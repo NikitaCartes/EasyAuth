@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "simpleauth",
+  "version": "${version}",
+
+  "name": "Simple Authentication mod",
+  "description": "A mod that tries to keep authentication for players simple via commands.",
+  "authors": [
+    "samo_lego"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "MIT",
+
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "org.samo_lego.simpleauth.SimpleAuth"
+    ]
+  },
+  "mixins": [
+    "simpleauth.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.4.0"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}

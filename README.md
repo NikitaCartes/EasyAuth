@@ -3,7 +3,8 @@
 ## Setup
 
 1. Clone the repository.
-2. Run the following command:
+2. Edit the code you want.
+3. To build run the following command:
 
 ```
 ./gradlew idea

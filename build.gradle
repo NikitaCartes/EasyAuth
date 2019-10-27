@@ -21,7 +21,7 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    implementation 'org.jetbrains:annotations:15.0'
+	implementation "org.mindrot:jbcrypt:0.4"
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
@@ -77,5 +77,6 @@ publishing {
 	repositories {
 		// uncomment to publish to the local maven
 		// mavenLocal()
+		mavenCentral()
 	}
 }

@@ -2,15 +2,23 @@ package org.samo_lego.simpleauth;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.samo_lego.simpleauth.commands.LoginCommand;
+import org.samo_lego.simpleauth.commands.RegisterCommand;
 
 public class SimpleAuth implements DedicatedServerModInitializer {
+	private static final Logger LOGGER = LogManager.getLogger();
+
 	@Override
 	public void onInitializeServer() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-
-		System.out.println("SimpleAuth mod by samo_lego."); // Info I guess :D
+		// Info I guess :D
+		LOGGER.info("SimpleAuth mod by samo_lego.");
 
 		// Registering the commands
-		CommandRegistry.INSTANCE.register(true, AuthCommands::registerCommands);
+		CommandRegistry.INSTANCE.register(false, dispatcher -> {
+			RegisterCommand.register(dispatcher);
+			LoginCommand.register(dispatcher);
+		});
 	}
 }

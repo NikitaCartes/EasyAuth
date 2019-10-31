@@ -21,7 +21,19 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // jBCrypt library for password hashing
 	implementation "org.mindrot:jbcrypt:0.4"
+	implementation 'org.jetbrains:annotations:15.0'
+
+	// TextileLib by NerdHubMC for events
+    /*repositories {
+        maven {
+            name = "NerdHub Maven"
+            url = "https://maven.abusedmaster.xyz"
+        }
+    }
+    modCompile "com.github.NerdHubMC:TextileLib:${textilelib_version}"*/
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.

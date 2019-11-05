@@ -2,22 +2,33 @@ package org.samo_lego.simpleauth.event;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import org.samo_lego.simpleauth.SimpleAuth;
 
+/**
+ * This class will take care of actions players try to do,
+ * and cancels them if they aren't authenticated
+ */
 public class AuthEventHandler {
+    private static LiteralText notAuthenticated = new LiteralText("§4You aren't authenticated.");
+
+    // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         // Player not authenticated
         if (!SimpleAuth.isAuthenticated(player))
-            System.out.println("Not authenticated!");
+            player.sendMessage(notAuthenticated);
+    }
+
+    // Player leaving the server
+    public static void onPlayerLeave(ServerPlayerEntity player) {
+        SimpleAuth.authenticatedUsers.remove(player);
     }
 
     // Breaking block
     public static boolean onBlockBroken(PlayerEntity player) {
-        // Player not authenticated
-        if (!SimpleAuth.isAuthenticated((ServerPlayerEntity) player))
-        {
-            System.out.println("Not authenticated!");
+        if (!SimpleAuth.isAuthenticated((ServerPlayerEntity) player)) {
+            player.sendMessage(notAuthenticated);
             return true;
         }
         return false;
@@ -25,15 +36,29 @@ public class AuthEventHandler {
 
     // Interacting with block
     public static ActionResult onInteractBlock(ServerPlayerEntity player) {
-        if(!SimpleAuth.authenticatedUsers.contains(player))
+        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+            player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
+        }
         return ActionResult.PASS;
     }
+
+    // Punching a block
+    public static ActionResult interact(PlayerEntity playerEntity) {
+        if(!SimpleAuth.authenticatedUsers.contains(playerEntity)) {
+            playerEntity.sendMessage(notAuthenticated);
+            return ActionResult.FAIL;
+        }
+        return ActionResult.PASS;
+    }
+
     // Interacting with item
     public static ActionResult onInteractItem(ServerPlayerEntity player) {
-        System.out.println("Called");
-        if(!SimpleAuth.authenticatedUsers.contains(player))
+        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+            player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
+        }
+
         return ActionResult.PASS;
     }
 }

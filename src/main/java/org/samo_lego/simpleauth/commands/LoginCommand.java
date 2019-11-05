@@ -6,7 +6,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import org.mindrot.jbcrypt.BCrypt;
 import org.samo_lego.simpleauth.SimpleAuth;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -15,14 +14,17 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class LoginCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    private static LiteralText PleaseLogin = new LiteralText("§4Type /login <password> to login.");
+    private static LiteralText EnterPassword = new LiteralText("§6You need to enter your password.");
+
+    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/login" command
         dispatcher.register(literal("login")
                 .then(argument("password", word())
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    System.out.println("You need to enter your password!");
+                    ctx.getSource().getPlayer().sendMessage(EnterPassword);
                     return 1;
                 }));
     }

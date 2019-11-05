@@ -6,7 +6,7 @@
   ],
   "server": [
     "MixinServerPlayerInteractionManager",
-    "MixinServerWorld"
+    "MixinPlayerManager"
   ],
   "injectors": {
     "defaultRequire": 1

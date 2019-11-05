@@ -1,4 +1,4 @@
-package org.samo_lego.simpleauth.event.entity.player;
+package org.samo_lego.simpleauth.event.block;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
@@ -6,7 +6,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 public interface BreakBlockCallback {
 
@@ -18,11 +17,5 @@ public interface BreakBlockCallback {
         }
         return false;
     });
-
-    /**
-     * fired when a block is broken by a player
-     *
-     * @return {@code true} to cancel the event
-     */
-    boolean onBlockBroken(World world, BlockPos pos, BlockState state, @Nullable PlayerEntity player);
+    boolean onBlockBroken(World world, BlockPos pos, BlockState state, PlayerEntity player);
 }

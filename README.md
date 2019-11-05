@@ -7,9 +7,9 @@
 3. To build run the following command:
 
 ```
-./gradlew idea
+./gradlew build
 ```
 
 ## License
 
-This template is available under the MIT license.
+This project is licensed under the MIT license.

@@ -1,18 +1,20 @@
 package org.samo_lego.simpleauth;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.commands.LoginCommand;
 import org.samo_lego.simpleauth.commands.RegisterCommand;
+import org.samo_lego.simpleauth.database.SimpleAuthDatabase;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
-import org.samo_lego.simpleauth.event.entity.player.BreakBlockCallback;
-import org.samo_lego.simpleauth.event.entity.player.InteractBlockCallback;
-import org.samo_lego.simpleauth.event.entity.player.InteractItemCallback;
-import org.samo_lego.simpleauth.event.entity.player.PlayerJoinWorldCallback;
+import org.samo_lego.simpleauth.event.block.BreakBlockCallback;
+import org.samo_lego.simpleauth.event.block.InteractBlockCallback;
+import org.samo_lego.simpleauth.event.entity.player.*;
 
+import java.io.File;
 import java.util.HashSet;
 
 public class SimpleAuth implements DedicatedServerModInitializer {
@@ -24,17 +26,28 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		LOGGER.info("SimpleAuth mod by samo_lego.");
 		LOGGER.info("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
+		// Creating data directory (database is stored there)
+		File file = new File("./mods/SimpleAuth");
+		if (!file.exists() && !file.mkdir()) {
+		    LOGGER.error("Error creating directory");
+		}
+
 		// Registering the commands
 		CommandRegistry.INSTANCE.register(false, dispatcher -> {
-			RegisterCommand.register(dispatcher);
-			LoginCommand.register(dispatcher);
+			RegisterCommand.registerCommand(dispatcher);
+			LoginCommand.registerCommand(dispatcher);
 		});
 
 		// Registering the events
 		InteractBlockCallback.EVENT.register(AuthEventHandler::onInteractBlock);
+		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.interact(playerEntity));
 		InteractItemCallback.EVENT.register(AuthEventHandler::onInteractItem);
-		PlayerJoinWorldCallback.EVENT.register((world, player) -> AuthEventHandler.onPlayerJoin(player));
+		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
+		PlayerLeaveServerCallback.EVENT.register(AuthEventHandler::onPlayerLeave);
 		BreakBlockCallback.EVENT.register((world, pos, state, player) -> AuthEventHandler.onBlockBroken(player));
+
+		// Connection to database
+		SimpleAuthDatabase.connect();
 	}
     public static HashSet<ServerPlayerEntity> authenticatedUsers = new HashSet<>();
 

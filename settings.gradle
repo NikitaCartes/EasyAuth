@@ -5,14 +5,7 @@ pluginManagement {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
-        /*maven {
-            name = "NerdHub Maven"
-            url = "https://maven.abusedmaster.xyz"
-        }*/
 
         gradlePluginPortal()
     }
-    /*dependencies {
-        modCompile "com.github.NerdHubMC:TextileLib:${textilelib_version}"
-    }*/
 }

@@ -24,6 +24,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	public void onInitializeServer() {
 		// Info I guess :D
 		LOGGER.info("SimpleAuth mod by samo_lego.");
+		// The support on discord was great! I really appreciate your help.
 		LOGGER.info("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
 		// Creating data directory (database is stored there)
@@ -47,7 +48,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		BreakBlockCallback.EVENT.register((world, pos, state, player) -> AuthEventHandler.onBlockBroken(player));
 
 		// Connection to database
-		SimpleAuthDatabase.connect();
+		SimpleAuthDatabase.main();
 	}
     public static HashSet<ServerPlayerEntity> authenticatedUsers = new HashSet<>();
 

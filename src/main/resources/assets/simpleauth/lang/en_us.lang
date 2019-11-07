@@ -1,0 +1,8 @@
+{
+    "command.simpleauth.password": "§6You need to enter your password!",
+    "command.simpleauth.passwordTwice": "§6You need to enter your password twice!",
+    "command.simpleauth.passwordMatch": "§6Passwords must match!",
+    "command.simpleauth.passwordWrong": "§4Wrong password!",
+    "command.simpleauth.notAuthenticated": "§4You are not authenticated!",
+    "command.simpleauth.authenticated": "§aYou are now authenticated."
+}

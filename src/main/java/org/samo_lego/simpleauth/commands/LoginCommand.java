@@ -6,6 +6,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import org.samo_lego.simpleauth.SimpleAuth;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -15,7 +16,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class LoginCommand {
     private static LiteralText PleaseLogin = new LiteralText("§4Type /login <password> to login.");
-    private static LiteralText EnterPassword = new LiteralText("§6You need to enter your password.");
+    private static TranslatableText EnterPassword = new TranslatableText("command.simpleauth.password");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/login" command

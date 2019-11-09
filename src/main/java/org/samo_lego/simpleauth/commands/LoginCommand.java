@@ -2,6 +2,8 @@ package org.samo_lego.simpleauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -15,8 +17,11 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class LoginCommand {
-    private static LiteralText PleaseLogin = new LiteralText("§4Type /login <password> to login.");
-    private static TranslatableText EnterPassword = new TranslatableText("command.simpleauth.password");
+    private static LiteralText pleaseLogin = new LiteralText("§4Type /login <password> to login.");
+    private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.password");
+    private static TranslatableText wrongPassword = new TranslatableText("command.simpleauth.wrongPassword");
+    private static TranslatableText alreadyAuthenticated = new TranslatableText("command.simpleauth.alreadyAuthenticated");
+    private static Text text = new LiteralText("You have entered login command");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/login" command
@@ -25,23 +30,40 @@ public class LoginCommand {
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(EnterPassword);
+                    ctx.getSource().getPlayer().sendMessage(enterPassword);
                     return 1;
                 }));
     }
+
     // Method called for checking the password
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
-        String savedHashed = "judf"; // Hashed password provided upon registration
-
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
 
-        // Comparing hashed password with one from the file
-        if(true/*BCrypt.checkpw(pass, savedHashed)*/){ //From database
-            Text text = new LiteralText(source.getName() + ", you have entered login command");
-            source.getMinecraftServer().getPlayerManager().broadcastChatMessage(text, false);
-            SimpleAuth.authenticatedUsers.add(player);
-            System.out.println(SimpleAuth.authenticatedUsers);
+        if(SimpleAuth.isAuthenticated(player)) {
+            player.sendMessage(alreadyAuthenticated);
+        }
+        else {
+            // Create instance
+            Argon2 argon2 = Argon2Factory.create();
+            // Read password from user
+            char[] password = pass.toCharArray();
+
+            try {
+                // Hashed password from DB
+                String hashed = argon2.hash(10, 65536, 1, password);
+
+                // Verify password
+                if (argon2.verify(hashed, password)) {
+                    SimpleAuth.authenticatedUsers.add(player);
+                    player.sendMessage(text);
+                } else {
+                    player.sendMessage(wrongPassword);
+                }
+            } finally {
+                // Wipe confidential data
+                argon2.wipeArray(password);
+            }
         }
         return 1; // Success
     }

@@ -56,6 +56,7 @@ public class SimpleAuthDatabase {
                     "  `Username`  VARCHAR(16) NOT NULL,\n" +
                     "  `Password`  VARCHAR(64) NOT NULL,\n" +
                     "  UNIQUE (`UUID`)\n" +
+                    "  UNIQUE (`Username`)\n" +
                     ");";
             Statement stmt = conn.createStatement();
             stmt.execute(sql);
@@ -70,7 +71,7 @@ public class SimpleAuthDatabase {
         String sql = "INSERT INTO users(uuid, username, password) VALUES(?,?,?)";
 
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, uuid);
             pstmt.setString(2, username);
             pstmt.setString(3, password);
@@ -79,7 +80,23 @@ public class SimpleAuthDatabase {
             LOGGER.error(e.getMessage());
         }
     }
+    public void selectAll(){
+        String sql = "SELECT id, name, capacity FROM users";
 
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+
+            // loop through the result set
+            while (rs.next()) {
+                System.out.println(rs.getInt("id") +  "\t" +
+                        rs.getString("name") + "\t" +
+                        rs.getDouble("capacity"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
     private static void disconnect(Connection conn) {
         try {
             if (conn != null) {

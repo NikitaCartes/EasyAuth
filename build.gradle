@@ -23,7 +23,7 @@ dependencies {
 	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Argon2 library for password hashing
-	compile 'de.mkammerer:argon2-jvm-nolibs:2.6'
+	compile 'de.mkammerer:argon2-jvm:2.6'
 
 	// IDEA stuff
 	implementation 'org.jetbrains:annotations:15.0'

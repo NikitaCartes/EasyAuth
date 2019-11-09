@@ -1,5 +1,7 @@
 package org.samo_lego.simpleauth;
 
+import de.mkammerer.argon2.Argon2;
+import de.mkammerer.argon2.Argon2Factory;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
@@ -29,9 +31,9 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Creating data directory (database is stored there)
 		File file = new File("./mods/SimpleAuth");
-		if (!file.exists() && !file.mkdir()) {
+		if (!file.exists() && !file.mkdir())
 		    LOGGER.error("Error creating directory");
-		}
+
 
 		// Registering the commands
 		CommandRegistry.INSTANCE.register(false, dispatcher -> {
@@ -49,7 +51,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Connection to database
 		SimpleAuthDatabase.main();
-	}
+    }
     public static HashSet<ServerPlayerEntity> authenticatedUsers = new HashSet<>();
 
     public static boolean isAuthenticated(ServerPlayerEntity player) { return authenticatedUsers.contains(player); }

@@ -16,7 +16,7 @@
 
 ## License
 Libraries that the project is using:
-- `LGPLv3 (Argon2)` https://github.com/phxql/argon2-jvm
-- `Apache 2 (JDBC)` https://github.com/xerial/sqlite-jdbc
+- `Argon2 (LGPLv3)` https://github.com/phxql/argon2-jvm
+- `JDBC (Apache 2)` https://github.com/xerial/sqlite-jdbc
 
 This project is licensed under the `MIT` license.

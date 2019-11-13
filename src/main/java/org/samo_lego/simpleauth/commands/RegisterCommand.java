@@ -9,8 +9,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import org.samo_lego.simpleauth.SimpleAuth;
-import org.samo_lego.simpleauth.database.SimpleAuthDatabase;
+
 import java.util.Objects;
+
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -21,6 +22,7 @@ public class RegisterCommand {
     private static TranslatableText pleaseRegister = new TranslatableText("§4Type /register <password> <password> to login.");
     private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.passwordTwice");
     private static TranslatableText alreadyAuthenticated = new TranslatableText("command.simpleauth.alreadyAuthenticated");
+    private static TranslatableText alreadyRegistered = new TranslatableText("command.simpleauth.alreadyRegistered");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
 
@@ -53,12 +55,14 @@ public class RegisterCommand {
                 // Hash password
                 String hash = argon2.hash(10, 65536, 1, password);
                 // Writing into database
-                SimpleAuthDatabase.insert(Objects.requireNonNull(source.getEntity()).getUuidAsString(), source.getName(), hash);
+                SimpleAuth.db.insert(Objects.requireNonNull(source.getEntity()).getUuidAsString(), source.getName(), hash);
                 SimpleAuth.authenticatedUsers.add(player);
                 // Letting the player know it was successful
                 player.sendMessage(
                         new LiteralText(source.getName() + ", you have registered successfully!")
                 );
+            } catch (Error e) {
+                player.sendMessage(alreadyRegistered);
             } finally {
                 // Wipe confidential data
                 argon2.wipeArray(password);

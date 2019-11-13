@@ -51,7 +51,7 @@ public class LoginCommand {
 
             try {
                 // Hashed password from DB
-                String hashed = argon2.hash(10, 65536, 1, password);
+                String hashed = SimpleAuth.db.getPassword(player.getUuidAsString());
 
                 // Verify password
                 if (argon2.verify(hashed, password)) {

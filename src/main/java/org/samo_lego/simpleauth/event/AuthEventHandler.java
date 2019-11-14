@@ -1,6 +1,7 @@
 package org.samo_lego.simpleauth.event;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
@@ -45,7 +46,7 @@ public class AuthEventHandler {
     }
 
     // Punching a block
-    public static ActionResult interact(PlayerEntity playerEntity) {
+    public static ActionResult onAttackBlock(PlayerEntity playerEntity) {
         if(!SimpleAuth.authenticatedUsers.contains(playerEntity)) {
             playerEntity.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
@@ -61,5 +62,13 @@ public class AuthEventHandler {
         }
 
         return ActionResult.PASS;
+    }
+    // Dropping an item
+    public static boolean onDropItem(ServerPlayerEntity player) {
+        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+            player.sendMessage(notAuthenticated);
+            return true;
+        }
+        return false;
     }
 }

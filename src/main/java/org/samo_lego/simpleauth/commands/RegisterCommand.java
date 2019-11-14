@@ -55,12 +55,15 @@ public class RegisterCommand {
                 // Hash password
                 String hash = argon2.hash(10, 65536, 1, password);
                 // Writing into database
-                SimpleAuth.db.insert(Objects.requireNonNull(source.getEntity()).getUuidAsString(), source.getName(), hash);
-                SimpleAuth.authenticatedUsers.add(player);
-                // Letting the player know it was successful
-                player.sendMessage(
-                        new LiteralText(source.getName() + ", you have registered successfully!")
-                );
+                if(SimpleAuth.db.registerUser(Objects.requireNonNull(source.getEntity()).getUuidAsString(), source.getName(), hash)) {
+                    SimpleAuth.authenticatedUsers.add(player);
+                    // Letting the player know it was successful
+                    player.sendMessage(
+                            new LiteralText(source.getName() + ", you have registered successfully!")
+                    );
+                }
+                else
+                    player.sendMessage(alreadyRegistered);
             } catch (Error e) {
                 player.sendMessage(alreadyRegistered);
             } finally {

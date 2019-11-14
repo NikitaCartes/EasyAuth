@@ -14,7 +14,8 @@ import org.samo_lego.simpleauth.database.SimpleAuthDatabase;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.event.block.BreakBlockCallback;
 import org.samo_lego.simpleauth.event.block.InteractBlockCallback;
-import org.samo_lego.simpleauth.event.entity.player.InteractItemCallback;
+import org.samo_lego.simpleauth.event.item.DropItemCallback;
+import org.samo_lego.simpleauth.event.item.InteractItemCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerLeaveServerCallback;
 
@@ -48,11 +49,14 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Registering the events
 		InteractBlockCallback.EVENT.register(AuthEventHandler::onInteractBlock);
-		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.interact(playerEntity));
+		BreakBlockCallback.EVENT.register((world, pos, state, player) -> AuthEventHandler.onBlockBroken(player));
 		InteractItemCallback.EVENT.register(AuthEventHandler::onInteractItem);
+		DropItemCallback.EVENT.register(AuthEventHandler::onDropItem);
 		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
 		PlayerLeaveServerCallback.EVENT.register(AuthEventHandler::onPlayerLeave);
-		BreakBlockCallback.EVENT.register((world, pos, state, player) -> AuthEventHandler.onBlockBroken(player));
+		// From Fabric API
+		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.onAttackBlock(playerEntity));
+
         db.makeTable();
     }
     public static HashSet<ServerPlayerEntity> authenticatedUsers = new HashSet<>();

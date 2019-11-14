@@ -1,4 +1,4 @@
-package org.samo_lego.simpleauth.event.entity.player;
+package org.samo_lego.simpleauth.event.item;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;

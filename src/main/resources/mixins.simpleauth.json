@@ -6,7 +6,8 @@
   ],
   "server": [
     "MixinServerPlayerInteractionManager",
-    "MixinPlayerManager"
+    "MixinPlayerManager",
+    "MixinPlayerEntity"
   ],
   "injectors": {
     "defaultRequire": 1

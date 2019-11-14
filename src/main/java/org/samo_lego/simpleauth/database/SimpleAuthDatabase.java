@@ -46,20 +46,32 @@ public class SimpleAuthDatabase {
     }
 
     // When player registers, we insert the data into DB
-    public void insert(String uuid, String username, String password) {
+    public boolean registerUser(String uuid, String username, String password) {
         String sql = "INSERT INTO users(uuid, username, password) VALUES(?,?,?)";
+        String sqlCheck = "SELECT UUID, Password "
+                + "FROM users WHERE UUID = ?";
         try (
             Connection conn = this.connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            PreparedStatement pstmtCheck = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, uuid);
-            pstmt.setString(2, username);
-            pstmt.setString(3, password);
+            pstmtCheck.setString(1,uuid);
+            ResultSet rs  = pstmtCheck.executeQuery();
 
-            pstmt.executeUpdate();
+            // Getting the password
+            String dbUuid = rs.getString("UUID");
+            if(dbUuid != null) {
+                pstmt.setString(1, uuid);
+                pstmt.setString(2, username);
+                pstmt.setString(3, password);
+
+                pstmt.executeUpdate();
+                return true;
+            }
         } catch (SQLException e) {
             LOGGER.error(e.getMessage());
         }
+        return false;
     }
 
     // Deletes row containing the username provided

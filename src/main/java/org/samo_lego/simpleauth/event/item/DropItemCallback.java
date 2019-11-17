@@ -2,17 +2,20 @@ package org.samo_lego.simpleauth.event.item;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ActionResult;
 
 public interface DropItemCallback {
-    Event<DropItemCallback> EVENT = EventFactory.createArrayBacked(DropItemCallback.class, listeners -> (playerEntity) -> {
-        for(DropItemCallback callback : listeners) {
-            if(callback.onDropItem(playerEntity)) {
-                return true;
+    Event<DropItemCallback> EVENT = EventFactory.createArrayBacked(DropItemCallback.class, listeners -> (player) -> {
+        for (DropItemCallback event : listeners) {
+            ActionResult result = event.onDropItem(player);
+
+            if (result != ActionResult.PASS) {
+                return result;
             }
         }
-        return false;
+        return ActionResult.PASS;
     });
 
-    boolean onDropItem(ServerPlayerEntity playerEntity);
+    ActionResult onDropItem(PlayerEntity player);
 }

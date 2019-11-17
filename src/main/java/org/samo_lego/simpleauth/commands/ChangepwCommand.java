@@ -62,7 +62,7 @@ public class ChangepwCommand {
             if (argon2.verify(hashedOld, password)) {
                 String hash = argon2.hash(10, 65536, 1, newPass.toCharArray());
                 // Writing into DB
-                SimpleAuth.db.update(player.getUuidAsString(), hash);
+                SimpleAuth.db.update(player.getUuidAsString(), null, hash);
                 player.sendMessage(passwordUpdated);
             }
             else

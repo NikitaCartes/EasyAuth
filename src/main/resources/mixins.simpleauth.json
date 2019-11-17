@@ -5,7 +5,7 @@
   "mixins": [
   ],
   "server": [
-    "MixinServerPlayerInteractionManager",
+
     "MixinPlayerManager",
     "MixinPlayerEntity"
   ],

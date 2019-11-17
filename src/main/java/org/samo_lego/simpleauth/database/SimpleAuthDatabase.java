@@ -48,19 +48,22 @@ public class SimpleAuthDatabase {
     // When player registers, we insert the data into DB
     public boolean registerUser(String uuid, String username, String password) {
         String sql = "INSERT INTO users(uuid, username, password) VALUES(?,?,?)";
-        String sqlCheck = "SELECT UUID, Password "
+        String sqlCheck = "SELECT UUID "
                 + "FROM users WHERE UUID = ?";
         try (
             Connection conn = this.connect();
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            PreparedStatement pstmtCheck = conn.prepareStatement(sql)) {
+            PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
 
-            pstmtCheck.setString(1,uuid);
+            pstmtCheck.setString(1, uuid);
             ResultSet rs  = pstmtCheck.executeQuery();
 
             // Getting the password
-            String dbUuid = rs.getString("UUID");
-            if(dbUuid != null) {
+            //String dbUuid = null;
+            try {
+                rs.getString("UUID");
+                return false;
+            } catch(SQLException ignored) {
                 pstmt.setString(1, uuid);
                 pstmt.setString(2, username);
                 pstmt.setString(3, password);
@@ -69,20 +72,21 @@ public class SimpleAuthDatabase {
                 return true;
             }
         } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Register error: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
     // Deletes row containing the username provided
-    public void delete(String uuid) {
-        String sql = "DELETE FROM users WHERE uuid = ?";
+    public void delete(String uuid, String username) {
+        String sql = "DELETE FROM users WHERE uuid = ? OR username = ?";
 
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param
             pstmt.setString(1, uuid);
+            pstmt.setString(2, username);
             // execute the delete statement
             pstmt.executeUpdate();
 
@@ -92,9 +96,9 @@ public class SimpleAuthDatabase {
     }
 
     // Updates the password of the user
-    public void update(String uuid, String pass) {
+    public void update(String uuid, String username, String pass) {
         String sql = "UPDATE users SET password = ? "
-                + "WHERE uuid = ?";
+                + "WHERE uuid = ? OR username = ?";
 
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -102,6 +106,7 @@ public class SimpleAuthDatabase {
             // set the corresponding param
             pstmt.setString(1, pass);
             pstmt.setString(2, uuid);
+            pstmt.setString(3, username);
 
             // update
             pstmt.executeUpdate();

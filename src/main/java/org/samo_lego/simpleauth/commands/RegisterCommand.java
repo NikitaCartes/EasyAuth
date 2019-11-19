@@ -55,31 +55,6 @@ public class RegisterCommand {
             }
             player.sendMessage(alreadyRegistered);
             return 0;
-            /*// Create instance
-            Argon2 argon2 = Argon2Factory.create();
-
-            // Read password from user
-            char[] password = pass1.toCharArray();
-
-            try {
-                // Hash password
-                String hash = argon2.hash(10, 65536, 1, password);
-                // Writing into database
-                if(SimpleAuth.db.registerUser(Objects.requireNonNull(source.getEntity()).getUuidAsString(), source.getName(), hash)) {
-                    SimpleAuth.authenticatedUsers.add(player);
-                    // Letting the player know it was successful
-                    player.sendMessage(
-                            new LiteralText(source.getName() + ", you have registered successfully!")
-                    );
-                }
-                else
-                    player.sendMessage(alreadyRegistered);
-            } catch (Error e) {
-                player.sendMessage(alreadyRegistered);
-            } finally {
-                // Wipe confidential data
-                argon2.wipeArray(password);
-            }*/
         }
         player.sendMessage(
             new LiteralText(source.getName() + ", passwords must match!")

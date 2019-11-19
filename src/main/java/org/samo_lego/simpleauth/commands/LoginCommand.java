@@ -51,26 +51,5 @@ public class LoginCommand {
         }
         player.sendMessage(wrongPassword);
         return 0;
-            /*// Create instance
-            Argon2 argon2 = Argon2Factory.create();
-            // Read password from user
-            char[] password = pass.toCharArray();
-
-            try {
-                // Hashed password from DB
-                String hashed = SimpleAuth.db.getPassword(player.getUuidAsString());
-
-                // Verify password
-                if (argon2.verify(hashed, password)) {
-                    SimpleAuth.authenticatedUsers.add(player);
-                    player.sendMessage(text);
-                } else {
-                    player.sendMessage(wrongPassword);
-                }
-            } finally {
-                // Wipe confidential data
-                argon2.wipeArray(password);
-            }
-        return 1;*/
     }
 }

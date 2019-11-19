@@ -61,25 +61,5 @@ public class ChangepwCommand {
         }
         player.sendMessage(wrongPassword);
         return 0;
-
-        // Create instance
-        //Argon2 argon2 = Argon2Factory.create();
-        /*try {
-            // Hashed password from DB
-            String hashedOld = SimpleAuth.db.getPassword(player.getUuidAsString());
-
-            // Verify password
-            if (argon2.verify(hashedOld, password)) {
-                String hash = argon2.hash(10, 65536, 1, newPass.toCharArray());
-                // Writing into DB
-                SimpleAuth.db.update(player.getUuidAsString(), null, hash);
-                player.sendMessage(passwordUpdated);
-            }
-            else
-                player.sendMessage(wrongPassword);
-        } finally {
-            // Wipe confidential data
-            argon2.wipeArray(password);
-        }*/
     }
 }

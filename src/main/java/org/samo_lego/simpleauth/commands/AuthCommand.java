@@ -95,25 +95,8 @@ public class AuthCommand {
             sender.sendMessage(userdataUpdated);
         else
             LOGGER.info(userdataUpdated);
-        /*// Create instance
-        Argon2 argon2 = Argon2Factory.create();
-        char[] password = pass.toCharArray();
-        try {
-            // Hashed password from DB
-            String hash = argon2.hash(10, 65536, 1, pass.toCharArray());
-
-            // Writing into DB
-            SimpleAuth.db.update(uuid, username, hash);
-            if(sender != null)
-                sender.sendMessage(userdataUpdated);
-            else
-                LOGGER.info(userdataUpdated);
-        } finally {
-            // Wipe confidential data
-            argon2.wipeArray(password);
-        }*/
         // TODO -> Kick player whose name was changed?
-        return 1; // Success
+        return 1;
     }
     private static int removeAccount(ServerCommandSource source, String uuid, String username) {
         Entity sender = source.getEntity();

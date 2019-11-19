@@ -11,6 +11,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import org.samo_lego.simpleauth.SimpleAuth;
+import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -18,7 +19,6 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class LoginCommand {
-    private static LiteralText pleaseLogin = new LiteralText("§4Type /login <password> to login.");
     private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.password");
     private static TranslatableText wrongPassword = new TranslatableText("command.simpleauth.wrongPassword");
     private static TranslatableText alreadyAuthenticated = new TranslatableText("command.simpleauth.alreadyAuthenticated");
@@ -32,7 +32,7 @@ public class LoginCommand {
                         ))
                 .executes(ctx -> {
                     ctx.getSource().getPlayer().sendMessage(enterPassword);
-                    return 1;
+                    return 0;
                 }));
     }
 
@@ -43,9 +43,15 @@ public class LoginCommand {
 
         if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
+            return 0;
         }
-        else {
-            // Create instance
+        else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray())) {
+            player.sendMessage(text);
+            return 1;
+        }
+        player.sendMessage(wrongPassword);
+        return 0;
+            /*// Create instance
             Argon2 argon2 = Argon2Factory.create();
             // Read password from user
             char[] password = pass.toCharArray();
@@ -65,7 +71,6 @@ public class LoginCommand {
                 // Wipe confidential data
                 argon2.wipeArray(password);
             }
-        }
-        return 1; // Success
+        return 1;*/
     }
 }

@@ -9,6 +9,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import org.samo_lego.simpleauth.SimpleAuth;
+import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import java.util.Objects;
 
@@ -23,6 +24,7 @@ public class RegisterCommand {
     private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.passwordTwice");
     private static TranslatableText alreadyAuthenticated = new TranslatableText("command.simpleauth.alreadyAuthenticated");
     private static TranslatableText alreadyRegistered = new TranslatableText("command.simpleauth.alreadyRegistered");
+    private static TranslatableText registerSuccess = new TranslatableText("command.simpleauth.registerSuccess");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
 
@@ -34,7 +36,7 @@ public class RegisterCommand {
             ))
         .executes(ctx -> {
             ctx.getSource().getPlayer().sendMessage(enterPassword);
-            return 1;
+            return 0;
         }));
     }
 
@@ -44,8 +46,16 @@ public class RegisterCommand {
         if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
         }
-        else if(pass1.equals(pass2)) { // Hashing the password with the Argon2 power
-            // Create instance
+        else if(pass1.equals(pass2)) {
+            String hash = AuthHelper.hashPass(pass1.toCharArray());
+            if (SimpleAuth.db.registerUser(player.getUuidAsString(), source.getName(), hash)) {
+                SimpleAuth.authenticatedUsers.add(player);
+                player.sendMessage(registerSuccess);
+                return 1;
+            }
+            player.sendMessage(alreadyRegistered);
+            return 0;
+            /*// Create instance
             Argon2 argon2 = Argon2Factory.create();
 
             // Read password from user
@@ -69,12 +79,11 @@ public class RegisterCommand {
             } finally {
                 // Wipe confidential data
                 argon2.wipeArray(password);
-            }
+            }*/
         }
-        else
-            player.sendMessage(
-                new LiteralText(source.getName() + ", passwords must match!")
-            );
-        return 1;
+        player.sendMessage(
+            new LiteralText(source.getName() + ", passwords must match!")
+        );
+        return 0;
     }
 }

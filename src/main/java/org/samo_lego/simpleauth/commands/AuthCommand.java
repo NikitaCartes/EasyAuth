@@ -14,6 +14,7 @@ import net.minecraft.text.TranslatableText;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
+import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -85,7 +86,16 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        // Create instance
+        SimpleAuth.db.update(
+                uuid,
+                username,
+                AuthHelper.hashPass(pass.toCharArray())
+        );
+        if(sender != null)
+            sender.sendMessage(userdataUpdated);
+        else
+            LOGGER.info(userdataUpdated);
+        /*// Create instance
         Argon2 argon2 = Argon2Factory.create();
         char[] password = pass.toCharArray();
         try {
@@ -101,7 +111,7 @@ public class AuthCommand {
         } finally {
             // Wipe confidential data
             argon2.wipeArray(password);
-        }
+        }*/
         // TODO -> Kick player whose name was changed?
         return 1; // Success
     }

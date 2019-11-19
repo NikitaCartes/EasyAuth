@@ -8,78 +8,60 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import org.samo_lego.simpleauth.SimpleAuth;
-import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class ChangepwCommand {
-    private static TranslatableText enterNewPassword = new TranslatableText("command.simpleauth.passwordNew");
+public class UnregisterCommand { // TODO
     private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.password");
     private static TranslatableText wrongPassword = new TranslatableText("command.simpleauth.wrongPassword");
-    private static TranslatableText passwordUpdated = new TranslatableText("command.simpleauth.passwordUpdated");
+    private static TranslatableText accountDeleted = new TranslatableText("command.simpleauth.passwordUpdated");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/changepw" command
         dispatcher.register(literal("changepw")
-            .executes(ctx -> {
+                .executes(ctx -> {
                     ctx.getSource().getPlayer().sendMessage(enterPassword);
                     return 1;
-            })
-            .then(argument("oldPassword", word())
-                .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(enterNewPassword);
-                    return 1;
                 })
-                .then(argument("newPassword", word())
-                    .executes( ctx -> changepw(
-                            ctx.getSource(),
-                            getString(ctx, "oldPassword"),
-                            getString(ctx, "newPassword")
+                .then(argument("password", word())
+                        .executes( ctx -> unregister(
+                                ctx.getSource(),
+                                getString(ctx, "password")
+                                )
                         )
-                    )
                 )
-            )
         );
     }
 
     // Method called for checking the password and then changing it
-    private static int changepw(ServerCommandSource source, String oldPass, String newPass) throws CommandSyntaxException {
+    private static int unregister(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
 
-        if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray())) {
-            SimpleAuth.db.update(
-                    player.getUuidAsString(),
-                    null,
-                    AuthHelper.hashPass(newPass.toCharArray())
-            );
-            player.sendMessage(passwordUpdated);
-            return 1;
-        }
-        player.sendMessage(wrongPassword);
-        return 0;
-
         // Create instance
-        //Argon2 argon2 = Argon2Factory.create();
-        /*try {
+        Argon2 argon2 = Argon2Factory.create();
+        // Read password from user
+        char[] password = pass.toCharArray();
+
+        try {
             // Hashed password from DB
             String hashedOld = SimpleAuth.db.getPassword(player.getUuidAsString());
 
             // Verify password
             if (argon2.verify(hashedOld, password)) {
-                String hash = argon2.hash(10, 65536, 1, newPass.toCharArray());
                 // Writing into DB
-                SimpleAuth.db.update(player.getUuidAsString(), null, hash);
-                player.sendMessage(passwordUpdated);
+                SimpleAuth.db.delete(player.getUuidAsString(), null);
+                player.sendMessage(accountDeleted);
             }
             else
                 player.sendMessage(wrongPassword);
         } finally {
             // Wipe confidential data
             argon2.wipeArray(password);
-        }*/
+        }
+        return 1;
     }
 }

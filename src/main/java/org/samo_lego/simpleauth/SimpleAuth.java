@@ -7,10 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.samo_lego.simpleauth.commands.AuthCommand;
-import org.samo_lego.simpleauth.commands.ChangepwCommand;
-import org.samo_lego.simpleauth.commands.LoginCommand;
-import org.samo_lego.simpleauth.commands.RegisterCommand;
+import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.database.SimpleAuthDatabase;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
@@ -42,13 +39,14 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			RegisterCommand.registerCommand(dispatcher);
 			LoginCommand.registerCommand(dispatcher);
 			ChangepwCommand.registerCommand(dispatcher);
+			UnregisterCommand.registerCommand(dispatcher);
 			AuthCommand.registerCommand(dispatcher);
 		});
 
 		// Registering the events
 		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
 		PlayerLeaveServerCallback.EVENT.register(AuthEventHandler::onPlayerLeave);
-		DropItemCallback.EVENT.register(player -> AuthEventHandler.onDropItem(player));
+		DropItemCallback.EVENT.register(AuthEventHandler::onDropItem);
 		// From Fabric API
 		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.onAttackBlock(playerEntity));
         UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));

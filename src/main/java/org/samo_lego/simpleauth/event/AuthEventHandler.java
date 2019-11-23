@@ -1,9 +1,11 @@
 package org.samo_lego.simpleauth.event;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.TypedActionResult;
 import org.samo_lego.simpleauth.SimpleAuth;
 
 /**
@@ -25,15 +27,6 @@ public class AuthEventHandler {
         SimpleAuth.authenticatedUsers.remove(player);
     }
 
-    // Breaking block
-    public static boolean onBlockBroken(PlayerEntity player) {
-        if (!SimpleAuth.isAuthenticated((ServerPlayerEntity) player)) {
-            player.sendMessage(notAuthenticated);
-            return true;
-        }
-        return false;
-    }
-
     // Using a block (right-click function)
     public static ActionResult onUseBlock(PlayerEntity player) {
         if(!SimpleAuth.authenticatedUsers.contains(player)) {
@@ -53,13 +46,13 @@ public class AuthEventHandler {
     }
 
     // Using an item
-    public static ActionResult onUseItem(PlayerEntity player) {
+    public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
         if(!SimpleAuth.authenticatedUsers.contains(player)) {
             player.sendMessage(notAuthenticated);
-            return ActionResult.FAIL;
+            return TypedActionResult.fail(ItemStack.EMPTY);
         }
 
-        return ActionResult.PASS;
+        return TypedActionResult.pass(ItemStack.EMPTY);
     }
     // Attacking an entity
     public static ActionResult onAttackEntity(PlayerEntity player) {

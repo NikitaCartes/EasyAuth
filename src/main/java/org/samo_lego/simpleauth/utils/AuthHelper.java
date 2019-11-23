@@ -23,8 +23,6 @@ public class AuthHelper {
         } finally {
             // Wipe confidential data
             argon2.wipeArray(pass);
-            // Todo del line
-            System.out.println("Pass data wiped.");
         }
         return false;
     }

@@ -46,6 +46,7 @@ public class LoginCommand {
             return 0;
         }
         else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray())) {
+            SimpleAuth.authenticatedUsers.add(player);
             player.sendMessage(text);
             return 1;
         }

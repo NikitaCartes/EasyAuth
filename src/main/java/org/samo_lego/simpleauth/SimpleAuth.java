@@ -5,13 +5,14 @@ import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.database.SimpleAuthDatabase;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
+import org.samo_lego.simpleauth.event.entity.player.OnChatCallback;
+import org.samo_lego.simpleauth.event.entity.player.OnPlayerMoveCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerLeaveServerCallback;
 import org.samo_lego.simpleauth.event.item.DropItemCallback;
@@ -37,7 +38,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Creating data directory (database is stored there)
 		File file = new File("./mods/SimpleAuth");
 		if (!file.exists() && !file.mkdir())
-		    LOGGER.error("[SimpleAuth]: Error creating directory!");
+		    LOGGER.error("[SimpleAuth] Error creating directory!");
 
 
 		// Registering the commands
@@ -53,6 +54,9 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
 		PlayerLeaveServerCallback.EVENT.register(AuthEventHandler::onPlayerLeave);
 		DropItemCallback.EVENT.register(AuthEventHandler::onDropItem);
+		//todo
+		OnChatCallback.EVENT.register(AuthEventHandler::onPlayerChat);
+		OnPlayerMoveCallback.EVENT.register(AuthEventHandler::onPlayerMove);
 		// From Fabric API
 		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.onAttackBlock(playerEntity));
         UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));

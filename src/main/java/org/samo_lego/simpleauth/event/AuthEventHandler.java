@@ -3,6 +3,7 @@ package org.samo_lego.simpleauth.event;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.network.packet.ChatMessageC2SPacket;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
@@ -18,13 +19,39 @@ public class AuthEventHandler {
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         // Player not authenticated
-        if (!SimpleAuth.isAuthenticated(player))
+        if (!SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(notAuthenticated);
+            // Setting the player to be invisible to mobs and also invulnerable
+            player.setInvulnerable(true);
+            player.setInvisible(true);
+        }
     }
 
     // Player leaving the server
     public static void onPlayerLeave(ServerPlayerEntity player) {
         SimpleAuth.authenticatedUsers.remove(player);
+    }
+
+    // todo
+    public static ActionResult onPlayerChat(PlayerEntity player, ChatMessageC2SPacket chatMessageC2SPacket) {
+        String msg = chatMessageC2SPacket.getChatMessage();
+        System.out.println(msg);
+        if(!SimpleAuth.authenticatedUsers.contains(player) || !msg.startsWith("/login") || !msg.startsWith("/register")) {
+            System.out.println("Ok.");
+            player.sendMessage(notAuthenticated);
+            return ActionResult.FAIL;
+        }
+        System.out.println("Pass "+ msg.startsWith("/login")+msg.startsWith("/register"));
+        return ActionResult.PASS;
+    }
+    //todo
+    public static ActionResult onPlayerMove(PlayerEntity player) {
+        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+            System.out.println("Ok. Moved & should fail. AuthEventHandler");
+            player.sendMessage(notAuthenticated);
+            return ActionResult.FAIL;
+        }
+        return ActionResult.PASS;
     }
 
     // Using a block (right-click function)

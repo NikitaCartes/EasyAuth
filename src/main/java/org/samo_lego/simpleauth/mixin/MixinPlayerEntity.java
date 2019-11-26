@@ -26,10 +26,12 @@ public abstract class MixinPlayerEntity {
         ActionResult result = DropItemCallback.EVENT.invoker().onDropItem(player);
 
         if (result == ActionResult.FAIL) {
-            // Canceling the item drop, as well as giving the items back to player
-            cir.cancel();
+            // Canceling the item drop, as well as giving the items back to player (and updating inv with packet)
             player.giveItemStack(stack);
+
+            player.inventory.updateItems();
             playerContainer.sendContentUpdates();
+            cir.cancel();
         }
     }
 }

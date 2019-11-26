@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public class MixinServerPlayNetworkHandler {
@@ -20,24 +19,38 @@ public class MixinServerPlayNetworkHandler {
     public ServerPlayerEntity player;
 
     // TODO
-    @Inject(method = "onChatMessage", at = @At(value = "HEAD"), cancellable = true)
-    private void onChatMessage(ChatMessageC2SPacket chatMessageC2SPacket_1, CallbackInfoReturnable cir) {
+    @Inject(
+            method = "onChatMessage(Lnet/minecraft/server/network/packet/ChatMessageC2SPacket;)V",
+            at = @At(
+                    value = "INVOKE",
+                    // Thanks to Liach for helping me out!
+                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true
+    )
+    private void onChatMessage(ChatMessageC2SPacket chatMessageC2SPacket_1, CallbackInfo ci) {
         ActionResult result = OnChatCallback.EVENT.invoker().onPlayerChat(player, chatMessageC2SPacket_1);
-
-        System.out.println("Mixined");
         if (result == ActionResult.FAIL) {
-            cir.cancel();
+            ci.cancel();
         }
     }
 
     // TODO
-    @Inject(method="onPlayerMove", at = @At(value = "HEAD"), cancellable = true)
-    private void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket_1, CallbackInfo cir) {
+    @Inject(
+            method="onPlayerMove(Lnet/minecraft/server/network/packet/PlayerMoveC2SPacket;)V",
+            at = @At(
+                    value = "INVOKE",
+                    // Thanks to Liach for helping me out!
+                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true
+    )
+    private void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket_1, CallbackInfo ci) {
         ActionResult result = OnPlayerMoveCallback.EVENT.invoker().onPlayerMove(player);
-
-        System.out.println("Player move");
         if (result == ActionResult.FAIL) {
-            cir.cancel();
+            ci.cancel();
         }
     }
 }

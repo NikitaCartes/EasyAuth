@@ -35,20 +35,16 @@ public class AuthEventHandler {
     // todo
     public static ActionResult onPlayerChat(PlayerEntity player, ChatMessageC2SPacket chatMessageC2SPacket) {
         String msg = chatMessageC2SPacket.getChatMessage();
-        System.out.println(msg);
-        if(!SimpleAuth.authenticatedUsers.contains(player) || !msg.startsWith("/login") || !msg.startsWith("/register")) {
-            System.out.println("Ok.");
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !(msg.startsWith("/login") || msg.startsWith("/register"))) {
             player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
         }
-        System.out.println("Pass "+ msg.startsWith("/login")+msg.startsWith("/register"));
         return ActionResult.PASS;
     }
     //todo
     public static ActionResult onPlayerMove(PlayerEntity player) {
         if(!SimpleAuth.authenticatedUsers.contains(player)) {
-            System.out.println("Ok. Moved & should fail. AuthEventHandler");
-            player.sendMessage(notAuthenticated);
+            // TP player back?
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;

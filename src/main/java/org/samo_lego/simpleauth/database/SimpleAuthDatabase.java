@@ -14,21 +14,32 @@ public class SimpleAuthDatabase {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // Connects to the DB
-    private Connection connect() {
+    private Connection conn;
+
+    public void openConnection() {
         // SQLite connection string
         String url = "jdbc:sqlite:mods/SimpleAuth/players.db";
-        Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
             LOGGER.error(e.getMessage());
         }
-        return conn;
+    }
+    // Cllosing connection
+    public void close() {
+        if (conn != null) {
+            try {
+                conn.close();
+                LOGGER.info("[SimpleAuth] Database connection closed successfully.");
+            } catch (SQLException e) {
+                LOGGER.info("[SimpleAuth] Error: " + e);
+            }
+        }
     }
 
     // If the mod runs for the first time, we need to create the DB table
     public void makeTable() {
-        try (Connection conn = this.connect()) {
+        try {
             // Creating database table if it doesn't exist yet
             String sql = "CREATE TABLE IF NOT EXISTS users (\n" +
                     "  `UserID`    INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
@@ -50,9 +61,8 @@ public class SimpleAuthDatabase {
         String sql = "INSERT INTO users(uuid, username, password) VALUES(?,?,?)";
         String sqlCheck = "SELECT UUID "
                 + "FROM users WHERE UUID = ?";
-        try (
-            Connection conn = this.connect();
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
             PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
 
             pstmtCheck.setString(1, uuid);
@@ -81,8 +91,7 @@ public class SimpleAuthDatabase {
     public void delete(String uuid, String username) {
         String sql = "DELETE FROM users WHERE uuid = ? OR username = ?";
 
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param
             pstmt.setString(1, uuid);
@@ -100,8 +109,7 @@ public class SimpleAuthDatabase {
         String sql = "UPDATE users SET password = ? "
                 + "WHERE uuid = ? OR username = ?";
 
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param
             pstmt.setString(1, pass);
@@ -121,10 +129,9 @@ public class SimpleAuthDatabase {
                 + "FROM users WHERE UUID = ?";
         String pass = null;
 
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt  = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt  = conn.prepareStatement(sql)) {
             // Setting statement
-            pstmt.setString(1,uuid);
+            pstmt.setString(1, uuid);
             ResultSet rs  = pstmt.executeQuery();
 
             // Getting the password

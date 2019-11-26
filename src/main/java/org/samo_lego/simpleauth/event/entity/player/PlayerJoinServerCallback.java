@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public interface PlayerJoinServerCallback {
-
     Event<PlayerJoinServerCallback> EVENT = EventFactory.createArrayBacked(PlayerJoinServerCallback.class, listeners -> (player) -> {
         for (PlayerJoinServerCallback callback : listeners) {
             callback.onPlayerJoin(player);

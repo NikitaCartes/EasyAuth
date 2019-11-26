@@ -8,20 +8,21 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import org.samo_lego.simpleauth.SimpleAuth;
+import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class UnregisterCommand { // TODO
+public class UnregisterCommand {
     private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.password");
     private static TranslatableText wrongPassword = new TranslatableText("command.simpleauth.wrongPassword");
-    private static TranslatableText accountDeleted = new TranslatableText("command.simpleauth.passwordUpdated");
+    private static TranslatableText accountDeleted = new TranslatableText("command.simpleauth.accountDeleted");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-        // Registering the "/changepw" command
-        dispatcher.register(literal("changepw")
+        // Registering the "/unregister" command
+        dispatcher.register(literal("unregister")
                 .executes(ctx -> {
                     ctx.getSource().getPlayer().sendMessage(enterPassword);
                     return 1;
@@ -36,11 +37,16 @@ public class UnregisterCommand { // TODO
         );
     }
 
-    // Method called for checking the password and then changing it
+    // Method called for checking the password and then removing user's account from db
     private static int unregister(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
-
-        return 1;
+        if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray())) {
+            SimpleAuth.db.delete(player.getUuidAsString(), null);
+            player.sendMessage(accountDeleted);
+            return 1;
+        }
+        player.sendMessage(wrongPassword);
+        return 0;
     }
 }

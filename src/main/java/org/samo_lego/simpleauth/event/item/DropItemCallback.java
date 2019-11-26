@@ -9,7 +9,6 @@ public interface DropItemCallback {
     Event<DropItemCallback> EVENT = EventFactory.createArrayBacked(DropItemCallback.class, listeners -> (player) -> {
         for (DropItemCallback event : listeners) {
             ActionResult result = event.onDropItem(player);
-
             if (result != ActionResult.PASS) {
                 return result;
             }

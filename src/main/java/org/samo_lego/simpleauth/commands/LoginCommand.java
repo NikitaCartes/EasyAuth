@@ -46,6 +46,10 @@ public class LoginCommand {
             return 0;
         }
         else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray())) {
+            SimpleAuth.authenticatedUsers.add(player);
+            // Player no longer needs to be invisible and invulnerable
+            player.setInvulnerable(false);
+            player.setInvisible(false);
             player.sendMessage(text);
             return 1;
         }

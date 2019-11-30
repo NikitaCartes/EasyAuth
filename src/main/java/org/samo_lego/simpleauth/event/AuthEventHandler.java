@@ -1,7 +1,10 @@
 package org.samo_lego.simpleauth.event;
 
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.minecraft.client.network.packet.InventoryS2CPacket;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketEncoder;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.packet.ChatMessageC2SPacket;
 import net.minecraft.text.TranslatableText;
@@ -32,19 +35,17 @@ public class AuthEventHandler {
         SimpleAuth.authenticatedUsers.remove(player);
     }
 
-    // todo
     public static ActionResult onPlayerChat(PlayerEntity player, ChatMessageC2SPacket chatMessageC2SPacket) {
         String msg = chatMessageC2SPacket.getChatMessage();
-        if(!SimpleAuth.authenticatedUsers.contains(player) && !(msg.startsWith("/login") || msg.startsWith("/register"))) {
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !msg.startsWith("/login") && !msg.startsWith("/register")) {
             player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
     }
-    //todo
+    // Player movement
     public static ActionResult onPlayerMove(PlayerEntity player) {
         if(!SimpleAuth.authenticatedUsers.contains(player)) {
-            // TP player back?
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;

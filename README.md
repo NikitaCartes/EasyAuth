@@ -1,12 +1,10 @@
 # Simple Authentication Mod
 
+Requires Fabric API.
+
 ## Setup
 
-1. Clone the repository. Run the following commands:
-```
-./gradlew genSources
-./gradlew idea
-```
+1. Clone the repository.
 2. Edit the code you want.
 3. To build run the following command:
 

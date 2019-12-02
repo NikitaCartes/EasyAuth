@@ -54,7 +54,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
 		PlayerLeaveServerCallback.EVENT.register(AuthEventHandler::onPlayerLeave);
 		DropItemCallback.EVENT.register(AuthEventHandler::onDropItem);
-		//todo
 		OnChatCallback.EVENT.register(AuthEventHandler::onPlayerChat);
 		OnPlayerMoveCallback.EVENT.register(AuthEventHandler::onPlayerMove);
 		// From Fabric API

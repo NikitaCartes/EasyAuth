@@ -1,10 +1,7 @@
 package org.samo_lego.simpleauth.event;
 
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
-import net.minecraft.client.network.packet.InventoryS2CPacket;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketEncoder;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.packet.ChatMessageC2SPacket;
 import net.minecraft.text.TranslatableText;
@@ -17,7 +14,7 @@ import org.samo_lego.simpleauth.SimpleAuth;
  * and cancels them if they aren't authenticated
  */
 public class AuthEventHandler {
-    private static TranslatableText notAuthenticated = new TranslatableText("command.simpleauth.notAuthenticated");
+    private static TranslatableText notAuthenticated = new TranslatableText("§4You are not authenticated!\nTry with /login or /register.");
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {

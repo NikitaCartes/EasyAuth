@@ -16,10 +16,10 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ChangepwCommand {
-    private static TranslatableText enterNewPassword = new TranslatableText("command.simpleauth.passwordNew");
-    private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.password");
-    private static TranslatableText wrongPassword = new TranslatableText("command.simpleauth.wrongPassword");
-    private static TranslatableText passwordUpdated = new TranslatableText("command.simpleauth.passwordUpdated");
+    private static TranslatableText enterNewPassword = new TranslatableText("§4You need to enter new password!");
+    private static TranslatableText enterPassword = new TranslatableText("§6You need to enter your password!");
+    private static TranslatableText wrongPassword = new TranslatableText("§4Wrong password!");
+    private static TranslatableText passwordUpdated = new TranslatableText("§4Your password was updated successfully!");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/changepw" command

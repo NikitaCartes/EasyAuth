@@ -2,16 +2,12 @@ package org.samo_lego.simpleauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.mkammerer.argon2.Argon2;
-import de.mkammerer.argon2.Argon2Factory;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.utils.AuthHelper;
-
-import java.util.Objects;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -20,11 +16,11 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 
 public class RegisterCommand {
-    private static TranslatableText pleaseRegister = new TranslatableText("§4Type /register <password> <password> to login.");
-    private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.passwordTwice");
-    private static TranslatableText alreadyAuthenticated = new TranslatableText("command.simpleauth.alreadyAuthenticated");
-    private static TranslatableText alreadyRegistered = new TranslatableText("command.simpleauth.alreadyRegistered");
-    private static TranslatableText registerSuccess = new TranslatableText("command.simpleauth.registerSuccess");
+    private static TranslatableText enterPassword = new TranslatableText("§6You need to enter your password!");
+    private static TranslatableText alreadyAuthenticated = new TranslatableText("§4You are already authenticated.");
+    private static TranslatableText alreadyRegistered = new TranslatableText("§6This account name is already registered!");
+    private static TranslatableText registerSuccess = new TranslatableText("§aYou are now authenticated.");
+    private static TranslatableText matchPass = new TranslatableText( "§6Passwords must match!");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
 
@@ -59,9 +55,7 @@ public class RegisterCommand {
             player.sendMessage(alreadyRegistered);
             return 0;
         }
-        player.sendMessage(
-            new LiteralText(source.getName() + ", passwords must match!")
-        );
+        player.sendMessage(matchPass);
         return 0;
     }
 }

@@ -16,9 +16,9 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class UnregisterCommand {
-    private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.password");
-    private static TranslatableText wrongPassword = new TranslatableText("command.simpleauth.wrongPassword");
-    private static TranslatableText accountDeleted = new TranslatableText("command.simpleauth.accountDeleted");
+    private static TranslatableText enterPassword = new TranslatableText("§6You need to enter your password!");
+    private static TranslatableText wrongPassword = new TranslatableText("§4Wrong password!");
+    private static TranslatableText accountDeleted = new TranslatableText("§4Your account was successfully deleted!");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/unregister" command

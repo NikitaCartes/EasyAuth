@@ -2,9 +2,6 @@ package org.samo_lego.simpleauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.mkammerer.argon2.Argon2;
-import de.mkammerer.argon2.Argon2Factory;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -19,10 +16,10 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class LoginCommand {
-    private static TranslatableText enterPassword = new TranslatableText("command.simpleauth.password");
-    private static TranslatableText wrongPassword = new TranslatableText("command.simpleauth.wrongPassword");
-    private static TranslatableText alreadyAuthenticated = new TranslatableText("command.simpleauth.alreadyAuthenticated");
-    private static Text text = new LiteralText("You have entered login command");
+    private static TranslatableText enterPassword = new TranslatableText("§6You need to enter your password!");
+    private static TranslatableText wrongPassword = new TranslatableText("§4Wrong password!");
+    private static TranslatableText alreadyAuthenticated = new TranslatableText("§4You are already authenticated.");
+    private static Text text = new LiteralText("§aYou are now authenticated.");
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/login" command

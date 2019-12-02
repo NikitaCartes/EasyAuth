@@ -23,10 +23,14 @@ dependencies {
 	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Argon2 library for password hashing
-	compile 'de.mkammerer:argon2-jvm:2.6'
+	implementation 'de.mkammerer:argon2-jvm:2.6'
+	include 'de.mkammerer:argon2-jvm:2.6'
 
 	// JDBC SQLite Driver
-	compile group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
+	include group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
+
+	// JNA lib
+	include 'net.java.dev.jna:jna:5.5.0'
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.

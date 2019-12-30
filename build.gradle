@@ -27,6 +27,7 @@ dependencies {
 	include 'de.mkammerer:argon2-jvm:2.6'
 
 	// JDBC SQLite Driver
+	implementation group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
 	include group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
 
 	// JNA lib

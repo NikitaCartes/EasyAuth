@@ -2,11 +2,11 @@ package org.samo_lego.simpleauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import de.mkammerer.argon2.Argon2;
-import de.mkammerer.argon2.Argon2Factory;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
@@ -16,10 +16,10 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class ChangepwCommand {
-    private static TranslatableText enterNewPassword = new TranslatableText("§4You need to enter new password!");
-    private static TranslatableText enterPassword = new TranslatableText("§6You need to enter your password!");
-    private static TranslatableText wrongPassword = new TranslatableText("§4Wrong password!");
-    private static TranslatableText passwordUpdated = new TranslatableText("§4Your password was updated successfully!");
+    private static Text enterNewPassword = new LiteralText(SimpleAuth.config.lang.enterNewPassword);
+    private static Text enterPassword = new LiteralText(SimpleAuth.config.lang.enterPassword);
+    private static Text wrongPassword = new LiteralText(SimpleAuth.config.lang.wrongPassword);
+    private static Text passwordUpdated = new LiteralText(SimpleAuth.config.lang.passwordUpdated);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/changepw" command

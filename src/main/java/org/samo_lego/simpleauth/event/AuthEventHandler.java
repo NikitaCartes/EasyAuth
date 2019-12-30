@@ -14,7 +14,7 @@ import org.samo_lego.simpleauth.SimpleAuth;
  * and cancels them if they aren't authenticated
  */
 public class AuthEventHandler {
-    private static TranslatableText notAuthenticated = new TranslatableText("§4You are not authenticated!\nTry with /login or /register.");
+    private static TranslatableText notAuthenticated = new TranslatableText(SimpleAuth.config.lang.notAuthenticated);
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
@@ -22,11 +22,10 @@ public class AuthEventHandler {
         if (!SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(notAuthenticated);
             // Setting the player to be invisible to mobs and also invulnerable
-            player.setInvulnerable(true);
-            player.setInvisible(true);
+            player.setInvulnerable(SimpleAuth.config.main.playerInvulnerable);
+            player.setInvisible(SimpleAuth.config.main.playerInvisible);
         }
     }
-
     // Player leaving the server
     public static void onPlayerLeave(ServerPlayerEntity player) {
         SimpleAuth.authenticatedUsers.remove(player);
@@ -34,7 +33,12 @@ public class AuthEventHandler {
 
     public static ActionResult onPlayerChat(PlayerEntity player, ChatMessageC2SPacket chatMessageC2SPacket) {
         String msg = chatMessageC2SPacket.getChatMessage();
-        if(!SimpleAuth.authenticatedUsers.contains(player) && !msg.startsWith("/login") && !msg.startsWith("/register")) {
+        if(
+            !SimpleAuth.authenticatedUsers.contains(player) &&
+            !msg.startsWith("/login") &&
+            !msg.startsWith("/register") &&
+            (!SimpleAuth.config.main.allowChat || msg.startsWith("/"))
+        ) {
             player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
         }
@@ -42,7 +46,7 @@ public class AuthEventHandler {
     }
     // Player movement
     public static ActionResult onPlayerMove(PlayerEntity player) {
-        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !SimpleAuth.config.main.allowMovement) {
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -50,7 +54,7 @@ public class AuthEventHandler {
 
     // Using a block (right-click function)
     public static ActionResult onUseBlock(PlayerEntity player) {
-        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !SimpleAuth.config.main.allowBlockUse) {
             player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
         }
@@ -59,7 +63,7 @@ public class AuthEventHandler {
 
     // Punching a block
     public static ActionResult onAttackBlock(PlayerEntity player) {
-        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !SimpleAuth.config.main.allowBlockPunch) {
             player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
         }
@@ -68,16 +72,24 @@ public class AuthEventHandler {
 
     // Using an item
     public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
-        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !SimpleAuth.config.main.allowItemUse) {
             player.sendMessage(notAuthenticated);
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
 
         return TypedActionResult.pass(ItemStack.EMPTY);
     }
+    // Dropping an item
+    public static ActionResult onDropItem(PlayerEntity player) {
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !SimpleAuth.config.main.allowItemDrop) {
+            player.sendMessage(notAuthenticated);
+            return ActionResult.FAIL;
+        }
+        return ActionResult.PASS;
+    }
     // Attacking an entity
     public static ActionResult onAttackEntity(PlayerEntity player) {
-        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !SimpleAuth.config.main.allowEntityPunch) {
             player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
         }
@@ -86,19 +98,11 @@ public class AuthEventHandler {
     }
     // Interacting with entity
     public static ActionResult onUseEntity(PlayerEntity player) {
-        if(!SimpleAuth.authenticatedUsers.contains(player)) {
+        if(!SimpleAuth.authenticatedUsers.contains(player) && !SimpleAuth.config.main.allowEntityInteract) {
             player.sendMessage(notAuthenticated);
             return ActionResult.FAIL;
         }
 
-        return ActionResult.PASS;
-    }
-    // Dropping an item
-    public static ActionResult onDropItem(PlayerEntity player) {
-        if(!SimpleAuth.authenticatedUsers.contains(player)) {
-            player.sendMessage(notAuthenticated);
-            return ActionResult.FAIL;
-        }
         return ActionResult.PASS;
     }
 }

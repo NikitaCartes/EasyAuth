@@ -11,11 +11,12 @@ import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.database.SimpleAuthDatabase;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
-import org.samo_lego.simpleauth.event.entity.player.OnChatCallback;
-import org.samo_lego.simpleauth.event.entity.player.OnPlayerMoveCallback;
+import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
+import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerLeaveServerCallback;
 import org.samo_lego.simpleauth.event.item.DropItemCallback;
+import org.samo_lego.simpleauth.utils.AuthConfig;
 
 import java.io.File;
 import java.util.HashSet;
@@ -25,6 +26,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
     public static SimpleAuthDatabase db = new SimpleAuthDatabase();
 	public static HashSet<PlayerEntity> authenticatedUsers = new HashSet<>();
 	public static boolean isAuthenticated(ServerPlayerEntity player) { return authenticatedUsers.contains(player); }
+	public static AuthConfig config;
+
 
 	@Override
 	public void onInitializeServer() {
@@ -32,14 +35,17 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		LOGGER.info("[SimpleAuth] SimpleAuth mod by samo_lego.");
 		// The support on discord was great! I really appreciate your help.
 		LOGGER.info("[SimpleAuth] This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
-		// Connecting to db
-		db.openConnection();
 
-		// Creating data directory (database is stored there)
+		// Creating data directory (database and config files are stored there)
 		File file = new File("./mods/SimpleAuth");
 		if (!file.exists() && !file.mkdir())
 		    LOGGER.error("[SimpleAuth] Error creating directory!");
-
+		// Loading config
+		config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
+		// Connecting to db
+		db.openConnection();
+		// Making a table in the database
+		db.makeTable();
 
 		// Registering the commands
 		CommandRegistry.INSTANCE.register(false, dispatcher -> {
@@ -54,8 +60,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
 		PlayerLeaveServerCallback.EVENT.register(AuthEventHandler::onPlayerLeave);
 		DropItemCallback.EVENT.register(AuthEventHandler::onDropItem);
-		OnChatCallback.EVENT.register(AuthEventHandler::onPlayerChat);
-		OnPlayerMoveCallback.EVENT.register(AuthEventHandler::onPlayerMove);
+		ChatCallback.EVENT.register(AuthEventHandler::onPlayerChat);
+		PlayerMoveCallback.EVENT.register(AuthEventHandler::onPlayerMove);
 		// From Fabric API
 		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.onAttackBlock(playerEntity));
         UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));
@@ -63,10 +69,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
         AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
 		UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
 		ServerStopCallback.EVENT.register(minecraftServer -> SimpleAuth.onStopServer());
-		// Making a table in the database
-        db.makeTable();
-    }
-
+	}
 	private static void onStopServer() {
 		LOGGER.info("[SimpleAuth] Shutting down SimpleAuth.");
 		db.close();

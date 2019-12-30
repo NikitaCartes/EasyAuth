@@ -1,12 +1,10 @@
 package org.samo_lego.simpleauth.mixin;
 
-import net.minecraft.client.network.packet.InventoryS2CPacket;
 import net.minecraft.container.PlayerContainer;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.packet.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.ActionResult;
 import org.samo_lego.simpleauth.event.item.DropItemCallback;
 import org.spongepowered.asm.mixin.Final;

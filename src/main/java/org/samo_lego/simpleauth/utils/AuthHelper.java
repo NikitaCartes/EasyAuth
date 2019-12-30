@@ -20,18 +20,18 @@ public class AuthHelper {
             return argon2.verify(hashed, pass);
         } catch(Error e) {
             LOGGER.error("[SimpleAuth] error: " + e);
+            return false;
         } finally {
             // Wipe confidential data
             argon2.wipeArray(pass);
         }
-        return false;
     }
     // Hashing the password with the Argon2 power
     public static String hashPass(char[] pass) {
         try {
             return argon2.hash(10, 65536, 1, pass);
         } catch (Error e) {
-            LOGGER.error(e);
+            LOGGER.error("[SimpleAuth] " + e);
         }
         return null;
     }

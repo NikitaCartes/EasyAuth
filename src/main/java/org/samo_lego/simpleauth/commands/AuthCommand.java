@@ -3,11 +3,15 @@ package org.samo_lego.simpleauth.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
+import org.samo_lego.simpleauth.utils.AuthConfig;
 import org.samo_lego.simpleauth.utils.AuthHelper;
+
+import java.io.File;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -17,13 +21,17 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class AuthCommand {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static TranslatableText userdataDeleted = new TranslatableText("§aUserdata deleted.");
-    private static TranslatableText userdataUpdated = new TranslatableText("§aUserdata updated.");
+    private static Text userdataDeleted = new LiteralText(SimpleAuth.config.lang.userdataDeleted);
+    private static Text userdataUpdated = new LiteralText(SimpleAuth.config.lang.userdataUpdated);
+    private static Text configurationReloaded = new LiteralText(SimpleAuth.config.lang.configurationReloaded);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/auth" command
         dispatcher.register(literal("auth")
             .requires(source -> source.hasPermissionLevel(4))
+            .then(literal("reload")
+                .executes( ctx -> reloadConfig(ctx.getSource()))
+            )
             .then(literal("update")
                 .then(literal("byUuid")
                     .then(argument("uuid", word())
@@ -101,5 +109,15 @@ public class AuthCommand {
         else
             LOGGER.info(userdataDeleted);
         return 1; // Success
+    }
+    private static int reloadConfig(ServerCommandSource source) {
+        Entity sender = source.getEntity();
+        SimpleAuth.config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
+
+        if(sender != null)
+            sender.sendMessage(configurationReloaded);
+        else
+            LOGGER.info(configurationReloaded);
+        return 1;
     }
 }

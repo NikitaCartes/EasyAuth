@@ -22,17 +22,17 @@ public class SimpleAuthDatabase {
         try {
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[SimpleAuth] " + e.getMessage());
         }
     }
-    // Cllosing connection
+    // Closing connection
     public void close() {
         if (conn != null) {
             try {
                 conn.close();
                 LOGGER.info("[SimpleAuth] Database connection closed successfully.");
             } catch (SQLException e) {
-                LOGGER.info("[SimpleAuth] Error: " + e);
+                LOGGER.info("[SimpleAuth] Error: " + e.getMessage());
             }
         }
     }
@@ -52,7 +52,7 @@ public class SimpleAuthDatabase {
             Statement stmt = conn.createStatement();
             stmt.execute(sql);
         } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[SimpleAuth] Error: " + e.getMessage());
         }
     }
 
@@ -74,15 +74,17 @@ public class SimpleAuthDatabase {
                 rs.getString("UUID");
                 return false;
             } catch(SQLException ignored) {
+                // User is not registered
+            } finally {
                 pstmt.setString(1, uuid);
                 pstmt.setString(2, username);
                 pstmt.setString(3, password);
 
                 pstmt.executeUpdate();
-                return true;
             }
+            return true;
         } catch (SQLException e) {
-            LOGGER.error("Register error: " + e.getMessage());
+            LOGGER.error("[SimpleAuth] Register error: " + e.getMessage());
             return false;
         }
     }
@@ -100,7 +102,7 @@ public class SimpleAuthDatabase {
             pstmt.executeUpdate();
 
         } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[SimpleAuth] " + e.getMessage());
         }
     }
 
@@ -119,7 +121,7 @@ public class SimpleAuthDatabase {
             // update
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[SimpleAuth] " + e.getMessage());
         }
     }
 
@@ -137,7 +139,7 @@ public class SimpleAuthDatabase {
             // Getting the password
             pass = rs.getString("Password");
         } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("[SimpleAuth] Error getting password: " + e.getMessage());
         }
         return pass;
     }

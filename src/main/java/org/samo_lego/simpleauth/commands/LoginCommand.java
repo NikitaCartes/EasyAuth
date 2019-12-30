@@ -6,7 +6,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
@@ -16,10 +16,11 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class LoginCommand {
-    private static TranslatableText enterPassword = new TranslatableText("§6You need to enter your password!");
-    private static TranslatableText wrongPassword = new TranslatableText("§4Wrong password!");
-    private static TranslatableText alreadyAuthenticated = new TranslatableText("§4You are already authenticated.");
-    private static Text text = new LiteralText("§aYou are now authenticated.");
+    private static Text enterPassword = new LiteralText(SimpleAuth.config.lang.enterPassword);
+    private static Text wrongPassword = new LiteralText(SimpleAuth.config.lang.wrongPassword);
+    private static Text alreadyAuthenticated = new LiteralText(SimpleAuth.config.lang.alreadyAuthenticated);
+    private static Text loginTriesExceeded = new LiteralText("§4Too many login tries.");
+    private static Text successfullyAuthenticated = new LiteralText(SimpleAuth.config.lang.successfullyAuthenticated);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/login" command
@@ -37,7 +38,6 @@ public class LoginCommand {
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
-
         if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
             return 0;
@@ -47,7 +47,9 @@ public class LoginCommand {
             // Player no longer needs to be invisible and invulnerable
             player.setInvulnerable(false);
             player.setInvisible(false);
-            player.sendMessage(text);
+            //player.setAir(AuthEventHandler.playerAir);
+            //player.getDataTracker().startTracking();
+            player.sendMessage(successfullyAuthenticated);
             return 1;
         }
         player.sendMessage(wrongPassword);

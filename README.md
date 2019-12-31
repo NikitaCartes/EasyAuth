@@ -1,5 +1,7 @@
 # Simple Authentication Mod
 
+![License](https://img.shields.io/badge/License-MIT-brightgreen)
+
 Requires Fabric API.
 
 ## Setup

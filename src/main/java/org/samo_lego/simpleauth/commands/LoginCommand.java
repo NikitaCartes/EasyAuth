@@ -6,7 +6,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
@@ -47,12 +46,11 @@ public class LoginCommand {
             // Player no longer needs to be invisible and invulnerable
             player.setInvulnerable(false);
             player.setInvisible(false);
-            //player.setAir(AuthEventHandler.playerAir);
-            //player.getDataTracker().startTracking();
             player.sendMessage(successfullyAuthenticated);
             return 1;
         }
-        player.sendMessage(wrongPassword);
+        player.networkHandler.disconnect(wrongPassword);
+        //player.sendMessage(wrongPassword);
         return 0;
     }
 }

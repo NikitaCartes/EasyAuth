@@ -9,12 +9,17 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import org.samo_lego.simpleauth.SimpleAuth;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * This class will take care of actions players try to do,
- * and cancels them if they aren't authenticated
+ * and cancel them if they aren't authenticated
  */
 public class AuthEventHandler {
     private static TranslatableText notAuthenticated = new TranslatableText(SimpleAuth.config.lang.notAuthenticated);
+    private static TranslatableText timeExpired = new TranslatableText(SimpleAuth.config.lang.timeExpired);
+    private static int delay = SimpleAuth.config.main.delay;
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
@@ -24,6 +29,14 @@ public class AuthEventHandler {
             // Setting the player to be invisible to mobs and also invulnerable
             player.setInvulnerable(SimpleAuth.config.main.playerInvulnerable);
             player.setInvisible(SimpleAuth.config.main.playerInvisible);
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if(!SimpleAuth.isAuthenticated(player)) // Kicking player if not authenticated
+                        player.networkHandler.disconnect(timeExpired);
+                }
+            }, delay * 1000);
         }
     }
     // Player leaving the server

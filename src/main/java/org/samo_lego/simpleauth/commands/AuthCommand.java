@@ -117,7 +117,7 @@ public class AuthCommand {
         if(sender != null)
             sender.sendMessage(configurationReloaded);
         else
-            LOGGER.info(configurationReloaded);
+            LOGGER.info(SimpleAuth.config.lang.configurationReloaded);
         return 1;
     }
 }

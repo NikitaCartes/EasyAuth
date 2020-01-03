@@ -37,8 +37,12 @@ public class AuthConfig {
         public boolean allowItemUse = false;
         public boolean allowEntityPunch = false;
         public boolean allowEntityInteract = false;
+        // If player should be invulnerable before authentication
         public boolean playerInvulnerable = true;
+        // If player should be invisible to mobs before authentication
         public boolean playerInvisible = true;
+        // Time after which player will be kicked if not authenticated [s]
+        public int delay = 60;
     }
     public static class LangConfig {
         public String enterPassword = "§6You need to enter your password!";
@@ -49,6 +53,7 @@ public class AuthConfig {
         public String notAuthenticated = "§cYou are not authenticated!\n§6Try with /login or /register.";
         public String alreadyAuthenticated = "§4You are already authenticated.";
         public String successfullyAuthenticated = "§aYou are now authenticated.";
+        public String timeExpired = "§cTime for authentication has expired.";
         public String alreadyRegistered = "§6This account name is already registered!";
         public String registerSuccess = "§aYou are now authenticated.";
         public String userdataDeleted = "§aUserdata deleted.";

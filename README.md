@@ -1,6 +1,6 @@
 # Simple Authentication Mod
 
-![License](https://img.shields.io/badge/License-MIT-brightgreen) ![Requires Fabric API](https://i.imgur.com/Ol1Tcf8.png =149x50)
+![License](https://img.shields.io/badge/License-MIT-brightgreen)
 
 Requires Fabric API.
 

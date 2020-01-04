@@ -28,20 +28,29 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class AuthConfig {
+    // If player is not authenticated, following conditions apply
     public static class MainConfig {
+        // Allows chat (but not commands, except for /login and /register)
         public boolean allowChat = false;
+        // Allows player movement
         public boolean allowMovement = false;
+        // Allows block "use" - right clicking (e.g. opening a chest)
         public boolean allowBlockUse = false;
+        // Allows mining || punching blocks
         public boolean allowBlockPunch = false;
+        // Allows dropping items from inventory
         public boolean allowItemDrop = false;
+        // Allows item "use" - right click function (e.g. using a bow)
         public boolean allowItemUse = false;
+        // Allows attacking mobs
         public boolean allowEntityPunch = false;
+        // Allows "right-clicking" on an entity (e.g. trading with villagers)
         public boolean allowEntityInteract = false;
         // If player should be invulnerable before authentication
         public boolean playerInvulnerable = true;
         // If player should be invisible to mobs before authentication
         public boolean playerInvisible = true;
-        // Time after which player will be kicked if not authenticated [s]
+        // Time after which player will be kicked if not authenticated - in seconds
         public int delay = 60;
     }
     public static class LangConfig {

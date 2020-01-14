@@ -14,7 +14,6 @@ import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
-import org.samo_lego.simpleauth.event.entity.player.PlayerLeaveServerCallback;
 import org.samo_lego.simpleauth.event.item.DropItemCallback;
 import org.samo_lego.simpleauth.utils.AuthConfig;
 
@@ -24,8 +23,12 @@ import java.util.HashSet;
 public class SimpleAuth implements DedicatedServerModInitializer {
 	private static final Logger LOGGER = LogManager.getLogger();
     public static SimpleAuthDatabase db = new SimpleAuthDatabase();
-	public static HashSet<PlayerEntity> authenticatedUsers = new HashSet<>();
-	public static boolean isAuthenticated(ServerPlayerEntity player) { return authenticatedUsers.contains(player); }
+    // HashSet of players that are not authenticated
+	// Rather than storing all the authenticated players, we just store ones that are not authenticated
+	public static HashSet<PlayerEntity> deauthenticatedUsers = new HashSet<>();
+	// Boolean for easier checking if player is authenticated
+	public static boolean isAuthenticated(ServerPlayerEntity player) { return !deauthenticatedUsers.contains(player); }
+	// Mod config
 	public static AuthConfig config;
 
 
@@ -58,7 +61,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Registering the events
 		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
-		PlayerLeaveServerCallback.EVENT.register(AuthEventHandler::onPlayerLeave);
 		DropItemCallback.EVENT.register(AuthEventHandler::onDropItem);
 		ChatCallback.EVENT.register(AuthEventHandler::onPlayerChat);
 		PlayerMoveCallback.EVENT.register(AuthEventHandler::onPlayerMove);

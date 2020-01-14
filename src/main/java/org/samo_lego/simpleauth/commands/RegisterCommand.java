@@ -46,7 +46,7 @@ public class RegisterCommand {
         else if(pass1.equals(pass2)) {
             String hash = AuthHelper.hashPass(pass1.toCharArray());
             if (SimpleAuth.db.registerUser(player.getUuidAsString(), source.getName(), hash)) {
-                SimpleAuth.authenticatedUsers.add(player);
+                SimpleAuth.deauthenticatedUsers.remove(player);
                 // Player no longer needs to be invisible and invulnerable
                 player.setInvulnerable(false);
                 player.setInvisible(false);

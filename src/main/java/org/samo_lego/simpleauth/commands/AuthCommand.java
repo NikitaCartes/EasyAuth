@@ -94,7 +94,7 @@ public class AuthCommand {
         if(sender != null)
             sender.sendMessage(userdataUpdated);
         else
-            LOGGER.info(userdataUpdated);
+            LOGGER.info(SimpleAuth.config.lang.userdataUpdated);
         // TODO -> Kick player whose name was changed?
         return 1;
     }
@@ -107,7 +107,7 @@ public class AuthCommand {
         if(sender != null)
             sender.sendMessage(userdataDeleted);
         else
-            LOGGER.info(userdataDeleted);
+            LOGGER.info(SimpleAuth.config.lang.userdataDeleted);
         return 1; // Success
     }
     private static int reloadConfig(ServerCommandSource source) {

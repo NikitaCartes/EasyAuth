@@ -50,8 +50,6 @@ public class RegisterCommand {
                 // Player no longer needs to be invisible and invulnerable
                 player.setInvulnerable(false);
                 player.setInvisible(false);
-                if(player.isInWater())
-                    player.setAir(10);
                 player.sendMessage(registerSuccess);
                 return 1;
             }

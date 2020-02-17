@@ -6,7 +6,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
@@ -20,6 +19,7 @@ public class ChangepwCommand {
     private static Text enterPassword = new LiteralText(SimpleAuth.config.lang.enterPassword);
     private static Text wrongPassword = new LiteralText(SimpleAuth.config.lang.wrongPassword);
     private static Text passwordUpdated = new LiteralText(SimpleAuth.config.lang.passwordUpdated);
+    private static Text cannotChangePassword = new LiteralText(SimpleAuth.config.lang.cannotChangePassword);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/changepw" command
@@ -50,7 +50,11 @@ public class ChangepwCommand {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
 
-        if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray())) {
+        if (SimpleAuth.config.main.enableGlobalPassword) {
+            player.sendMessage(cannotChangePassword);
+            return 0;
+        }
+        else if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray())) {
             SimpleAuth.db.update(
                     player.getUuidAsString(),
                     null,

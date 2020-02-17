@@ -68,6 +68,8 @@ public class AuthConfig {
         public String passwordUpdated = "§4Your password was updated successfully!";
         public String loginRequired = "§cYou are not authenticated!\n§6Use /login to authenticate!";
         public String globalPasswordSet = "§aGlobal password was successfully set!";
+        public String cannotChangePassword = "§aYou cannot change password!";
+        public String cannotUnregister = "§aYou cannot unregister this account!";
         public String notAuthenticated = "§cYou are not authenticated!\n§6Try with /login or /register.";
         public String alreadyAuthenticated = "§4You are already authenticated.";
         public String successfullyAuthenticated = "§aYou are now authenticated.";
@@ -76,6 +78,7 @@ public class AuthConfig {
         public String registerSuccess = "§aYou are now authenticated.";
         public String userdataDeleted = "§aUserdata deleted.";
         public String userdataUpdated = "§aUserdata updated.";
+        public String accountDeleted = "§4Your account was successfully deleted!";
         public String configurationReloaded = "§aConfiguration file was reloaded successfully.";
 
     }

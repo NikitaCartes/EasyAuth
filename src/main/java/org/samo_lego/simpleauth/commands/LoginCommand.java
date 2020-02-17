@@ -18,7 +18,7 @@ public class LoginCommand {
     private static Text enterPassword = new LiteralText(SimpleAuth.config.lang.enterPassword);
     private static Text wrongPassword = new LiteralText(SimpleAuth.config.lang.wrongPassword);
     private static Text alreadyAuthenticated = new LiteralText(SimpleAuth.config.lang.alreadyAuthenticated);
-    private static Text loginTriesExceeded = new LiteralText("§4Too many login tries.");
+    //private static Text loginTriesExceeded = new LiteralText("§4Too many login tries.");
     private static Text successfullyAuthenticated = new LiteralText(SimpleAuth.config.lang.successfullyAuthenticated);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -37,16 +37,16 @@ public class LoginCommand {
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
-        if(SimpleAuth.isAuthenticated(player)) {
+        if(SimpleAuth.config.main.enableGlobalPassword && AuthHelper.checkPass("globalPass", pass.toCharArray())) {
+            SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
+            return 1;
+        }
+        else if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
             return 0;
         }
         else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray())) {
-            SimpleAuth.deauthenticatedUsers.remove(player);
-            // Player no longer needs to be invisible and invulnerable
-            player.setInvulnerable(false);
-            player.setInvisible(false);
-            player.sendMessage(successfullyAuthenticated);
+            SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
             return 1;
         }
         player.networkHandler.disconnect(wrongPassword);

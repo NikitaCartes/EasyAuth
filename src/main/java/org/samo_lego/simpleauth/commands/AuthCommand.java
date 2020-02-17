@@ -24,6 +24,7 @@ public class AuthCommand {
     private static Text userdataDeleted = new LiteralText(SimpleAuth.config.lang.userdataDeleted);
     private static Text userdataUpdated = new LiteralText(SimpleAuth.config.lang.userdataUpdated);
     private static Text configurationReloaded = new LiteralText(SimpleAuth.config.lang.configurationReloaded);
+    private static Text globalPasswordSet = new LiteralText(SimpleAuth.config.lang.globalPasswordSet);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/auth" command
@@ -31,6 +32,14 @@ public class AuthCommand {
             .requires(source -> source.hasPermissionLevel(4))
             .then(literal("reload")
                 .executes( ctx -> reloadConfig(ctx.getSource()))
+            )
+            .then(literal("setGlobalPassword")
+                    .then(argument("password", word())
+                            .executes( ctx -> setGlobalPassword(
+                                    ctx.getSource(),
+                                    getString(ctx, "password")
+                            ))
+                    )
             )
             .then(literal("update")
                 .then(literal("byUuid")
@@ -80,6 +89,20 @@ public class AuthCommand {
             )
         );
     }
+    private static int setGlobalPassword(ServerCommandSource source, String pass) {
+        // Getting the player who send the command
+        Entity sender = source.getEntity();
+        // Writing the global pass to config
+        SimpleAuth.config.main.globalPassword = AuthHelper.hashPass(pass.toCharArray());
+        SimpleAuth.config.save(new File("./mods/SimpleAuth/config.json"));
+
+        if(sender != null)
+            sender.sendMessage(globalPasswordSet);
+        else
+            LOGGER.info(globalPasswordSet);
+        return 1;
+    }
+
 
     // Method called for checking the password
     private static int updatePass(ServerCommandSource source, String uuid, String username, String pass) {

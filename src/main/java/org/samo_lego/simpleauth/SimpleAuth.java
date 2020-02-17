@@ -6,6 +6,8 @@ import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.commands.*;
@@ -30,7 +32,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	public static boolean isAuthenticated(ServerPlayerEntity player) { return !deauthenticatedUsers.contains(player); }
 	// Mod config
 	public static AuthConfig config;
-
 
 	@Override
 	public void onInitializeServer() {
@@ -75,5 +76,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	private static void onStopServer() {
 		LOGGER.info("[SimpleAuth] Shutting down SimpleAuth.");
 		db.close();
+	}
+	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
+		SimpleAuth.deauthenticatedUsers.remove(player);
+		// Player no longer needs to be invisible and invulnerable
+		player.setInvulnerable(false);
+		player.setInvisible(false);
+		player.sendMessage(msg);
 	}
 }

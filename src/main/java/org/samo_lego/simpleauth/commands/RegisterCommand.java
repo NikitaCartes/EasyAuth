@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
+import org.samo_lego.simpleauth.utils.AuthConfig;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -21,6 +22,7 @@ public class RegisterCommand {
     private static Text alreadyRegistered = new LiteralText(SimpleAuth.config.lang.alreadyRegistered);
     private static Text registerSuccess = new LiteralText(SimpleAuth.config.lang.registerSuccess);
     private static Text matchPass = new LiteralText( SimpleAuth.config.lang.matchPassword);
+    private static Text globalPasswordRequired = new LiteralText( SimpleAuth.config.lang.globalPasswordRequired);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
 
@@ -39,18 +41,18 @@ public class RegisterCommand {
     // Method called for hashing the password & writing to DB
     private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayer();
-        if(SimpleAuth.isAuthenticated(player)) {
+        if(SimpleAuth.config.main.enableGlobalPassword) {
+            player.sendMessage(globalPasswordRequired);
+            return 0;
+        }
+        else if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
             return 0;
         }
         else if(pass1.equals(pass2)) {
             String hash = AuthHelper.hashPass(pass1.toCharArray());
             if (SimpleAuth.db.registerUser(player.getUuidAsString(), source.getName(), hash)) {
-                SimpleAuth.deauthenticatedUsers.remove(player);
-                // Player no longer needs to be invisible and invulnerable
-                player.setInvulnerable(false);
-                player.setInvisible(false);
-                player.sendMessage(registerSuccess);
+                SimpleAuth.authenticatePlayer(player, registerSuccess);
                 return 1;
             }
             player.sendMessage(alreadyRegistered);

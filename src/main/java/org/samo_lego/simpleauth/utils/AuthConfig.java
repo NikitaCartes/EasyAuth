@@ -52,6 +52,13 @@ public class AuthConfig {
         public boolean playerInvisible = true;
         // Time after which player will be kicked if not authenticated - in seconds
         public int delay = 60;
+        // Disables registering and forces logging in with global password
+        public boolean enableGlobalPassword = false;
+        /* If above is true, the global password can be set with command:
+        `/auth setGlobalPassword <pass>`
+        Password will be hashed and saved.
+         */
+        public String globalPassword = null;
     }
     public static class LangConfig {
         public String enterPassword = "§6You need to enter your password!";
@@ -59,6 +66,8 @@ public class AuthConfig {
         public String wrongPassword = "§4Wrong password!";
         public String matchPassword = "§6Passwords must match!";
         public String passwordUpdated = "§4Your password was updated successfully!";
+        public String globalPasswordRequired = "§4Use /login <global password> to authenticate!";
+        public String globalPasswordSet = "§aGlobal password was successfully set!";
         public String notAuthenticated = "§cYou are not authenticated!\n§6Try with /login or /register.";
         public String alreadyAuthenticated = "§4You are already authenticated.";
         public String successfullyAuthenticated = "§aYou are now authenticated.";
@@ -94,7 +103,7 @@ public class AuthConfig {
 
         return config;
     }
-    private void save(File file) {
+    public void save(File file) {
         try (FileWriter writer = new FileWriter(file)) {
             gson.toJson(this, writer);
         } catch (IOException e) {

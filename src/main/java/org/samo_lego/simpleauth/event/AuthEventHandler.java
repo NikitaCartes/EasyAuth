@@ -5,6 +5,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.packet.ChatMessageC2SPacket;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
@@ -18,20 +20,25 @@ import java.util.TimerTask;
  * and cancel them if they aren't authenticated
  */
 public class AuthEventHandler {
-    private static TranslatableText notAuthenticated = new TranslatableText(SimpleAuth.config.lang.notAuthenticated);
-    private static TranslatableText timeExpired = new TranslatableText(SimpleAuth.config.lang.timeExpired);
+    private static Text notAuthenticated() {
+        if(SimpleAuth.config.main.enableGlobalPassword) {
+            return new LiteralText(SimpleAuth.config.lang.loginRequired);
+        }
+        return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
+    }
+    private static Text timeExpired = new LiteralText(SimpleAuth.config.lang.timeExpired);
     private static int delay = SimpleAuth.config.main.delay;
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         SimpleAuth.deauthenticatedUsers.add(player);
-        CompoundTag tag = new CompoundTag();
+        /*CompoundTag tag = new CompoundTag();
         tag.putInt("loginTries", 0);
-        player.writeCustomDataToTag(tag);
+        player.writeCustomDataToTag(tag);*/
         // Player not authenticated
         // If clause actually not needed, since we add player to deauthenticated hashset above
         if (!SimpleAuth.isAuthenticated(player)) {
-            player.sendMessage(notAuthenticated);
+            player.sendMessage(notAuthenticated());
             // Setting the player to be invisible to mobs and also invulnerable
             player.setInvulnerable(SimpleAuth.config.main.playerInvulnerable);
             player.setInvisible(SimpleAuth.config.main.playerInvisible);
@@ -56,7 +63,7 @@ public class AuthEventHandler {
             !msg.startsWith("/register") &&
             (!SimpleAuth.config.main.allowChat || msg.startsWith("/"))
         ) {
-            player.sendMessage(notAuthenticated);
+            player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -72,7 +79,7 @@ public class AuthEventHandler {
     // Using a block (right-click function)
     public static ActionResult onUseBlock(PlayerEntity player) {
         if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowBlockUse) {
-            player.sendMessage(notAuthenticated);
+            player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -81,7 +88,7 @@ public class AuthEventHandler {
     // Punching a block
     public static ActionResult onAttackBlock(PlayerEntity player) {
         if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowBlockPunch) {
-            player.sendMessage(notAuthenticated);
+            player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -90,7 +97,7 @@ public class AuthEventHandler {
     // Using an item
     public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
         if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowItemUse) {
-            player.sendMessage(notAuthenticated);
+            player.sendMessage(notAuthenticated());
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
 
@@ -99,7 +106,7 @@ public class AuthEventHandler {
     // Dropping an item
     public static ActionResult onDropItem(PlayerEntity player) {
         if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowItemDrop) {
-            player.sendMessage(notAuthenticated);
+            player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -107,7 +114,7 @@ public class AuthEventHandler {
     // Attacking an entity
     public static ActionResult onAttackEntity(PlayerEntity player) {
         if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowEntityPunch) {
-            player.sendMessage(notAuthenticated);
+            player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
 
@@ -116,7 +123,7 @@ public class AuthEventHandler {
     // Interacting with entity
     public static ActionResult onUseEntity(PlayerEntity player) {
         if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowEntityInteract) {
-            player.sendMessage(notAuthenticated);
+            player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
 

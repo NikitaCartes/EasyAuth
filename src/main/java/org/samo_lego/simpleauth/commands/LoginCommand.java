@@ -37,13 +37,15 @@ public class LoginCommand {
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
-        if(SimpleAuth.config.main.enableGlobalPassword && AuthHelper.checkPass("globalPass", pass.toCharArray())) {
-            SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
-            return 1;
-        }
-        else if(SimpleAuth.isAuthenticated(player)) {
+        if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
             return 0;
+        }
+        else if(SimpleAuth.config.main.enableGlobalPassword) {
+            if (AuthHelper.checkPass("globalPass", pass.toCharArray())) {
+                SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
+                return 1;
+            }
         }
         else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray())) {
             SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);

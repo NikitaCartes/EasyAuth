@@ -66,7 +66,7 @@ public class AuthConfig {
         public String wrongPassword = "§4Wrong password!";
         public String matchPassword = "§6Passwords must match!";
         public String passwordUpdated = "§4Your password was updated successfully!";
-        public String globalPasswordRequired = "§4Use /login <global password> to authenticate!";
+        public String loginRequired = "§cYou are not authenticated!\n§6Use /login to authenticate!";
         public String globalPasswordSet = "§aGlobal password was successfully set!";
         public String notAuthenticated = "§cYou are not authenticated!\n§6Try with /login or /register.";
         public String alreadyAuthenticated = "§4You are already authenticated.";

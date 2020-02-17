@@ -22,7 +22,7 @@ public class RegisterCommand {
     private static Text alreadyRegistered = new LiteralText(SimpleAuth.config.lang.alreadyRegistered);
     private static Text registerSuccess = new LiteralText(SimpleAuth.config.lang.registerSuccess);
     private static Text matchPass = new LiteralText( SimpleAuth.config.lang.matchPassword);
-    private static Text globalPasswordRequired = new LiteralText( SimpleAuth.config.lang.globalPasswordRequired);
+    private static Text loginRequired = new LiteralText(SimpleAuth.config.lang.loginRequired);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
 
@@ -42,7 +42,7 @@ public class RegisterCommand {
     private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayer();
         if(SimpleAuth.config.main.enableGlobalPassword) {
-            player.sendMessage(globalPasswordRequired);
+            player.sendMessage(loginRequired);
             return 0;
         }
         else if(SimpleAuth.isAuthenticated(player)) {

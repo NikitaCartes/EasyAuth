@@ -94,6 +94,7 @@ public class AuthCommand {
         Entity sender = source.getEntity();
         // Writing the global pass to config
         SimpleAuth.config.main.globalPassword = AuthHelper.hashPass(pass.toCharArray());
+        SimpleAuth.config.main.enableGlobalPassword = true;
         SimpleAuth.config.save(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)

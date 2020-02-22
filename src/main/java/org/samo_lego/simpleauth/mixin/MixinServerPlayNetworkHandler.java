@@ -1,11 +1,9 @@
 package org.samo_lego.simpleauth.mixin;
 
-import net.minecraft.client.network.packet.EntityS2CPacket;
-import net.minecraft.network.NetworkThreadUtils;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.packet.ChatMessageC2SPacket;
-import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
 import net.minecraft.util.ActionResult;
 import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
@@ -20,8 +18,8 @@ public abstract class MixinServerPlayNetworkHandler {
     @Shadow
     public ServerPlayerEntity player;
 
-    @Inject(
-            method = "onChatMessage(Lnet/minecraft/server/network/packet/ChatMessageC2SPacket;)V",
+    @Inject( //todo check on fabric discord in #botposting(`!ym onGameMessage`)
+            method = "onGameMessage",
             at = @At(
                     value = "INVOKE",
                     // Thanks to Liach for helping me out!
@@ -39,7 +37,7 @@ public abstract class MixinServerPlayNetworkHandler {
     }
 
     @Inject(
-            method="onPlayerMove(Lnet/minecraft/server/network/packet/PlayerMoveC2SPacket;)V",
+            method="onPlayerMove(Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
                     // Thanks to Liach for helping me out!

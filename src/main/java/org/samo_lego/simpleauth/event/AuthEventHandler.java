@@ -2,12 +2,10 @@ package org.samo_lego.simpleauth.event;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.packet.ChatMessageC2SPacket;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import org.samo_lego.simpleauth.SimpleAuth;
@@ -32,9 +30,9 @@ public class AuthEventHandler {
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         SimpleAuth.deauthenticatedUsers.add(player);
-        /*CompoundTag tag = new CompoundTag();
-        tag.putInt("loginTries", 0);
-        player.writeCustomDataToTag(tag);*/
+        /*CompoundTag loginTries = new CompoundTag();
+        loginTries.putInt("loginTries", 0);
+        player.saveToTag(loginTries);*/
         // Player not authenticated
         // If clause actually not needed, since we add player to deauthenticated hashset above
         if (!SimpleAuth.isAuthenticated(player)) {

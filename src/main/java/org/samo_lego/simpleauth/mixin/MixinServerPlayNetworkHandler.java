@@ -18,8 +18,8 @@ public abstract class MixinServerPlayNetworkHandler {
     @Shadow
     public ServerPlayerEntity player;
 
-    @Inject( //todo check on fabric discord in #botposting(`!ym onGameMessage`)
-            method = "onGameMessage",
+    @Inject(
+            method = "onGameMessage(Lnet/minecraft/network/packet/c2s/play/ChatMessageC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
                     // Thanks to Liach for helping me out!

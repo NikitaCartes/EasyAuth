@@ -32,7 +32,8 @@ public class AuthEventHandler {
         SimpleAuth.deauthenticatedUsers.add(player);
         /*CompoundTag loginTries = new CompoundTag();
         loginTries.putInt("loginTries", 0);
-        player.saveToTag(loginTries);*/
+        player.saveToTag(loginTries);
+        player.writeCustomDataToTag(loginTries);*/
         // Player not authenticated
         // If clause actually not needed, since we add player to deauthenticated hashset above
         if (!SimpleAuth.isAuthenticated(player)) {

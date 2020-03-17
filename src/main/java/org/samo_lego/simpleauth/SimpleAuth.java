@@ -4,7 +4,10 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
@@ -19,16 +22,24 @@ import org.samo_lego.simpleauth.event.item.DropItemCallback;
 import org.samo_lego.simpleauth.utils.AuthConfig;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class SimpleAuth implements DedicatedServerModInitializer {
 	private static final Logger LOGGER = LogManager.getLogger();
+
     public static SimpleAuthDatabase db = new SimpleAuthDatabase();
+
     // HashSet of players that are not authenticated
 	// Rather than storing all the authenticated players, we just store ones that are not authenticated
-	public static HashSet<PlayerEntity> deauthenticatedUsers = new HashSet<>();
+	public static HashMap<PlayerEntity, Integer> deauthenticatedUsers = new HashMap<>();
+
 	// Boolean for easier checking if player is authenticated
-	public static boolean isAuthenticated(ServerPlayerEntity player) { return !deauthenticatedUsers.contains(player); }
+	public static boolean isAuthenticated(ServerPlayerEntity player) {
+		return !deauthenticatedUsers.containsKey(player);
+	}
+	// Getting game directory
+	public static final File gameDirectory = FabricLoader.getInstance().getGameDirectory();
 	// Mod config
 	public static AuthConfig config;
 
@@ -40,11 +51,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		LOGGER.info("[SimpleAuth] This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
 		// Creating data directory (database and config files are stored there)
-		File file = new File("./mods/SimpleAuth");
+		File file = new File(gameDirectory + "/mods/SimpleAuth");
 		if (!file.exists() && !file.mkdir())
 		    LOGGER.error("[SimpleAuth] Error creating directory!");
 		// Loading config
-		config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
+		config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
 		// Connecting to db
 		db.openConnection();
 		// Making a table in the database
@@ -77,7 +88,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		db.close();
 	}
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
-		SimpleAuth.deauthenticatedUsers.remove(player);
+		deauthenticatedUsers.remove(player);
 		// Player no longer needs to be invisible and invulnerable
 		player.setInvulnerable(false);
 		player.setInvisible(false);

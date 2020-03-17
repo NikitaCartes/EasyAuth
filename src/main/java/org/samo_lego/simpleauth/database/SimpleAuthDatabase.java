@@ -2,6 +2,7 @@ package org.samo_lego.simpleauth.database;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.samo_lego.simpleauth.SimpleAuth;
 
 import java.sql.*;
 
@@ -18,7 +19,7 @@ public class SimpleAuthDatabase {
 
     public void openConnection() {
         // SQLite connection string
-        String url = "jdbc:sqlite:mods/SimpleAuth/players.db";
+        String url = "jdbc:sqlite:" + SimpleAuth.gameDirectory + "/mods/SimpleAuth/players.db";
         try {
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {

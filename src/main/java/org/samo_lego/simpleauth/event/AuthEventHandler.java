@@ -29,7 +29,7 @@ public class AuthEventHandler {
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
-        SimpleAuth.deauthenticatedUsers.add(player);
+        SimpleAuth.deauthenticatedUsers.put(player, 0);
         /*CompoundTag loginTries = new CompoundTag();
         loginTries.putInt("loginTries", 0);
         player.saveToTag(loginTries);

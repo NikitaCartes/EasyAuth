@@ -50,6 +50,9 @@ public class AuthConfig {
         public boolean playerInvulnerable = true;
         // If player should be invisible to mobs before authentication
         public boolean playerInvisible = true;
+        // Maximum login tries before kicking the player
+        // Set to -1 to allow unlimited, not recommended however
+        public int maxLoginTries = 1;
         // Time after which player will be kicked if not authenticated - in seconds
         public int delay = 60;
         // Disables registering and forces logging in with global password
@@ -67,6 +70,7 @@ public class AuthConfig {
         public String matchPassword = "§6Passwords must match!";
         public String passwordUpdated = "§4Your password was updated successfully!";
         public String loginRequired = "§cYou are not authenticated!\n§6Use /login to authenticate!";
+        public String loginTriesExceeded = "§4Too many login tries.";
         public String globalPasswordSet = "§aGlobal password was successfully set!";
         public String cannotChangePassword = "§aYou cannot change password!";
         public String cannotUnregister = "§aYou cannot unregister this account!";

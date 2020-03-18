@@ -29,6 +29,7 @@ public class AuthEventHandler {
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
+        // Marking player as not authenticated, (re)setting login tries to zero
         SimpleAuth.deauthenticatedUsers.put(player, 0);
         /*CompoundTag loginTries = new CompoundTag();
         loginTries.putInt("loginTries", 0);

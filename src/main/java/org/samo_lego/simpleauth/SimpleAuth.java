@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +26,8 @@ import org.samo_lego.simpleauth.utils.AuthConfig;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SimpleAuth implements DedicatedServerModInitializer {
 	private static final Logger LOGGER = LogManager.getLogger();
@@ -66,6 +69,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		CommandRegistry.INSTANCE.register(false, dispatcher -> {
 			RegisterCommand.registerCommand(dispatcher);
 			LoginCommand.registerCommand(dispatcher);
+			LogoutCommand.registerCommand(dispatcher);
 			ChangepwCommand.registerCommand(dispatcher);
 			UnregisterCommand.registerCommand(dispatcher);
 			AuthCommand.registerCommand(dispatcher);
@@ -95,5 +99,35 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		player.setInvulnerable(false);
 		player.setInvisible(false);
 		player.sendMessage(msg);
+	}
+
+	// Getting some config options
+	private static Text notAuthenticated() {
+		if(SimpleAuth.config.main.enableGlobalPassword) {
+			return new LiteralText(SimpleAuth.config.lang.loginRequired);
+		}
+		return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
+	}
+	private static Text timeExpired = new LiteralText(SimpleAuth.config.lang.timeExpired);
+	private static int delay = SimpleAuth.config.main.delay;
+
+
+	public static void deauthenticatePlayer(ServerPlayerEntity player) {
+		// Marking player as not authenticated, (re)setting login tries to zero
+		SimpleAuth.deauthenticatedUsers.put(player, 0);
+
+		// Player is now not authenticated
+		player.sendMessage(notAuthenticated());
+		// Setting the player to be invisible to mobs and also invulnerable
+		player.setInvulnerable(SimpleAuth.config.main.playerInvulnerable);
+		player.setInvisible(SimpleAuth.config.main.playerInvisible);
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				if(!SimpleAuth.isAuthenticated(player)) // Kicking player if not authenticated
+					player.networkHandler.disconnect(timeExpired);
+			}
+		}, delay * 1000);
 	}
 }

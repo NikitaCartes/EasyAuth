@@ -20,7 +20,7 @@ public class LoginCommand {
     private static Text alreadyAuthenticated = new LiteralText(SimpleAuth.config.lang.alreadyAuthenticated);
     private static Text loginTriesExceeded = new LiteralText(SimpleAuth.config.lang.loginTriesExceeded);
     private static Text successfullyAuthenticated = new LiteralText(SimpleAuth.config.lang.successfullyAuthenticated);
-    private static int maxLoginTries = 3;
+    private static int maxLoginTries = SimpleAuth.config.main.maxLoginTries;
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/login" command

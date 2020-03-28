@@ -86,7 +86,7 @@ public class AuthConfig {
         public String userdataUpdated = "§aUserdata updated.";
         public String accountDeleted = "§4Your account was successfully deleted!";
         public String configurationReloaded = "§aConfiguration file was reloaded successfully.";
-
+        public String successfulLogout;
     }
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson gson = new GsonBuilder()

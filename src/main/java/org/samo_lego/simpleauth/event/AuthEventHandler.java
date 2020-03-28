@@ -24,30 +24,10 @@ public class AuthEventHandler {
         }
         return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
     }
-    private static Text timeExpired = new LiteralText(SimpleAuth.config.lang.timeExpired);
-    private static int delay = SimpleAuth.config.main.delay;
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
-        // Marking player as not authenticated, (re)setting login tries to zero
-        SimpleAuth.deauthenticatedUsers.put(player, 0);
-
-        // Player not authenticated
-        // If clause actually not needed, since we add player to deauthenticated hashset above
-        if (!SimpleAuth.isAuthenticated(player)) {
-            player.sendMessage(notAuthenticated());
-            // Setting the player to be invisible to mobs and also invulnerable
-            player.setInvulnerable(SimpleAuth.config.main.playerInvulnerable);
-            player.setInvisible(SimpleAuth.config.main.playerInvisible);
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    if(!SimpleAuth.isAuthenticated(player)) // Kicking player if not authenticated
-                        player.networkHandler.disconnect(timeExpired);
-                }
-            }, delay * 1000);
-        }
+        SimpleAuth.deauthenticatePlayer(player);
     }
 
     // Player chatting

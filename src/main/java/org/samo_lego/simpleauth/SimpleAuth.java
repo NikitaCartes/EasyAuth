@@ -19,6 +19,7 @@ import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
 import org.samo_lego.simpleauth.event.item.DropItemCallback;
+import org.samo_lego.simpleauth.event.item.TakeItemCallback;
 import org.samo_lego.simpleauth.utils.AuthConfig;
 
 import java.io.File;
@@ -73,6 +74,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Registering the events
 		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
 		DropItemCallback.EVENT.register(AuthEventHandler::onDropItem);
+		TakeItemCallback.EVENT.register(AuthEventHandler::onTakeItem);
 		ChatCallback.EVENT.register(AuthEventHandler::onPlayerChat);
 		PlayerMoveCallback.EVENT.register(AuthEventHandler::onPlayerMove);
 		// From Fabric API

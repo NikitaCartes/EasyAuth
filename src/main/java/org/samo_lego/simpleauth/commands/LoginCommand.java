@@ -42,9 +42,10 @@ public class LoginCommand {
             player.sendMessage(alreadyAuthenticated);
             return 0;
         }
-        else if(SimpleAuth.deauthenticatedUsers.get(player) >= maxLoginTries && maxLoginTries != -1)
+        else if(SimpleAuth.deauthenticatedUsers.get(player) >= maxLoginTries && maxLoginTries != -1) {
             player.networkHandler.disconnect(loginTriesExceeded);
-
+            return 0;
+        }
         else if(SimpleAuth.config.main.enableGlobalPassword) {
             if (AuthHelper.checkPass("globalPass", pass.toCharArray())) {
                 SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
@@ -55,11 +56,19 @@ public class LoginCommand {
             SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
             return 1;
         }
-        else if(maxLoginTries == 1)
+        // Kicking the player out
+        else if(maxLoginTries == 1) {
             player.networkHandler.disconnect(wrongPassword);
+            return 0;
+        }
 
+        // Sending wrong pass message
         player.sendMessage(wrongPassword);
-        SimpleAuth.deauthenticatedUsers.replace(player, SimpleAuth.deauthenticatedUsers.get(player) + 1);
+        // ++ the login tries
+        SimpleAuth.deauthenticatedUsers.replace(
+                player,
+                SimpleAuth.deauthenticatedUsers.getOrDefault(player, 0) + 1
+        );
 
         return 0;
     }

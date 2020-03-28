@@ -40,6 +40,8 @@ public class AuthConfig {
         public boolean allowBlockPunch = false;
         // Allows dropping items from inventory
         public boolean allowItemDrop = false;
+        // Allows moving item through inventory
+        public boolean allowItemMoving = false;
         // Allows item "use" - right click function (e.g. using a bow)
         public boolean allowItemUse = false;
         // Allows attacking mobs

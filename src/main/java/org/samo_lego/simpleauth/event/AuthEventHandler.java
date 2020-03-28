@@ -31,10 +31,7 @@ public class AuthEventHandler {
     public static void onPlayerJoin(ServerPlayerEntity player) {
         // Marking player as not authenticated, (re)setting login tries to zero
         SimpleAuth.deauthenticatedUsers.put(player, 0);
-        /*CompoundTag loginTries = new CompoundTag();
-        loginTries.putInt("loginTries", 0);
-        player.saveToTag(loginTries);
-        player.writeCustomDataToTag(loginTries);*/
+
         // Player not authenticated
         // If clause actually not needed, since we add player to deauthenticated hashset above
         if (!SimpleAuth.isAuthenticated(player)) {
@@ -68,6 +65,7 @@ public class AuthEventHandler {
         }
         return ActionResult.PASS;
     }
+
     // Player movement
     public static ActionResult onPlayerMove(PlayerEntity player) {
         if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowMovement) {
@@ -109,6 +107,15 @@ public class AuthEventHandler {
             player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
+        return ActionResult.PASS;
+    }
+    // Changing inventory (item moving etc.)
+    public static ActionResult onTakeItem(PlayerEntity player) {
+        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowItemMoving) {
+            player.sendMessage(notAuthenticated());
+            return ActionResult.FAIL;
+        }
+
         return ActionResult.PASS;
     }
     // Attacking an entity

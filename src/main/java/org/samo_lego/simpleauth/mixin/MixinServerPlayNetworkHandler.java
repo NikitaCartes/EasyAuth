@@ -4,7 +4,6 @@ import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
-import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,5 +33,23 @@ public abstract class MixinServerPlayNetworkHandler {
             ci.cancel();
         }
     }
-    // onClickWindow, onPickFromInventory todo*/
+    // onClickWindow, onPickFromInventory todo
+    @Inject(
+            method="onPlayerMove(Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket;)V",
+            at = @At(
+                    value = "INVOKE",
+                    // Thanks to Liach for helping me out!
+                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true
+    )
+    private void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket_1, CallbackInfo ci) {
+        ActionResult result = PlayerMoveCallback.EVENT.invoker().onPlayerMove(player);
+        if (result == ActionResult.FAIL) {
+            // A bit ugly, I know. (we need to update player position)
+            player.teleport(player.getX(), player.getY(), player.getZ());
+            ci.cancel();
+        }
+    }
 }

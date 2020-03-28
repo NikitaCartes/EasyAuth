@@ -8,8 +8,7 @@
     "MixinServerPlayNetworkHandler",
     "MixinPlayerManager",
     "MixinPlayerEntity",
-    "MixinServerPlayerEntity",
-    "MixinPlayerInventory"
+    "MixinSlot"
   ],
   "injectors": {
     "defaultRequire": 1

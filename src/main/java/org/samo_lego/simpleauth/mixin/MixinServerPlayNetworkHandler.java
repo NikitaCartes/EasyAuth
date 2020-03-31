@@ -6,11 +6,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
+import org.samo_lego.simpleauth.event.item.TakeItemCallback;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action.SWAP_HELD_ITEMS;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class MixinServerPlayNetworkHandler {
@@ -27,13 +30,30 @@ public abstract class MixinServerPlayNetworkHandler {
             ),
             cancellable = true
     )
-    private void onChatMessage(ChatMessageC2SPacket chatMessageC2SPacket_1, CallbackInfo ci) {
-        ActionResult result = ChatCallback.EVENT.invoker().onPlayerChat(player, chatMessageC2SPacket_1);
+    private void onChatMessage(ChatMessageC2SPacket chatMessageC2SPacket, CallbackInfo ci) {
+        ActionResult result = ChatCallback.EVENT.invoker().onPlayerChat(player, chatMessageC2SPacket);
         if (result == ActionResult.FAIL) {
             ci.cancel();
         }
     }
-    // onClickWindow, onPickFromInventory todo
+
+    @Inject(
+            method = "onPlayerAction(Lnet/minecraft/network/packet/c2s/play/PlayerActionC2SPacket;)V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true
+    )
+    private void onPlayerAction(PlayerActionC2SPacket packet, CallbackInfo ci) {
+        if(packet.getAction() == SWAP_HELD_ITEMS) {
+            ActionResult result = TakeItemCallback.EVENT.invoker().onTakeItem(player);
+            if (result == ActionResult.FAIL) {
+                ci.cancel();
+            }
+        }
+    }
     @Inject(
             method="onPlayerMove(Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket;)V",
             at = @At(
@@ -44,11 +64,11 @@ public abstract class MixinServerPlayNetworkHandler {
             ),
             cancellable = true
     )
-    private void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket_1, CallbackInfo ci) {
+    private void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket, CallbackInfo ci) {
         ActionResult result = PlayerMoveCallback.EVENT.invoker().onPlayerMove(player);
         if (result == ActionResult.FAIL) {
             // A bit ugly, I know. (we need to update player position)
-            player.teleport(player.getX(), player.getY(), player.getZ());
+            player.requestTeleport(player.getX(), player.getY(), player.getZ());
             ci.cancel();
         }
     }

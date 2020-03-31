@@ -14,15 +14,16 @@ public class LogoutCommand {
     private static Text successfulLogout = new LiteralText(SimpleAuth.config.lang.successfulLogout);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-        // Registering the "/login" command
-        dispatcher.register(literal("login")
-                .executes(ctx -> logout(ctx.getSource())) // Tries to authenticate user
+        // Registering the "/logout" command
+        dispatcher.register(literal("logout")
+                .executes(ctx -> logout(ctx.getSource())) // Tries to deauthenticate user
         );
     }
 
     private static int logout(ServerCommandSource serverCommandSource) throws CommandSyntaxException {
         ServerPlayerEntity player = serverCommandSource.getPlayer();
         SimpleAuth.deauthenticatePlayer(player);
+        player.sendMessage(successfulLogout);
         return 1;
     }
 }

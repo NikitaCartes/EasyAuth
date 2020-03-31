@@ -52,7 +52,7 @@ public class AuthConfig {
         public boolean playerInvulnerable = true;
         // If player should be invisible to mobs before authentication
         public boolean playerInvisible = true;
-        // Maximum login tries before kicking the player
+        // Maximum login tries before kicking the player from server
         // Set to -1 to allow unlimited, not recommended however
         public int maxLoginTries = 1;
         // Time after which player will be kicked if not authenticated - in seconds
@@ -77,8 +77,9 @@ public class AuthConfig {
         public String cannotChangePassword = "§aYou cannot change password!";
         public String cannotUnregister = "§aYou cannot unregister this account!";
         public String notAuthenticated = "§cYou are not authenticated!\n§6Try with /login or /register.";
-        public String alreadyAuthenticated = "§4You are already authenticated.";
+        public String alreadyAuthenticated = "§6You are already authenticated.";
         public String successfullyAuthenticated = "§aYou are now authenticated.";
+		public String successfulLogout = "§aLogged out successfully.";
         public String timeExpired = "§cTime for authentication has expired.";
         public String alreadyRegistered = "§6This account name is already registered!";
         public String registerSuccess = "§aYou are now authenticated.";
@@ -86,7 +87,6 @@ public class AuthConfig {
         public String userdataUpdated = "§aUserdata updated.";
         public String accountDeleted = "§4Your account was successfully deleted!";
         public String configurationReloaded = "§aConfiguration file was reloaded successfully.";
-        public String successfulLogout;
     }
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson gson = new GsonBuilder()

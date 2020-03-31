@@ -108,9 +108,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		}
 		return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
 	}
-	private static Text timeExpired = new LiteralText(SimpleAuth.config.lang.timeExpired);
-	private static int delay = SimpleAuth.config.main.delay;
-
 
 	public static void deauthenticatePlayer(ServerPlayerEntity player) {
 		// Marking player as not authenticated, (re)setting login tries to zero
@@ -126,8 +123,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			@Override
 			public void run() {
 				if(!SimpleAuth.isAuthenticated(player)) // Kicking player if not authenticated
-					player.networkHandler.disconnect(timeExpired);
+					player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
 			}
-		}, delay * 1000);
+		}, SimpleAuth.config.main.delay * 1000);
 	}
 }

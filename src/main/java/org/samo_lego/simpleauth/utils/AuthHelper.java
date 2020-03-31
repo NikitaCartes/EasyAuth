@@ -13,7 +13,7 @@ public class AuthHelper {
     private static Argon2 argon2 = Argon2Factory.create();
 
     public static boolean checkPass(String uuid, char[] pass) {
-        if(uuid.equals("globalPass") && SimpleAuth.config.main.enableGlobalPassword) {
+        if(SimpleAuth.config.main.enableGlobalPassword) {
             // We have global password enabled
             try {
                 return argon2.verify(SimpleAuth.config.main.globalPassword, pass);

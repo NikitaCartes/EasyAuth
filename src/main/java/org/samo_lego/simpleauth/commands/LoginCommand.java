@@ -37,17 +37,20 @@ public class LoginCommand {
     // Method called for checking the password
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
+        System.out.println(maxLoginTries);
         ServerPlayerEntity player = source.getPlayer();
+
         if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
             return 0;
         }
         else if(SimpleAuth.deauthenticatedUsers.get(player) >= maxLoginTries && maxLoginTries != -1) {
+            SimpleAuth.deauthenticatePlayer(player);
             player.networkHandler.disconnect(loginTriesExceeded);
             return 0;
         }
         else if(SimpleAuth.config.main.enableGlobalPassword) {
-            if (AuthHelper.checkPass("globalPass", pass.toCharArray())) {
+            if (AuthHelper.checkPass(null, pass.toCharArray())) {
                 SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
                 return 1;
             }
@@ -58,10 +61,10 @@ public class LoginCommand {
         }
         // Kicking the player out
         else if(maxLoginTries == 1) {
+            SimpleAuth.deauthenticatePlayer(player);
             player.networkHandler.disconnect(wrongPassword);
             return 0;
         }
-
         // Sending wrong pass message
         player.sendMessage(wrongPassword);
         // ++ the login tries
@@ -69,7 +72,6 @@ public class LoginCommand {
                 player,
                 SimpleAuth.deauthenticatedUsers.getOrDefault(player, 0) + 1
         );
-
         return 0;
     }
 }

@@ -37,7 +37,6 @@ public class LoginCommand {
     // Method called for checking the password
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
-        System.out.println(maxLoginTries);
         ServerPlayerEntity player = source.getPlayer();
 
         if(SimpleAuth.isAuthenticated(player)) {

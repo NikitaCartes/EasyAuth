@@ -34,7 +34,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
     public static SimpleAuthDatabase db = new SimpleAuthDatabase();
 
-    // HashSet of players that are not authenticated
+    // HashMap of players that are not authenticated
 	// Rather than storing all the authenticated players, we just store ones that are not authenticated
 	public static HashMap<PlayerEntity, Integer> deauthenticatedUsers = new HashMap<>();
 

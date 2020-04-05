@@ -7,7 +7,7 @@ Requires Fabric API.
 
 ## Setup
 
-1. Clone the repository.
+1. Clone the repository. Then run `./gradlew genSources`
 2. Edit the code you want.
 3. To build run the following command:
 

@@ -74,8 +74,8 @@ public class AuthConfig {
         public String loginRequired = "§cYou are not authenticated!\n§6Use /login to authenticate!";
         public String loginTriesExceeded = "§4Too many login tries.";
         public String globalPasswordSet = "§aGlobal password was successfully set!";
-        public String cannotChangePassword = "§aYou cannot change password!";
-        public String cannotUnregister = "§aYou cannot unregister this account!";
+        public String cannotChangePassword = "§cYou cannot change password!";
+        public String cannotUnregister = "§cYou cannot unregister this account!";
         public String notAuthenticated = "§cYou are not authenticated!\n§6Try with /login or /register.";
         public String alreadyAuthenticated = "§6You are already authenticated.";
         public String successfullyAuthenticated = "§aYou are now authenticated.";

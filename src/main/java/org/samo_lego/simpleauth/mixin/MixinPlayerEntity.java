@@ -24,7 +24,7 @@ public abstract class MixinPlayerEntity {
                     new ScreenHandlerSlotUpdateS2CPacket(
                             -2,
                             player.inventory.selectedSlot,
-                            player.inventory.getInvStack(player.inventory.selectedSlot))
+                            player.inventory.getStack(player.inventory.selectedSlot))
             );
             player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(-1, -1, player.inventory.getCursorStack()));
             cir.setReturnValue(false);

@@ -6,8 +6,6 @@ import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -25,7 +23,6 @@ import org.samo_lego.simpleauth.utils.AuthConfig;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,7 +31,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
     public static SimpleAuthDatabase db = new SimpleAuthDatabase();
 
-    // HashSet of players that are not authenticated
+    // HashMap of players that are not authenticated
 	// Rather than storing all the authenticated players, we just store ones that are not authenticated
 	public static HashMap<PlayerEntity, Integer> deauthenticatedUsers = new HashMap<>();
 

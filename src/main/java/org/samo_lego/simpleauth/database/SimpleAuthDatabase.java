@@ -64,7 +64,7 @@ public class SimpleAuthDatabase {
                 + "FROM users WHERE UUID = ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
-            PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
+             PreparedStatement pstmtCheck = conn.prepareStatement(sqlCheck)) {
 
             pstmtCheck.setString(1, uuid);
             ResultSet rs  = pstmtCheck.executeQuery();

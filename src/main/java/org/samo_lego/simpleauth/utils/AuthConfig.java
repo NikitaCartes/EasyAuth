@@ -89,6 +89,7 @@ public class AuthConfig {
         public String userdataUpdated = "§aUserdata updated.";
         public String accountDeleted = "§aYour account was successfully deleted!";
         public String configurationReloaded = "§aConfiguration file was reloaded successfully.";
+        public String successfulPortalRescue = "§aYou were rescued from nether portal successfully!";
     }
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson gson = new GsonBuilder()

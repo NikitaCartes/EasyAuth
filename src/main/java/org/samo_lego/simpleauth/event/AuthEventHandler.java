@@ -1,5 +1,7 @@
 package org.samo_lego.simpleauth.event;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
@@ -8,10 +10,12 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.samo_lego.simpleauth.SimpleAuth;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import static net.minecraft.block.NetherPortalBlock.AXIS;
+import static net.minecraft.util.math.Direction.Axis.Z;
 
 /**
  * This class will take care of actions players try to do,
@@ -25,9 +29,80 @@ public class AuthEventHandler {
         return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
     }
 
+    private static Text successfulPortalRescue = new LiteralText(SimpleAuth.config.lang.successfulPortalRescue);
+
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         SimpleAuth.deauthenticatePlayer(player);
+
+        // Tries to rescue player from nether portal
+        if(SimpleAuth.config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
+            boolean wasSuccessful = false;
+
+            BlockState portalState = player.getBlockState();
+            World world = player.getEntityWorld();
+
+            double x = player.getX();
+            double y = player.getY();
+            double z = player.getZ();
+
+            if(portalState.get(AXIS) == Z) {
+                // Player should be put to eastern or western block
+                if( // Checking towards east
+                        world.getBlockState(new BlockPos(x + 1, y, z)).isAir() &&
+                        world.getBlockState(new BlockPos(x + 1, y + 1, z)).isAir() &&
+                        (
+                            world.getBlockState(new BlockPos(x + 1, y - 1, z)).isOpaque() ||
+                            world.getBlockState(new BlockPos(x + 1, y - 1, z)).hasSolidTopSurface(world, new BlockPos(x + 1, y - 1, z), player)
+                        )
+                ) {
+                    x++; // Towards east
+                    wasSuccessful = true;
+                }
+
+                else if( // Checking towards south
+                        world.getBlockState(new BlockPos(x - 1, y, z)).isAir() &&
+                        world.getBlockState(new BlockPos(x - 1, y + 1, z)).isAir() &&
+                        (
+                            world.getBlockState(new BlockPos(x - 1, y - 1, z)).isOpaque() ||
+                            world.getBlockState(new BlockPos(x - 1, y - 1, z)).hasSolidTopSurface(world, new BlockPos(x - 1, y - 1, z), player)
+                        )
+                ) {
+                    x--; // Towards south
+                    wasSuccessful = true;
+                }
+            }
+            else {
+                // Player should be put to northern or southern block
+                if( // Checking towards south
+                        world.getBlockState(new BlockPos(x, y, z + 1)).isAir() &&
+                        world.getBlockState(new BlockPos(x, y + 1, z + 1)).isAir() &&
+                        (
+                            world.getBlockState(new BlockPos(x, y - 1, z + 1)).isOpaque() ||
+                            world.getBlockState(new BlockPos(x, y - 1, z + 1)).hasSolidTopSurface(world, new BlockPos(x, y - 1, z + 1), player)
+                        )
+                ) {
+                    z++; // Towards south
+                    wasSuccessful = true;
+                }
+
+                else if( // Checking towards north
+                        world.getBlockState(new BlockPos(x, y, z - 1)).isAir() &&
+                        world.getBlockState(new BlockPos(x, y + 1, z - 1)).isAir() &&
+                        (
+                            world.getBlockState(new BlockPos(x, y - 1, z - 1)).isOpaque() ||
+                            world.getBlockState(new BlockPos(x, y - 1, z - 1)).hasSolidTopSurface(world, new BlockPos(x, y - 1, z - 1), player)
+                        )
+                ) {
+                    z--; // Towards north
+                    wasSuccessful = true;
+                }
+            }
+            if(wasSuccessful) {
+                player.teleport(x, y, z);
+                player.sendMessage(successfulPortalRescue);
+            }
+        }
     }
 
     // Player chatting

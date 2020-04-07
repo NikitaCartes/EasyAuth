@@ -64,6 +64,8 @@ public class AuthConfig {
         Password will be hashed and saved.
          */
         public String globalPassword = null;
+        // Tries to rescue players if they are stuck inside a portal on logging in
+        public boolean tryPortalRescue = true;
     }
     public static class LangConfig {
         public String enterPassword = "§6You need to enter your password!";

@@ -100,7 +100,7 @@ public class AuthCommand {
         if(sender != null)
             sender.sendMessage(globalPasswordSet);
         else
-            LOGGER.info(globalPasswordSet);
+            LOGGER.info(SimpleAuth.config.lang.globalPasswordSet);
         return 1;
     }
 

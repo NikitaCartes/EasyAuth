@@ -27,8 +27,8 @@ dependencies {
 	include 'de.mkammerer:argon2-jvm:2.6'
 
 	// JDBC SQLite Driver
-	implementation group: 'org.polyjdbc', name: 'polyjdbc', version: '0.7.6'
-	include group: 'org.polyjdbc', name: 'polyjdbc', version: '0.7.6'
+	implementation group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
+	include group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
 
 	// JNA lib
 	include 'net.java.dev.jna:jna:5.5.0'

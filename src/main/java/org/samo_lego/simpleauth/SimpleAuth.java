@@ -52,15 +52,14 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		LOGGER.info("[SimpleAuth] This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
 		// Creating data directory (database and config files are stored there)
-		File file = new File(gameDirectory + "/mods/SimpleAuth");
+		File file = new File(gameDirectory + "/mods/SimpleAuth/levelDBStore");
 		if (!file.exists() && !file.mkdir())
 		    LOGGER.error("[SimpleAuth] Error creating directory!");
 		// Loading config
 		config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
 		// Connecting to db
 		db.openConnection();
-		// Making a table in the database
-		db.makeTable();
+
 
 		// Registering the commands
 		CommandRegistry.INSTANCE.register(false, dispatcher -> {

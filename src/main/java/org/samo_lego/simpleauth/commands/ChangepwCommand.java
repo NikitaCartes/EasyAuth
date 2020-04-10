@@ -57,7 +57,6 @@ public class ChangepwCommand {
         else if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray())) {
             SimpleAuth.db.update(
                     player.getUuidAsString(),
-                    null,
                     AuthHelper.hashPass(newPass.toCharArray())
             );
             player.sendMessage(passwordUpdated);

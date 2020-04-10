@@ -112,7 +112,6 @@ public class AuthCommand {
 
         SimpleAuth.db.update(
                 uuid,
-                username,
                 AuthHelper.hashPass(pass.toCharArray())
         );
         if(sender != null)
@@ -124,7 +123,7 @@ public class AuthCommand {
     }
     private static int removeAccount(ServerCommandSource source, String uuid, String username) {
         Entity sender = source.getEntity();
-        SimpleAuth.db.delete(uuid, username);
+        SimpleAuth.db.delete(uuid);
 
         // TODO -> Kick player that was unregistered?
 

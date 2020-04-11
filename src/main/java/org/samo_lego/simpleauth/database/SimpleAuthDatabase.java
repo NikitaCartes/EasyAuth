@@ -3,6 +3,7 @@ package org.samo_lego.simpleauth.database;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import org.samo_lego.simpleauth.SimpleAuth;
 
@@ -41,9 +42,8 @@ public class SimpleAuthDatabase {
 
     // When player registers, we insert the data into DB
     public boolean registerUser(String uuid, String password) {
-        System.out.println(Arrays.toString(levelDBStore.get(bytes("UUID:" + uuid))));
         try {
-            if(levelDBStore.get(bytes("UUID:" + uuid)) == null) {
+            if(!this.isRegistered(uuid)) {
                 levelDBStore.put(bytes("UUID:" + uuid), bytes("password:" + password));
                 return true;
             }
@@ -52,6 +52,16 @@ public class SimpleAuthDatabase {
             LOGGER.error("[SimpleAuth] Register error: " + e.getMessage());
             return false;
         }
+    }
+
+    // Checks if user is registered
+    private boolean isRegistered(String uuid) {
+        try {
+            return levelDBStore.get(bytes("UUID:" + uuid)) != null;
+        } catch (DBException e) {
+            LOGGER.error("[SimpleAuth] " + e.getMessage());
+        }
+        return false;
     }
 
     // Deletes row containing the username provided
@@ -74,13 +84,12 @@ public class SimpleAuthDatabase {
 
     // Gets the hashed password from DB
     public String getPassword(String uuid){
-        String password = null;
         try {
-            // Gets password from db and removes "password:" prefix from it
-            password = new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(9);
+            if(this.isRegistered(uuid))  // Gets password from db and removes "password:" prefix from it
+                return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(9);
         } catch (Error e) {
             LOGGER.error("[SimpleAuth] Error getting password: " + e.getMessage());
         }
-        return password;
+        return "";
     }
 }

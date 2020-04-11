@@ -46,6 +46,7 @@ public class UnregisterCommand {
             return 0;
         }
         else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray())) {
+            SimpleAuth.deauthenticatePlayer(player);
             SimpleAuth.db.delete(player.getUuidAsString(), null);
             player.sendMessage(accountDeleted);
             return 1;

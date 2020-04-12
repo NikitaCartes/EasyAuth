@@ -42,7 +42,7 @@ public class SimpleAuthDatabase {
     // When player registers, we insert the data into DB
     public boolean registerUser(String uuid, String password) {
         try {
-            if(!this.isRegistered(uuid)) {
+            if(!this.isUserRegistered(uuid)) {
                 levelDBStore.put(bytes("UUID:" + uuid), bytes("password:" + password));
                 return true;
             }
@@ -54,7 +54,7 @@ public class SimpleAuthDatabase {
     }
 
     // Checks if user is registered
-    private boolean isRegistered(String uuid) {
+    private boolean isUserRegistered(String uuid) {
         try {
             return levelDBStore.get(bytes("UUID:" + uuid)) != null;
         } catch (DBException e) {
@@ -64,7 +64,7 @@ public class SimpleAuthDatabase {
     }
 
     // Deletes row containing the username provided
-    public void delete(String uuid) {
+    public void deleteUserData(String uuid) {
         try {
             levelDBStore.delete(bytes("UUID:" + uuid));
         } catch (Error e) {
@@ -73,7 +73,7 @@ public class SimpleAuthDatabase {
     }
 
     // Updates the password of the user
-    public void update(String uuid, String password) {
+    public void updateUserData(String uuid, String password) {
         try {
             levelDBStore.put(bytes("UUID:" + uuid),bytes("password:" + password));
         } catch (Error e) {
@@ -84,7 +84,7 @@ public class SimpleAuthDatabase {
     // Gets the hashed password from DB
     public String getPassword(String uuid){
         try {
-            if(this.isRegistered(uuid))  // Gets password from db and removes "password:" prefix from it
+            if(this.isUserRegistered(uuid))  // Gets password from db and removes "password:" prefix from it
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(9);
         } catch (Error e) {
             LOGGER.error("[SimpleAuth] Error getting password: " + e.getMessage());

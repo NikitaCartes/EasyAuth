@@ -41,54 +41,52 @@ public class AuthCommand {
                             ))
                     )
             )
-            .then(literal("update")
-                .then(literal("byUuid")
-                    .then(argument("uuid", word())
-                        .then(argument("password", word())
-                                .executes( ctx -> updatePass(
-                                        ctx.getSource(),
-                                        getString(ctx, "uuid"),
-                                        null,
-                                        getString(ctx, "password")
-                                ))
-                        )
-                    )
-                )
-               .then(literal("byUsername")
-                   .then(argument("username", word())
-                        .then(argument("password", word())
-                                .executes( ctx -> updatePass(
-                                        ctx.getSource(),
-                                        null,
-                                        getString(ctx, "username"),
-                                        getString(ctx, "password")
-                                ))
-                        )
-                    )
+            .then(literal("remove")
+                .then(argument("uuid", word())
+                    .executes( ctx -> removeAccount(
+                            ctx.getSource(),
+                            getString(ctx, "uuid")
+                    ))
                 )
             )
-            .then(literal("remove")
-                .then(literal("byUuid")
-                    .then(argument("uuid", word())
-                        .executes( ctx -> removeAccount(
+            .then(literal("register")
+                .then(argument("uuid", word())
+                    .then(argument("password", word())
+                        .executes( ctx -> registerUser(
                                 ctx.getSource(),
                                 getString(ctx, "uuid"),
-                                null
+                                getString(ctx, "password")
                         ))
                     )
                 )
-                .then(literal("byUsername")
-                    .then(argument("username", word())
-                        .executes( ctx -> removeAccount(
+            )
+            .then(literal("update")
+                .then(argument("uuid", word())
+                    .then(argument("password", word())
+                        .executes( ctx -> updatePass(
                                 ctx.getSource(),
-                                null,
-                                getString(ctx, "username")
+                                getString(ctx, "uuid"),
+                                getString(ctx, "password")
                         ))
                     )
                 )
             )
         );
     }
+
+    // Reloading the config
+    private static int reloadConfig(ServerCommandSource source) {
+        Entity sender = source.getEntity();
+        SimpleAuth.config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
+
+        if(sender != null)
+            sender.sendMessage(configurationReloaded);
+        else
+            LOGGER.info(SimpleAuth.config.lang.configurationReloaded);
+        return 1;
+    }
+
+    // Setting global password
     private static int setGlobalPassword(ServerCommandSource source, String pass) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
@@ -104,26 +102,10 @@ public class AuthCommand {
         return 1;
     }
 
-
-    // Method called for checking the password
-    private static int updatePass(ServerCommandSource source, String uuid, String username, String pass) {
-        // Getting the player who send the command
+    // Deleting (unregistering) user's account
+    private static int removeAccount(ServerCommandSource source, String uuid) {
         Entity sender = source.getEntity();
-
-        SimpleAuth.db.update(
-                uuid,
-                AuthHelper.hashPass(pass.toCharArray())
-        );
-        if(sender != null)
-            sender.sendMessage(userdataUpdated);
-        else
-            LOGGER.info(SimpleAuth.config.lang.userdataUpdated);
-        // TODO -> Kick player whose name was changed?
-        return 1;
-    }
-    private static int removeAccount(ServerCommandSource source, String uuid, String username) {
-        Entity sender = source.getEntity();
-        SimpleAuth.db.delete(uuid);
+        SimpleAuth.db.deleteUserData(uuid);
 
         // TODO -> Kick player that was unregistered?
 
@@ -133,14 +115,38 @@ public class AuthCommand {
             LOGGER.info(SimpleAuth.config.lang.userdataDeleted);
         return 1; // Success
     }
-    private static int reloadConfig(ServerCommandSource source) {
-        Entity sender = source.getEntity();
-        SimpleAuth.config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
 
+    // Creating account for user
+    private static int registerUser(ServerCommandSource source, String uuid, String password) {
+        // Getting the player who send the command
+        Entity sender = source.getEntity();
+
+        if(SimpleAuth.db.registerUser(
+                uuid,
+                AuthHelper.hashPass(password.toCharArray())
+        )) {
+            if(sender != null)
+                sender.sendMessage(userdataUpdated);
+            else
+                LOGGER.info(SimpleAuth.config.lang.userdataUpdated);
+            return 1;
+        }
+        return 0;
+    }
+
+    // Force-updating the user's password
+    private static int updatePass(ServerCommandSource source, String uuid, String password) {
+        // Getting the player who send the command
+        Entity sender = source.getEntity();
+
+        SimpleAuth.db.updateUserData(
+                uuid,
+                AuthHelper.hashPass(password.toCharArray())
+        );
         if(sender != null)
-            sender.sendMessage(configurationReloaded);
+            sender.sendMessage(userdataUpdated);
         else
-            LOGGER.info(SimpleAuth.config.lang.configurationReloaded);
+            LOGGER.info(SimpleAuth.config.lang.userdataUpdated);
         return 1;
     }
 }

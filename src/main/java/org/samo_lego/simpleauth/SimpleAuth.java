@@ -39,6 +39,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	public static boolean isAuthenticated(ServerPlayerEntity player) {
 		return !deauthenticatedUsers.containsKey(player);
 	}
+
 	// Getting game directory
 	public static final File gameDirectory = FabricLoader.getInstance().getGameDirectory();
 	// Mod config
@@ -85,10 +86,13 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
 		ServerStopCallback.EVENT.register(minecraftServer -> SimpleAuth.onStopServer());
 	}
+
 	private static void onStopServer() {
 		LOGGER.info("[SimpleAuth] Shutting down SimpleAuth.");
 		db.close();
 	}
+
+	// Authenticates player and sends the message
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
 		deauthenticatedUsers.remove(player);
 		// Player no longer needs to be invisible and invulnerable
@@ -105,6 +109,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
 	}
 
+	// De-authenticates player
 	public static void deauthenticatePlayer(ServerPlayerEntity player) {
 		// Marking player as not authenticated, (re)setting login tries to zero
 		SimpleAuth.deauthenticatedUsers.put(player, 0);

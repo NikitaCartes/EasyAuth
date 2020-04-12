@@ -62,7 +62,7 @@ public class RegisterCommand {
                 return 0;
             }
             String hash = AuthHelper.hashPass(pass1.toCharArray());
-            if (SimpleAuth.db.registerUser(player.getUuidAsString(), source.getName(), hash)) {
+            if (SimpleAuth.db.registerUser(player.getUuidAsString(), hash)) {
                 SimpleAuth.authenticatePlayer(player, registerSuccess);
                 return 1;
             }

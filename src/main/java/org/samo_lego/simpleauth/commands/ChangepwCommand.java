@@ -54,7 +54,7 @@ public class ChangepwCommand {
             player.sendMessage(cannotChangePassword);
             return 0;
         }
-        else if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray())) {
+        else if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray()) == 1) {
             if(newPass.length() < SimpleAuth.config.main.minPasswordChars) {
                 player.sendMessage(new LiteralText(
                         String.format(SimpleAuth.config.lang.minPasswordChars, SimpleAuth.config.main.minPasswordChars)
@@ -69,7 +69,6 @@ public class ChangepwCommand {
             }
             SimpleAuth.db.update(
                     player.getUuidAsString(),
-                    null,
                     AuthHelper.hashPass(newPass.toCharArray())
             );
             player.sendMessage(passwordUpdated);

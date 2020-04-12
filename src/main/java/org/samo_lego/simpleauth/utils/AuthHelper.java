@@ -12,15 +12,17 @@ public class AuthHelper {
     // Creating the instance
     private static Argon2 argon2 = Argon2Factory.create();
 
-    public static boolean checkPass(String uuid, char[] pass) {
+    // Returns 1 if password is correct, 0 if not
+    // and -1 if user is not registered yet
+    public static int checkPass(String uuid, char[] pass) {
         if(SimpleAuth.config.main.enableGlobalPassword) {
             // We have global password enabled
             try {
-                return argon2.verify(SimpleAuth.config.main.globalPassword, pass);
+                return argon2.verify(SimpleAuth.config.main.globalPassword, pass) ? 1 : 0;
             }
             catch (Error e) {
                 LOGGER.error("[SimpleAuth] Argon2 error: " + e);
-                return false;
+                return 0;
             } finally {
                 // Wipe confidential data
                 argon2.wipeArray(pass);
@@ -30,11 +32,13 @@ public class AuthHelper {
             try {
                 // Hashed password from DB
                 String hashed = SimpleAuth.db.getPassword(uuid);
+                if(hashed.equals(""))
+                    return -1;  // User is not yet registered
                 // Verify password
-                return argon2.verify(hashed, pass);
+                return argon2.verify(hashed, pass) ? 1 : 0;
             } catch (Error e) {
                 LOGGER.error("[SimpleAuth] error: " + e);
-                return false;
+                return 0;
             } finally {
                 // Wipe confidential data
                 argon2.wipeArray(pass);

@@ -26,9 +26,12 @@ dependencies {
 	implementation 'de.mkammerer:argon2-jvm:2.6'
 	include 'de.mkammerer:argon2-jvm:2.6'
 
-	// JDBC SQLite Driver
-	implementation group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
-	include group:'org.xerial', name:'sqlite-jdbc', version:'3.8.11.2'
+	// leveldb
+	implementation group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
+	implementation group: 'org.iq80.leveldb', name: 'leveldb-api', version: '0.12'
+	include group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
+	include group: 'org.iq80.leveldb', name: 'leveldb-api', version: '0.12'
+
 
 	// JNA lib
 	include 'net.java.dev.jna:jna:5.5.0'

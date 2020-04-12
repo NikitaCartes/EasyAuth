@@ -18,6 +18,7 @@ public class LoginCommand {
     private static Text enterPassword = new LiteralText(SimpleAuth.config.lang.enterPassword);
     private static Text wrongPassword = new LiteralText(SimpleAuth.config.lang.wrongPassword);
     private static Text alreadyAuthenticated = new LiteralText(SimpleAuth.config.lang.alreadyAuthenticated);
+    private static Text notRegistered = new LiteralText(SimpleAuth.config.lang.notRegistered);
     private static Text loginTriesExceeded = new LiteralText(SimpleAuth.config.lang.loginTriesExceeded);
     private static Text successfullyAuthenticated = new LiteralText(SimpleAuth.config.lang.successfullyAuthenticated);
     private static int maxLoginTries = SimpleAuth.config.main.maxLoginTries;
@@ -47,15 +48,13 @@ public class LoginCommand {
             player.networkHandler.disconnect(loginTriesExceeded);
             return 0;
         }
-        else if(SimpleAuth.config.main.enableGlobalPassword) {
-            if (AuthHelper.checkPass(null, pass.toCharArray())) {
-                SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
-                return 1;
-            }
-        }
-        else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray())) {
+        else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray()) == 1) {
             SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
             return 1;
+        }
+        else if(AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray()) == -1) {
+            player.sendMessage(notRegistered);
+            return 0;
         }
         // Kicking the player out
         else if(maxLoginTries == 1) {

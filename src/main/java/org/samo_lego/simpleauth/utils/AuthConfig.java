@@ -95,6 +95,7 @@ public class AuthConfig {
         public String successfulPortalRescue = "§aYou were rescued from nether portal successfully!";
         public String maxPasswordChars = "§6Password can be at most %d characters long!";
         public String minPasswordChars = "§6Password needs to be at least %d characters long!";
+        public String notRegistered = "§6This account is not yet registered! Type `/register` first";
     }
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson gson = new GsonBuilder()

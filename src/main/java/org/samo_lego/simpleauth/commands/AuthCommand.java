@@ -8,7 +8,7 @@ import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
-import org.samo_lego.simpleauth.utils.AuthConfig;
+import org.samo_lego.simpleauth.storage.AuthConfig;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import java.io.File;

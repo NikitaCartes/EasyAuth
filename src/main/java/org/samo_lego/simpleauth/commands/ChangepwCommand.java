@@ -67,7 +67,7 @@ public class ChangepwCommand {
                 ));
                 return 0;
             }
-            SimpleAuth.db.update(
+            SimpleAuth.db.updateUserData(
                     player.getUuidAsString(),
                     AuthHelper.hashPass(newPass.toCharArray())
             );

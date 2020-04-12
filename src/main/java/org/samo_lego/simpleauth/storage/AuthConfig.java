@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package org.samo_lego.simpleauth.utils;
+package org.samo_lego.simpleauth.storage;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

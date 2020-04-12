@@ -1,4 +1,4 @@
-package org.samo_lego.simpleauth.database;
+package org.samo_lego.simpleauth.storage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +54,7 @@ public class SimpleAuthDatabase {
     }
 
     // Checks if user is registered
-    private boolean isUserRegistered(String uuid) {
+    public boolean isUserRegistered(String uuid) {
         try {
             return levelDBStore.get(bytes("UUID:" + uuid)) != null;
         } catch (DBException e) {

@@ -7,6 +7,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
+import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -39,20 +40,21 @@ public class LoginCommand {
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
+        String uuid = player.getUuidAsString();
 
         if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
             return 0;
         }
-        else if(SimpleAuth.deauthenticatedUsers.get(player) >= maxLoginTries && maxLoginTries != -1) {
+        else if(SimpleAuth.deauthenticatedUsers.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
             player.networkHandler.disconnect(loginTriesExceeded);
             return 0;
         }
-        else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray()) == 1) {
+        else if (AuthHelper.checkPass(uuid, pass.toCharArray()) == 1) {
             SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
             return 1;
         }
-        else if(AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray()) == -1) {
+        else if(AuthHelper.checkPass(uuid, pass.toCharArray()) == -1) {
             player.sendMessage(notRegistered);
             return 0;
         }
@@ -64,10 +66,7 @@ public class LoginCommand {
         // Sending wrong pass message
         player.sendMessage(wrongPassword);
         // ++ the login tries
-        SimpleAuth.deauthenticatedUsers.replace(
-                player,
-                SimpleAuth.deauthenticatedUsers.getOrDefault(player, 0) + 1
-        );
+        SimpleAuth.deauthenticatedUsers.getOrDefault(uuid, new PlayerCache(uuid)).loginTries += 1;
         return 0;
     }
 }

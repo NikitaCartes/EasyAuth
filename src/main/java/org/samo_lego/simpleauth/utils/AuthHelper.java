@@ -10,7 +10,7 @@ public class AuthHelper {
     private static final Logger LOGGER = LogManager.getLogger();
 
     // Creating the instance
-    private static Argon2 argon2 = Argon2Factory.create();
+    private static final Argon2 argon2 = Argon2Factory.create();
 
     // Returns 1 if password is correct, 0 if not
     // and -1 if user is not registered yet
@@ -30,8 +30,13 @@ public class AuthHelper {
         }
         else {
             try {
+                String hashed;
+                // Password from cache
+                if(SimpleAuth.deauthenticatedUsers.containsKey(uuid))
+                    hashed = SimpleAuth.deauthenticatedUsers.get(uuid).password;
                 // Hashed password from DB
-                String hashed = SimpleAuth.db.getPassword(uuid);
+                else
+                    hashed = SimpleAuth.db.getPassword(uuid);
                 if(hashed.equals(""))
                     return -1;  // User is not yet registered
                 // Verify password

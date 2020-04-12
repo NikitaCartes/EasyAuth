@@ -7,7 +7,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
-import org.samo_lego.simpleauth.utils.AuthConfig;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -50,6 +49,18 @@ public class RegisterCommand {
             return 0;
         }
         else if(pass1.equals(pass2)) {
+            if(pass1.length() < SimpleAuth.config.main.minPasswordChars) {
+                player.sendMessage(new LiteralText(
+                        String.format(SimpleAuth.config.lang.minPasswordChars, SimpleAuth.config.main.minPasswordChars)
+                ));
+                return 0;
+            }
+            else if(pass1.length() > SimpleAuth.config.main.maxPasswordChars && SimpleAuth.config.main.maxPasswordChars != -1) {
+                player.sendMessage(new LiteralText(
+                        String.format(SimpleAuth.config.lang.maxPasswordChars, SimpleAuth.config.main.maxPasswordChars)
+                ));
+                return 0;
+            }
             String hash = AuthHelper.hashPass(pass1.toCharArray());
             if (SimpleAuth.db.registerUser(player.getUuidAsString(), source.getName(), hash)) {
                 SimpleAuth.authenticatePlayer(player, registerSuccess);

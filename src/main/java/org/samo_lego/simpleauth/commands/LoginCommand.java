@@ -44,7 +44,6 @@ public class LoginCommand {
             return 0;
         }
         else if(SimpleAuth.deauthenticatedUsers.get(player) >= maxLoginTries && maxLoginTries != -1) {
-            SimpleAuth.deauthenticatePlayer(player);
             player.networkHandler.disconnect(loginTriesExceeded);
             return 0;
         }
@@ -60,7 +59,6 @@ public class LoginCommand {
         }
         // Kicking the player out
         else if(maxLoginTries == 1) {
-            SimpleAuth.deauthenticatePlayer(player);
             player.networkHandler.disconnect(wrongPassword);
             return 0;
         }

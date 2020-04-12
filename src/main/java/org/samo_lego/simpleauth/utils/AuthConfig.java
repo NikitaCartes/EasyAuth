@@ -66,6 +66,9 @@ public class AuthConfig {
         public String globalPassword = null;
         // Tries to rescue players if they are stuck inside a portal on logging in
         public boolean tryPortalRescue = true;
+        // Minimum and maximum length of password. Set -1 to disable max chars
+        public int minPasswordChars = 4;
+        public int maxPasswordChars = -1;
     }
     public static class LangConfig {
         public String enterPassword = "§6You need to enter your password!";
@@ -90,6 +93,8 @@ public class AuthConfig {
         public String accountDeleted = "§aYour account was successfully deleted!";
         public String configurationReloaded = "§aConfiguration file was reloaded successfully.";
         public String successfulPortalRescue = "§aYou were rescued from nether portal successfully!";
+        public String maxPasswordChars = "§6Password can be at most %d characters long!";
+        public String minPasswordChars = "§6Password needs to be at least %d characters long!";
     }
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson gson = new GsonBuilder()

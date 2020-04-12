@@ -55,6 +55,18 @@ public class ChangepwCommand {
             return 0;
         }
         else if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray())) {
+            if(newPass.length() < SimpleAuth.config.main.minPasswordChars) {
+                player.sendMessage(new LiteralText(
+                        String.format(SimpleAuth.config.lang.minPasswordChars, SimpleAuth.config.main.minPasswordChars)
+                ));
+                return 0;
+            }
+            else if(newPass.length() > SimpleAuth.config.main.maxPasswordChars && SimpleAuth.config.main.maxPasswordChars != -1) {
+                player.sendMessage(new LiteralText(
+                        String.format(SimpleAuth.config.lang.maxPasswordChars, SimpleAuth.config.main.maxPasswordChars)
+                ));
+                return 0;
+            }
             SimpleAuth.db.update(
                     player.getUuidAsString(),
                     null,

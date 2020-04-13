@@ -1,5 +1,7 @@
 package org.samo_lego.simpleauth.utils;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import org.apache.logging.log4j.LogManager;
@@ -11,6 +13,9 @@ public class AuthHelper {
 
     // Creating the instance
     private static final Argon2 argon2 = Argon2Factory.create();
+
+    // Json parser
+    private static final JsonParser parser = new JsonParser();
 
     // Returns 1 if password is correct, 0 if not
     // and -1 if user is not registered yet
@@ -35,8 +40,11 @@ public class AuthHelper {
                 if(SimpleAuth.deauthenticatedUsers.containsKey(uuid))
                     hashed = SimpleAuth.deauthenticatedUsers.get(uuid).password;
                 // Hashed password from DB
-                else
-                    hashed = SimpleAuth.db.getPassword(uuid);
+                else {
+                    JsonObject json = parser.parse(SimpleAuth.db.getData(uuid)).getAsJsonObject();
+                    hashed = json.get("password").getAsString();
+                }
+
                 if(hashed.equals(""))
                     return -1;  // User is not yet registered
                 // Verify password

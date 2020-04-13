@@ -1,5 +1,6 @@
 package org.samo_lego.simpleauth.commands;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
@@ -67,10 +68,12 @@ public class ChangepwCommand {
                 ));
                 return 0;
             }
-            SimpleAuth.db.updateUserData(
-                    player.getUuidAsString(),
-                    AuthHelper.hashPass(newPass.toCharArray())
-            );
+            // JSON object holding password (may hold some other info in the future)
+            JsonObject playerdata = new JsonObject();
+            String hash = AuthHelper.hashPass(newPass.toCharArray());
+            playerdata.addProperty("password", hash);
+
+            SimpleAuth.db.updateUserData(player.getUuidAsString(), playerdata.toString());
             player.sendMessage(passwordUpdated);
             return 1;
         }

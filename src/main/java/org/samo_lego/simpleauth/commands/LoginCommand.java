@@ -7,7 +7,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
-import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
@@ -41,6 +40,7 @@ public class LoginCommand {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
         String uuid = player.getUuidAsString();
+        int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
 
         if(SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(alreadyAuthenticated);
@@ -50,11 +50,11 @@ public class LoginCommand {
             player.networkHandler.disconnect(loginTriesExceeded);
             return 0;
         }
-        else if (AuthHelper.checkPass(uuid, pass.toCharArray()) == 1) {
+        else if(passwordResult == 1) {
             SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
             return 1;
         }
-        else if(AuthHelper.checkPass(uuid, pass.toCharArray()) == -1) {
+        else if(passwordResult == -1) {
             player.sendMessage(notRegistered);
             return 0;
         }
@@ -66,7 +66,7 @@ public class LoginCommand {
         // Sending wrong pass message
         player.sendMessage(wrongPassword);
         // ++ the login tries
-        SimpleAuth.deauthenticatedUsers.getOrDefault(uuid, new PlayerCache(uuid)).loginTries += 1;
+        SimpleAuth.deauthenticatedUsers.get(uuid).loginTries += 1;
         return 0;
     }
 }

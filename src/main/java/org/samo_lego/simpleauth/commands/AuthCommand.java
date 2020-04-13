@@ -1,5 +1,6 @@
 package org.samo_lego.simpleauth.commands;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -9,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.storage.AuthConfig;
+import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import java.io.File;
@@ -106,8 +108,7 @@ public class AuthCommand {
     private static int removeAccount(ServerCommandSource source, String uuid) {
         Entity sender = source.getEntity();
         SimpleAuth.db.deleteUserData(uuid);
-
-        // TODO -> Kick player that was unregistered?
+        SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, ""));
 
         if(sender != null)
             sender.sendMessage(userdataDeleted);
@@ -121,10 +122,12 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        if(SimpleAuth.db.registerUser(
-                uuid,
-                AuthHelper.hashPass(password.toCharArray())
-        )) {
+        // JSON object holding password (may hold some other info in the future)
+        JsonObject playerdata = new JsonObject();
+        String hash = AuthHelper.hashPass(password.toCharArray());
+        playerdata.addProperty("password", hash);
+
+        if(SimpleAuth.db.registerUser(uuid, playerdata.toString())) {
             if(sender != null)
                 sender.sendMessage(userdataUpdated);
             else
@@ -139,10 +142,12 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        SimpleAuth.db.updateUserData(
-                uuid,
-                AuthHelper.hashPass(password.toCharArray())
-        );
+        // JSON object holding password (may hold some other info in the future)
+        JsonObject playerdata = new JsonObject();
+        String hash = AuthHelper.hashPass(password.toCharArray());
+        playerdata.addProperty("password", hash);
+
+        SimpleAuth.db.updateUserData(uuid, playerdata.toString());
         if(sender != null)
             sender.sendMessage(userdataUpdated);
         else

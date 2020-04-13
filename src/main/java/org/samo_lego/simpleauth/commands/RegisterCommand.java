@@ -1,5 +1,6 @@
 package org.samo_lego.simpleauth.commands;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
@@ -62,7 +63,11 @@ public class RegisterCommand {
                 return 0;
             }
             String hash = AuthHelper.hashPass(pass1.toCharArray());
-            if (SimpleAuth.db.registerUser(player.getUuidAsString(), hash)) {
+            // JSON object holding password (may hold some other info in the future)
+            JsonObject playerdata = new JsonObject();
+            playerdata.addProperty("password", hash);
+
+            if (SimpleAuth.db.registerUser(player.getUuidAsString(), playerdata.toString())) {
                 SimpleAuth.authenticatePlayer(player, registerSuccess);
                 return 1;
             }

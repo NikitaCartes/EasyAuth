@@ -14,6 +14,7 @@ import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
+import org.samo_lego.simpleauth.event.entity.player.PlayerLeaveServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
 import org.samo_lego.simpleauth.event.item.DropItemCallback;
 import org.samo_lego.simpleauth.event.item.TakeItemCallback;
@@ -38,7 +39,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// Boolean for easier checking if player is authenticated
 	public static boolean isAuthenticated(ServerPlayerEntity player) {
-		return !deauthenticatedUsers.containsKey(player.getUuidAsString());
+		String uuid = player.getUuidAsString();
+		return !deauthenticatedUsers.containsKey(uuid);
 	}
 
 	// Getting game directory
@@ -75,10 +77,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Registering the events
 		PlayerJoinServerCallback.EVENT.register(AuthEventHandler::onPlayerJoin);
+		PlayerLeaveServerCallback.EVENT.register(AuthEventHandler::onPlayerLeave);
 		DropItemCallback.EVENT.register(AuthEventHandler::onDropItem);
 		TakeItemCallback.EVENT.register(AuthEventHandler::onTakeItem);
 		ChatCallback.EVENT.register(AuthEventHandler::onPlayerChat);
 		PlayerMoveCallback.EVENT.register(AuthEventHandler::onPlayerMove);
+
 		// From Fabric API
 		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.onAttackBlock(playerEntity));
         UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));
@@ -93,6 +97,14 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		db.close();
 	}
 
+	// Getting some config options
+	private static Text notAuthenticated() {
+		if(SimpleAuth.config.main.enableGlobalPassword) {
+			return new LiteralText(SimpleAuth.config.lang.loginRequired);
+		}
+		return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
+	}
+
 	// Authenticates player and sends the message
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
 		deauthenticatedUsers.remove(player.getUuidAsString());
@@ -102,19 +114,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		player.sendMessage(msg);
 	}
 
-	// Getting some config options
-	private static Text notAuthenticated() {
-		if(SimpleAuth.config.main.enableGlobalPassword) {
-			return new LiteralText(SimpleAuth.config.lang.loginRequired);
-		}
-		return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
-	}
-
 	// De-authenticates player
 	public static void deauthenticatePlayer(ServerPlayerEntity player) {
 		// Marking player as not authenticated, (re)setting login tries to zero
 		String uuid = player.getUuidAsString();
-		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid));
+		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player.getIp()));
 
 		// Player is now not authenticated
 		player.sendMessage(notAuthenticated());

@@ -39,8 +39,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// Boolean for easier checking if player is authenticated
 	public static boolean isAuthenticated(ServerPlayerEntity player) {
-		String uuid = player.getUuidAsString();
-		return !deauthenticatedUsers.containsKey(uuid);
+		return !deauthenticatedUsers.containsKey(player.getUuidAsString());
 	}
 
 	// Getting game directory

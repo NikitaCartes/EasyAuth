@@ -14,6 +14,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.samo_lego.simpleauth.SimpleAuth;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import static net.minecraft.block.NetherPortalBlock.AXIS;
 import static net.minecraft.util.math.Direction.Axis.Z;
 
@@ -33,7 +36,18 @@ public class AuthEventHandler {
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
-        SimpleAuth.deauthenticatePlayer(player);
+        // Checking if session is still valid
+        String uuid = player.getUuidAsString();
+        if(
+            SimpleAuth.deauthenticatedUsers.containsKey(uuid) &&
+            SimpleAuth.deauthenticatedUsers.get(uuid).lastIp.equals(player.getIp()) &&
+            SimpleAuth.deauthenticatedUsers.get(uuid).wasAuthenticated
+        ) {
+            SimpleAuth.deauthenticatedUsers.remove(uuid); // Makes player authenticated
+            return;
+        }
+        else
+            SimpleAuth.deauthenticatePlayer(player);
 
         // Tries to rescue player from nether portal
         if(SimpleAuth.config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
@@ -103,6 +117,27 @@ public class AuthEventHandler {
                 player.sendMessage(successfulPortalRescue);
             }
         }
+    }
+
+    public static void onPlayerLeave(ServerPlayerEntity player) {
+        if(!SimpleAuth.isAuthenticated(player) || SimpleAuth.config.main.sessionTimeoutTime == -1)
+            return;
+
+        // Starting session
+        // Putting player to deauthenticated player map
+        SimpleAuth.deauthenticatePlayer(player);
+
+        // Setting that player was actually authenticated before leaving
+        SimpleAuth.deauthenticatedUsers.get(player.getUuidAsString()).wasAuthenticated = true;
+
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(player.removed) // Disproving session
+                    SimpleAuth.deauthenticatedUsers.remove(player.getUuidAsString());
+            }
+        }, SimpleAuth.config.main.sessionTimeoutTime * 1000);
     }
 
     // Player chatting

@@ -14,6 +14,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static net.minecraft.block.NetherPortalBlock.AXIS;
 import static net.minecraft.util.math.Direction.Axis.Z;
 import static org.samo_lego.simpleauth.SimpleAuth.*;
@@ -34,13 +37,23 @@ public class AuthEventHandler {
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
+        // Checking if player username is valid
+        String regex = config.main.usernameRegex;
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(player.getName().getString());
+        if (!matcher.matches()) {
+            player.networkHandler.disconnect(new LiteralText(String.format(config.lang.disallowedUsername, regex)));
+            return;
+        }
         // Checking if session is still valid
         String uuid = player.getUuidAsString();
+        PlayerCache playerCache = deauthenticatedUsers.getOrDefault(uuid, null);
         if(
-            deauthenticatedUsers.containsKey(uuid) &&
-            deauthenticatedUsers.get(uuid).lastIp.equals(player.getIp()) &&
-            deauthenticatedUsers.get(uuid).wasAuthenticated &&
-            deauthenticatedUsers.get(uuid).validUntil >= System.currentTimeMillis()
+            playerCache != null &&
+            playerCache.lastIp.equals(player.getIp()) &&
+            playerCache.wasAuthenticated &&
+            playerCache.validUntil >= System.currentTimeMillis()
         ) {
             deauthenticatedUsers.remove(uuid); // Makes player authenticated
             return;

@@ -58,19 +58,21 @@ public class AuthConfig {
         // Time after which player will be kicked if not authenticated - in seconds
         public int delay = 60;
         // Disables registering and forces logging in with global password
+        // Visit https://github.com/samolego/SimpleAuth/wiki/Locking-server-with-global-password for more info
         public boolean enableGlobalPassword = false;
-        /* If above is true, the global password can be set with command:
-        `/auth setGlobalPassword <pass>`
-        Password will be hashed and saved.
-         */
         public String globalPassword = null;
         // Tries to rescue players if they are stuck inside a portal on logging in
+        // Visit https://github.com/samolego/SimpleAuth/wiki/Portal-Rescue for more info
         public boolean tryPortalRescue = true;
         // Minimum and maximum length of password. Set -1 to disable max chars
         public int minPasswordChars = 4;
         public int maxPasswordChars = -1;
+        // Regex of valid playername characters. You probably don't want to change this.
+        // Visit https://github.com/samolego/SimpleAuth/wiki/Username-Restriction for more info
+        public String usernameRegex = "^[a-zA-Z0-9_]{3,16}$";
         // How long to keep session (auto-logging in the player), in seconds
         // Set to -1 to disable
+        // Visit https://github.com/samolego/SimpleAuth/wiki/Sessions for more info
         public int sessionTimeoutTime = 60;
     }
     public static class LangConfig {
@@ -99,6 +101,7 @@ public class AuthConfig {
         public String successfulPortalRescue = "§aYou were rescued from nether portal successfully!";
         public String maxPasswordChars = "§6Password can be at most %d characters long!";
         public String minPasswordChars = "§6Password needs to be at least %d characters long!";
+        public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
     }
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson gson = new GsonBuilder()

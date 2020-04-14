@@ -10,6 +10,7 @@ public class PlayerCache {
     public String password;
     public int loginTries;
     public String lastIp;
+    public long validUntil;
     private static final JsonParser parser = new JsonParser();
 
 

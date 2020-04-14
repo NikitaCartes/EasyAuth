@@ -12,13 +12,11 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.samo_lego.simpleauth.SimpleAuth;
-
-import java.util.Timer;
-import java.util.TimerTask;
+import org.samo_lego.simpleauth.storage.PlayerCache;
 
 import static net.minecraft.block.NetherPortalBlock.AXIS;
 import static net.minecraft.util.math.Direction.Axis.Z;
+import static org.samo_lego.simpleauth.SimpleAuth.*;
 
 /**
  * This class will take care of actions players try to do,
@@ -26,31 +24,32 @@ import static net.minecraft.util.math.Direction.Axis.Z;
  */
 public class AuthEventHandler {
     private static Text notAuthenticated() {
-        if(SimpleAuth.config.main.enableGlobalPassword) {
-            return new LiteralText(SimpleAuth.config.lang.loginRequired);
+        if(config.main.enableGlobalPassword) {
+            return new LiteralText(config.lang.loginRequired);
         }
-        return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
+        return new LiteralText(config.lang.notAuthenticated);
     }
 
-    private static Text successfulPortalRescue = new LiteralText(SimpleAuth.config.lang.successfulPortalRescue);
+    private static Text successfulPortalRescue = new LiteralText(config.lang.successfulPortalRescue);
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         // Checking if session is still valid
         String uuid = player.getUuidAsString();
         if(
-            SimpleAuth.deauthenticatedUsers.containsKey(uuid) &&
-            SimpleAuth.deauthenticatedUsers.get(uuid).lastIp.equals(player.getIp()) &&
-            SimpleAuth.deauthenticatedUsers.get(uuid).wasAuthenticated
+            deauthenticatedUsers.containsKey(uuid) &&
+            deauthenticatedUsers.get(uuid).lastIp.equals(player.getIp()) &&
+            deauthenticatedUsers.get(uuid).wasAuthenticated &&
+            deauthenticatedUsers.get(uuid).validUntil >= System.currentTimeMillis()
         ) {
-            SimpleAuth.deauthenticatedUsers.remove(uuid); // Makes player authenticated
+            deauthenticatedUsers.remove(uuid); // Makes player authenticated
             return;
         }
         else
-            SimpleAuth.deauthenticatePlayer(player);
+            deauthenticatePlayer(player);
 
         // Tries to rescue player from nether portal
-        if(SimpleAuth.config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
+        if(config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
             boolean wasSuccessful = false;
 
             BlockState portalState = player.getBlockState();
@@ -120,24 +119,18 @@ public class AuthEventHandler {
     }
 
     public static void onPlayerLeave(ServerPlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated(player) || SimpleAuth.config.main.sessionTimeoutTime == -1)
+        if(!isAuthenticated(player) || config.main.sessionTimeoutTime == -1)
             return;
 
         // Starting session
         // Putting player to deauthenticated player map
-        SimpleAuth.deauthenticatePlayer(player);
+        deauthenticatePlayer(player);
 
         // Setting that player was actually authenticated before leaving
-        SimpleAuth.deauthenticatedUsers.get(player.getUuidAsString()).wasAuthenticated = true;
+        PlayerCache playerCache = deauthenticatedUsers.get(player.getUuidAsString());
+        playerCache.wasAuthenticated = true;
+        playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
 
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if(player.removed) // Disproving session
-                    SimpleAuth.deauthenticatedUsers.remove(player.getUuidAsString());
-            }
-        }, SimpleAuth.config.main.sessionTimeoutTime * 1000);
     }
 
     // Player chatting
@@ -145,10 +138,10 @@ public class AuthEventHandler {
         // Getting the message to then be able to check it
         String msg = chatMessageC2SPacket.getChatMessage();
         if(
-            !SimpleAuth.isAuthenticated((ServerPlayerEntity) player) &&
+            !isAuthenticated((ServerPlayerEntity) player) &&
             !msg.startsWith("/login") &&
             !msg.startsWith("/register") &&
-            (!SimpleAuth.config.main.allowChat || msg.startsWith("/"))
+            (!config.main.allowChat || msg.startsWith("/"))
         ) {
             player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
@@ -158,7 +151,7 @@ public class AuthEventHandler {
 
     // Player movement
     public static ActionResult onPlayerMove(PlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowMovement) {
+        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowMovement) {
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -166,7 +159,7 @@ public class AuthEventHandler {
 
     // Using a block (right-click function)
     public static ActionResult onUseBlock(PlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowBlockUse) {
+        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowBlockUse) {
             player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
@@ -175,7 +168,7 @@ public class AuthEventHandler {
 
     // Punching a block
     public static ActionResult onAttackBlock(PlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowBlockPunch) {
+        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowBlockPunch) {
             player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
@@ -184,7 +177,7 @@ public class AuthEventHandler {
 
     // Using an item
     public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowItemUse) {
+        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowItemUse) {
             player.sendMessage(notAuthenticated());
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
@@ -193,7 +186,7 @@ public class AuthEventHandler {
     }
     // Dropping an item
     public static ActionResult onDropItem(PlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowItemDrop) {
+        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowItemDrop) {
             player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
@@ -201,7 +194,7 @@ public class AuthEventHandler {
     }
     // Changing inventory (item moving etc.)
     public static ActionResult onTakeItem(PlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowItemMoving) {
+        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowItemMoving) {
             player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
@@ -210,7 +203,7 @@ public class AuthEventHandler {
     }
     // Attacking an entity
     public static ActionResult onAttackEntity(PlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowEntityPunch) {
+        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowEntityPunch) {
             player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }
@@ -219,7 +212,7 @@ public class AuthEventHandler {
     }
     // Interacting with entity
     public static ActionResult onUseEntity(PlayerEntity player) {
-        if(!SimpleAuth.isAuthenticated((ServerPlayerEntity) player) && !SimpleAuth.config.main.allowEntityInteract) {
+        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowEntityInteract) {
             player.sendMessage(notAuthenticated());
             return ActionResult.FAIL;
         }

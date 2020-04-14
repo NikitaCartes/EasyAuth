@@ -71,7 +71,7 @@ public class AuthConfig {
         public int maxPasswordChars = -1;
         // How long to keep session (auto-logging in the player), in seconds
         // Set to -1 to disable
-        public int sessionTimeoutTime = 300;
+        public int sessionTimeoutTime = 60;
     }
     public static class LangConfig {
         public String enterPassword = "§6You need to enter your password!";

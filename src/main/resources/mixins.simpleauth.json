@@ -5,9 +5,10 @@
   "mixins": [
   ],
   "server": [
-    "MixinServerPlayNetworkHandler",
-    "MixinPlayerManager",
     "MixinPlayerEntity",
+    "MixinPlayerManager",
+    "MixinServerLoginNetworkHandler",
+    "MixinServerPlayNetworkHandler",
     "MixinSlot"
   ],
   "injectors": {

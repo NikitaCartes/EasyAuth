@@ -30,28 +30,8 @@ import java.io.IOException;
 public class AuthConfig {
     // If player is not authenticated, following conditions apply
     public static class MainConfig {
-        // Allows chat (but not commands, except for /login and /register)
-        public boolean allowChat = false;
-        // Allows player movement
-        public boolean allowMovement = false;
-        // Allows block "use" - right clicking (e.g. opening a chest)
-        public boolean allowBlockUse = false;
-        // Allows mining || punching blocks
-        public boolean allowBlockPunch = false;
-        // Allows dropping items from inventory
-        public boolean allowItemDrop = false;
-        // Allows moving item through inventory
-        public boolean allowItemMoving = false;
-        // Allows item "use" - right click function (e.g. using a bow)
-        public boolean allowItemUse = false;
-        // Allows attacking mobs
-        public boolean allowEntityPunch = false;
-        // Allows "right-clicking" on an entity (e.g. trading with villagers)
+        // Allows "right-clicking" on an entity (e.g. clicking on villagers)
         public boolean allowEntityInteract = false;
-        // If player should be invulnerable before authentication
-        public boolean playerInvulnerable = true;
-        // If player should be invisible to mobs before authentication
-        public boolean playerInvisible = true;
         // Maximum login tries before kicking the player from server
         // Set to -1 to allow unlimited, not recommended however
         public int maxLoginTries = 1;
@@ -102,6 +82,31 @@ public class AuthConfig {
         public String maxPasswordChars = "§6Password can be at most %d characters long!";
         public String minPasswordChars = "§6Password needs to be at least %d characters long!";
         public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
+        public String playerAlreadyOnline = "§cPlayer %s is already online!";
+    }
+    public static class ExperimentalConfig {
+        // Prevents player being kicked because another player with the same name has joined the server
+        public boolean disableAnotherLocationKick = true;
+        // If player should be invulnerable before authentication
+        public boolean playerInvulnerable = true;
+        // If player should be invisible to mobs before authentication
+        public boolean playerInvisible = true;
+        // Allows chat (but not commands, except for /login and /register)
+        public boolean allowChat = false;
+        // Allows player movement
+        public boolean allowMovement = false;
+        // Allows block "use" - right clicking (e.g. opening a chest)
+        public boolean allowBlockUse = false;
+        // Allows mining || punching blocks
+        public boolean allowBlockPunch = false;
+        // Allows dropping items from inventory
+        public boolean allowItemDrop = false;
+        // Allows moving item through inventory
+        public boolean allowItemMoving = false;
+        // Allows item "use" - right click function (e.g. using a bow)
+        public boolean allowItemUse = false;
+        // Allows attacking mobs
+        public boolean allowEntityPunch = false;
     }
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson gson = new GsonBuilder()
@@ -110,6 +115,7 @@ public class AuthConfig {
 
     public MainConfig main = new MainConfig();
     public LangConfig lang = new LangConfig();
+    public ExperimentalConfig experimental = new ExperimentalConfig();
 
     public static AuthConfig load(File file) {
         AuthConfig config;

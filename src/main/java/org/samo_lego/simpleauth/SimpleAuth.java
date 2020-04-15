@@ -110,7 +110,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Player no longer needs to be invisible and invulnerable
 		player.setInvulnerable(false);
 		player.setInvisible(false);
-		player.sendMessage(msg);
+		player.sendMessage(msg, false);
 	}
 
 	// De-authenticates player
@@ -120,10 +120,10 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player.getIp()));
 
 		// Player is now not authenticated
-		player.sendMessage(notAuthenticated());
+		player.sendMessage(notAuthenticated(), false);
 		// Setting the player to be invisible to mobs and also invulnerable
-		player.setInvulnerable(SimpleAuth.config.main.playerInvulnerable);
-		player.setInvisible(SimpleAuth.config.main.playerInvisible);
+		player.setInvulnerable(SimpleAuth.config.experimental.playerInvulnerable);
+		player.setInvisible(SimpleAuth.config.experimental.playerInvisible);
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override

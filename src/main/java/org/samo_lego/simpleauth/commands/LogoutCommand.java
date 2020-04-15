@@ -23,7 +23,7 @@ public class LogoutCommand {
     private static int logout(ServerCommandSource serverCommandSource) throws CommandSyntaxException {
         ServerPlayerEntity player = serverCommandSource.getPlayer();
         SimpleAuth.deauthenticatePlayer(player);
-        player.sendMessage(successfulLogout);
+        player.sendMessage(successfulLogout, false);
         return 1;
     }
 }

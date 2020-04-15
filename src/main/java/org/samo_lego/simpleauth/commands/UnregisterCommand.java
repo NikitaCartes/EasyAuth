@@ -24,7 +24,7 @@ public class UnregisterCommand {
         // Registering the "/unregister" command
         dispatcher.register(literal("unregister")
                 .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(enterPassword);
+                    ctx.getSource().getPlayer().sendMessage(enterPassword, false);
                     return 1;
                 })
                 .then(argument("password", word())
@@ -42,16 +42,16 @@ public class UnregisterCommand {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
         if (SimpleAuth.config.main.enableGlobalPassword) {
-            player.sendMessage(cannotUnregister);
+            player.sendMessage(cannotUnregister, false);
             return 0;
         }
         else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray()) == 1) {
             SimpleAuth.deauthenticatePlayer(player);
             SimpleAuth.db.deleteUserData(player.getUuidAsString());
-            player.sendMessage(accountDeleted);
+            player.sendMessage(accountDeleted, false);
             return 1;
         }
-        player.sendMessage(wrongPassword);
+        player.sendMessage(wrongPassword, false);
         return 0;
     }
 }

@@ -26,12 +26,12 @@ public class ChangepwCommand {
         // Registering the "/changepw" command
         dispatcher.register(literal("changepw")
             .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(enterPassword);
+                    ctx.getSource().getPlayer().sendMessage(enterPassword, false);
                     return 1;
             })
             .then(argument("oldPassword", word())
                 .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(enterNewPassword);
+                    ctx.getSource().getPlayer().sendMessage(enterNewPassword, false);
                     return 1;
                 })
                 .then(argument("newPassword", word())
@@ -52,20 +52,20 @@ public class ChangepwCommand {
         ServerPlayerEntity player = source.getPlayer();
 
         if (SimpleAuth.config.main.enableGlobalPassword) {
-            player.sendMessage(cannotChangePassword);
+            player.sendMessage(cannotChangePassword, false);
             return 0;
         }
         else if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray()) == 1) {
             if(newPass.length() < SimpleAuth.config.main.minPasswordChars) {
                 player.sendMessage(new LiteralText(
                         String.format(SimpleAuth.config.lang.minPasswordChars, SimpleAuth.config.main.minPasswordChars)
-                ));
+                ), false);
                 return 0;
             }
             else if(newPass.length() > SimpleAuth.config.main.maxPasswordChars && SimpleAuth.config.main.maxPasswordChars != -1) {
                 player.sendMessage(new LiteralText(
                         String.format(SimpleAuth.config.lang.maxPasswordChars, SimpleAuth.config.main.maxPasswordChars)
-                ));
+                ), false);
                 return 0;
             }
             // JSON object holding password (may hold some other info in the future)
@@ -74,10 +74,10 @@ public class ChangepwCommand {
             playerdata.addProperty("password", hash);
 
             SimpleAuth.db.updateUserData(player.getUuidAsString(), playerdata.toString());
-            player.sendMessage(passwordUpdated);
+            player.sendMessage(passwordUpdated, false);
             return 1;
         }
-        player.sendMessage(wrongPassword);
+        player.sendMessage(wrongPassword, false);
         return 0;
     }
 }

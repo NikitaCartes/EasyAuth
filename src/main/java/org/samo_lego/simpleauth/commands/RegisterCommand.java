@@ -33,7 +33,7 @@ public class RegisterCommand {
                     .executes( ctx -> register(ctx.getSource(), getString(ctx, "password"), getString(ctx, "passwordAgain")))
             ))
         .executes(ctx -> {
-            ctx.getSource().getPlayer().sendMessage(enterPassword);
+            ctx.getSource().getPlayer().sendMessage(enterPassword, false);
             return 0;
         }));
     }
@@ -42,24 +42,24 @@ public class RegisterCommand {
     private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayer();
         if(SimpleAuth.config.main.enableGlobalPassword) {
-            player.sendMessage(loginRequired);
+            player.sendMessage(loginRequired, false);
             return 0;
         }
         else if(SimpleAuth.isAuthenticated(player)) {
-            player.sendMessage(alreadyAuthenticated);
+            player.sendMessage(alreadyAuthenticated, false);
             return 0;
         }
         else if(pass1.equals(pass2)) {
             if(pass1.length() < SimpleAuth.config.main.minPasswordChars) {
                 player.sendMessage(new LiteralText(
                         String.format(SimpleAuth.config.lang.minPasswordChars, SimpleAuth.config.main.minPasswordChars)
-                ));
+                ), false);
                 return 0;
             }
             else if(pass1.length() > SimpleAuth.config.main.maxPasswordChars && SimpleAuth.config.main.maxPasswordChars != -1) {
                 player.sendMessage(new LiteralText(
                         String.format(SimpleAuth.config.lang.maxPasswordChars, SimpleAuth.config.main.maxPasswordChars)
-                ));
+                ), false);
                 return 0;
             }
             String hash = AuthHelper.hashPass(pass1.toCharArray());
@@ -71,10 +71,10 @@ public class RegisterCommand {
                 SimpleAuth.authenticatePlayer(player, registerSuccess);
                 return 1;
             }
-            player.sendMessage(alreadyRegistered);
+            player.sendMessage(alreadyRegistered, false);
             return 0;
         }
-        player.sendMessage(matchPass);
+        player.sendMessage(matchPass, false);
         return 0;
     }
 }

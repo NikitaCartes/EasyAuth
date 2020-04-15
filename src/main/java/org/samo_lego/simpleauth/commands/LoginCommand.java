@@ -30,7 +30,7 @@ public class LoginCommand {
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(enterPassword);
+                    ctx.getSource().getPlayer().sendMessage(enterPassword, false);
                     return 0;
                 }));
     }
@@ -43,7 +43,7 @@ public class LoginCommand {
         int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
 
         if(SimpleAuth.isAuthenticated(player)) {
-            player.sendMessage(alreadyAuthenticated);
+            player.sendMessage(alreadyAuthenticated, false);
             return 0;
         }
         else if(SimpleAuth.deauthenticatedUsers.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
@@ -55,7 +55,7 @@ public class LoginCommand {
             return 1;
         }
         else if(passwordResult == -1) {
-            player.sendMessage(notRegistered);
+            player.sendMessage(notRegistered, false);
             return 0;
         }
         // Kicking the player out
@@ -64,7 +64,7 @@ public class LoginCommand {
             return 0;
         }
         // Sending wrong pass message
-        player.sendMessage(wrongPassword);
+        player.sendMessage(wrongPassword, false);
         // ++ the login tries
         SimpleAuth.deauthenticatedUsers.get(uuid).loginTries += 1;
         return 0;

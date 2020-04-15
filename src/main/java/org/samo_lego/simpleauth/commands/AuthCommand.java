@@ -3,6 +3,7 @@ package org.samo_lego.simpleauth.commands;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -82,7 +83,7 @@ public class AuthCommand {
         SimpleAuth.config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)
-            sender.sendMessage(configurationReloaded);
+            ((PlayerEntity) sender).sendMessage(configurationReloaded, false);
         else
             LOGGER.info(SimpleAuth.config.lang.configurationReloaded);
         return 1;
@@ -98,7 +99,7 @@ public class AuthCommand {
         SimpleAuth.config.save(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)
-            sender.sendMessage(globalPasswordSet);
+            sender.sendSystemMessage(globalPasswordSet);
         else
             LOGGER.info(SimpleAuth.config.lang.globalPasswordSet);
         return 1;
@@ -111,7 +112,7 @@ public class AuthCommand {
         SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, ""));
 
         if(sender != null)
-            sender.sendMessage(userdataDeleted);
+            ((PlayerEntity) sender).sendMessage(userdataDeleted, false);
         else
             LOGGER.info(SimpleAuth.config.lang.userdataDeleted);
         return 1; // Success
@@ -129,7 +130,7 @@ public class AuthCommand {
 
         if(SimpleAuth.db.registerUser(uuid, playerdata.toString())) {
             if(sender != null)
-                sender.sendMessage(userdataUpdated);
+                ((PlayerEntity) sender).sendMessage(userdataUpdated, false);
             else
                 LOGGER.info(SimpleAuth.config.lang.userdataUpdated);
             return 1;
@@ -149,9 +150,10 @@ public class AuthCommand {
 
         SimpleAuth.db.updateUserData(uuid, playerdata.toString());
         if(sender != null)
-            sender.sendMessage(userdataUpdated);
+            ((PlayerEntity) sender).sendMessage(userdataUpdated, false);
         else
             LOGGER.info(SimpleAuth.config.lang.userdataUpdated);
         return 1;
     }
+    // todo PlayerEntity.getOfflinePlayerUuid("")
 }

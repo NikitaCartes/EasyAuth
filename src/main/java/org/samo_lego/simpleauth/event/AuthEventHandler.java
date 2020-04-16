@@ -1,10 +1,12 @@
 package org.samo_lego.simpleauth.event;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -14,6 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
+import java.net.SocketAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,18 +38,40 @@ public class AuthEventHandler {
 
     private static Text successfulPortalRescue = new LiteralText(config.lang.successfulPortalRescue);
 
-    // Player joining the server
-    public static void onPlayerJoin(ServerPlayerEntity player) {
+    // Player pre-join
+    // Returns text as a reason for disconnect or null to pass
+    public static LiteralText checkCanPlayerJoinServer(SocketAddress socketAddress, GameProfile profile, PlayerManager manager) {
+        // Getting the player
+        String incomingPlayerUsername = profile.getName();
+        PlayerEntity onlinePlayer = manager.getPlayer(incomingPlayerUsername);
+
         // Checking if player username is valid
         String regex = config.main.usernameRegex;
 
         Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(player.getName().getString());
-        if (!matcher.matches()) {
-            player.networkHandler.disconnect(new LiteralText(String.format(config.lang.disallowedUsername, regex)));
-            return;
-        }
+        Matcher matcher = pattern.matcher(incomingPlayerUsername);
 
+        if(onlinePlayer != null && config.experimental.disableAnotherLocationKick) {
+            // Player needs to be kicked, since there's already a player with that name
+            // playing on the server
+            return new LiteralText(
+                    String.format(
+                            config.lang.playerAlreadyOnline, onlinePlayer.getName().asString()
+                    )
+            );
+        }
+        else if(!matcher.matches()) {
+            return new LiteralText(
+                    String.format(
+                            config.lang.disallowedUsername, regex
+                    )
+            );
+        }
+        return null;
+    }
+
+    // Player joining the server
+    public static void onPlayerJoin(ServerPlayerEntity player) {
         // Checking if session is still valid
         String uuid = player.getUuidAsString();
         PlayerCache playerCache = deauthenticatedUsers.getOrDefault(uuid, null);
@@ -143,8 +168,8 @@ public class AuthEventHandler {
         // Setting that player was actually authenticated before leaving
         PlayerCache playerCache = deauthenticatedUsers.get(player.getUuidAsString());
         playerCache.wasAuthenticated = true;
+        // Setting the session expire time
         playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
-
     }
 
     // Player chatting

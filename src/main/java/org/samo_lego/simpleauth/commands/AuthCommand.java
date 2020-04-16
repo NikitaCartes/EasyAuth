@@ -99,7 +99,7 @@ public class AuthCommand {
         SimpleAuth.config.save(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)
-            sender.sendSystemMessage(globalPasswordSet);
+            ((PlayerEntity) sender).sendMessage(globalPasswordSet, false);
         else
             LOGGER.info(SimpleAuth.config.lang.globalPasswordSet);
         return 1;

@@ -39,6 +39,12 @@ public class SimpleAuthDatabase {
         }
     }
 
+    // Tells whether db connection is closed
+    public boolean isClosed() {
+        return levelDBStore != null;
+    }
+
+
     // When player registers, we insert the data into DB
     public boolean registerUser(String uuid, String data) {
         try {

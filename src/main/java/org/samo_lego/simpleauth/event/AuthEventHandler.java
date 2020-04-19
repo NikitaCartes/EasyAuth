@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import static net.minecraft.block.NetherPortalBlock.AXIS;
 import static net.minecraft.util.math.Direction.Axis.Z;
 import static org.samo_lego.simpleauth.SimpleAuth.*;
+import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 /**
  * This class will take care of actions players try to do,
@@ -76,7 +77,7 @@ public class AuthEventHandler {
         if(isPlayerFake(player))
             return;
         // Checking if session is still valid
-        String uuid = player.getUuidAsString();
+        String uuid = convertUuid(player);
         PlayerCache playerCache = deauthenticatedUsers.getOrDefault(uuid, null);
 
         if (
@@ -174,7 +175,9 @@ public class AuthEventHandler {
         deauthenticatePlayer(player);
         
         // Setting that player was actually authenticated before leaving
-        PlayerCache playerCache = deauthenticatedUsers.get(player.getUuidAsString());
+        PlayerCache playerCache = deauthenticatedUsers.get(convertUuid(player));
+        if(playerCache == null)
+            return;
         playerCache.wasAuthenticated = true;
         // Setting the session expire time
         playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
@@ -185,7 +188,7 @@ public class AuthEventHandler {
         // Getting the message to then be able to check it
         String msg = chatMessageC2SPacket.getChatMessage();
         if(
-            !isAuthenticated((ServerPlayerEntity) player) &&
+            !isAuthenticated(player) &&
             !msg.startsWith("/login") &&
             !msg.startsWith("/register") &&
             (!config.experimental.allowChat || msg.startsWith("/"))
@@ -198,7 +201,7 @@ public class AuthEventHandler {
 
     // Player movement
     public static ActionResult onPlayerMove(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowMovement) {
+        if(!isAuthenticated(player) && !config.experimental.allowMovement) {
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -206,7 +209,7 @@ public class AuthEventHandler {
 
     // Using a block (right-click function)
     public static ActionResult onUseBlock(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowBlockUse) {
+        if(!isAuthenticated(player) && !config.experimental.allowBlockUse) {
             player.sendMessage(notAuthenticated(), false);
             return ActionResult.FAIL;
         }
@@ -215,7 +218,7 @@ public class AuthEventHandler {
 
     // Punching a block
     public static ActionResult onAttackBlock(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowBlockPunch) {
+        if(!isAuthenticated(player) && !config.experimental.allowBlockPunch) {
             player.sendMessage(notAuthenticated(), false);
             return ActionResult.FAIL;
         }
@@ -224,7 +227,7 @@ public class AuthEventHandler {
 
     // Using an item
     public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowItemUse) {
+        if(!isAuthenticated(player) && !config.experimental.allowItemUse) {
             player.sendMessage(notAuthenticated(), false);
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
@@ -233,7 +236,7 @@ public class AuthEventHandler {
     }
     // Dropping an item
     public static ActionResult onDropItem(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowItemDrop) {
+        if(!isAuthenticated(player) && !config.experimental.allowItemDrop) {
             player.sendMessage(notAuthenticated(), false);
             return ActionResult.FAIL;
         }
@@ -241,7 +244,7 @@ public class AuthEventHandler {
     }
     // Changing inventory (item moving etc.)
     public static ActionResult onTakeItem(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowItemMoving) {
+        if(!isAuthenticated(player) && !config.experimental.allowItemMoving) {
             player.sendMessage(notAuthenticated(), false);
             return ActionResult.FAIL;
         }
@@ -250,7 +253,7 @@ public class AuthEventHandler {
     }
     // Attacking an entity
     public static ActionResult onAttackEntity(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowEntityPunch) {
+        if(!isAuthenticated(player) && !config.experimental.allowEntityPunch) {
             player.sendMessage(notAuthenticated(), false);
             return ActionResult.FAIL;
         }
@@ -259,7 +262,7 @@ public class AuthEventHandler {
     }
     // Interacting with entity
     public static ActionResult onUseEntity(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowEntityInteract) {
+        if(!isAuthenticated(player) && !config.main.allowEntityInteract) {
             player.sendMessage(notAuthenticated(), false);
             return ActionResult.FAIL;
         }

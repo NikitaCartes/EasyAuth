@@ -14,6 +14,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class ChangepwCommand {
     private static Text enterNewPassword = new LiteralText(SimpleAuth.config.lang.enterNewPassword);
@@ -55,7 +56,7 @@ public class ChangepwCommand {
             player.sendMessage(cannotChangePassword, false);
             return 0;
         }
-        else if (AuthHelper.checkPass(player.getUuidAsString(), oldPass.toCharArray()) == 1) {
+        else if (AuthHelper.checkPass(convertUuid(player), oldPass.toCharArray()) == 1) {
             if(newPass.length() < SimpleAuth.config.main.minPasswordChars) {
                 player.sendMessage(new LiteralText(
                         String.format(SimpleAuth.config.lang.minPasswordChars, SimpleAuth.config.main.minPasswordChars)
@@ -73,7 +74,7 @@ public class ChangepwCommand {
             String hash = AuthHelper.hashPass(newPass.toCharArray());
             playerdata.addProperty("password", hash);
 
-            SimpleAuth.db.updateUserData(player.getUuidAsString(), playerdata.toString());
+            SimpleAuth.db.updateUserData(convertUuid(player), playerdata.toString());
             player.sendMessage(passwordUpdated, false);
             return 1;
         }

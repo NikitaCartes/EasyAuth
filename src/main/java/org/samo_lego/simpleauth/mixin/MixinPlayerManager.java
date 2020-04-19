@@ -23,6 +23,9 @@ import java.net.SocketAddress;
 @Mixin(PlayerManager.class)
 public abstract class MixinPlayerManager {
 
+    @Final @Shadow
+    private MinecraftServer server;
+
     @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("RETURN"))
     private void onPlayerConnect(ClientConnection clientConnection, ServerPlayerEntity serverPlayerEntity, CallbackInfo ci) {
         PlayerJoinServerCallback.EVENT.invoker().onPlayerJoin(serverPlayerEntity);

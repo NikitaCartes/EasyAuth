@@ -2,6 +2,7 @@ package org.samo_lego.simpleauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -13,6 +14,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class LoginCommand {
     private static Text enterPassword = new LiteralText(SimpleAuth.config.lang.enterPassword);
@@ -39,7 +41,8 @@ public class LoginCommand {
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
-        String uuid = player.getUuidAsString();
+
+        String uuid = convertUuid(player);
         int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
 
         if(SimpleAuth.isAuthenticated(player)) {

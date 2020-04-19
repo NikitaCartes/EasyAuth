@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
+
 public class SimpleAuth implements DedicatedServerModInitializer {
 	private static final Logger LOGGER = LogManager.getLogger();
 
@@ -36,8 +38,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	public static HashMap<String, PlayerCache> deauthenticatedUsers = new HashMap<>();
 
 	// Boolean for easier checking if player is authenticated
-	public static boolean isAuthenticated(ServerPlayerEntity player) {
-		return !deauthenticatedUsers.containsKey(player.getUuidAsString());
+	public static boolean isAuthenticated(PlayerEntity player) {
+		return !deauthenticatedUsers.containsKey(convertUuid(player));
 	}
 
 	// Getting game directory
@@ -105,7 +107,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// Authenticates player and sends the message
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
-		deauthenticatedUsers.remove(player.getUuidAsString());
+		deauthenticatedUsers.remove(convertUuid(player));
 		// Player no longer needs to be invisible and invulnerable
 		player.setInvulnerable(false);
 		player.setInvisible(false);
@@ -117,7 +119,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		if(db.isClosed())
 			return;
 		// Marking player as not authenticated, (re)setting login tries to zero
-		String uuid = player.getUuidAsString();
+		String uuid = convertUuid(player);
 		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player.getIp()));
 
 		// Player is now not authenticated

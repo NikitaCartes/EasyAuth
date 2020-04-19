@@ -14,6 +14,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 
 public class RegisterCommand {
@@ -67,7 +68,7 @@ public class RegisterCommand {
             JsonObject playerdata = new JsonObject();
             playerdata.addProperty("password", hash);
 
-            if (SimpleAuth.db.registerUser(player.getUuidAsString(), playerdata.toString())) {
+            if (SimpleAuth.db.registerUser(convertUuid(player), playerdata.toString())) {
                 SimpleAuth.authenticatePlayer(player, registerSuccess);
                 return 1;
             }

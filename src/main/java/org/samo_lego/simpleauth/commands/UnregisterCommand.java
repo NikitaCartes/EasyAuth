@@ -13,6 +13,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class UnregisterCommand {
     private static Text enterPassword = new LiteralText(SimpleAuth.config.lang.enterPassword);
@@ -45,9 +46,9 @@ public class UnregisterCommand {
             player.sendMessage(cannotUnregister, false);
             return 0;
         }
-        else if (AuthHelper.checkPass(player.getUuidAsString(), pass.toCharArray()) == 1) {
+        else if (AuthHelper.checkPass(convertUuid(player), pass.toCharArray()) == 1) {
             SimpleAuth.deauthenticatePlayer(player);
-            SimpleAuth.db.deleteUserData(player.getUuidAsString());
+            SimpleAuth.db.deleteUserData(convertUuid(player));
             player.sendMessage(accountDeleted, false);
             return 1;
         }

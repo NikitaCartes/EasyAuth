@@ -32,9 +32,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
     public static SimpleAuthDatabase db = new SimpleAuthDatabase();
 
-    // If server is running carpetmod
-    public static boolean isUsingCarpet;
-
     // HashMap of players that are not authenticated
 	// Rather than storing all the authenticated players, we just store ones that are not authenticated
 	// It stores some data as well, e.g. login tries and user password
@@ -42,7 +39,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// Boolean for easier checking if player is authenticated
 	public static boolean isAuthenticated(ServerPlayerEntity player) {
-		return !deauthenticatedUsers.containsKey(player.getUuidAsString());
+		String uuid = player.getUuidAsString();
+		return !deauthenticatedUsers.containsKey(uuid) || deauthenticatedUsers.get(uuid).wasAuthenticated;
 	}
 
 	// Getting game directory
@@ -65,9 +63,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
 		// Connecting to db
 		db.openConnection();
-
-		// Checking if carpetmod is loaded
-		isUsingCarpet = FabricLoader.getInstance().isModLoaded("carpet");
 
 
 		// Registering the commands
@@ -122,7 +117,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// De-authenticates player
 	public static void deauthenticatePlayer(ServerPlayerEntity player) {
-		if(db.isClosed() || isPlayerFake(player))
+		if(db.isClosed())
 			return;
 		// Marking player as not authenticated, (re)setting login tries to zero
 		String uuid = player.getUuidAsString();
@@ -146,6 +141,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	// Checking is player is a fake (carpetmod) player
 	public static boolean isPlayerFake(PlayerEntity player) {
 		// We ask CarpetHelper class since it has the imports needed
-		return isUsingCarpet ? isPlayerCarpetFake(player) : false;
+		return FabricLoader.getInstance().isModLoaded("carpet") && isPlayerCarpetFake(player);
 	}
 }

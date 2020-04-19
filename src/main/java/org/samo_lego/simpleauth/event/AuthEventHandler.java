@@ -72,14 +72,18 @@ public class AuthEventHandler {
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
+        // If player is fake auth is not needed
+        if(isPlayerFake(player))
+            return;
         // Checking if session is still valid
         String uuid = player.getUuidAsString();
         PlayerCache playerCache = deauthenticatedUsers.getOrDefault(uuid, null);
-        if(
+
+        if (
             playerCache != null &&
-            playerCache.lastIp.equals(player.getIp()) &&
             playerCache.wasAuthenticated &&
-            playerCache.validUntil >= System.currentTimeMillis()
+            playerCache.validUntil >= System.currentTimeMillis() &&
+            playerCache.lastIp.equals(player.getIp())
         ) {
             deauthenticatedUsers.remove(uuid); // Makes player authenticated
             return;
@@ -168,7 +172,7 @@ public class AuthEventHandler {
         // Starting session
         // Putting player to deauthenticated player map
         deauthenticatePlayer(player);
-
+        
         // Setting that player was actually authenticated before leaving
         PlayerCache playerCache = deauthenticatedUsers.get(player.getUuidAsString());
         playerCache.wasAuthenticated = true;

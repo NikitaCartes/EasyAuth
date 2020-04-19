@@ -25,10 +25,15 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
+
 public class SimpleAuth implements DedicatedServerModInitializer {
 	private static final Logger LOGGER = LogManager.getLogger();
 
     public static SimpleAuthDatabase db = new SimpleAuthDatabase();
+
+    // If server is running carpetmod
+    public static boolean isUsingCarpet;
 
     // HashMap of players that are not authenticated
 	// Rather than storing all the authenticated players, we just store ones that are not authenticated
@@ -60,6 +65,9 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
 		// Connecting to db
 		db.openConnection();
+
+		// Checking if carpetmod is loaded
+		isUsingCarpet = FabricLoader.getInstance().isModLoaded("carpet");
 
 
 		// Registering the commands
@@ -114,7 +122,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// De-authenticates player
 	public static void deauthenticatePlayer(ServerPlayerEntity player) {
-		if(db.isClosed())
+		if(db.isClosed() || isPlayerFake(player))
 			return;
 		// Marking player as not authenticated, (re)setting login tries to zero
 		String uuid = player.getUuidAsString();
@@ -133,5 +141,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 					player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
 			}
 		}, SimpleAuth.config.main.delay * 1000);
+	}
+
+	// Checking is player is a fake (carpetmod) player
+	public static boolean isPlayerFake(PlayerEntity player) {
+		// We ask CarpetHelper class since it has the imports needed
+		return isUsingCarpet ? isPlayerCarpetFake(player) : false;
 	}
 }

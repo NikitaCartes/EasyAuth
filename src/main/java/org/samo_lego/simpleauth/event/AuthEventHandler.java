@@ -51,7 +51,7 @@ public class AuthEventHandler {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(incomingPlayerUsername);
 
-        if(onlinePlayer != null && config.experimental.disableAnotherLocationKick) {
+        if((onlinePlayer != null && !isPlayerFake(onlinePlayer)) && config.experimental.disableAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
             return new LiteralText(
@@ -158,7 +158,11 @@ public class AuthEventHandler {
     }
 
     public static void onPlayerLeave(ServerPlayerEntity player) {
-        if(!isAuthenticated(player) || config.main.sessionTimeoutTime == -1)
+        if(
+            !isAuthenticated(player) ||
+            config.main.sessionTimeoutTime == -1 ||
+            isPlayerFake(player)
+        )
             return;
 
         // Starting session

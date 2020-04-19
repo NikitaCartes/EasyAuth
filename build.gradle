@@ -3,6 +3,13 @@ plugins {
 	id 'maven-publish'
 }
 
+repositories {
+	// Carpet mod
+	maven {
+		url 'https://masa.dy.fi/maven'
+	}
+}
+
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -36,8 +43,8 @@ dependencies {
 	// JNA lib
 	include 'net.java.dev.jna:jna:5.5.0'
 
-    // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-	// You may need to force-disable transitiveness on them.
+	// carpetMod
+	modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
 }
 
 processResources {

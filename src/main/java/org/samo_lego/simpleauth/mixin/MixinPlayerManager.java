@@ -2,7 +2,6 @@ package org.samo_lego.simpleauth.mixin;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -10,9 +9,7 @@ import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerLeaveServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PrePlayerJoinCallback;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -22,9 +19,6 @@ import java.net.SocketAddress;
 
 @Mixin(PlayerManager.class)
 public abstract class MixinPlayerManager {
-
-    @Final @Shadow
-    private MinecraftServer server;
 
     @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("RETURN"))
     private void onPlayerConnect(ClientConnection clientConnection, ServerPlayerEntity serverPlayerEntity, CallbackInfo ci) {

@@ -41,7 +41,7 @@ public class SimpleAuthDatabase {
 
     // Tells whether db connection is closed
     public boolean isClosed() {
-        return levelDBStore != null;
+        return levelDBStore == null;
     }
 
 

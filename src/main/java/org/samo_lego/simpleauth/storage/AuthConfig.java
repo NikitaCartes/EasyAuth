@@ -40,7 +40,7 @@ public class AuthConfig {
         // Disables registering and forces logging in with global password
         // Visit https://github.com/samolego/SimpleAuth/wiki/Locking-server-with-global-password for more info
         public boolean enableGlobalPassword = false;
-        public String globalPassword = null;
+        public String globalPassword;
         // Tries to rescue players if they are stuck inside a portal on logging in
         // Visit https://github.com/samolego/SimpleAuth/wiki/Portal-Rescue for more info
         public boolean tryPortalRescue = true;
@@ -54,6 +54,14 @@ public class AuthConfig {
         // Set to -1 to disable
         // Visit https://github.com/samolego/SimpleAuth/wiki/Sessions for more info
         public int sessionTimeoutTime = 60;
+
+        public boolean spawnOnJoin =  false;
+        public static class WorldSpawn {
+                public int dimensionId;
+                public double x;
+                public double y;
+                public double z;
+        };
     }
     public static class LangConfig {
         public String enterPassword = "§6You need to enter your password!";
@@ -83,6 +91,7 @@ public class AuthConfig {
         public String minPasswordChars = "§6Password needs to be at least %d characters long!";
         public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
         public String playerAlreadyOnline = "§cPlayer %s is already online!";
+        public String worldSpawnSet = "";
     }
     public static class ExperimentalConfig {
         // Prevents player being kicked because another player with the same name has joined the server
@@ -114,6 +123,7 @@ public class AuthConfig {
             .create();
 
     public MainConfig main = new MainConfig();
+    public MainConfig.WorldSpawn worldSpawn = new MainConfig.WorldSpawn();
     public LangConfig lang = new LangConfig();
     public ExperimentalConfig experimental = new ExperimentalConfig();
 

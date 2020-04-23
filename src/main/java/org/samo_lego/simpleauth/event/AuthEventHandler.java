@@ -71,6 +71,7 @@ public class AuthEventHandler {
         return null;
     }
 
+
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         // If player is fake auth is not needed
@@ -89,8 +90,7 @@ public class AuthEventHandler {
             deauthenticatedUsers.remove(uuid); // Makes player authenticated
             return;
         }
-        else
-            deauthenticatePlayer(player);
+        deauthenticatePlayer(player);
 
         // Tries to rescue player from nether portal
         if(config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
@@ -163,11 +163,13 @@ public class AuthEventHandler {
     }
 
     public static void onPlayerLeave(ServerPlayerEntity player) {
-        if(
-            !isAuthenticated(player) ||
-            config.main.sessionTimeoutTime == -1 ||
-            isPlayerFake(player)
-        )
+        if(isPlayerFake(player))
+            return;
+
+        // Teleporting player back
+        teleportPlayer(player, false);
+
+        if(!isAuthenticated(player) || config.main.sessionTimeoutTime == -1)
             return;
 
         // Starting session

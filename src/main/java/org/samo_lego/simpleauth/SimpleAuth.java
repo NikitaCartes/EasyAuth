@@ -6,9 +6,11 @@ import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.world.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.commands.*;
@@ -109,7 +111,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// Authenticates player and sends the message
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
+		// Teleporting player back
+		teleportPlayer(player, false);
+
 		deauthenticatedUsers.remove(convertUuid(player));
+
 		// Player no longer needs to be invisible and invulnerable
 		player.setInvulnerable(false);
 		player.setInvisible(false);
@@ -120,9 +126,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	public static void deauthenticatePlayer(ServerPlayerEntity player) {
 		if(db.isClosed())
 			return;
+
 		// Marking player as not authenticated, (re)setting login tries to zero
 		String uuid = convertUuid(player);
-		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player.getIp()));
+		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player));
+		// Teleporting player to spawn to hide its position
+		teleportPlayer(player, true);
 
 		// Player is now not authenticated
 		player.sendMessage(notAuthenticated(), false);
@@ -143,5 +152,34 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	public static boolean isPlayerFake(PlayerEntity player) {
 		// We ask CarpetHelper class since it has the imports needed
 		return FabricLoader.getInstance().isModLoaded("carpet") && isPlayerCarpetFake(player);
+	}
+
+	// Teleports player to spawn or last location when authenticating
+	public static void teleportPlayer(ServerPlayerEntity player, boolean toSpawn) {
+		if(config.main.spawnOnJoin) {
+			MinecraftServer server = player.getServer();
+			assert server != null;
+			if (toSpawn) {
+				// Teleports player to spawn
+				player.teleport(
+						server.getWorld(DimensionType.byRawId(config.worldSpawn.dimensionId)),
+						config.worldSpawn.x,
+						config.worldSpawn.y,
+						config.worldSpawn.z,
+						0,
+						0
+				);
+				return;
+			}
+			PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
+			// Puts player to last cached position
+			player.setWorld(server.getWorld(DimensionType.byRawId(cache.lastDimId)));
+			player.setPos(
+					cache.lastX,
+					cache.lastY,
+					cache.lastZ
+			);
+			player.updateNeeded = true;
+		}
 	}
 }

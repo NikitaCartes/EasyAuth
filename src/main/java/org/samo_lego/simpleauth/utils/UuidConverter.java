@@ -2,8 +2,6 @@ package org.samo_lego.simpleauth.utils;
 
 import net.minecraft.entity.player.PlayerEntity;
 
-import java.util.UUID;
-
 /**
  * Converts player uuid, to ensure player with "nAmE" and "NamE" get same uuid
  * Both players are not allowed to play, since mod mimics Mojang behaviour
@@ -26,7 +24,6 @@ public class UuidConverter {
      * @return converted UUID as string
      */
     public static String convertUuid(PlayerEntity player) {
-        System.out.println("Playeruuid: " + player.getUuidAsString() + " converted: " + PlayerEntity.getOfflinePlayerUuid(player.getName().asString().toLowerCase()).toString());
         return convertUuid(player.getName().asString().toLowerCase());
     }
 }

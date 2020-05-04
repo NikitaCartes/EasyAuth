@@ -21,7 +21,10 @@ import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.storage.SimpleAuthDatabase;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -46,6 +49,10 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// Getting game directory
 	public static final File gameDirectory = FabricLoader.getInstance().getGameDirectory();
+
+	// Server properties
+	public static Properties serverProp = new Properties();
+
 	// Mod config
 	public static AuthConfig config;
 
@@ -64,6 +71,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
 		// Connecting to db
 		db.openConnection();
+
+		try {
+			serverProp.load(new FileReader(gameDirectory + "/server.properties"));
+		} catch (IOException e) {
+			LOGGER.error("[SimpleAuth] Error while reading server properties: " + e.getMessage());
+		}
 
 
 		// Registering the commands

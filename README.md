@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/License-MIT-brightgreen)
 [![Curseforge downloads](http://cf.way2muchnoise.eu/full_simpleauth_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/simpleauth)
-![Java CI with Gradle](https://github.com/samolego/SimpleAuth/workflows/Java%20CI%20with%20Gradle/badge.svg)
+![Gradle Build](https://github.com/samolego/SimpleAuth/workflows/Gradle%20Build/badge.svg)
 
 Requires Fabric API.
 

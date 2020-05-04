@@ -2,6 +2,8 @@ package org.samo_lego.simpleauth.utils;
 
 import net.minecraft.entity.player.PlayerEntity;
 
+import static org.samo_lego.simpleauth.SimpleAuth.serverProp;
+
 /**
  * Converts player uuid, to ensure player with "nAmE" and "NamE" get same uuid
  * Both players are not allowed to play, since mod mimics Mojang behaviour
@@ -9,21 +11,22 @@ import net.minecraft.entity.player.PlayerEntity;
  */
 public class UuidConverter {
 
-    /** Converts player UUID to offline mode style.
-     *
-     * @param playername name of the player to get UUID for
-     * @return converted UUID as string
-     */
-    public static String convertUuid(String playername) {
-        return PlayerEntity.getOfflinePlayerUuid(playername).toString();
-    }
+    private static final boolean isOnline = (boolean) serverProp.getOrDefault("online-mode", false);
 
-    /** Converts player UUID to offline mode style.
+    /** Gets player UUID.
      *
      * @param player player to get UUID for
      * @return converted UUID as string
      */
     public static String convertUuid(PlayerEntity player) {
-        return convertUuid(player.getName().asString().toLowerCase());
+        // If server is in online mode online-mode UUIDs should be used
+        if(isOnline)
+            return player.getUuidAsString();
+
+        /* Lower case is used for Player and PlAyEr to get same UUID
+            Mimicking Mojang behaviour, where players cannot set their name to
+            ExAmple if example is already taken.*/
+        String playername = player.getName().asString().toLowerCase();
+        return PlayerEntity.getOfflinePlayerUuid(playername).toString();
     }
 }

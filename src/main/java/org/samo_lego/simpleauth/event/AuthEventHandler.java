@@ -163,13 +163,7 @@ public class AuthEventHandler {
     }
 
     public static void onPlayerLeave(ServerPlayerEntity player) {
-        if(isPlayerFake(player))
-            return;
-
-        // Teleporting player back
-        teleportPlayer(player, false);
-
-        if(!isAuthenticated(player) || config.main.sessionTimeoutTime == -1)
+        if(isPlayerFake(player) || !isAuthenticated(player) || config.main.sessionTimeoutTime == -1)
             return;
 
         // Starting session

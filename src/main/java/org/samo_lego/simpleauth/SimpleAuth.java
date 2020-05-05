@@ -112,7 +112,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	// Authenticates player and sends the message
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
 		// Teleporting player back
-		teleportPlayer(player, false);
+		if(config.main.spawnOnJoin)
+			teleportPlayer(player, false);
 
 		deauthenticatedUsers.remove(convertUuid(player));
 
@@ -131,7 +132,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		String uuid = convertUuid(player);
 		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player));
 		// Teleporting player to spawn to hide its position
-		teleportPlayer(player, true);
+		if(config.main.spawnOnJoin)
+			teleportPlayer(player, true);
 
 		// Player is now not authenticated
 		player.sendMessage(notAuthenticated(), false);
@@ -156,30 +158,30 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// Teleports player to spawn or last location when authenticating
 	public static void teleportPlayer(ServerPlayerEntity player, boolean toSpawn) {
-		if(config.main.spawnOnJoin) {
-			MinecraftServer server = player.getServer();
-			assert server != null;
-			if (toSpawn) {
-				// Teleports player to spawn
-				player.teleport(
-						server.getWorld(DimensionType.byRawId(config.worldSpawn.dimensionId)),
-						config.worldSpawn.x,
-						config.worldSpawn.y,
-						config.worldSpawn.z,
-						0,
-						0
-				);
-				return;
-			}
-			PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
-			// Puts player to last cached position
-			player.setWorld(server.getWorld(DimensionType.byRawId(cache.lastDimId)));
-			player.setPos(
-					cache.lastX,
-					cache.lastY,
-					cache.lastZ
+		MinecraftServer server = player.getServer();
+		if(server == null)
+			return;
+		if (toSpawn) {
+			// Teleports player to spawn
+			player.teleport(
+					server.getWorld(DimensionType.byRawId(config.worldSpawn.dimensionId)),
+					config.worldSpawn.x,
+					config.worldSpawn.y,
+					config.worldSpawn.z,
+					0,
+					0
 			);
-			player.updateNeeded = true;
+			return;
 		}
+		PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
+		// Puts player to last cached position
+		player.teleport(
+				server.getWorld(DimensionType.byRawId(cache.lastDimId)),
+				cache.lastX,
+				cache.lastY,
+				cache.lastZ,
+				0,
+				0
+		);
 	}
 }

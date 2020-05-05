@@ -79,9 +79,9 @@ public class SimpleAuthDatabase {
     }
 
     // Updates the password of the user
-    public void updateUserData(String uuid, String password) {
+    public void updateUserData(String uuid, String data) {
         try {
-            levelDBStore.put(bytes("UUID:" + uuid),bytes("data:" + password));
+            levelDBStore.put(bytes("UUID:" + uuid),bytes("data:" + data));
         } catch (Error e) {
             LOGGER.error("[SimpleAuth] " + e.getMessage());
         }

@@ -79,15 +79,17 @@ public class AuthEventHandler {
         // Checking if session is still valid
         String uuid = convertUuid(player);
         PlayerCache playerCache = deauthenticatedUsers.getOrDefault(uuid, null);
-
-        if (
-            playerCache != null &&
-            playerCache.wasAuthenticated &&
-            playerCache.validUntil >= System.currentTimeMillis() &&
-            playerCache.lastIp.equals(player.getIp())
-        ) {
-            deauthenticatedUsers.remove(uuid); // Makes player authenticated
-            return;
+        
+        if(playerCache != null) {
+            if (
+                playerCache.wasAuthenticated &&
+                playerCache.validUntil >= System.currentTimeMillis() &&
+                playerCache.lastIp.equals(player.getIp())
+            ) {
+                deauthenticatedUsers.remove(uuid); // Makes player authenticated
+                return;
+            }
+            // Session is invalid
         }
         else
             deauthenticatePlayer(player);

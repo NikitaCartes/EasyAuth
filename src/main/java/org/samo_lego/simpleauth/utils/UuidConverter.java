@@ -11,7 +11,7 @@ import static org.samo_lego.simpleauth.SimpleAuth.serverProp;
  */
 public class UuidConverter {
 
-    private static final boolean isOnline = (boolean) serverProp.getOrDefault("online-mode", false);
+    private static final boolean isOnline = Boolean.parseBoolean(serverProp.getProperty("online-mode"));
 
     /** Gets player UUID.
      *
@@ -25,7 +25,7 @@ public class UuidConverter {
 
         /* Lower case is used for Player and PlAyEr to get same UUID
             Mimicking Mojang behaviour, where players cannot set their name to
-            ExAmple if example is already taken.*/
+            ExAmple if Example is already taken.*/
         String playername = player.getName().asString().toLowerCase();
         return PlayerEntity.getOfflinePlayerUuid(playername).toString();
     }

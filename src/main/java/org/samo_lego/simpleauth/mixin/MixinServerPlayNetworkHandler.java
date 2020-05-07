@@ -6,13 +6,10 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.world.dimension.DimensionType;
 import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
 import org.samo_lego.simpleauth.event.item.TakeItemCallback;
-import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,9 +18,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action.SWAP_HELD_ITEMS;
-import static org.samo_lego.simpleauth.SimpleAuth.config;
-import static org.samo_lego.simpleauth.SimpleAuth.deauthenticatedUsers;
-import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class MixinServerPlayNetworkHandler {
@@ -84,50 +78,6 @@ public abstract class MixinServerPlayNetworkHandler {
             // A bit ugly, I know. (we need to update player position)
             this.player.requestTeleport(this.player.getX(), this.player.getY(), this.player.getZ());
             ci.cancel();
-        }
-    }
-
-    @Inject(
-            method="disconnect(Lnet/minecraft/text/Text;)V",
-            at = @At(value = "HEAD"),
-            cancellable = true
-    )
-    // If player is disconnected because of sth (e.g. wrong password)
-    // its position is set back to previous (e.g. not spawn)
-    private void disconnect(Text reason, CallbackInfo ci) {
-        if(config.main.spawnOnJoin) {
-            PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
-            // Puts player to last cached position
-            this.player.teleport(
-                    this.server.getWorld(DimensionType.byRawId(cache.lastDimId)),
-                    cache.lastX,
-                    cache.lastY,
-                    cache.lastZ,
-                    0,
-                    0
-            );
-        }
-    }
-
-    @Inject(
-            method="onDisconnected(Lnet/minecraft/text/Text;)V",
-            at = @At(value = "HEAD"),
-            cancellable = true
-    )
-    // If player is disconnected because of sth (e.g. wrong password)
-    // its position is set back to previous (e.g. not spawn)
-    private void onDisconnected(Text reason, CallbackInfo ci) {
-        if(config.main.spawnOnJoin) {
-            PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
-            // Puts player to last cached position
-            this.player.teleport(
-                    this.server.getWorld(DimensionType.byRawId(cache.lastDimId)),
-                    cache.lastX,
-                    cache.lastY,
-                    cache.lastZ,
-                    0,
-                    0
-            );
         }
     }
 }

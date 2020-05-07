@@ -2,6 +2,7 @@ package org.samo_lego.simpleauth.commands;
 
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.command.arguments.BlockPosArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -50,28 +51,23 @@ public class AuthCommand {
                     )
             )
             .then(literal("setSpawn")
-                    .then(argument("here", word())
-                            .executes( ctx -> setSpawn(
+                    .executes( ctx -> setSpawn(
+                            ctx.getSource(),
+                            Objects.requireNonNull(ctx.getSource().getEntity()).dimension.getRawId(),
+                            ctx.getSource().getEntity().getX(),
+                            ctx.getSource().getEntity().getY(),
+                            ctx.getSource().getEntity().getZ()
+                    ))
+                    .then(argument("dimension id", integer())
+                            .then(argument("position", BlockPosArgumentType.blockPos())
+                                .executes(ctx -> setSpawn(
                                     ctx.getSource(),
-                                    Objects.requireNonNull(ctx.getSource().getEntity()).dimension.getRawId(),
-                                    ctx.getSource().getEntity().getX(),
-                                    ctx.getSource().getEntity().getY(),
-                                    ctx.getSource().getEntity().getZ()
-                            ))
-                    )
-                    .then(argument("dimensionId", integer())
-                            .then(argument("x", integer())
-                                    .then(argument("y", integer())
-                                            .then(argument("z", integer())
-                                                .executes( ctx -> setSpawn(
-                                                        ctx.getSource(),
-                                                        getInteger(ctx, "dimensionId"),
-                                                        getInteger(ctx, "x"),
-                                                        getInteger(ctx, "y"),
-                                                        getInteger(ctx, "z")
-                                                ))
-                                            )
-                                    )
+                                    getInteger(ctx, "dimension id"),
+                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
+                                    // +1 to not spawn player in ground
+                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,
+                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ()
+                                ))
                             )
                     )
             )

@@ -61,7 +61,7 @@ public class AuthConfig {
                 public double x;
                 public double y;
                 public double z;
-        };
+        }
     }
     public static class LangConfig {
         public String enterPassword = "§6You need to enter your password!";
@@ -91,7 +91,7 @@ public class AuthConfig {
         public String minPasswordChars = "§6Password needs to be at least %d characters long!";
         public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
         public String playerAlreadyOnline = "§cPlayer %s is already online!";
-        public String worldSpawnSet = "";
+        public String worldSpawnSet = "§aSpawn for logging in was set successfully.";
     }
     public static class ExperimentalConfig {
         // Prevents player being kicked because another player with the same name has joined the server

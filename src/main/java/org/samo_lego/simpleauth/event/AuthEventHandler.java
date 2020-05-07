@@ -75,22 +75,29 @@ public class AuthEventHandler {
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         // If player is fake auth is not needed
-        if(isPlayerFake(player))
+        if (isPlayerFake(player))
             return;
         // Checking if session is still valid
         String uuid = convertUuid(player);
         PlayerCache playerCache = deauthenticatedUsers.getOrDefault(uuid, null);
 
-        if (
-            playerCache != null &&
-            playerCache.wasAuthenticated &&
-            playerCache.validUntil >= System.currentTimeMillis() &&
-            playerCache.lastIp.equals(player.getIp())
-        ) {
-            deauthenticatedUsers.remove(uuid); // Makes player authenticated
-            return;
+        if (playerCache != null) {
+            if (
+                playerCache.wasAuthenticated &&
+                playerCache.validUntil >= System.currentTimeMillis() &&
+                playerCache.lastIp.equals(player.getIp())
+            ) {
+                deauthenticatedUsers.remove(uuid); // Makes player authenticated
+                return;
+            }
+            // Invalidating session
+            playerCache.wasAuthenticated = false;
         }
-        deauthenticatePlayer(player);
+        else
+            deauthenticatePlayer(player);
+
+        if(config.main.spawnOnJoin)
+            teleportPlayer(player, true);
 
         // Tries to rescue player from nether portal
         if(config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
@@ -174,6 +181,7 @@ public class AuthEventHandler {
         PlayerCache playerCache = deauthenticatedUsers.get(convertUuid(player));
         if(playerCache == null)
             return;
+
         playerCache.wasAuthenticated = true;
         // Setting the session expire time
         playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;

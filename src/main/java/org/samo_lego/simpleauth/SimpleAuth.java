@@ -1,5 +1,6 @@
 package org.samo_lego.simpleauth;
 
+import com.google.gson.JsonObject;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.event.server.ServerStopCallback;
@@ -13,6 +14,7 @@ import net.minecraft.text.Text;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.iq80.leveldb.WriteBatch;
 import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.event.entity.player.*;
@@ -23,10 +25,12 @@ import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.storage.SimpleAuthDatabase;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
 import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
@@ -98,6 +102,32 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	private static void onStopServer() {
 		LOGGER.info("[SimpleAuth] Shutting down SimpleAuth.");
+
+		WriteBatch batch = db.levelDBStore.createWriteBatch();
+		// Writing coords of de-authenticated players to database
+		deauthenticatedUsers.forEach((uuid, playerCache) -> {
+			JsonObject data = new JsonObject();
+			data.addProperty("password", playerCache.password);
+
+			JsonObject lastLocation = new JsonObject();
+			lastLocation.addProperty("dimId", playerCache.lastDimId);
+			lastLocation.addProperty("x", playerCache.lastX);
+			lastLocation.addProperty("y", playerCache.lastY);
+			lastLocation.addProperty("z", playerCache.lastZ);
+
+			data.addProperty("lastLocation", lastLocation.toString());
+
+			batch.put(bytes("UUID:" + uuid), bytes("data:" + data.toString()));
+		});
+		try {
+			// Writing and closing batch
+			db.levelDBStore.write(batch);
+			batch.close();
+		} catch (IOException e) {
+			LOGGER.error("[SimpleAuth] Error saving player data! " + e.getMessage());
+		}
+
+		// Closing DB connection
 		db.close();
 	}
 
@@ -131,6 +161,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Marking player as not authenticated, (re)setting login tries to zero
 		String uuid = convertUuid(player);
 		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player));
+
 		// Teleporting player to spawn to hide its position
 		if(config.main.spawnOnJoin)
 			teleportPlayer(player, true);

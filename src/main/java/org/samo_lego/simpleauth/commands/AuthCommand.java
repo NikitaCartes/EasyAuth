@@ -2,6 +2,7 @@ package org.samo_lego.simpleauth.commands;
 
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.command.arguments.BlockPosArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -15,19 +16,24 @@ import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import java.io.File;
+import java.util.Objects;
 
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.SimpleAuth.config;
+import static org.samo_lego.simpleauth.SimpleAuth.db;
 
 public class AuthCommand {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private static Text userdataDeleted = new LiteralText(SimpleAuth.config.lang.userdataDeleted);
-    private static Text userdataUpdated = new LiteralText(SimpleAuth.config.lang.userdataUpdated);
-    private static Text configurationReloaded = new LiteralText(SimpleAuth.config.lang.configurationReloaded);
-    private static Text globalPasswordSet = new LiteralText(SimpleAuth.config.lang.globalPasswordSet);
+    private static Text userdataDeleted = new LiteralText(config.lang.userdataDeleted);
+    private static Text userdataUpdated = new LiteralText(config.lang.userdataUpdated);
+    private static Text configurationReloaded = new LiteralText(config.lang.configurationReloaded);
+    private static Text globalPasswordSet = new LiteralText(config.lang.globalPasswordSet);
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/auth" command
@@ -42,6 +48,27 @@ public class AuthCommand {
                                     ctx.getSource(),
                                     getString(ctx, "password")
                             ))
+                    )
+            )
+            .then(literal("setSpawn")
+                    .executes( ctx -> setSpawn(
+                            ctx.getSource(),
+                            Objects.requireNonNull(ctx.getSource().getEntity()).dimension.getRawId(),
+                            ctx.getSource().getEntity().getX(),
+                            ctx.getSource().getEntity().getY(),
+                            ctx.getSource().getEntity().getZ()
+                    ))
+                    .then(argument("dimension id", integer())
+                            .then(argument("position", BlockPosArgumentType.blockPos())
+                                .executes(ctx -> setSpawn(
+                                    ctx.getSource(),
+                                    getInteger(ctx, "dimension id"),
+                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
+                                    // +1 to not spawn player in ground
+                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,
+                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ()
+                                ))
+                            )
                     )
             )
             .then(literal("remove")
@@ -80,12 +107,12 @@ public class AuthCommand {
     // Reloading the config
     private static int reloadConfig(ServerCommandSource source) {
         Entity sender = source.getEntity();
-        SimpleAuth.config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
+        config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(configurationReloaded, false);
         else
-            LOGGER.info(SimpleAuth.config.lang.configurationReloaded);
+            LOGGER.info(config.lang.configurationReloaded);
         return 1;
     }
 
@@ -94,27 +121,41 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
         // Writing the global pass to config
-        SimpleAuth.config.main.globalPassword = AuthHelper.hashPass(pass.toCharArray());
-        SimpleAuth.config.main.enableGlobalPassword = true;
-        SimpleAuth.config.save(new File("./mods/SimpleAuth/config.json"));
+        config.main.globalPassword = AuthHelper.hashPass(pass.toCharArray());
+        config.main.enableGlobalPassword = true;
+        config.save(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(globalPasswordSet, false);
         else
-            LOGGER.info(SimpleAuth.config.lang.globalPasswordSet);
+            LOGGER.info(config.lang.globalPasswordSet);
+        return 1;
+    }
+
+    //
+    private static int setSpawn(ServerCommandSource source, int dimensionId, double x, double y, double z) {
+        config.worldSpawn.dimensionId = dimensionId;
+        config.worldSpawn.x = x;
+        config.worldSpawn.y = y;
+        config.worldSpawn.z = z;
+        Entity sender = source.getEntity();
+        if(sender != null)
+            sender.sendSystemMessage(new LiteralText(config.lang.worldSpawnSet));
+        else
+            LOGGER.info(config.lang.worldSpawnSet);
         return 1;
     }
 
     // Deleting (unregistering) user's account
     private static int removeAccount(ServerCommandSource source, String uuid) {
         Entity sender = source.getEntity();
-        SimpleAuth.db.deleteUserData(uuid);
-        SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, ""));
+        db.deleteUserData(uuid);
+        SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, null));
 
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(userdataDeleted, false);
         else
-            LOGGER.info(SimpleAuth.config.lang.userdataDeleted);
+            LOGGER.info(config.lang.userdataDeleted);
         return 1; // Success
     }
 
@@ -128,11 +169,11 @@ public class AuthCommand {
         String hash = AuthHelper.hashPass(password.toCharArray());
         playerdata.addProperty("password", hash);
 
-        if(SimpleAuth.db.registerUser(uuid, playerdata.toString())) {
+        if(db.registerUser(uuid, playerdata.toString())) {
             if(sender != null)
                 ((PlayerEntity) sender).sendMessage(userdataUpdated, false);
             else
-                LOGGER.info(SimpleAuth.config.lang.userdataUpdated);
+                LOGGER.info(config.lang.userdataUpdated);
             return 1;
         }
         return 0;
@@ -148,11 +189,11 @@ public class AuthCommand {
         String hash = AuthHelper.hashPass(password.toCharArray());
         playerdata.addProperty("password", hash);
 
-        SimpleAuth.db.updateUserData(uuid, playerdata.toString());
+        db.updateUserData(uuid, playerdata.toString());
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(userdataUpdated, false);
         else
-            LOGGER.info(SimpleAuth.config.lang.userdataUpdated);
+            LOGGER.info(config.lang.userdataUpdated);
         return 1;
     }
     // todo PlayerEntity.getOfflinePlayerUuid("")

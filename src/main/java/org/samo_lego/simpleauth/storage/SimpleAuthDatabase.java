@@ -15,7 +15,7 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
 public class SimpleAuthDatabase {
     private static final Logger LOGGER = LogManager.getLogger();
-    private DB levelDBStore;
+    public DB levelDBStore;
 
     // Connects to the DB
     public void openConnection() {
@@ -79,9 +79,9 @@ public class SimpleAuthDatabase {
     }
 
     // Updates the password of the user
-    public void updateUserData(String uuid, String password) {
+    public void updateUserData(String uuid, String data) {
         try {
-            levelDBStore.put(bytes("UUID:" + uuid),bytes("data:" + password));
+            levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
         } catch (Error e) {
             LOGGER.error("[SimpleAuth] " + e.getMessage());
         }

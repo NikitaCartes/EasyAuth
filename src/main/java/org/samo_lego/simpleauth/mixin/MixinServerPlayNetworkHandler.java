@@ -3,12 +3,14 @@ package org.samo_lego.simpleauth.mixin;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
 import org.samo_lego.simpleauth.event.item.TakeItemCallback;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,6 +23,10 @@ import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action
 public abstract class MixinServerPlayNetworkHandler {
     @Shadow
     public ServerPlayerEntity player;
+
+    @Final
+    @Shadow
+    private MinecraftServer server;
 
     @Inject(
             method = "onGameMessage(Lnet/minecraft/network/packet/c2s/play/ChatMessageC2SPacket;)V",

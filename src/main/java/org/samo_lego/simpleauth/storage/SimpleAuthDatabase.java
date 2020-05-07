@@ -90,7 +90,7 @@ public class SimpleAuthDatabase {
     // Gets the hashed password from DB
     public String getData(String uuid){
         try {
-            if(this.isUserRegistered(uuid))  // Gets password from db and removes "password:" prefix from it
+            if(this.isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);
         } catch (Error e) {
             LOGGER.error("[SimpleAuth] Error getting password: " + e.getMessage());

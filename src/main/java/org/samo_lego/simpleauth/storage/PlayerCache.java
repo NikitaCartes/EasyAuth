@@ -2,7 +2,8 @@ package org.samo_lego.simpleauth.storage;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.samo_lego.simpleauth.SimpleAuth;
+
+import static org.samo_lego.simpleauth.SimpleAuth.db;
 
 public class PlayerCache {
     public boolean isRegistered;
@@ -15,8 +16,6 @@ public class PlayerCache {
 
 
     public PlayerCache(String uuid, String ip) {
-        SimpleAuthDatabase db = SimpleAuth.db;
-
         this.wasAuthenticated = false;
         this.loginTries = 0;
         this.lastIp = ip;

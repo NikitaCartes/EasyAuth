@@ -22,10 +22,11 @@ public class UuidConverter {
         // If server is in online mode online-mode UUIDs should be used
         if(isOnline)
             return player.getUuidAsString();
-
-        /* Lower case is used for Player and PlAyEr to get same UUID
+        /*
+            Lower case is used for Player and PlAyEr to get same UUID (for password storing)
             Mimicking Mojang behaviour, where players cannot set their name to
-            ExAmple if Example is already taken.*/
+            ExAmple if Example is already taken.
+        */
         String playername = player.getName().asString().toLowerCase();
         return PlayerEntity.getOfflinePlayerUuid(playername).toString();
     }

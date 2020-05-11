@@ -157,6 +157,9 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		if(config.main.spawnOnJoin)
 			teleportPlayer(player, false);
 
+		// Updating chunk if needed (if portal rescue action happened)
+		if(deauthenticatedUsers.get(convertUuid(player)).wasInPortal)
+
 		deauthenticatedUsers.remove(convertUuid(player));
 
 		// Player no longer needs to be invisible and invulnerable

@@ -6,6 +6,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -13,15 +14,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import org.samo_lego.simpleauth.mixin.BlockUpdateS2CPacketAccess;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
 import java.net.SocketAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static net.minecraft.block.NetherPortalBlock.AXIS;
-import static net.minecraft.util.math.Direction.Axis.Z;
 import static org.samo_lego.simpleauth.SimpleAuth.*;
 import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
@@ -92,6 +91,10 @@ public class AuthEventHandler {
             }
             // Invalidating session
             playerCache.wasAuthenticated = false;
+            if(playerCache.isRegistered)
+                player.sendMessage(new LiteralText(config.lang.loginRequired), false);
+            else
+                player.sendMessage(new LiteralText(config.lang.notRegistered), false);
         }
         else
             deauthenticatePlayer(player);
@@ -99,73 +102,26 @@ public class AuthEventHandler {
         if(config.main.spawnOnJoin)
             teleportPlayer(player, true);
 
+
         // Tries to rescue player from nether portal
         if(config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
-            boolean wasSuccessful = false;
+            PlayerCache newPlayerCache = deauthenticatedUsers.get(uuid);
+            BlockPos pos = player.getBlockPos();
 
-            BlockState portalState = player.getBlockState();
-            World world = player.getEntityWorld();
+            // Faking portal blocks to be air
+            BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket();
+            ((BlockUpdateS2CPacketAccess) feetPacket).setState(new BlockState(Blocks.AIR, null));
+            ((BlockUpdateS2CPacketAccess) feetPacket).setBlockPos(pos);
+            player.networkHandler.sendPacket(feetPacket);
 
-            double x = player.getX();
-            double y = player.getY();
-            double z = player.getZ();
+            BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket();
+            ((BlockUpdateS2CPacketAccess) headPacket).setState(new BlockState(Blocks.AIR, null));
+            ((BlockUpdateS2CPacketAccess) headPacket).setBlockPos(pos.up());
+            player.networkHandler.sendPacket(headPacket);
 
-            if(portalState.get(AXIS) == Z) {
-                // Player should be put to eastern or western block
-                if( // Checking towards east
-                        world.getBlockState(new BlockPos(x + 1, y, z)).isAir() &&
-                        world.getBlockState(new BlockPos(x + 1, y + 1, z)).isAir() &&
-                        (
-                            world.getBlockState(new BlockPos(x + 1, y - 1, z)).isOpaque() ||
-                            world.getBlockState(new BlockPos(x + 1, y - 1, z)).hasSolidTopSurface(world, new BlockPos(x + 1, y - 1, z), player)
-                        )
-                ) {
-                    x++; // Towards east
-                    wasSuccessful = true;
-                }
-
-                else if( // Checking towards south
-                        world.getBlockState(new BlockPos(x - 1, y, z)).isAir() &&
-                        world.getBlockState(new BlockPos(x - 1, y + 1, z)).isAir() &&
-                        (
-                            world.getBlockState(new BlockPos(x - 1, y - 1, z)).isOpaque() ||
-                            world.getBlockState(new BlockPos(x - 1, y - 1, z)).hasSolidTopSurface(world, new BlockPos(x - 1, y - 1, z), player)
-                        )
-                ) {
-                    x--; // Towards south
-                    wasSuccessful = true;
-                }
-            }
-            else {
-                // Player should be put to northern or southern block
-                if( // Checking towards south
-                        world.getBlockState(new BlockPos(x, y, z + 1)).isAir() &&
-                        world.getBlockState(new BlockPos(x, y + 1, z + 1)).isAir() &&
-                        (
-                            world.getBlockState(new BlockPos(x, y - 1, z + 1)).isOpaque() ||
-                            world.getBlockState(new BlockPos(x, y - 1, z + 1)).hasSolidTopSurface(world, new BlockPos(x, y - 1, z + 1), player)
-                        )
-                ) {
-                    z++; // Towards south
-                    wasSuccessful = true;
-                }
-
-                else if( // Checking towards north
-                        world.getBlockState(new BlockPos(x, y, z - 1)).isAir() &&
-                        world.getBlockState(new BlockPos(x, y + 1, z - 1)).isAir() &&
-                        (
-                            world.getBlockState(new BlockPos(x, y - 1, z - 1)).isOpaque() ||
-                            world.getBlockState(new BlockPos(x, y - 1, z - 1)).hasSolidTopSurface(world, new BlockPos(x, y - 1, z - 1), player)
-                        )
-                ) {
-                    z--; // Towards north
-                    wasSuccessful = true;
-                }
-            }
-            if(wasSuccessful) {
-                player.teleport(x, y, z);
-                player.sendMessage(successfulPortalRescue, false);
-            }
+            // Teleporting player to the middle of the block
+            player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+            newPlayerCache.wasInPortal = true;
         }
     }
 

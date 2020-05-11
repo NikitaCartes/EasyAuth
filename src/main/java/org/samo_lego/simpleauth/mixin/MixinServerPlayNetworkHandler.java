@@ -1,16 +1,15 @@
 package org.samo_lego.simpleauth.mixin;
 
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import org.samo_lego.simpleauth.event.entity.player.ChatCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerMoveCallback;
 import org.samo_lego.simpleauth.event.item.TakeItemCallback;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,10 +22,6 @@ import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action
 public abstract class MixinServerPlayNetworkHandler {
     @Shadow
     public ServerPlayerEntity player;
-
-    @Final
-    @Shadow
-    private MinecraftServer server;
 
     @Inject(
             method = "onGameMessage(Lnet/minecraft/network/packet/c2s/play/ChatMessageC2SPacket;)V",
@@ -77,6 +72,25 @@ public abstract class MixinServerPlayNetworkHandler {
         if (result == ActionResult.FAIL) {
             // A bit ugly, I know. (we need to update player position)
             this.player.requestTeleport(this.player.getX(), this.player.getY(), this.player.getZ());
+            ci.cancel();
+        }
+    }
+
+    @Inject(
+            method = "onCreativeInventoryAction(Lnet/minecraft/network/packet/c2s/play/CreativeInventoryActionC2SPacket;)V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    shift = At.Shift.AFTER
+            ),
+            cancellable = true
+    )
+    public void onCreativeInventoryAction(CreativeInventoryActionC2SPacket packet, CallbackInfo ci) {
+        ActionResult result = TakeItemCallback.EVENT.invoker().onTakeItem(this.player);
+
+        if (result == ActionResult.FAIL) {
+            // Canceling the item taking
+            // Updating is not working yet
             ci.cancel();
         }
     }

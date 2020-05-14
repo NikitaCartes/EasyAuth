@@ -50,8 +50,6 @@ dependencies {
 
 	// jitpack for quicker updating
 	modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
-	//tmp twozerobee fix
-	modImplementation "io.github.haykam821:twozerobee-1.0.0"
 }
 
 processResources {

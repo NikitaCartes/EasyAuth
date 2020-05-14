@@ -2,9 +2,9 @@ package org.samo_lego.simpleauth;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.event.server.ServerStopCallback;
-import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -85,7 +85,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 
 		// Registering the commands
-		CommandRegistry.INSTANCE.register(false, dispatcher -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 			RegisterCommand.registerCommand(dispatcher);
 			LoginCommand.registerCommand(dispatcher);
 			LogoutCommand.registerCommand(dispatcher);

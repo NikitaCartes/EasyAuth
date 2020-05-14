@@ -6,7 +6,8 @@ plugins {
 repositories {
 	// Carpet mod
 	maven {
-		url 'https://masa.dy.fi/maven'
+		//url 'https://masa.dy.fi/maven'
+		url 'https://jitpack.io'
 	}
 }
 
@@ -44,7 +45,13 @@ dependencies {
 	include 'net.java.dev.jna:jna:5.5.0'
 
 	// carpetMod
-	modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
+	// from masa's maven
+	//modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
+
+	// jitpack for quicker updating
+	modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
+	//tmp twozerobee fix
+	modImplementation "io.github.haykam821:twozerobee-1.0.0"
 }
 
 processResources {

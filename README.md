@@ -1,8 +1,10 @@
 # Simple Authentication Mod
 
-![License](https://img.shields.io/badge/License-MIT-brightgreen)
-[![Curseforge downloads](http://cf.way2muchnoise.eu/full_simpleauth_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/simpleauth)
+![License](https://img.shields.io/github/license/samolego/simpleauth.svg)
 ![Gradle Build](https://github.com/samolego/SimpleAuth/workflows/Gradle%20Build/badge.svg)
+![Version](https://img.shields.io/github/v/tag/samolego/SimpleAuth.svg?label=version)
+![Issues](https://img.shields.io/github/issues/samolego/simpleauth.svg)
+[![Curseforge downloads](http://cf.way2muchnoise.eu/full_simpleauth_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/simpleauth)
 
 Requires Fabric API.
 

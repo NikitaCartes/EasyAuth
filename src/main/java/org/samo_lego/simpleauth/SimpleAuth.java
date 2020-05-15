@@ -89,9 +89,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			RegisterCommand.registerCommand(dispatcher);
 			LoginCommand.registerCommand(dispatcher);
 			LogoutCommand.registerCommand(dispatcher);
-			ChangepwCommand.registerCommand(dispatcher);
-			UnregisterCommand.registerCommand(dispatcher);
 			AuthCommand.registerCommand(dispatcher);
+			AccountCommand.registerCommand(dispatcher);
 		});
 
 		// Registering the events

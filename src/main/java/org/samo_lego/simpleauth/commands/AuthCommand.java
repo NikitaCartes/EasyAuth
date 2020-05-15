@@ -7,7 +7,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
@@ -29,12 +28,7 @@ import static org.samo_lego.simpleauth.SimpleAuth.db;
 
 public class AuthCommand {
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private static Text userdataDeleted = new LiteralText(config.lang.userdataDeleted);
-    private static Text userdataUpdated = new LiteralText(config.lang.userdataUpdated);
-    private static Text configurationReloaded = new LiteralText(config.lang.configurationReloaded);
-    private static Text globalPasswordSet = new LiteralText(config.lang.globalPasswordSet);
-
+    
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/auth" command
         dispatcher.register(literal("auth")
@@ -110,7 +104,7 @@ public class AuthCommand {
         config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)
-            ((PlayerEntity) sender).sendMessage(configurationReloaded, false);
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.configurationReloaded), false);
         else
             LOGGER.info(config.lang.configurationReloaded);
         return 1;
@@ -126,7 +120,7 @@ public class AuthCommand {
         config.save(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)
-            ((PlayerEntity) sender).sendMessage(globalPasswordSet, false);
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.globalPasswordSet), false);
         else
             LOGGER.info(config.lang.globalPasswordSet);
         return 1;
@@ -153,7 +147,7 @@ public class AuthCommand {
         SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, null));
 
         if(sender != null)
-            ((PlayerEntity) sender).sendMessage(userdataDeleted, false);
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataDeleted), false);
         else
             LOGGER.info(config.lang.userdataDeleted);
         return 1; // Success
@@ -171,7 +165,7 @@ public class AuthCommand {
 
         if(db.registerUser(uuid, playerdata.toString())) {
             if(sender != null)
-                ((PlayerEntity) sender).sendMessage(userdataUpdated, false);
+                ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
             else
                 LOGGER.info(config.lang.userdataUpdated);
             return 1;
@@ -191,7 +185,7 @@ public class AuthCommand {
 
         db.updateUserData(uuid, playerdata.toString());
         if(sender != null)
-            ((PlayerEntity) sender).sendMessage(userdataUpdated, false);
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
         else
             LOGGER.info(config.lang.userdataUpdated);
         return 1;

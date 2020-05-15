@@ -2,11 +2,9 @@ package org.samo_lego.simpleauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
@@ -14,16 +12,10 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class LoginCommand {
-    private static Text enterPassword = new LiteralText(SimpleAuth.config.lang.enterPassword);
-    private static Text wrongPassword = new LiteralText(SimpleAuth.config.lang.wrongPassword);
-    private static Text alreadyAuthenticated = new LiteralText(SimpleAuth.config.lang.alreadyAuthenticated);
-    private static Text notRegistered = new LiteralText(SimpleAuth.config.lang.notRegistered);
-    private static Text loginTriesExceeded = new LiteralText(SimpleAuth.config.lang.loginTriesExceeded);
-    private static Text successfullyAuthenticated = new LiteralText(SimpleAuth.config.lang.successfullyAuthenticated);
-    private static int maxLoginTries = SimpleAuth.config.main.maxLoginTries;
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/login" command
@@ -32,7 +24,7 @@ public class LoginCommand {
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(enterPassword, false);
+                    ctx.getSource().getPlayer().sendMessage(new LiteralText(config.lang.enterPassword), false);
                     return 0;
                 }));
     }
@@ -42,32 +34,34 @@ public class LoginCommand {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
 
-        String uuid = convertUuid(player);
-        int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
-
         if(SimpleAuth.isAuthenticated(player)) {
-            player.sendMessage(alreadyAuthenticated, false);
+            player.sendMessage(new LiteralText(config.lang.alreadyAuthenticated), false);
             return 0;
         }
-        else if(SimpleAuth.deauthenticatedUsers.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
-            player.networkHandler.disconnect(loginTriesExceeded);
+
+        String uuid = convertUuid(player);
+        int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
+        int maxLoginTries = config.main.maxLoginTries;
+        
+        if(SimpleAuth.deauthenticatedUsers.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
+            player.networkHandler.disconnect(new LiteralText(config.lang.loginTriesExceeded));
             return 0;
         }
         else if(passwordResult == 1) {
-            SimpleAuth.authenticatePlayer(player, successfullyAuthenticated);
+            SimpleAuth.authenticatePlayer(player, new LiteralText(config.lang.successfullyAuthenticated));
             return 1;
         }
         else if(passwordResult == -1) {
-            player.sendMessage(notRegistered, false);
+            player.sendMessage(new LiteralText(config.lang.notRegistered), false);
             return 0;
         }
         // Kicking the player out
         else if(maxLoginTries == 1) {
-            player.networkHandler.disconnect(wrongPassword);
+            player.networkHandler.disconnect(new LiteralText(config.lang.wrongPassword));
             return 0;
         }
         // Sending wrong pass message
-        player.sendMessage(wrongPassword, false);
+        player.sendMessage(new LiteralText(config.lang.wrongPassword), false);
         // ++ the login tries
         SimpleAuth.deauthenticatedUsers.get(uuid).loginTries += 1;
         return 0;

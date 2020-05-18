@@ -11,6 +11,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -157,8 +159,16 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		if(config.main.spawnOnJoin)
 			teleportPlayer(player, false);
 
-		// Updating chunk if needed (if portal rescue action happened)
-		if(deauthenticatedUsers.get(convertUuid(player)).wasInPortal)
+		// Updating blocks if needed (if portal rescue action happened)
+		if(deauthenticatedUsers.get(convertUuid(player)).wasInPortal) {
+			World world = player.getEntityWorld();
+			BlockPos pos = player.getBlockPos();
+
+			// Sending updates to portal blocks
+			// This is technically not needed, but it cleans the "messed portal" on the client
+			world.updateListeners(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
+			world.updateListeners(pos.up(), world.getBlockState(pos.up()), world.getBlockState(pos.up()), 3);
+		}
 
 		deauthenticatedUsers.remove(convertUuid(player));
 

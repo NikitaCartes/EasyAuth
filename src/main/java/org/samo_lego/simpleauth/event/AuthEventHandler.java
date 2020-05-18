@@ -14,7 +14,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
-import org.samo_lego.simpleauth.mixin.BlockUpdateS2CPacketAccess;
+import org.samo_lego.simpleauth.mixin.BlockUpdateS2CPacketAccessor;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
 import java.net.SocketAddress;
@@ -96,8 +96,10 @@ public class AuthEventHandler {
             else
                 player.sendMessage(new LiteralText(config.lang.notRegistered), false);
         }
-        else
+        else {
             deauthenticatePlayer(player);
+            playerCache = deauthenticatedUsers.get(uuid);
+        }
 
         if(config.main.spawnOnJoin)
             teleportPlayer(player, true);
@@ -105,23 +107,22 @@ public class AuthEventHandler {
 
         // Tries to rescue player from nether portal
         if(config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
-            PlayerCache newPlayerCache = deauthenticatedUsers.get(uuid);
             BlockPos pos = player.getBlockPos();
 
             // Faking portal blocks to be air
             BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket();
-            ((BlockUpdateS2CPacketAccess) feetPacket).setState(new BlockState(Blocks.AIR, null));
-            ((BlockUpdateS2CPacketAccess) feetPacket).setBlockPos(pos);
+            ((BlockUpdateS2CPacketAccessor) feetPacket).setState(new BlockState(Blocks.AIR, null));
+            ((BlockUpdateS2CPacketAccessor) feetPacket).setBlockPos(pos);
             player.networkHandler.sendPacket(feetPacket);
 
             BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket();
-            ((BlockUpdateS2CPacketAccess) headPacket).setState(new BlockState(Blocks.AIR, null));
-            ((BlockUpdateS2CPacketAccess) headPacket).setBlockPos(pos.up());
+            ((BlockUpdateS2CPacketAccessor) headPacket).setState(new BlockState(Blocks.AIR, null));
+            ((BlockUpdateS2CPacketAccessor) headPacket).setBlockPos(pos.up());
             player.networkHandler.sendPacket(headPacket);
 
             // Teleporting player to the middle of the block
             player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-            newPlayerCache.wasInPortal = true;
+            playerCache.wasInPortal = true;
         }
     }
 

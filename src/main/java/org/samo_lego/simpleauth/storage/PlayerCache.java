@@ -23,6 +23,7 @@ public class PlayerCache {
     public double lastZ;
 
     private static final Gson gson = new Gson();
+    public boolean wasInPortal;
 
 
     public PlayerCache(String uuid, ServerPlayerEntity player) {
@@ -90,5 +91,6 @@ public class PlayerCache {
         }
         this.wasAuthenticated = false;
         this.loginTries = 0;
+        this.wasInPortal = false;
     }
 }

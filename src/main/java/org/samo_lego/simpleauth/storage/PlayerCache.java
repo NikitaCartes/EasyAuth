@@ -5,6 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.dimension.DimensionType;
+
+import java.util.Objects;
 
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.SimpleAuth.db;
@@ -17,7 +21,7 @@ public class PlayerCache {
     public String lastIp;
     public long validUntil;
 
-    public int lastDimId;
+    public DimensionType lastDim;
     public double lastX;
     public double lastY;
     public double lastZ;
@@ -43,7 +47,7 @@ public class PlayerCache {
             this.lastIp = "";
 
             // Setting last coordinates
-            this.lastDimId = config.worldSpawn.dimensionId;
+            this.lastDim = config.worldSpawn.dimension;
             this.lastX = config.worldSpawn.x;
             this.lastY = config.worldSpawn.y;
             this.lastZ = config.worldSpawn.z;
@@ -63,14 +67,16 @@ public class PlayerCache {
                     JsonElement lastLoc = json.get("lastLocation");
                     if (
                             lastLoc != null &&
-                            this.lastDimId == config.worldSpawn.dimensionId &&
+                            this.lastDim == config.worldSpawn.dimension &&
                             this.lastX == config.worldSpawn.x &&
                             this.lastY == config.worldSpawn.y &&
                             this.lastZ == config.worldSpawn.z
                     ) {
                         // Getting DB coords
                         JsonObject lastLocation = gson.fromJson(lastLoc.getAsString(), JsonObject.class);
-                        this.lastDimId = lastLocation.get("dimId").getAsInt();
+                        String dim = lastLocation.get("dim").getAsString();
+                        // Extra long line to get dimension from string
+                        this.lastDim = Objects.requireNonNull(Objects.requireNonNull(player).getServer()).method_29174().getRegistry().get(new Identifier(dim));
                         this.lastX = lastLocation.get("x").getAsDouble();
                         this.lastY = lastLocation.get("y").getAsDouble();
                         this.lastZ = lastLocation.get("z").getAsDouble();

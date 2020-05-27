@@ -3,10 +3,14 @@ package org.samo_lego.simpleauth.commands;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.arguments.BlockPosArgumentType;
+import net.minecraft.command.arguments.DimensionArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
@@ -15,10 +19,7 @@ import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import java.io.File;
-import java.util.Objects;
 
-import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
-import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -28,7 +29,7 @@ import static org.samo_lego.simpleauth.SimpleAuth.db;
 
 public class AuthCommand {
     private static final Logger LOGGER = LogManager.getLogger();
-    
+
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/auth" command
         dispatcher.register(literal("auth")
@@ -47,22 +48,29 @@ public class AuthCommand {
             .then(literal("setSpawn")
                     .executes( ctx -> setSpawn(
                             ctx.getSource(),
-                            Objects.requireNonNull(ctx.getSource().getEntity()).dimension.getRawId(),
-                            ctx.getSource().getEntity().getX(),
-                            ctx.getSource().getEntity().getY(),
-                            ctx.getSource().getEntity().getZ()
+                            ctx.getSource().getWorld().getDimension(),
+                            ctx.getSource().getEntityOrThrow().getX(),
+                            ctx.getSource().getEntityOrThrow().getY(),
+                            ctx.getSource().getEntityOrThrow().getZ()
                     ))
-                    .then(argument("dimension id", integer())
+                    .then(argument("dimension", DimensionArgumentType.dimension())
                             .then(argument("position", BlockPosArgumentType.blockPos())
-                                .executes(ctx -> setSpawn(
-                                    ctx.getSource(),
-                                    getInteger(ctx, "dimension id"),
-                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
-                                    // +1 to not spawn player in ground
-                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,
-                                    BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ()
-                                ))
+                                .executes(ctx -> {
+                                    RegistryKey<DimensionType> registryKey = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
+                                    Registry<DimensionType> registry = ctx.getSource().getWorld().getServer().method_29174().getRegistry();
+                                    //RegistryKey<DimensionType> registryKey = ctx.getSource().getEntityOrThrow().getEntityWorld().method_27983();
+                                    return setSpawn(
+                                            ctx.getSource(),
+                                            registry.get(registryKey),
+                                            //(ctx, "dimension id"),
+                                            BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
+                                            // +1 to not spawn player in ground
+                                            BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,
+                                            BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ()
+                                    );
+                                }
                             )
+                        )
                     )
             )
             .then(literal("remove")
@@ -127,14 +135,14 @@ public class AuthCommand {
     }
 
     //
-    private static int setSpawn(ServerCommandSource source, int dimensionId, double x, double y, double z) {
-        config.worldSpawn.dimensionId = dimensionId;
+    private static int setSpawn(ServerCommandSource source, DimensionType dimension, double x, double y, double z) {
+        config.worldSpawn.dimension = dimension;
         config.worldSpawn.x = x;
         config.worldSpawn.y = y;
         config.worldSpawn.z = z;
         Entity sender = source.getEntity();
         if(sender != null)
-            sender.sendSystemMessage(new LiteralText(config.lang.worldSpawnSet));
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.worldSpawnSet), false);
         else
             LOGGER.info(config.lang.worldSpawnSet);
         return 1;

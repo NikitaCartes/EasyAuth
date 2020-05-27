@@ -19,6 +19,7 @@ package org.samo_lego.simpleauth.storage;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.world.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,9 +56,10 @@ public class AuthConfig {
         // Visit https://github.com/samolego/SimpleAuth/wiki/Sessions for more info
         public int sessionTimeoutTime = 60;
 
+        // Whether to tp player to spawn when joining (to hide coordinates)
         public boolean spawnOnJoin =  false;
         public static class WorldSpawn {
-                public int dimensionId;
+                public DimensionType dimension;
                 public double x;
                 public double y;
                 public double z;

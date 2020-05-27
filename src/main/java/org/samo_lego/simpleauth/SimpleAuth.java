@@ -12,6 +12,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
@@ -123,7 +124,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			data.addProperty("password", playerCache.password);
 
 			JsonObject lastLocation = new JsonObject();
-			lastLocation.addProperty("dimId", playerCache.lastDimId);
+			lastLocation.addProperty("dim", playerCache.lastDim.toString());
 			lastLocation.addProperty("x", playerCache.lastX);
 			lastLocation.addProperty("y", playerCache.lastY);
 			lastLocation.addProperty("z", playerCache.lastZ);
@@ -216,10 +217,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		MinecraftServer server = player.getServer();
 		if(server == null)
 			return;
+		Registry<DimensionType> registry = server.method_29174().getRegistry();
 		if (toSpawn) {
 			// Teleports player to spawn
 			player.teleport(
-					server.getWorld(DimensionType.byRawId(config.worldSpawn.dimensionId)),
+					server.getWorld(registry.getKey(config.worldSpawn.dimension)),
 					config.worldSpawn.x,
 					config.worldSpawn.y,
 					config.worldSpawn.z,
@@ -231,7 +233,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
 		// Puts player to last cached position
 		player.teleport(
-				server.getWorld(DimensionType.byRawId(cache.lastDimId)),
+				server.getWorld(registry.getKey(cache.lastDim)),
 				cache.lastX,
 				cache.lastY,
 				cache.lastZ,

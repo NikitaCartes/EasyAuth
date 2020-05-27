@@ -38,7 +38,7 @@ public class PlayerCache {
             this.lastIp = player.getIp();
 
             // Setting last coordinates
-            this.lastDimId = player.dimension.getRawId();
+            this.lastDim = player.getEntityWorld().getDimension();
             this.lastX = player.getX();
             this.lastY = player.getY();
             this.lastZ = player.getZ();

@@ -19,6 +19,7 @@ import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import java.io.File;
+import java.util.Objects;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -58,10 +59,9 @@ public class AuthCommand {
                                 .executes(ctx -> {
                                     RegistryKey<DimensionType> registryKey = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
                                     Registry<DimensionType> registry = ctx.getSource().getWorld().getServer().method_29174().getRegistry();
-                                    //RegistryKey<DimensionType> registryKey = ctx.getSource().getEntityOrThrow().getEntityWorld().method_27983();
                                     return setSpawn(
                                             ctx.getSource(),
-                                            registry.get(registryKey),
+                                            Objects.requireNonNull(registry.get(registryKey)),
                                             //(ctx, "dimension id"),
                                             BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
                                             // +1 to not spawn player in ground
@@ -136,10 +136,17 @@ public class AuthCommand {
 
     //
     private static int setSpawn(ServerCommandSource source, DimensionType dimension, double x, double y, double z) {
-        config.worldSpawn.dimension = dimension;
+        // Getting dimension regitry
+        Registry<DimensionType> registry = source.getWorld().getServer().method_29174().getRegistry();
+
+        // Setting config values and saving
+        config.worldSpawn.dimension = String.valueOf(registry.getId(dimension));
         config.worldSpawn.x = x;
         config.worldSpawn.y = y;
         config.worldSpawn.z = z;
+        config.save(new File("./mods/SimpleAuth/config.json"));
+
+        // Getting sender
         Entity sender = source.getEntity();
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.worldSpawnSet), false);

@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.dimension.DimensionType;
 
 import java.util.Objects;
@@ -21,7 +21,7 @@ public class PlayerCache {
     public String lastIp;
     public long validUntil;
 
-    public DimensionType lastDim;
+    public String lastDim;
     public double lastX;
     public double lastY;
     public double lastZ;
@@ -37,20 +37,17 @@ public class PlayerCache {
         if(player != null) {
             this.lastIp = player.getIp();
 
-            // Setting last coordinates
-            this.lastDim = player.getEntityWorld().getDimension();
+            // Getting dimension registry
+            Registry<DimensionType> registry = Objects.requireNonNull(player.getServer()).method_29174().getRegistry();
+
+            // Setting position cache
+            this.lastDim = String.valueOf(registry.getId(player.getEntityWorld().getDimension()));
             this.lastX = player.getX();
             this.lastY = player.getY();
             this.lastZ = player.getZ();
         }
         else {
             this.lastIp = "";
-
-            // Setting last coordinates
-            this.lastDim = config.worldSpawn.dimension;
-            this.lastX = config.worldSpawn.x;
-            this.lastY = config.worldSpawn.y;
-            this.lastZ = config.worldSpawn.z;
         }
 
         if(db.isUserRegistered(uuid)) {
@@ -59,24 +56,18 @@ public class PlayerCache {
             // Getting (hashed) password
             JsonObject json = gson.fromJson(data, JsonObject.class);
             this.password = json.get("password").getAsString();
+            this.isRegistered = true;
 
-            // If coordinates are same as the one from world spawn
-            // we should check the DB for saved coords
+            // We should check the DB for saved coords
             if(config.main.spawnOnJoin) {
                 try {
                     JsonElement lastLoc = json.get("lastLocation");
-                    if (
-                            lastLoc != null &&
-                            this.lastDim == config.worldSpawn.dimension &&
-                            this.lastX == config.worldSpawn.x &&
-                            this.lastY == config.worldSpawn.y &&
-                            this.lastZ == config.worldSpawn.z
-                    ) {
+                    if (lastLoc != null) {
                         // Getting DB coords
                         JsonObject lastLocation = gson.fromJson(lastLoc.getAsString(), JsonObject.class);
-                        String dim = lastLocation.get("dim").getAsString();
+                        //String dim = Objects.requireNonNull(Objects.requireNonNull(player).getServer()).method_29174().getRegistry().get(new Identifier(dim));
                         // Extra long line to get dimension from string
-                        this.lastDim = Objects.requireNonNull(Objects.requireNonNull(player).getServer()).method_29174().getRegistry().get(new Identifier(dim));
+                        this.lastDim = lastLocation.get("dim").getAsString();
                         this.lastX = lastLocation.get("x").getAsDouble();
                         this.lastY = lastLocation.get("y").getAsDouble();
                         this.lastZ = lastLocation.get("z").getAsDouble();
@@ -89,7 +80,6 @@ public class PlayerCache {
                     // Player didn't have any coords in db to tp to
                 }
             }
-            this.isRegistered = true;
         }
         else {
             this.isRegistered = false;

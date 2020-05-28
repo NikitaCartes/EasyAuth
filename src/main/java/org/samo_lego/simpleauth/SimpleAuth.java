@@ -11,10 +11,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.iq80.leveldb.WriteBatch;
@@ -117,14 +118,14 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	private static void onStopServer() {
 		LOGGER.info("[SimpleAuth] Shutting down SimpleAuth.");
 
-		WriteBatch batch = db.levelDBStore.createWriteBatch();
+		WriteBatch batch = db.getLevelDBStore().createWriteBatch();
 		// Writing coords of de-authenticated players to database
 		deauthenticatedUsers.forEach((uuid, playerCache) -> {
 			JsonObject data = new JsonObject();
 			data.addProperty("password", playerCache.password);
 
 			JsonObject lastLocation = new JsonObject();
-			lastLocation.addProperty("dim", playerCache.lastDim.toString());
+			lastLocation.addProperty("dim", playerCache.lastDim);
 			lastLocation.addProperty("x", playerCache.lastX);
 			lastLocation.addProperty("y", playerCache.lastY);
 			lastLocation.addProperty("z", playerCache.lastZ);
@@ -135,7 +136,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		});
 		try {
 			// Writing and closing batch
-			db.levelDBStore.write(batch);
+			db.getLevelDBStore().write(batch);
 			batch.close();
 		} catch (IOException e) {
 			LOGGER.error("[SimpleAuth] Error saving player data! " + e.getMessage());
@@ -215,25 +216,25 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	// Teleports player to spawn or last location when authenticating
 	public static void teleportPlayer(ServerPlayerEntity player, boolean toSpawn) {
 		MinecraftServer server = player.getServer();
-		if(server == null)
+		if(server == null || config.worldSpawn.dimension == null)
 			return;
-		Registry<DimensionType> registry = server.method_29174().getRegistry();
+		// registry for dimensions
 		if (toSpawn) {
 			// Teleports player to spawn
 			player.teleport(
-					server.getWorld(registry.getKey(config.worldSpawn.dimension)),
+					server.getWorld(RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(config.worldSpawn.dimension))),
 					config.worldSpawn.x,
 					config.worldSpawn.y,
 					config.worldSpawn.z,
-					0,
-					0
+					90,
+					90
 			);
 			return;
 		}
 		PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
 		// Puts player to last cached position
 		player.teleport(
-				server.getWorld(registry.getKey(cache.lastDim)),
+				server.getWorld(RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(cache.lastDim))),
 				cache.lastX,
 				cache.lastY,
 				cache.lastZ,

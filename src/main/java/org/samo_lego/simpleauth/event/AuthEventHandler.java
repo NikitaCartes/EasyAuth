@@ -1,7 +1,6 @@
 package org.samo_lego.simpleauth.event;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -111,14 +110,15 @@ public class AuthEventHandler {
 
             // Faking portal blocks to be air
             BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket();
-            ((BlockUpdateS2CPacketAccessor) feetPacket).setState(new BlockState(Blocks.AIR, null, null));
+            ((BlockUpdateS2CPacketAccessor) feetPacket).setState(Blocks.AIR.getDefaultState());
             ((BlockUpdateS2CPacketAccessor) feetPacket).setBlockPos(pos);
             player.networkHandler.sendPacket(feetPacket);
 
             BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket();
-            ((BlockUpdateS2CPacketAccessor) headPacket).setState(new BlockState(Blocks.AIR, null, null));
+            ((BlockUpdateS2CPacketAccessor) headPacket).setState(Blocks.AIR.getDefaultState());
             ((BlockUpdateS2CPacketAccessor) headPacket).setBlockPos(pos.up());
             player.networkHandler.sendPacket(headPacket);
+            System.out.println(headPacket);
 
             // Teleporting player to the middle of the block
             player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);

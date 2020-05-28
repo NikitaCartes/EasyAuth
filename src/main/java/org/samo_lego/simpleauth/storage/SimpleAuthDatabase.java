@@ -15,7 +15,11 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
 public class SimpleAuthDatabase {
     private static final Logger LOGGER = LogManager.getLogger();
-    public DB levelDBStore;
+    private DB levelDBStore;
+
+    public DB getLevelDBStore() {
+        return this.levelDBStore;
+    }
 
     // Connects to the DB
     public void openConnection() {

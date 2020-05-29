@@ -8,9 +8,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
@@ -19,7 +19,6 @@ import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.AuthHelper;
 
 import java.io.File;
-import java.util.Objects;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
@@ -49,7 +48,7 @@ public class AuthCommand {
             .then(literal("setSpawn")
                     .executes( ctx -> setSpawn(
                             ctx.getSource(),
-                            ctx.getSource().getWorld().getDimension(),
+                            new Identifier(String.valueOf(ctx.getSource().getWorld().getDimension())),
                             ctx.getSource().getEntityOrThrow().getX(),
                             ctx.getSource().getEntityOrThrow().getY(),
                             ctx.getSource().getEntityOrThrow().getZ()
@@ -57,11 +56,12 @@ public class AuthCommand {
                     .then(argument("dimension", DimensionArgumentType.dimension())
                             .then(argument("position", BlockPosArgumentType.blockPos())
                                 .executes(ctx -> {
-                                    RegistryKey<DimensionType> registryKey = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
-                                    Registry<DimensionType> registry = ctx.getSource().getWorld().getServer().method_29174().getRegistry();
+                                    RegistryKey<World> worldRegistryKey = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
+                                    //Registry<DimensionType> registry = ctx.getSource().getWorld().getServer().method_29174().getRegistry();
                                     return setSpawn(
                                             ctx.getSource(),
-                                            Objects.requireNonNull(registry.get(registryKey)),
+                                            //Objects.requireNonNull(registry.get(dimension.getValue())),
+                                            worldRegistryKey.getValue(),
                                             //(ctx, "dimension id"),
                                             BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
                                             // +1 to not spawn player in ground
@@ -135,12 +135,12 @@ public class AuthCommand {
     }
 
     //
-    private static int setSpawn(ServerCommandSource source, DimensionType dimension, double x, double y, double z) {
-        // Getting dimension regitry
-        Registry<DimensionType> registry = source.getWorld().getServer().method_29174().getRegistry();
+    private static int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z) {
+        // Getting dimension registry
+        //Registry<DimensionType> registry = source.getWorld().getServer().method_29435();
 
         // Setting config values and saving
-        config.worldSpawn.dimension = String.valueOf(registry.getId(dimension));
+        config.worldSpawn.dimension = String.valueOf(world);
         config.worldSpawn.x = x;
         config.worldSpawn.y = y;
         config.worldSpawn.z = z;

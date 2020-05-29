@@ -5,10 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.dimension.DimensionType;
-
-import java.util.Objects;
+import net.minecraft.util.Identifier;
 
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.SimpleAuth.db;
@@ -38,10 +35,10 @@ public class PlayerCache {
             this.lastIp = player.getIp();
 
             // Getting dimension registry
-            Registry<DimensionType> registry = Objects.requireNonNull(player.getServer()).method_29174().getRegistry();
+            //Registry<DimensionType> registry = Objects.requireNonNull(player.getServer()).method_29435().getRegistry();
 
             // Setting position cache
-            this.lastDim = String.valueOf(registry.getId(player.getEntityWorld().getDimension()));
+            this.lastDim = String.valueOf(new Identifier(String.valueOf(player.getEntityWorld().getDimension())));
             this.lastX = player.getX();
             this.lastY = player.getY();
             this.lastZ = player.getZ();

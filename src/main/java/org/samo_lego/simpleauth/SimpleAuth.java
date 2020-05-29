@@ -222,7 +222,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		if (toSpawn) {
 			// Teleports player to spawn
 			player.teleport(
-					server.getWorld(RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(config.worldSpawn.dimension))),
+					server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(config.worldSpawn.dimension))),
 					config.worldSpawn.x,
 					config.worldSpawn.y,
 					config.worldSpawn.z,
@@ -234,7 +234,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
 		// Puts player to last cached position
 		player.teleport(
-				server.getWorld(RegistryKey.of(Registry.DIMENSION_TYPE_KEY, new Identifier(cache.lastDim))),
+				server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(cache.lastDim))),
 				cache.lastX,
 				cache.lastY,
 				cache.lastZ,

@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.SimpleAuth.db;
@@ -34,17 +33,11 @@ public class PlayerCache {
         if(player != null) {
             this.lastIp = player.getIp();
 
-            // Getting dimension registry
-            //Registry<DimensionType> registry = Objects.requireNonNull(player.getServer()).method_29435().getRegistry();
-
             // Setting position cache
-            this.lastDim = String.valueOf(new Identifier(String.valueOf(player.getEntityWorld().getDimension())));
+            this.lastDim = String.valueOf(player.getEntityWorld().getDimension());
             this.lastX = player.getX();
             this.lastY = player.getY();
             this.lastZ = player.getZ();
-        }
-        else {
-            this.lastIp = "";
         }
 
         if(db.isUserRegistered(uuid)) {
@@ -62,8 +55,6 @@ public class PlayerCache {
                     if (lastLoc != null) {
                         // Getting DB coords
                         JsonObject lastLocation = gson.fromJson(lastLoc.getAsString(), JsonObject.class);
-                        //String dim = Objects.requireNonNull(Objects.requireNonNull(player).getServer()).method_29174().getRegistry().get(new Identifier(dim));
-                        // Extra long line to get dimension from string
                         this.lastDim = lastLocation.get("dim").getAsString();
                         this.lastX = lastLocation.get("x").getAsDouble();
                         this.lastY = lastLocation.get("y").getAsDouble();

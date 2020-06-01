@@ -83,7 +83,7 @@ public class AuthEventHandler {
             if (
                 playerCache.wasAuthenticated &&
                 playerCache.validUntil >= System.currentTimeMillis() &&
-                playerCache.lastIp.equals(player.getIp())
+                player.getIp().equals(playerCache.lastIp)
             ) {
                 deauthenticatedUsers.remove(uuid); // Makes player authenticated
                 return;

@@ -46,7 +46,7 @@ public class AuthCommand {
             .then(literal("setSpawn")
                     .executes( ctx -> setSpawn(
                         ctx.getSource(),
-                        ctx.getSource().getEntityOrThrow().getEntityWorld().method_27983().getValue(),
+                        ctx.getSource().getEntityOrThrow().getEntityWorld().getRegistryKey().getValue(),
                         ctx.getSource().getEntityOrThrow().getX(),
                         ctx.getSource().getEntityOrThrow().getY(),
                         ctx.getSource().getEntityOrThrow().getZ()

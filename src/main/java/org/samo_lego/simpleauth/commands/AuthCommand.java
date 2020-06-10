@@ -55,7 +55,7 @@ public class AuthCommand {
                             .then(argument("position", BlockPosArgumentType.blockPos())
                                 .executes(ctx -> setSpawn(
                                         ctx.getSource(),
-                                        DimensionArgumentType.getDimensionArgument(ctx, "dimension").getValue(),
+                                        DimensionArgumentType.getDimensionArgument(ctx, "dimension").getRegistryKey().getValue(),
                                         BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
                                         // +1 to not spawn player in ground
                                         BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,

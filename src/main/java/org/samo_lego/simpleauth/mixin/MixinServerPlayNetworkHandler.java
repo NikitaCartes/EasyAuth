@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action.SWAP_HELD_ITEMS;
+import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class MixinServerPlayNetworkHandler {
@@ -50,7 +50,7 @@ public abstract class MixinServerPlayNetworkHandler {
             cancellable = true
     )
     private void onPlayerAction(PlayerActionC2SPacket packet, CallbackInfo ci) {
-        if(packet.getAction() == SWAP_HELD_ITEMS) {
+        if(packet.getAction() == SWAP_ITEM_WITH_OFFHAND) {
             ActionResult result = TakeItemCallback.EVENT.invoker().onTakeItem(this.player);
             if (result == ActionResult.FAIL) {
                 ci.cancel();

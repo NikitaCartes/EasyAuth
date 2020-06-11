@@ -33,37 +33,38 @@ public class LoginCommand {
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
-
-        if(SimpleAuth.isAuthenticated(player)) {
+        String uuid = convertUuid(player);
+        if (SimpleAuth.isAuthenticated(player)) {
             player.sendMessage(new LiteralText(config.lang.alreadyAuthenticated), false);
             return 0;
         }
+        // Putting rest of the command in new thread to avoid lag spikes
+        new Thread(() -> {
+            int maxLoginTries = config.main.maxLoginTries;
+            int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
 
-        String uuid = convertUuid(player);
-        int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
-        int maxLoginTries = config.main.maxLoginTries;
-        
-        if(SimpleAuth.deauthenticatedUsers.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
-            player.networkHandler.disconnect(new LiteralText(config.lang.loginTriesExceeded));
-            return 0;
-        }
-        else if(passwordResult == 1) {
-            SimpleAuth.authenticatePlayer(player, new LiteralText(config.lang.successfullyAuthenticated));
-            return 1;
-        }
-        else if(passwordResult == -1) {
-            player.sendMessage(new LiteralText(config.lang.notRegistered), false);
-            return 0;
-        }
-        // Kicking the player out
-        else if(maxLoginTries == 1) {
-            player.networkHandler.disconnect(new LiteralText(config.lang.wrongPassword));
-            return 0;
-        }
-        // Sending wrong pass message
-        player.sendMessage(new LiteralText(config.lang.wrongPassword), false);
-        // ++ the login tries
-        SimpleAuth.deauthenticatedUsers.get(uuid).loginTries += 1;
+            if(SimpleAuth.deauthenticatedUsers.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
+                player.networkHandler.disconnect(new LiteralText(config.lang.loginTriesExceeded));
+                return;
+            }
+            else if(passwordResult == 1) {
+                SimpleAuth.authenticatePlayer(player, new LiteralText(config.lang.successfullyAuthenticated));
+                return;
+            }
+            else if(passwordResult == -1) {
+                player.sendMessage(new LiteralText(config.lang.notRegistered), false);
+                return;
+            }
+            // Kicking the player out
+            else if(maxLoginTries == 1) {
+                player.networkHandler.disconnect(new LiteralText(config.lang.wrongPassword));
+                return;
+            }
+            // Sending wrong pass message
+            player.sendMessage(new LiteralText(config.lang.wrongPassword), false);
+            // ++ the login tries
+            SimpleAuth.deauthenticatedUsers.get(uuid).loginTries += 1;
+        }).start();
         return 0;
     }
 }

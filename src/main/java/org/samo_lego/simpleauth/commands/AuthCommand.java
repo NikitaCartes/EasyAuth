@@ -114,10 +114,13 @@ public class AuthCommand {
     private static int setGlobalPassword(ServerCommandSource source, String pass) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
-        // Writing the global pass to config
-        config.main.globalPassword = AuthHelper.hashPass(pass.toCharArray());
-        config.main.enableGlobalPassword = true;
-        config.save(new File("./mods/SimpleAuth/config.json"));
+        // New thread to avoid lag spikes
+        new Thread(() -> {
+            // Writing the global pass to config
+            config.main.globalPassword = AuthHelper.hashPass(pass.toCharArray());
+            config.main.enableGlobalPassword = true;
+            config.save(new File("./mods/SimpleAuth/config.json"));
+        }).start();
 
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.globalPasswordSet), false);
@@ -147,8 +150,10 @@ public class AuthCommand {
     // Deleting (unregistering) user's account
     private static int removeAccount(ServerCommandSource source, String uuid) {
         Entity sender = source.getEntity();
-        db.deleteUserData(uuid);
-        SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, null));
+        new Thread(() -> {
+            db.deleteUserData(uuid);
+            SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, null));
+        }).start();
 
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataDeleted), false);
@@ -162,18 +167,19 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        // JSON object holding password (may hold some other info in the future)
-        JsonObject playerdata = new JsonObject();
-        String hash = AuthHelper.hashPass(password.toCharArray());
-        playerdata.addProperty("password", hash);
+        new Thread(() -> {
+            // JSON object holding password (may hold some other info in the future)
+            JsonObject playerdata = new JsonObject();
+            String hash = AuthHelper.hashPass(password.toCharArray());
+            playerdata.addProperty("password", hash);
 
-        if(db.registerUser(uuid, playerdata.toString())) {
-            if(sender != null)
-                ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
-            else
-                LOGGER.info(config.lang.userdataUpdated);
-            return 1;
-        }
+            if (db.registerUser(uuid, playerdata.toString())) {
+                if (sender != null)
+                    ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
+                else
+                    LOGGER.info(config.lang.userdataUpdated);
+            }
+        }).start();
         return 0;
     }
 
@@ -182,17 +188,18 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        // JSON object holding password (may hold some other info in the future)
-        JsonObject playerdata = new JsonObject();
-        String hash = AuthHelper.hashPass(password.toCharArray());
-        playerdata.addProperty("password", hash);
+        new Thread(() -> {
+            // JSON object holding password (may hold some other info in the future)
+            JsonObject playerdata = new JsonObject();
+            String hash = AuthHelper.hashPass(password.toCharArray());
+            playerdata.addProperty("password", hash);
 
-        db.updateUserData(uuid, playerdata.toString());
-        if(sender != null)
-            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
-        else
-            LOGGER.info(config.lang.userdataUpdated);
-        return 1;
+            db.updateUserData(uuid, playerdata.toString());
+            if (sender != null)
+                ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
+            else
+                LOGGER.info(config.lang.userdataUpdated);
+        }).start();
+        return 0;
     }
-    // todo PlayerEntity.getOfflinePlayerUuid("")
 }

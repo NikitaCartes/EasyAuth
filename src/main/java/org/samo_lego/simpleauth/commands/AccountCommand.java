@@ -70,20 +70,23 @@ public class AccountCommand {
             );
             return 0;
         }
-        
-        if (AuthHelper.checkPass(convertUuid(player), pass.toCharArray()) == 1) {
-            SimpleAuth.db.deleteUserData(convertUuid(player));
-            player.sendMessage(
-                    new LiteralText(config.lang.accountDeleted),
-                    false
-            );
-            SimpleAuth.deauthenticatePlayer(player);
-            return 1;
-        }
-        player.sendMessage(
-                new LiteralText(config.lang.wrongPassword),
+
+        // New thread to avoid lag spikes
+        new Thread(() -> {
+            if (AuthHelper.checkPass(convertUuid(player), pass.toCharArray()) == 1) {
+                SimpleAuth.db.deleteUserData(convertUuid(player));
+                player.sendMessage(
+                        new LiteralText(config.lang.accountDeleted),
                         false
                 );
+                SimpleAuth.deauthenticatePlayer(player);
+                return;
+            }
+            player.sendMessage(
+                    new LiteralText(config.lang.wrongPassword),
+                    false
+            );
+        }).start();
         return 0;
     }
 
@@ -99,35 +102,38 @@ public class AccountCommand {
             );
             return 0;
         }
-        else if (AuthHelper.checkPass(convertUuid(player), oldPass.toCharArray()) == 1) {
-            if(newPass.length() < config.main.minPasswordChars) {
-                player.sendMessage(new LiteralText(
-                        String.format(config.lang.minPasswordChars, config.main.minPasswordChars)
-                ), false);
-                return 0;
-            }
-            else if(newPass.length() > config.main.maxPasswordChars && config.main.maxPasswordChars != -1) {
-                player.sendMessage(new LiteralText(
-                        String.format(config.lang.maxPasswordChars, config.main.maxPasswordChars)
-                ), false);
-                return 0;
-            }
-            // JSON object holding password (may hold some other info in the future)
-            JsonObject playerdata = new JsonObject();
-            String hash = AuthHelper.hashPass(newPass.toCharArray());
-            playerdata.addProperty("password", hash);
+        // New thread to avoid lag spikes
+        new Thread(() -> {
+            if (AuthHelper.checkPass(convertUuid(player), oldPass.toCharArray()) == 1) {
+                if (newPass.length() < config.main.minPasswordChars) {
+                    player.sendMessage(new LiteralText(
+                            String.format(config.lang.minPasswordChars, config.main.minPasswordChars)
+                    ), false);
+                    return;
+                }
+                else if (newPass.length() > config.main.maxPasswordChars && config.main.maxPasswordChars != -1) {
+                    player.sendMessage(new LiteralText(
+                            String.format(config.lang.maxPasswordChars, config.main.maxPasswordChars)
+                    ), false);
+                    return;
+                }
+                // JSON object holding password (may hold some other info in the future)
+                JsonObject playerdata = new JsonObject();
+                String hash = AuthHelper.hashPass(newPass.toCharArray());
+                playerdata.addProperty("password", hash);
 
-            SimpleAuth.db.updateUserData(convertUuid(player), playerdata.toString());
-            player.sendMessage(
-                    new LiteralText(config.lang.passwordUpdated),
+                SimpleAuth.db.updateUserData(convertUuid(player), playerdata.toString());
+                player.sendMessage(
+                        new LiteralText(config.lang.passwordUpdated),
+                        false
+                );
+            }
+            else
+                player.sendMessage(
+                    new LiteralText(config.lang.wrongPassword),
                     false
-            );
-            return 1;
-        }
-        player.sendMessage(
-                new LiteralText(config.lang.wrongPassword),
-                false
-        );
+                );
+        }).start();
         return 0;
     }
 }

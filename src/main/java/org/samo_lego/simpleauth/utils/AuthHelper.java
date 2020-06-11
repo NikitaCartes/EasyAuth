@@ -50,7 +50,7 @@ public class AuthHelper {
                 // Verify password
                 return argon2.verify(hashed, pass) ? 1 : 0;
             } catch (Error e) {
-                LOGGER.error("[SimpleAuth] error: " + e);
+                LOGGER.error("[SimpleAuth] Argon2 error: " + e);
                 return 0;
             } finally {
                 // Wipe confidential data

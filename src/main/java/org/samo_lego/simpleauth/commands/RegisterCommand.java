@@ -44,18 +44,23 @@ public class RegisterCommand {
             player.sendMessage(new LiteralText(config.lang.alreadyAuthenticated), false);
             return 0;
         }
-        else if(pass1.equals(pass2)) {
+        else if(!pass1.equals(pass2)) {
+            player.sendMessage(new LiteralText(config.lang.matchPassword), false);
+            return 0;
+        }
+        // New thread to avoid lag spikes
+        new Thread(() -> {
             if(pass1.length() < config.main.minPasswordChars) {
                 player.sendMessage(new LiteralText(
                         String.format(config.lang.minPasswordChars, config.main.minPasswordChars)
                 ), false);
-                return 0;
+                return;
             }
             else if(pass1.length() > config.main.maxPasswordChars && config.main.maxPasswordChars != -1) {
                 player.sendMessage(new LiteralText(
                         String.format(config.lang.maxPasswordChars, config.main.maxPasswordChars)
                 ), false);
-                return 0;
+                return;
             }
             String hash = AuthHelper.hashPass(pass1.toCharArray());
             // JSON object holding password (may hold some other info in the future)
@@ -64,12 +69,10 @@ public class RegisterCommand {
 
             if (SimpleAuth.db.registerUser(convertUuid(player), playerdata.toString())) {
                 SimpleAuth.authenticatePlayer(player, new LiteralText(config.lang.registerSuccess));
-                return 1;
+                return;
             }
             player.sendMessage(new LiteralText(config.lang.alreadyRegistered), false);
-            return 0;
-        }
-        player.sendMessage(new LiteralText(config.lang.matchPassword), false);
+        }).start();
         return 0;
     }
 }

@@ -17,6 +17,8 @@ public class PlayerCache {
     public String lastIp;
     public long validUntil;
 
+    public int lastAir = 300;
+
     public String lastDim;
     public double lastX;
     public double lastY;
@@ -32,6 +34,8 @@ public class PlayerCache {
 
         if(player != null) {
             this.lastIp = player.getIp();
+
+            this.lastAir = player.getAir();
 
             // Setting position cache
             this.lastDim = String.valueOf(player.getEntityWorld().getDimension());

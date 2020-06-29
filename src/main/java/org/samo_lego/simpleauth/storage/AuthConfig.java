@@ -22,10 +22,8 @@ import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class AuthConfig {
     // If player is not authenticated, following conditions apply
@@ -146,7 +144,7 @@ public class AuthConfig {
         return config;
     }
     public void save(File file) {
-        try (FileWriter writer = new FileWriter(file)) {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             gson.toJson(this, writer);
         } catch (IOException e) {
             LOGGER.error("[SimpleAuth] Problem occurred when saving config: ", e);

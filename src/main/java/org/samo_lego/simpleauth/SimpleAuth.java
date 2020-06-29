@@ -3,8 +3,8 @@ package org.samo_lego.simpleauth;
 import com.google.gson.JsonObject;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
-import net.fabricmc.fabric.api.event.server.ServerStopCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -112,10 +112,10 @@ public class SimpleAuth implements DedicatedServerModInitializer {
         UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
         AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
 		UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-		ServerStopCallback.EVENT.register(minecraftServer -> SimpleAuth.onStopServer());
+		ServerLifecycleEvents.SERVER_STOPPING.register(minecraftServer -> this.onStopServer());
 	}
 
-	private static void onStopServer() {
+	private void onStopServer() {
 		LOGGER.info("[SimpleAuth] Shutting down SimpleAuth.");
 
 		WriteBatch batch = db.getLevelDBStore().createWriteBatch();

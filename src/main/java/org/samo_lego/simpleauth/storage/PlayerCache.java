@@ -38,7 +38,7 @@ public class PlayerCache {
             this.lastAir = player.getAir();
 
             // Setting position cache
-            this.lastDim = String.valueOf(player.getEntityWorld().getDimension());
+            this.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
             this.lastX = player.getX();
             this.lastY = player.getY();
             this.lastZ = player.getZ();

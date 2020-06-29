@@ -238,13 +238,25 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		}
 		PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
 		// Puts player to last cached position
-		player.teleport(
-				server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(cache.lastDim))),
+		try {
+			player.teleport(
+					server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(cache.lastDim))),
+					cache.lastX,
+					cache.lastY,
+					cache.lastZ,
+					0,
+					0
+			);
+		} catch (Error e) {
+			player.sendMessage(new LiteralText(config.lang.corruptedPosition), false);
+			LOGGER.error("[SimpleAuth] Couldn't teleport player " + player.getName().asString());
+			LOGGER.error(
+				String.format("[SimpleAuth] Last recorded position is X: %s, Y: %s, Z: %s in dimension %s",
 				cache.lastX,
 				cache.lastY,
 				cache.lastZ,
-				0,
-				0
-		);
+				cache.lastDim
+			));
+		}
 	}
 }

@@ -93,6 +93,7 @@ public class AuthConfig {
         public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
         public String playerAlreadyOnline = "§cPlayer %s is already online!";
         public String worldSpawnSet = "§aSpawn for logging in was set successfully.";
+        public String corruptedPosition = "§cYour position data is probably corrupted. Please contact admin.";
     }
     public static class ExperimentalConfig {
         // Prevents player being kicked because another player with the same name has joined the server

@@ -48,7 +48,7 @@ dependencies {
 ```
 
 And this to your `gradle.properties`
-```gradle
+```properties
 # By tag (version)
 # SimpleAuth version (this might not be the latest version)
 simpleauth_version = 1.4.6

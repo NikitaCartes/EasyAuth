@@ -112,7 +112,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
         UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
         AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
 		UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-		ServerLifecycleEvents.SERVER_STOPPING.register(minecraftServer -> this.onStopServer());
+		ServerLifecycleEvents.SERVER_STOPPED.register(minecraftServer -> this.onStopServer());
 	}
 
 	private void onStopServer() {

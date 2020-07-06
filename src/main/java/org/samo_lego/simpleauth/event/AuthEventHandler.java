@@ -35,8 +35,6 @@ public class AuthEventHandler {
         return new LiteralText(config.lang.notAuthenticated);
     }
 
-    private static Text successfulPortalRescue = new LiteralText(config.lang.successfulPortalRescue);
-
     // Player pre-join
     // Returns text as a reason for disconnect or null to pass
     public static LiteralText checkCanPlayerJoinServer(SocketAddress socketAddress, GameProfile profile, PlayerManager manager) {

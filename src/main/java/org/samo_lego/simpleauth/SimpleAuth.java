@@ -206,7 +206,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				if(!SimpleAuth.isAuthenticated(player)) // Kicking player if not authenticated
+				if(!SimpleAuth.isAuthenticated(player) && player.networkHandler.getConnection().isOpen()) // Kicking player if not authenticated
 					player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
 			}
 		}, SimpleAuth.config.main.delay * 1000);

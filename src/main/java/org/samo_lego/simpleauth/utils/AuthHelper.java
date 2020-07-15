@@ -41,7 +41,7 @@ public class AuthHelper {
                     hashed = SimpleAuth.deauthenticatedUsers.get(uuid).password;
                 // Hashed password from DB
                 else {
-                    JsonObject json = parser.parse(SimpleAuth.db.getData(uuid)).getAsJsonObject();
+                    JsonObject json = parser.parse(SimpleAuth.DB.getData(uuid)).getAsJsonObject();
                     hashed = json.get("password").getAsString();
                 }
 

@@ -91,7 +91,7 @@ public class AuthEventHandler {
             if(playerCache.isRegistered)
                 player.sendMessage(new LiteralText(config.lang.loginRequired), false);
             else
-                player.sendMessage(new LiteralText(config.lang.notRegistered), false);
+                player.sendMessage(new LiteralText(config.lang.registerRequired), false);
         }
         else {
             deauthenticatePlayer(player);

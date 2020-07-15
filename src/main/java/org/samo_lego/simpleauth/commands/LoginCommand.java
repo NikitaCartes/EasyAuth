@@ -12,6 +12,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.SimpleAuth.THREADPOOL;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
@@ -38,8 +39,8 @@ public class LoginCommand {
             player.sendMessage(new LiteralText(config.lang.alreadyAuthenticated), false);
             return 0;
         }
-        // Putting rest of the command in new thread to avoid lag spikes
-        new Thread(() -> {
+        // Putting rest of the command in different thread to avoid lag spikes
+        THREADPOOL.submit(() -> {
             int maxLoginTries = config.main.maxLoginTries;
             int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
 
@@ -52,7 +53,7 @@ public class LoginCommand {
                 return;
             }
             else if(passwordResult == -1) {
-                player.sendMessage(new LiteralText(config.lang.notRegistered), false);
+                player.sendMessage(new LiteralText(config.lang.registerRequired), false);
                 return;
             }
             // Kicking the player out
@@ -64,7 +65,7 @@ public class LoginCommand {
             player.sendMessage(new LiteralText(config.lang.wrongPassword), false);
             // ++ the login tries
             SimpleAuth.deauthenticatedUsers.get(uuid).loginTries += 1;
-        }).start();
+        });
         return 0;
     }
 }

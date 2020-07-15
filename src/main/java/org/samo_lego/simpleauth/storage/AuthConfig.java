@@ -68,24 +68,23 @@ public class AuthConfig {
         public String wrongPassword = "§4Wrong password!";
         public String matchPassword = "§6Passwords must match!";
         public String passwordUpdated = "§aYour password was updated successfully!";
-        public String loginRequired = "§cYou are not authenticated!\n§6Use /login to authenticate!";
+        public String loginRequired = "§6Use /login <password> to authenticate!";
         public String loginTriesExceeded = "§4Too many login tries.";
         public String globalPasswordSet = "§aGlobal password was successfully set!";
         public String cannotChangePassword = "§cYou cannot change password!";
         public String cannotUnregister = "§cYou cannot unregister this account!";
-        public String notAuthenticated = "§cYou are not authenticated!\n§6Try with /login or /register.";
+        public String notAuthenticated = "§cYou are not authenticated!";
         public String alreadyAuthenticated = "§6You are already authenticated.";
         public String successfullyAuthenticated = "§aYou are now authenticated.";
 		public String successfulLogout = "§aLogged out successfully.";
         public String timeExpired = "§cTime for authentication has expired.";
-        public String notRegistered = "§6This account is not yet registered! Type `/register` first";
+        public String registerRequired = "§6Type /register <password> <password> to claim this account.";
         public String alreadyRegistered = "§6This account name is already registered!";
         public String registerSuccess = "§aYou are now authenticated.";
         public String userdataDeleted = "§aUserdata deleted.";
         public String userdataUpdated = "§aUserdata updated.";
         public String accountDeleted = "§aYour account was successfully deleted!";
         public String configurationReloaded = "§aConfiguration file was reloaded successfully.";
-        public String successfulPortalRescue = "§aYou were rescued from nether portal successfully!";
         public String maxPasswordChars = "§6Password can be at most %d characters long!";
         public String minPasswordChars = "§6Password needs to be at least %d characters long!";
         public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
@@ -130,7 +129,9 @@ public class AuthConfig {
     public static AuthConfig load(File file) {
         AuthConfig config;
         if (file.exists()) {
-            try (FileReader fileReader = new FileReader(file)) {
+            try (BufferedReader fileReader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
+            )) {
                 config = gson.fromJson(fileReader, AuthConfig.class);
             } catch (IOException e) {
                 throw new RuntimeException("[SimpleAuth] Problem occurred when trying to load config: ", e);

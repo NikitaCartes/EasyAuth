@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
@@ -43,9 +45,11 @@ import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 public class SimpleAuth implements DedicatedServerModInitializer {
 	private static final Logger LOGGER = LogManager.getLogger();
 
-    public static SimpleAuthDatabase db = new SimpleAuthDatabase();
+    public static SimpleAuthDatabase DB = new SimpleAuthDatabase();
 
-    // HashMap of players that are not authenticated
+	public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
+
+	// HashMap of players that are not authenticated
 	// Rather than storing all the authenticated players, we just store ones that are not authenticated
 	// It stores some data as well, e.g. login tries and user password
 	public static HashMap<String, PlayerCache> deauthenticatedUsers = new HashMap<>();
@@ -73,13 +77,13 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		LOGGER.info("[SimpleAuth] This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
 		// Creating data directory (database and config files are stored there)
-		File file = new File(gameDirectory + "/mods/SimpleAuth/levelDBStore");
+		File file = new File(gameDirectory + "/mods/SimpleAuth/leveldbStore");
 		if (!file.exists() && !file.mkdirs())
 		    throw new RuntimeException("[SimpleAuth] Error creating directory!");
 		// Loading config
 		config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
 		// Connecting to db
-		db.openConnection();
+		DB.openConnection();
 
 		try {
 			serverProp.load(new FileReader(gameDirectory + "/server.properties"));
@@ -118,7 +122,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	private void onStopServer() {
 		LOGGER.info("[SimpleAuth] Shutting down SimpleAuth.");
 
-		WriteBatch batch = db.getLevelDBStore().createWriteBatch();
+		WriteBatch batch = DB.getLevelDBStore().createWriteBatch();
 		// Writing coords of de-authenticated players to database
 		deauthenticatedUsers.forEach((uuid, playerCache) -> {
 			JsonObject data = new JsonObject();
@@ -136,22 +140,26 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		});
 		try {
 			// Writing and closing batch
-			db.getLevelDBStore().write(batch);
+			DB.getLevelDBStore().write(batch);
 			batch.close();
 		} catch (IOException e) {
 			LOGGER.error("[SimpleAuth] Error saving player data! " + e.getMessage());
 		}
 
 		// Closing DB connection
-		db.close();
+		DB.close();
 	}
 
-	// Getting some config options
-	private static Text notAuthenticated() {
-		if(SimpleAuth.config.main.enableGlobalPassword) {
-			return new LiteralText(SimpleAuth.config.lang.loginRequired);
-		}
-		return new LiteralText(SimpleAuth.config.lang.notAuthenticated);
+	// Getting not authenticated text
+	private static LiteralText notAuthenticated(ServerPlayerEntity player) {
+        final PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
+        if(SimpleAuth.config.main.enableGlobalPassword || cache.isRegistered)
+			return new LiteralText(
+			        SimpleAuth.config.lang.notAuthenticated + "\n" + SimpleAuth.config.lang.loginRequired
+            );
+		return new LiteralText(
+		        SimpleAuth.config.lang.notAuthenticated+ "\n" + SimpleAuth.config.lang.registerRequired
+        );
 	}
 
 	// Authenticates player and sends the message
@@ -185,7 +193,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// De-authenticates player
 	public static void deauthenticatePlayer(ServerPlayerEntity player) {
-		if(db.isClosed())
+		if(DB.isClosed())
 			return;
 
 		// Marking player as not authenticated, (re)setting login tries to zero
@@ -197,7 +205,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			teleportPlayer(player, true);
 
 		// Player is now not authenticated
-		player.sendMessage(notAuthenticated(), false);
+		player.sendMessage(notAuthenticated(player), false);
 
 		// Setting the player to be invisible to mobs and also invulnerable
 		player.setInvulnerable(SimpleAuth.config.experimental.playerInvulnerable);
@@ -206,7 +214,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				if(!SimpleAuth.isAuthenticated(player) && player.networkHandler.getConnection().isOpen()) // Kicking player if not authenticated
+				// Kicking player if not authenticated
+				if(!SimpleAuth.isAuthenticated(player) && player.networkHandler.getConnection().isOpen())
 					player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
 			}
 		}, SimpleAuth.config.main.delay * 1000);

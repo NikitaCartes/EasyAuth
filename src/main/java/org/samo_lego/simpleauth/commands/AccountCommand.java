@@ -13,6 +13,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.SimpleAuth.THREADPOOL;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
@@ -71,10 +72,10 @@ public class AccountCommand {
             return 0;
         }
 
-        // New thread to avoid lag spikes
-        new Thread(() -> {
+        // Different thread to avoid lag spikes
+        THREADPOOL.submit(() -> {
             if (AuthHelper.checkPass(convertUuid(player), pass.toCharArray()) == 1) {
-                SimpleAuth.db.deleteUserData(convertUuid(player));
+                SimpleAuth.DB.deleteUserData(convertUuid(player));
                 player.sendMessage(
                         new LiteralText(config.lang.accountDeleted),
                         false
@@ -86,7 +87,7 @@ public class AccountCommand {
                     new LiteralText(config.lang.wrongPassword),
                     false
             );
-        }).start();
+        });
         return 0;
     }
 
@@ -102,8 +103,8 @@ public class AccountCommand {
             );
             return 0;
         }
-        // New thread to avoid lag spikes
-        new Thread(() -> {
+        // Different thread to avoid lag spikes
+        THREADPOOL.submit(() -> {
             if (AuthHelper.checkPass(convertUuid(player), oldPass.toCharArray()) == 1) {
                 if (newPass.length() < config.main.minPasswordChars) {
                     player.sendMessage(new LiteralText(
@@ -122,7 +123,7 @@ public class AccountCommand {
                 String hash = AuthHelper.hashPass(newPass.toCharArray());
                 playerdata.addProperty("password", hash);
 
-                SimpleAuth.db.updateUserData(convertUuid(player), playerdata.toString());
+                SimpleAuth.DB.updateUserData(convertUuid(player), playerdata.toString());
                 player.sendMessage(
                         new LiteralText(config.lang.passwordUpdated),
                         false
@@ -133,7 +134,7 @@ public class AccountCommand {
                     new LiteralText(config.lang.wrongPassword),
                     false
                 );
-        }).start();
+        });
         return 0;
     }
 }

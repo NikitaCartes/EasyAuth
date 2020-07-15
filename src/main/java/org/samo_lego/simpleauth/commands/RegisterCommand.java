@@ -13,6 +13,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static org.samo_lego.simpleauth.SimpleAuth.THREADPOOL;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
@@ -48,8 +49,8 @@ public class RegisterCommand {
             player.sendMessage(new LiteralText(config.lang.matchPassword), false);
             return 0;
         }
-        // New thread to avoid lag spikes
-        new Thread(() -> {
+        // Different thread to avoid lag spikes
+        THREADPOOL.submit(() -> {
             if(pass1.length() < config.main.minPasswordChars) {
                 player.sendMessage(new LiteralText(
                         String.format(config.lang.minPasswordChars, config.main.minPasswordChars)
@@ -67,12 +68,12 @@ public class RegisterCommand {
             JsonObject playerdata = new JsonObject();
             playerdata.addProperty("password", hash);
 
-            if (SimpleAuth.db.registerUser(convertUuid(player), playerdata.toString())) {
+            if (SimpleAuth.DB.registerUser(convertUuid(player), playerdata.toString())) {
                 SimpleAuth.authenticatePlayer(player, new LiteralText(config.lang.registerSuccess));
                 return;
             }
             player.sendMessage(new LiteralText(config.lang.alreadyRegistered), false);
-        }).start();
+        });
         return 0;
     }
 }

@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import static org.samo_lego.simpleauth.SimpleAuth.DB;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
-import static org.samo_lego.simpleauth.SimpleAuth.db;
 
 public class PlayerCache {
     public boolean isRegistered;
@@ -29,7 +29,7 @@ public class PlayerCache {
 
 
     public PlayerCache(String uuid, ServerPlayerEntity player) {
-        if(db.isClosed())
+        if(DB.isClosed())
             return;
 
         if(player != null) {
@@ -44,8 +44,8 @@ public class PlayerCache {
             this.lastZ = player.getZ();
         }
 
-        if(db.isUserRegistered(uuid)) {
-            String data = db.getData(uuid);
+        if(DB.isUserRegistered(uuid)) {
+            String data = DB.getData(uuid);
 
             // Getting (hashed) password
             JsonObject json = gson.fromJson(data, JsonObject.class);
@@ -66,7 +66,7 @@ public class PlayerCache {
 
                         // Removing location data from DB
                         json.remove("lastLocation");
-                        db.updateUserData(uuid, json.toString());
+                        DB.updateUserData(uuid, json.toString());
                     }
                 } catch (JsonSyntaxException ignored) {
                     // Player didn't have any coords in db to tp to

@@ -1,9 +1,6 @@
 package org.samo_lego.simpleauth.storage;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import static org.samo_lego.simpleauth.SimpleAuth.DB;
@@ -49,8 +46,17 @@ public class PlayerCache {
 
             // Getting (hashed) password
             JsonObject json = gson.fromJson(data, JsonObject.class);
-            this.password = json.get("password").getAsString();
-            this.isRegistered = true;
+            JsonElement passwordElement = json.get("password");
+            if(passwordElement instanceof JsonNull) {
+                // This shouldn't have happened, data seems to be corrupted
+                this.password = null;
+                this.isRegistered = false;
+            }
+            else {
+                this.password = passwordElement.getAsString();
+                this.isRegistered = true;
+            }
+
 
             // We should check the DB for saved coords
             if(config.main.spawnOnJoin) {

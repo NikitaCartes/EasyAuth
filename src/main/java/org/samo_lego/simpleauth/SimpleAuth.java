@@ -151,7 +151,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	}
 
 	// Getting not authenticated text
-	private static LiteralText notAuthenticated(ServerPlayerEntity player) {
+	public static LiteralText notAuthenticated(PlayerEntity player) {
         final PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
         if(SimpleAuth.config.main.enableGlobalPassword || cache.isRegistered)
 			return new LiteralText(

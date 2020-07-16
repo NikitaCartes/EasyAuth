@@ -4,12 +4,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
 
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
+
 public class AuthHelper {
-    private static final Logger LOGGER = LogManager.getLogger();
 
     // Creating the instance
     private static final Argon2 argon2 = Argon2Factory.create();
@@ -26,7 +25,7 @@ public class AuthHelper {
                 return argon2.verify(SimpleAuth.config.main.globalPassword, pass) ? 1 : 0;
             }
             catch (Error e) {
-                LOGGER.error("[SimpleAuth] Argon2 error: " + e);
+                logError("Argon2 error: " + e);
                 return 0;
             } finally {
                 // Wipe confidential data
@@ -50,7 +49,7 @@ public class AuthHelper {
                 // Verify password
                 return argon2.verify(hashed, pass) ? 1 : 0;
             } catch (Error e) {
-                LOGGER.error("[SimpleAuth] Argon2 error: " + e);
+                logError("Argon2 error: " + e);
                 return 0;
             } finally {
                 // Wipe confidential data
@@ -63,7 +62,7 @@ public class AuthHelper {
         try {
             return argon2.hash(10, 65536, 1, pass);
         } catch (Error e) {
-            LOGGER.error("[SimpleAuth] " + e);
+            logError(e.getMessage());
         }
         return null;
     }

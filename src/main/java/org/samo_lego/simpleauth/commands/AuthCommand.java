@@ -9,8 +9,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.storage.AuthConfig;
 import org.samo_lego.simpleauth.storage.PlayerCache;
@@ -23,9 +21,9 @@ import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static org.samo_lego.simpleauth.SimpleAuth.*;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class AuthCommand {
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/auth" command
@@ -105,7 +103,7 @@ public class AuthCommand {
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.configurationReloaded), false);
         else
-            LOGGER.info(config.lang.configurationReloaded);
+            logInfo(config.lang.configurationReloaded);
         return 1;
     }
 
@@ -124,7 +122,7 @@ public class AuthCommand {
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.globalPasswordSet), false);
         else
-            LOGGER.info(config.lang.globalPasswordSet);
+            logInfo(config.lang.globalPasswordSet);
         return 1;
     }
 
@@ -142,7 +140,7 @@ public class AuthCommand {
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.worldSpawnSet), false);
         else
-            LOGGER.info(config.lang.worldSpawnSet);
+            logInfo(config.lang.worldSpawnSet);
         return 1;
     }
 
@@ -157,7 +155,7 @@ public class AuthCommand {
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataDeleted), false);
         else
-            LOGGER.info(config.lang.userdataDeleted);
+            logInfo(config.lang.userdataDeleted);
         return 1; // Success
     }
 
@@ -176,7 +174,7 @@ public class AuthCommand {
                 if (sender != null)
                     ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
                 else
-                    LOGGER.info(config.lang.userdataUpdated);
+                    logInfo(config.lang.userdataUpdated);
             }
         });
         return 0;
@@ -197,7 +195,7 @@ public class AuthCommand {
             if (sender != null)
                 ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
             else
-                LOGGER.info(config.lang.userdataUpdated);
+                logInfo(config.lang.userdataUpdated);
         });
         return 0;
     }

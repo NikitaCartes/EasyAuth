@@ -1,6 +1,6 @@
-/*
-    Original author:
-    https://github.com/jellysquid3/Lithium/blob/1.15.x/fabric/src/main/java/me/jellysquid/mods/lithium/common/config/LithiumConfig.java
+/**
+ * This class has been adapted from old Lithium's config file
+ * @author jellysquid https://github.com/jellysquid3/Lithium/blob/1.15.x/fabric/src/main/java/me/jellysquid/mods/lithium/common/config/LithiumConfig.java
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,11 +19,11 @@ package org.samo_lego.simpleauth.storage;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 
 public class AuthConfig {
     // If player is not authenticated, following conditions apply
@@ -90,7 +90,7 @@ public class AuthConfig {
         public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
         public String playerAlreadyOnline = "§cPlayer %s is already online!";
         public String worldSpawnSet = "§aSpawn for logging in was set successfully.";
-        public String corruptedPosition = "§cYour position data is probably corrupted. Please contact admin.";
+        public String corruptedPlayerData = "§cYour data is probably corrupted. Please contact admin.";
     }
     public static class ExperimentalConfig {
         // Prevents player being kicked because another player with the same name has joined the server
@@ -116,7 +116,6 @@ public class AuthConfig {
         // Allows attacking mobs
         public boolean allowEntityPunch = false;
     }
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .create();
@@ -148,7 +147,7 @@ public class AuthConfig {
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             gson.toJson(this, writer);
         } catch (IOException e) {
-            LOGGER.error("[SimpleAuth] Problem occurred when saving config: ", e);
+            logError("Problem occurred when saving config: " + e.getMessage());
         }
     }
 }

@@ -2,6 +2,7 @@ package org.samo_lego.simpleauth.storage;
 
 import com.google.gson.*;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 
 import static org.samo_lego.simpleauth.SimpleAuth.DB;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
@@ -48,6 +49,10 @@ public class PlayerCache {
             JsonObject json = gson.fromJson(data, JsonObject.class);
             JsonElement passwordElement = json.get("password");
             if(passwordElement instanceof JsonNull) {
+                if(player != null) {
+                    player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
+                }
+
                 // This shouldn't have happened, data seems to be corrupted
                 this.password = null;
                 this.isRegistered = false;

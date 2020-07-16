@@ -16,8 +16,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.iq80.leveldb.WriteBatch;
 import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
@@ -40,10 +38,11 @@ import java.util.concurrent.Executors;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class SimpleAuth implements DedicatedServerModInitializer {
-	private static final Logger LOGGER = LogManager.getLogger();
 
     public static SimpleAuthDatabase DB = new SimpleAuthDatabase();
 
@@ -72,9 +71,9 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	@Override
 	public void onInitializeServer() {
 		// Info I guess :D
-		LOGGER.info("[SimpleAuth] SimpleAuth mod by samo_lego.");
+		logInfo("SimpleAuth mod by samo_lego.");
 		// The support on discord was great! I really appreciate your help.
-		LOGGER.info("[SimpleAuth] This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
+		logInfo("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
 		// Creating data directory (database and config files are stored there)
 		File file = new File(gameDirectory + "/mods/SimpleAuth/leveldbStore");
@@ -88,7 +87,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		try {
 			serverProp.load(new FileReader(gameDirectory + "/server.properties"));
 		} catch (IOException e) {
-			LOGGER.error("[SimpleAuth] Error while reading server properties: " + e.getMessage());
+			logError("Error while reading server properties: " + e.getMessage());
 		}
 
 
@@ -120,7 +119,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	}
 
 	private void onStopServer() {
-		LOGGER.info("[SimpleAuth] Shutting down SimpleAuth.");
+		logInfo("Shutting down SimpleAuth.");
 
 		WriteBatch batch = DB.getLevelDBStore().createWriteBatch();
 		// Writing coords of de-authenticated players to database
@@ -143,7 +142,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			DB.getLevelDBStore().write(batch);
 			batch.close();
 		} catch (IOException e) {
-			LOGGER.error("[SimpleAuth] Error saving player data! " + e.getMessage());
+			logError("Error saving player data! " + e.getMessage());
 		}
 
 		// Closing DB connection
@@ -257,10 +256,10 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 					0
 			);
 		} catch (Error e) {
-			player.sendMessage(new LiteralText(config.lang.corruptedPosition), false);
-			LOGGER.error("[SimpleAuth] Couldn't teleport player " + player.getName().asString());
-			LOGGER.error(
-				String.format("[SimpleAuth] Last recorded position is X: %s, Y: %s, Z: %s in dimension %s",
+			player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
+			logError("Couldn't teleport player " + player.getName().asString());
+			logError(
+				String.format("Last recorded position is X: %s, Y: %s, Z: %s in dimension %s",
 				cache.lastX,
 				cache.lastY,
 				cache.lastZ,

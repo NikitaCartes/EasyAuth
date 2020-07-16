@@ -29,6 +29,7 @@ import org.samo_lego.simpleauth.storage.SimpleAuthDatabase;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Timer;
@@ -60,7 +61,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	}
 
 	// Getting game directory
-	public static final File gameDirectory = FabricLoader.getInstance().getGameDirectory();
+	public static final Path gameDirectory = FabricLoader.getInstance().getGameDir();
 
 	// Server properties
 	public static Properties serverProp = new Properties();

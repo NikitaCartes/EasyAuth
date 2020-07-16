@@ -1,13 +1,12 @@
 package org.samo_lego.simpleauth.utils;
 
-//import carpet.patches.EntityPlayerMPFake;
+import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class CarpetHelper {
     // Checking if player is actually a fake one
     // This is in its own class since we need carpet import
     public static boolean isPlayerCarpetFake(PlayerEntity player) {
-        //return player instanceof EntityPlayerMPFake;
-        return false;
+        return player instanceof EntityPlayerMPFake;
     }
 }

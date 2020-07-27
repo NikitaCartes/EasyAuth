@@ -76,7 +76,7 @@ public class AuthEventHandler {
                 playerCache.validUntil >= System.currentTimeMillis() &&
                 player.getIp().equals(playerCache.lastIp)
             ) {
-                deauthenticatedUsers.remove(uuid); // Makes player authenticated
+                authenticatePlayer(player, null); // Makes player authenticated
                 return;
             }
             // Invalidating session

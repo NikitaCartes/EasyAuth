@@ -49,6 +49,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
 
+	private static final Timer TIMER = new Timer();
+
 	// HashMap of players that are not authenticated
 	// Rather than storing all the authenticated players, we just store ones that are not authenticated
 	// It stores some data as well, e.g. login tries and user password
@@ -164,12 +166,13 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	// Authenticates player and sends the message
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
+		PlayerCache playerCache = deauthenticatedUsers.get(convertUuid(player));
 		// Teleporting player back
 		if(config.main.spawnOnJoin)
 			teleportPlayer(player, false);
 
 		// Updating blocks if needed (if portal rescue action happened)
-		if(deauthenticatedUsers.get(convertUuid(player)).wasInPortal) {
+		if(playerCache.wasInPortal) {
 			World world = player.getEntityWorld();
 			BlockPos pos = player.getBlockPos();
 
@@ -181,7 +184,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Setting last air to player
 		if(player.isSubmergedInWater())
-			player.setAir(deauthenticatedUsers.get(convertUuid(player)).lastAir);
+			player.setAir(playerCache.lastAir);
+
+		// In case player is in lava during authentication proccess
+		if(!playerCache.wasOnFire)
+			player.setFireTicks(0);
 
 		deauthenticatedUsers.remove(convertUuid(player));
 
@@ -196,9 +203,9 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		if(DB.isClosed())
 			return;
 
-		// Marking player as not authenticated, (re)setting login tries to zero
+		// Marking player as not authenticated
 		String uuid = convertUuid(player);
-		SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player));
+		deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player));
 
 		// Teleporting player to spawn to hide its position
 		if(config.main.spawnOnJoin)
@@ -210,15 +217,17 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Setting the player to be invisible to mobs and also invulnerable
 		player.setInvulnerable(SimpleAuth.config.experimental.playerInvulnerable);
 		player.setInvisible(SimpleAuth.config.experimental.playerInvisible);
-		Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				// Kicking player if not authenticated
-				if(!SimpleAuth.isAuthenticated(player) && player.networkHandler.getConnection().isOpen())
-					player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
-			}
-		}, SimpleAuth.config.main.delay * 1000);
+
+		// Timer should start only if player has joined, not left the server (in case os session)
+		if(player.networkHandler.getConnection().isOpen())
+			TIMER.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					// Kicking player if not authenticated
+					if(!isAuthenticated(player) && player.networkHandler.getConnection().isOpen())
+						player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
+				}
+			}, SimpleAuth.config.main.delay * 1000);
 	}
 
 	// Checking is player is a fake (carpetmod) player
@@ -232,7 +241,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		MinecraftServer server = player.getServer();
 		if(server == null || config.worldSpawn.dimension == null)
 			return;
-		// registry for dimensions
+
 		if (toSpawn) {
 			// Teleports player to spawn
 			player.teleport(

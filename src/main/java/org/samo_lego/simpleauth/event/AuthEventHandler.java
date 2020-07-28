@@ -12,6 +12,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
+import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.mixin.BlockUpdateS2CPacketAccessor;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
@@ -76,9 +77,13 @@ public class AuthEventHandler {
                 playerCache.validUntil >= System.currentTimeMillis() &&
                 player.getIp().equals(playerCache.lastIp)
             ) {
-                deauthenticatedUsers.remove(uuid); // Makes player authenticated
+                authenticatePlayer(player, null); // Makes player authenticated
                 return;
             }
+            // Ugly fix for #13
+            player.setInvulnerable(SimpleAuth.config.experimental.playerInvulnerable);
+            player.setInvisible(SimpleAuth.config.experimental.playerInvisible);
+
             // Invalidating session
             playerCache.wasAuthenticated = false;
             player.sendMessage(notAuthenticated(player), false);
@@ -106,7 +111,6 @@ public class AuthEventHandler {
             ((BlockUpdateS2CPacketAccessor) headPacket).setState(Blocks.AIR.getDefaultState());
             ((BlockUpdateS2CPacketAccessor) headPacket).setBlockPos(pos.up());
             player.networkHandler.sendPacket(headPacket);
-            System.out.println(headPacket);
 
             // Teleporting player to the middle of the block
             player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);

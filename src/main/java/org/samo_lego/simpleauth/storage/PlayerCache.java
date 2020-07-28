@@ -9,6 +9,7 @@ import static org.samo_lego.simpleauth.SimpleAuth.config;
 
 public class PlayerCache {
     public boolean isRegistered;
+    // If player from another location (different IP) joins, session is invalidated using this boolean
     public boolean wasAuthenticated;
     public String password;
     public int loginTries;
@@ -16,6 +17,7 @@ public class PlayerCache {
     public long validUntil;
 
     public int lastAir = 300;
+    public boolean wasOnFire = false;
 
     public String lastDim;
     public double lastX;
@@ -34,6 +36,7 @@ public class PlayerCache {
             this.lastIp = player.getIp();
 
             this.lastAir = player.getAir();
+            this.wasOnFire = player.isOnFire();
 
             // Setting position cache
             this.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());

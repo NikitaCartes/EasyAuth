@@ -6,8 +6,10 @@ plugins {
 repositories {
 	// Carpet mod
 	maven {
-		//url 'https://masa.dy.fi/maven'
 		url 'https://jitpack.io'
+	}
+	maven {
+		url 'https://masa.dy.fi/maven'
 	}
 }
 
@@ -47,9 +49,9 @@ dependencies {
 	// carpetMod
 	// from masa's maven
 	//modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
-
+	modImplementation "carpet:fabric-carpet:1.16-${project.carpet_core_version}"
 	// jitpack for quicker updating
-	modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
+	//modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
 }
 
 processResources {

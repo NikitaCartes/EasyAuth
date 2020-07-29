@@ -17,7 +17,7 @@ public class PlayerCache {
     public long validUntil;
 
     public int lastAir = 300;
-    public boolean wasOnFire = false;
+    public boolean wasOnFire;
 
     public String lastDim;
     public double lastX;
@@ -43,6 +43,9 @@ public class PlayerCache {
             this.lastX = player.getX();
             this.lastY = player.getY();
             this.lastZ = player.getZ();
+        }
+        else {
+            this.wasOnFire = false;
         }
 
         if(DB.isUserRegistered(uuid)) {

@@ -115,6 +115,8 @@ public class AuthConfig {
         public boolean allowItemUse = false;
         // Allows attacking mobs
         public boolean allowEntityPunch = false;
+        // Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error)
+        public boolean useBCryptLibrary = false;
     }
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()

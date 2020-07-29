@@ -33,8 +33,11 @@ dependencies {
 	modImplementation  "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Argon2 library for password hashing
-	implementation 'de.mkammerer:argon2-jvm:2.6'
-	include 'de.mkammerer:argon2-jvm:2.6'
+	implementation "de.mkammerer:argon2-jvm:${project.argon2_version}"
+	include "de.mkammerer:argon2-jvm:${project.argon2_version}"
+
+	// BCrypt
+	implementation "at.favre.lib:bcrypt:${project.bcrypt_version}"
 
 	// leveldb
 	implementation group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'

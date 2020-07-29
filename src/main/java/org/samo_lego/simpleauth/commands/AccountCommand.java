@@ -120,7 +120,7 @@ public class AccountCommand {
                 }
                 // JSON object holding password (may hold some other info in the future)
                 JsonObject playerdata = new JsonObject();
-                String hash = AuthHelper.hashPass(newPass.toCharArray());
+                String hash = AuthHelper.hashPassword(newPass.toCharArray());
                 playerdata.addProperty("password", hash);
 
                 SimpleAuth.DB.updateUserData(convertUuid(player), playerdata.toString());

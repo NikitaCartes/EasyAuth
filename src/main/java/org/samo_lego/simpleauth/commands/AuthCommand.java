@@ -114,7 +114,7 @@ public class AuthCommand {
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
             // Writing the global pass to config
-            config.main.globalPassword = AuthHelper.hashPass(pass.toCharArray());
+            config.main.globalPassword = AuthHelper.hashPassword(pass.toCharArray());
             config.main.enableGlobalPassword = true;
             config.save(new File("./mods/SimpleAuth/config.json"));
         });
@@ -133,6 +133,7 @@ public class AuthCommand {
         config.worldSpawn.x = x;
         config.worldSpawn.y = y;
         config.worldSpawn.z = z;
+        config.main.spawnOnJoin = true;
         config.save(new File("./mods/SimpleAuth/config.json"));
 
         // Getting sender
@@ -167,7 +168,7 @@ public class AuthCommand {
         THREADPOOL.submit(() -> {
             // JSON object holding password (may hold some other info in the future)
             JsonObject playerdata = new JsonObject();
-            String hash = AuthHelper.hashPass(password.toCharArray());
+            String hash = AuthHelper.hashPassword(password.toCharArray());
             playerdata.addProperty("password", hash);
 
             if (DB.registerUser(uuid, playerdata.toString())) {
@@ -188,7 +189,7 @@ public class AuthCommand {
         THREADPOOL.submit(() -> {
             // JSON object holding password (may hold some other info in the future)
             JsonObject playerdata = new JsonObject();
-            String hash = AuthHelper.hashPass(password.toCharArray());
+            String hash = AuthHelper.hashPassword(password.toCharArray());
             playerdata.addProperty("password", hash);
 
             DB.updateUserData(uuid, playerdata.toString());

@@ -12,7 +12,6 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
-import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.mixin.BlockUpdateS2CPacketAccessor;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
@@ -81,8 +80,8 @@ public class AuthEventHandler {
                 return;
             }
             // Ugly fix for #13
-            player.setInvulnerable(SimpleAuth.config.experimental.playerInvulnerable);
-            player.setInvisible(SimpleAuth.config.experimental.playerInvisible);
+            player.setInvulnerable(config.experimental.playerInvulnerable);
+            player.setInvisible(config.experimental.playerInvisible);
 
             // Invalidating session
             playerCache.wasAuthenticated = false;
@@ -91,6 +90,7 @@ public class AuthEventHandler {
         else {
             deauthenticatePlayer(player);
             playerCache = deauthenticatedUsers.get(uuid);
+            playerCache.wasOnFire = false;
         }
 
         if(config.main.spawnOnJoin)

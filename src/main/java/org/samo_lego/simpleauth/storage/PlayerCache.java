@@ -17,7 +17,7 @@ public class PlayerCache {
     public long validUntil;
 
     public int lastAir = 300;
-    public boolean wasOnFire = false;
+    public boolean wasOnFire;
 
     public String lastDim;
     public double lastX;
@@ -43,6 +43,9 @@ public class PlayerCache {
             this.lastX = player.getX();
             this.lastY = player.getY();
             this.lastZ = player.getZ();
+        }
+        else {
+            this.wasOnFire = false;
         }
 
         if(DB.isUserRegistered(uuid)) {
@@ -73,10 +76,10 @@ public class PlayerCache {
                     if (lastLoc != null) {
                         // Getting DB coords
                         JsonObject lastLocation = gson.fromJson(lastLoc.getAsString(), JsonObject.class);
-                        this.lastDim = lastLocation.get("dim").getAsString();
-                        this.lastX = lastLocation.get("x").getAsDouble();
-                        this.lastY = lastLocation.get("y").getAsDouble();
-                        this.lastZ = lastLocation.get("z").getAsDouble();
+                        this.lastDim = lastLocation.get("dim").isJsonNull() ? config.worldSpawn.dimension : lastLocation.get("dim").getAsString();
+                        this.lastX = lastLocation.get("x").isJsonNull() ? config.worldSpawn.x : lastLocation.get("x").getAsDouble();
+                        this.lastY = lastLocation.get("y").isJsonNull() ? config.worldSpawn.y : lastLocation.get("y").getAsDouble();
+                        this.lastZ = lastLocation.get("z").isJsonNull() ? config.worldSpawn.z : lastLocation.get("z").getAsDouble();
 
                         // Removing location data from DB
                         json.remove("lastLocation");

@@ -63,7 +63,7 @@ public class RegisterCommand {
                 ), false);
                 return;
             }
-            String hash = AuthHelper.hashPass(pass1.toCharArray());
+            String hash = AuthHelper.hashPassword(pass1.toCharArray());
             // JSON object holding password (may hold some other info in the future)
             JsonObject playerdata = new JsonObject();
             playerdata.addProperty("password", hash);

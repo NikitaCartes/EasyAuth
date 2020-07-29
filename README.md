@@ -6,7 +6,7 @@
 [![Closed Issues](https://img.shields.io/github/issues-closed/samolego/simpleauth.svg)](https://github.com/samolego/SimpleAuth/issues?q=is%3Aissue+is%3Aclosed)
 [![Curseforge downloads](http://cf.way2muchnoise.eu/full_simpleauth_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/simpleauth)
 
-Requires Fabric API.
+[<img src="https://i.imgur.com/Ol1Tcf8.png" alt="Requires Fabric API." width="200px" href="https://www.curseforge.com/minecraft/mc-mods/fabric-api">](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
 
 ## License
 Libraries that the project is using:
@@ -51,7 +51,7 @@ And this to your `gradle.properties`
 ```properties
 # By tag (version)
 # SimpleAuth version (this might not be the latest version)
-simpleauth_version = 1.4.6
+simpleauth_version = 1.4.8
 
 # Or this (by branch)
 # SimpleAuth branches

@@ -76,10 +76,10 @@ public class PlayerCache {
                     if (lastLoc != null) {
                         // Getting DB coords
                         JsonObject lastLocation = gson.fromJson(lastLoc.getAsString(), JsonObject.class);
-                        this.lastDim = lastLocation.get("dim").getAsString();
-                        this.lastX = lastLocation.get("x").getAsDouble();
-                        this.lastY = lastLocation.get("y").getAsDouble();
-                        this.lastZ = lastLocation.get("z").getAsDouble();
+                        this.lastDim = lastLocation.get("dim").isJsonNull() ? config.worldSpawn.dimension : lastLocation.get("dim").getAsString();
+                        this.lastX = lastLocation.get("x").isJsonNull() ? config.worldSpawn.x : lastLocation.get("x").getAsDouble();
+                        this.lastY = lastLocation.get("y").isJsonNull() ? config.worldSpawn.y : lastLocation.get("y").getAsDouble();
+                        this.lastZ = lastLocation.get("z").isJsonNull() ? config.worldSpawn.z : lastLocation.get("z").getAsDouble();
 
                         // Removing location data from DB
                         json.remove("lastLocation");

@@ -32,14 +32,20 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation  "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    // Argon2 library for password hashing
-	implementation "de.mkammerer:argon2-jvm:${project.argon2_version}"
-	include "de.mkammerer:argon2-jvm:${project.argon2_version}"
+
+	// Password hashing
+    // Argon2
+	implementation "de.mkammerer:argon2-jvm:${argon2_version}"
+	include "de.mkammerer:argon2-jvm:${argon2_version}"
 
 	// BCrypt
-	implementation "at.favre.lib:bcrypt:${project.bcrypt_version}"
+	implementation "at.favre.lib:bcrypt:${bcrypt_version}"
+	implementation "at.favre.lib:bytes:${bytes_version}"
+	include "at.favre.lib:bcrypt:${bcrypt_version}"
+	include "at.favre.lib:bytes:${bytes_version}"
 
-	// leveldb
+	// Storage
+	// leveldb database
 	implementation group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
 	implementation group: 'org.iq80.leveldb', name: 'leveldb-api', version: '0.12'
 	include group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'

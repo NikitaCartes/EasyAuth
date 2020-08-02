@@ -10,23 +10,35 @@ public class HasherArgon2 {
     // Creating the instance
     private static final Argon2 HASHER = Argon2Factory.create();
 
-    public static boolean verify(char[] pass, String hashed) {
+    /**
+     * Verifies password
+     *
+     * @param password character array of password string
+     * @param hashed hashed password
+     * @return true if password was correct
+     */
+    public static boolean verify(char[] password, String hashed) {
         try {
-            return HASHER.verify(hashed, pass);
+            return HASHER.verify(hashed, password);
         }
         catch (Error e) {
             logError("Argon2 password verification error: " + e);
             return false;
         } finally {
             // Wipe confidential data
-            HASHER.wipeArray(pass);
+            HASHER.wipeArray(password);
         }
     }
 
-    // Hashing the password with the Argon2 power
-    public static String hash(char[] pass) {
+    /**
+     * Hashes the password
+     *
+     * @param password character array of password string that needs to be hashed
+     * @return string
+     */
+    public static String hash(char[] password) {
         try {
-            return HASHER.hash(10, 65536, 1, pass);
+            return HASHER.hash(10, 65536, 1, password);
         } catch (Error e) {
             logError("Argon2 password hashing error: " + e);
         }

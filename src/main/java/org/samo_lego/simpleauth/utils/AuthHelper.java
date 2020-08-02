@@ -12,12 +12,17 @@ public class AuthHelper {
     // Json parser
     private static final JsonParser parser = new JsonParser();
 
-    // Returns 1 if password is correct, 0 if not
-    // and -1 if user is not registered yet
-    public static int checkPass(String uuid, char[] pass) {
+    /**
+     * Checks password of user
+     *
+     * @param uuid uuid of player, stored in database
+     * @param password password that needs to be checked
+     * @return 1 for pass, 0 if password is false, -1 if user is not yet registered
+     */
+    public static int checkPass(String uuid, char[] password) {
         if(config.main.enableGlobalPassword) {
             // We have global password enabled
-            return verifyPassword(pass, config.main.globalPassword) ? 1 : 0;
+            return verifyPassword(password, config.main.globalPassword) ? 1 : 0;
         }
         else {
             String hashed;
@@ -35,17 +40,22 @@ public class AuthHelper {
                 return -1;  // User is not yet registered
 
             // Verify password
-            return verifyPassword(pass, hashed) ? 1 : 0;
+            return verifyPassword(password, hashed) ? 1 : 0;
         }
     }
 
-    public static String hashPassword(char[] pass) {
+    /**
+     * Hashes password with algorithm, depending on config
+     *
+     * @param password character array of password string
+     * @return hashed password as string
+     */
+    public static String hashPassword(char[] password) {
         if(config.experimental.useBCryptLibrary)
-            return HasherBCrypt.hash(pass);
+            return HasherBCrypt.hash(password);
         else
-            return HasherArgon2.hash(pass);
+            return HasherArgon2.hash(password);
     }
-
 
     private static boolean verifyPassword(char[] pass, String hashed) {
         if(config.experimental.useBCryptLibrary)

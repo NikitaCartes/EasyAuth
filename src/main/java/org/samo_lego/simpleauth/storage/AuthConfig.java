@@ -53,8 +53,13 @@ public class AuthConfig {
         // Visit https://github.com/samolego/SimpleAuth/wiki/Sessions for more info
         public int sessionTimeoutTime = 60;
 
+        // Should deauthenticated players fall if the login mid-air?
+        public boolean allowFalling = false;
+
         // Whether to tp player to spawn when joining (to hide coordinates)
         public boolean spawnOnJoin =  false;
+
+        // Data for spawn (where deauthenticated players are teleported)
         public static class WorldSpawn {
                 public String dimension;
                 public double x;

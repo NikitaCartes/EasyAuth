@@ -114,7 +114,6 @@ public class AuthEventHandler {
 
             // Teleporting player to the middle of the block
             player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-            playerCache.wasInPortal = true;
         }
     }
 
@@ -154,7 +153,17 @@ public class AuthEventHandler {
 
     // Player movement
     public static ActionResult onPlayerMove(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowMovement) {
+        // Player will fall if enabled (prevent fly kick)
+        boolean auth = isAuthenticated((ServerPlayerEntity) player);
+        if(!auth && config.main.allowFalling && !player.isOnGround() && !player.isInsideWaterOrBubbleColumn()) {
+            if(player.isInvulnerable())
+                player.setInvulnerable(false);
+            return ActionResult.PASS;
+        }
+        // Otherwise movement should be disabled
+        else if(!auth && !config.experimental.allowMovement) {
+            if(!player.isInvulnerable())
+                player.setInvulnerable(true);
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;

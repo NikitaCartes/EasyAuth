@@ -56,7 +56,13 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	// It stores some data as well, e.g. login tries and user password
 	public static HashMap<String, PlayerCache> deauthenticatedUsers = new HashMap<>();
 
-	// Boolean for easier checking if player is authenticated
+	/**
+	 * Checks whether player is authenticated
+	 * Fake players always count as authenticated
+	 *
+	 * @param player player that needs to be checked
+	 * @return false if player is de-authenticated, otherwise false
+	 */
 	public static boolean isAuthenticated(ServerPlayerEntity player) {
 		String uuid = convertUuid(player);
 		return !deauthenticatedUsers.containsKey(uuid) || deauthenticatedUsers.get(uuid).wasAuthenticated;
@@ -152,7 +158,13 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		DB.close();
 	}
 
-	// Getting not authenticated text
+	/**
+	 * Gets the text which tells the player
+	 * to login or register, depending on account status
+	 *
+	 * @param player player who will get the message
+	 * @return LiteralText with appropriate string (login or register)
+	 */
 	public static LiteralText notAuthenticated(PlayerEntity player) {
         final PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
         if(SimpleAuth.config.main.enableGlobalPassword || cache.isRegistered)
@@ -164,7 +176,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
         );
 	}
 
-	// Authenticates player and sends the message
+	/**
+	 * Authenticates player and sends the success message
+	 *
+	 * @param player player that needs to be authenticated
+	 * @param msg message to be send to the player
+	 */
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
 		PlayerCache playerCache = deauthenticatedUsers.get(convertUuid(player));
 		// Teleporting player back
@@ -198,7 +215,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		player.sendMessage(msg, false);
 	}
 
-	// De-authenticates player
+	/**
+	 * De-authenticates the player
+	 *
+	 * @param player player that needs to be de-authenticated
+	 */
 	public static void deauthenticatePlayer(ServerPlayerEntity player) {
 		if(DB.isClosed())
 			return;
@@ -230,13 +251,24 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			}, SimpleAuth.config.main.delay * 1000);
 	}
 
-	// Checking is player is a fake (carpetmod) player
+	/**
+	 * Checks whether player is a fake player (from CarpetMod)
+	 *
+	 * @param player player that needs to be checked
+	 * @return true if player is fake, otherwise false
+	 */
 	public static boolean isPlayerFake(PlayerEntity player) {
 		// We ask CarpetHelper class since it has the imports needed
 		return FabricLoader.getInstance().isModLoaded("carpet") && isPlayerCarpetFake(player);
 	}
 
-	// Teleports player to spawn or last location when authenticating
+	/**
+	 * Teleports player to spawn or last location that is recorded
+	 * Last location means the location before de-authentication
+	 *
+	 * @param player player that needs to be teleported
+	 * @param toSpawn whether to teleport player to spawn (provided in config) or last recorded position
+	 */
 	public static void teleportPlayer(ServerPlayerEntity player, boolean toSpawn) {
 		MinecraftServer server = player.getServer();
 		if(server == null || config.worldSpawn.dimension == null)

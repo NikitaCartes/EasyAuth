@@ -1,0 +1,41 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Fabric Snapshot CI
+
+on:
+  push:
+    branches: fabric-snapshot
+  pull_request:
+    branches: fabric-snapshot
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+          name: Fetching branches
+          with:
+            ref: 'fabric-snapshot' # Branch to build from
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Execute permission for renaming script
+        run: chmod +x renaming.sh
+      - name: Running renaming script
+        run: ./renaming.sh
+
+        # Artifact upload
+      - name: Uploading artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          #name: ${{ env.BUILDNAME }}.jar
+          name: UNZIP_ME_${{ env.BUILDNAME }}.zip
+          path: build/libs/${{ env.BUILDNAME }}.jar

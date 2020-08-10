@@ -1,13 +1,13 @@
 # This workflow will build a Java project with Gradle
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
-name: Gradle Build
+name: Fabric CI
 
 on:
   push:
-    branches: [ master ]
+    branches: fabric
   pull_request:
-    branches: [ master ]
+    branches: fabric
 
 jobs:
   build:
@@ -16,9 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Fetching branches 
-      run: |
-        git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+      name: Fetching branches
+      with:
+        ref: ${{ on.push.branches }}
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
@@ -31,14 +31,11 @@ jobs:
       run: chmod +x renaming.sh
     - name: Running renaming script
       run: ./renaming.sh
-      
-      # Publishing to dev-builds branch
-    - name: GitHub Pages
-      if: success()
-      uses: crazy-max/ghaction-github-pages@v1.4.0
+
+      # Artifact upload
+    - name: Uploading artifacts
+      uses: actions/upload-artifact@v2
       with:
-        build_dir: build/libs
-        target_branch: dev-builds
-        keep_history: false
-      env:
-        GITHUB_PAT: ${{ secrets.pat }}
+        #name: ${{ env.BUILDNAME }}.jar
+        name: UNZIP_ME_${{ env.BUILDNAME }}.zip
+        path: build/libs/${{ env.BUILDNAME }}.jar

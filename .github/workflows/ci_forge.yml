@@ -30,7 +30,7 @@ jobs:
       - name: Execute permission for renaming script
         run: chmod +x renaming.sh
       - name: Running renaming script
-        run: ./renaming.sh
+        run: ./.github/workflows/renaming.sh
 
         # Artifact upload
       - name: Uploading artifacts

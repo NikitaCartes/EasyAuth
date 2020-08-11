@@ -28,7 +28,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
     - name: Execute permission for renaming script
-      run: chmod +x renaming.sh
+      run: chmod +x ./.github/workflows/renaming.sh
     - name: Running renaming script
       run: ./.github/workflows/renaming.sh
 

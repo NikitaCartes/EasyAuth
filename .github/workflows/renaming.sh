@@ -7,6 +7,11 @@ mcVersion="$(grep 'minecraft_version' gradle.properties | sed 's/minecraft_versi
 
 cd ./build/libs || exit
 
-echo "Build is going to be renamed: $projectId-$version-devbuild_$GITHUB_RUN_NUMBER-MC_$mcVersion.jar"
+buildName="$projectId-$version-devbuild_$GITHUB_RUN_NUMBER-MC_$mcVersion"
+
+echo "Build is going to be renamed: $buildName.jar"
 # Renaming the dev build
-mv "$projectId-$version.jar" "$projectId-$version-devbuild_$GITHUB_RUN_NUMBER-MC_$mcVersion.jar"
+mv "$projectId-$version.jar" "$buildName.jar"
+
+#Setting the buildname for GH actions
+echo "::set-env name=BUILDNAME::$buildName"

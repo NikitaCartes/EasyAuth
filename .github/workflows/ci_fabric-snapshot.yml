@@ -37,5 +37,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           #name: ${{ env.BUILDNAME }}.jar
-          name: UNZIP_ME_${{ env.BUILDNAME }}.zip
+          name: UNZIP_ME_${{ env.BUILDNAME }}
           path: build/libs/${{ env.BUILDNAME }}.jar

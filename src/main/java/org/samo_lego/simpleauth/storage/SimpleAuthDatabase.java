@@ -20,7 +20,9 @@ public class SimpleAuthDatabase {
         return this.levelDBStore;
     }
 
-    // Connects to the DB
+    /**
+     * Connects to the DB.
+     */
     public void openConnection() {
         try {
 
@@ -30,7 +32,10 @@ public class SimpleAuthDatabase {
             logError(e.getMessage());
         }
     }
-    // Closing connection
+
+    /**
+     * Closes database connection.
+     */
     public void close() {
         if (levelDBStore != null) {
             try {
@@ -42,13 +47,23 @@ public class SimpleAuthDatabase {
         }
     }
 
-    // Tells whether db connection is closed
+    /**
+     * Tells whether DB connection is closed.
+     *
+     * @return false if connection is open, otherwise false
+     */
     public boolean isClosed() {
         return levelDBStore == null;
     }
 
 
-    // When player registers, we insert the data into DB
+    /**
+     * Inserts the data for the player.
+     *
+     * @param uuid uuid of the player to insert data for
+     * @param data data to put inside database
+     * @return true if operation was successful, otherwise false
+     */
     public boolean registerUser(String uuid, String data) {
         try {
             if(!this.isUserRegistered(uuid)) {
@@ -62,7 +77,12 @@ public class SimpleAuthDatabase {
         }
     }
 
-    // Checks if user is registered
+    /**
+     * Checks if player is registered.
+     *
+     * @param uuid player's uuid
+     * @return true if registered, otherwise false
+     */
     public boolean isUserRegistered(String uuid) {
         try {
             return levelDBStore.get(bytes("UUID:" + uuid)) != null;
@@ -72,7 +92,11 @@ public class SimpleAuthDatabase {
         return false;
     }
 
-    // Deletes row containing the username provided
+    /**
+     * Deletes data for the provided uuid.
+     *
+     * @param uuid uuid of player to delete data for
+     */
     public void deleteUserData(String uuid) {
         try {
             levelDBStore.delete(bytes("UUID:" + uuid));
@@ -81,7 +105,12 @@ public class SimpleAuthDatabase {
         }
     }
 
-    // Updates the password of the user
+    /**
+     * Updates player's data.
+     *
+     * @param uuid uuid of the player to update data for
+     * @param data data to put inside database
+     */
     public void updateUserData(String uuid, String data) {
         try {
             levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));

@@ -26,41 +26,78 @@ import java.nio.charset.StandardCharsets;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 
 public class AuthConfig {
+    private static final Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+
     // If player is not authenticated, following conditions apply
     public static class MainConfig {
-        // Allows "right-clicking" on an entity (e.g. clicking on villagers)
+        /**
+         * Allows "right-clicking" on an entity (e.g. clicking on villagers).
+         */
         public boolean allowEntityInteract = false;
-        // Maximum login tries before kicking the player from server
-        // Set to -1 to allow unlimited, not recommended however
+        /**
+         * Maximum login tries before kicking the player from server.
+         * Set to -1 to allow unlimited, not recommended however.
+         */
         public int maxLoginTries = 1;
-        // Time after which player will be kicked if not authenticated - in seconds
-        public int delay = 60;
-        // Disables registering and forces logging in with global password
-        // Visit https://github.com/samolego/SimpleAuth/wiki/Locking-server-with-global-password for more info
+        /**
+         * Time after which player will be kicked if not authenticated - in seconds
+         */
+        public int kickTime = 60;
+        /**
+         * Disables registering and forces logging in with global password.
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Locking-server-with-global-password">wiki</a>
+         */
         public boolean enableGlobalPassword = false;
+        /**
+         * Hashed global password.
+         */
         public String globalPassword;
-        // Tries to rescue players if they are stuck inside a portal on logging in
-        // Visit https://github.com/samolego/SimpleAuth/wiki/Portal-Rescue for more info
+        /**
+         * Tries to rescue players if they are stuck inside a portal on logging in.
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Portal-Rescue">wiki</a>
+         */
         public boolean tryPortalRescue = true;
-        // Minimum and maximum length of password. Set -1 to disable max chars
+        /**
+         * Minimum length of password.
+         */
         public int minPasswordChars = 4;
+        /**
+         * Maximum length of password.
+         * Set -1 to disable.
+         */
         public int maxPasswordChars = -1;
-        // Regex of valid playername characters. You probably don't want to change this.
-        // Visit https://github.com/samolego/SimpleAuth/wiki/Username-Restriction for more info
+        /**
+         * Regex of valid playername characters. You probably don't want to change this.
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Username-Restriction">wiki</a>
+         */
         public String usernameRegex = "^[a-zA-Z0-9_]{3,16}$";
-        // How long to keep session (auto-logging in the player), in seconds
-        // Set to -1 to disable
-        // Visit https://github.com/samolego/SimpleAuth/wiki/Sessions for more info
+        /**
+         * How long to keep session (auto-logging in the player), in seconds
+         * Set to -1 to disable
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Sessions">wiki</a>
+         */
         public int sessionTimeoutTime = 60;
 
-        // Should deauthenticated players fall if the login mid-air?
+        /**
+         * Should deauthenticated players fall if the login mid-air?
+         */
         public boolean allowFalling = false;
 
-        // Whether to tp player to spawn when joining (to hide coordinates)
+        /**
+         * Whether to tp player to spawn when joining (to hide coordinates)
+         */
         public boolean spawnOnJoin =  false;
 
-        // Data for spawn (where deauthenticated players are teleported)
+        /**
+         * Data for spawn (where deauthenticated players are teleported).
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Coordinate-Hiding">wiki</a>
+         */
         public static class WorldSpawn {
+                /**
+                 * Dimension id, e.g. "minecraft:overworld"
+                 */
                 public String dimension;
                 public double x;
                 public double y;
@@ -98,40 +135,69 @@ public class AuthConfig {
         public String corruptedPlayerData = "§cYour data is probably corrupted. Please contact admin.";
     }
     public static class ExperimentalConfig {
-        // Prevents player being kicked because another player with the same name has joined the server
+        /**
+         * Prevents player being kicked because another player with the same name has joined the server.
+         */
         public boolean disableAnotherLocationKick = true;
-        // If player should be invulnerable before authentication
+        /**
+         * If player should be invulnerable before authentication.
+         */
         public boolean playerInvulnerable = true;
-        // If player should be invisible to mobs before authentication
+        /**
+         * If player should be invisible to mobs before authentication.
+         */
         public boolean playerInvisible = true;
-        // Allows chat (but not commands, except for /login and /register)
+        /**
+         * Allows chat (but not commands, except for /login and /register).
+         */
         public boolean allowChat = false;
-        // Allows player movement
+        /**
+         * Allows player movement.
+         */
         public boolean allowMovement = false;
-        // Allows block "use" - right clicking (e.g. opening a chest)
+        /**
+         * Allows block "use" - right clicking (e.g. opening a chest).
+         */
         public boolean allowBlockUse = false;
-        // Allows mining || punching blocks
+        /**
+         *  Allows mining or punching blocks.
+         */
         public boolean allowBlockPunch = false;
-        // Allows dropping items from inventory
+        /**
+         * Allows dropping items from inventory.
+         */
         public boolean allowItemDrop = false;
-        // Allows moving item through inventory
+        /**
+         * Allows moving item through inventory.
+         */
         public boolean allowItemMoving = false;
-        // Allows item "use" - right click function (e.g. using a bow)
+        /**
+         * Allows item "use" - right click function (e.g. using a bow).
+         */
         public boolean allowItemUse = false;
-        // Allows attacking mobs
+        /**
+         * Allows attacking mobs.
+         */
         public boolean allowEntityPunch = false;
-        // Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error)
+        /**
+         * Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error).
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/GLIBC-problems">wiki</a>
+         */
         public boolean useBCryptLibrary = false;
     }
-    private static final Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
 
     public MainConfig main = new MainConfig();
     public MainConfig.WorldSpawn worldSpawn = new MainConfig.WorldSpawn();
     public LangConfig lang = new LangConfig();
     public ExperimentalConfig experimental = new ExperimentalConfig();
 
+
+    /**
+     * Loads SimpleAuth's config file.
+     *
+     * @param file file to load config from
+     * @return AuthConfig config object
+     */
     public static AuthConfig load(File file) {
         AuthConfig config;
         if (file.exists()) {
@@ -150,6 +216,12 @@ public class AuthConfig {
 
         return config;
     }
+
+    /**
+     * Saves the config to the given file.
+     *
+     * @param file file to save config to
+     */
     public void save(File file) {
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             gson.toJson(this, writer);

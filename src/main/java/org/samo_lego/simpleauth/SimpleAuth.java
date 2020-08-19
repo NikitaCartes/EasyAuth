@@ -57,11 +57,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	public static HashMap<String, PlayerCache> deauthenticatedUsers = new HashMap<>();
 
 	/**
-	 * Checks whether player is authenticated
-	 * Fake players always count as authenticated
+	 * Checks whether player is authenticated.
+	 * Fake players always count as authenticated.
 	 *
 	 * @param player player that needs to be checked
-	 * @return false if player is de-authenticated, otherwise false
+	 * @return false if player is not authenticated, otherwise true
 	 */
 	public static boolean isAuthenticated(ServerPlayerEntity player) {
 		String uuid = convertUuid(player);
@@ -160,7 +160,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	/**
 	 * Gets the text which tells the player
-	 * to login or register, depending on account status
+	 * to login or register, depending on account status.
 	 *
 	 * @param player player who will get the message
 	 * @return LiteralText with appropriate string (login or register)
@@ -177,7 +177,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	}
 
 	/**
-	 * Authenticates player and sends the success message
+	 * Authenticates player and sends the success message.
 	 *
 	 * @param player player that needs to be authenticated
 	 * @param msg message to be send to the player
@@ -216,7 +216,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	}
 
 	/**
-	 * De-authenticates the player
+	 * De-authenticates the player.
 	 *
 	 * @param player player that needs to be de-authenticated
 	 */
@@ -248,11 +248,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 					if(!isAuthenticated(player) && player.networkHandler.getConnection().isOpen())
 						player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
 				}
-			}, SimpleAuth.config.main.delay * 1000);
+			}, SimpleAuth.config.main.kickTime * 1000);
 	}
 
 	/**
-	 * Checks whether player is a fake player (from CarpetMod)
+	 * Checks whether player is a fake player (from CarpetMod).
 	 *
 	 * @param player player that needs to be checked
 	 * @return true if player is fake, otherwise false
@@ -263,8 +263,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	}
 
 	/**
-	 * Teleports player to spawn or last location that is recorded
-	 * Last location means the location before de-authentication
+	 * Teleports player to spawn or last location that is recorded.
+	 * Last location means the location before de-authentication.
 	 *
 	 * @param player player that needs to be teleported
 	 * @param toSpawn whether to teleport player to spawn (provided in config) or last recorded position

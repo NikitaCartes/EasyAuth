@@ -70,6 +70,8 @@ public class PlayerCache {
             if(passwordElement instanceof JsonNull) {
                 if(player != null) {
                     player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
+                    this.isRegistered = false;
+                    this.password = "";
                 }
 
                 // This shouldn't have happened, data seems to be corrupted

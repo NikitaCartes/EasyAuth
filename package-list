@@ -1,0 +1,9 @@
+org.samo_lego.simpleauth
+org.samo_lego.simpleauth.commands
+org.samo_lego.simpleauth.event
+org.samo_lego.simpleauth.event.entity.player
+org.samo_lego.simpleauth.event.item
+org.samo_lego.simpleauth.mixin
+org.samo_lego.simpleauth.storage
+org.samo_lego.simpleauth.utils
+org.samo_lego.simpleauth.utils.hashing

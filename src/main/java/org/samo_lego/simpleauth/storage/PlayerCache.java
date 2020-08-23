@@ -9,28 +9,46 @@ import static org.samo_lego.simpleauth.SimpleAuth.DB;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 
 /**
- * Class used for storing the deauthenticated player's cache
+ * Class used for storing the non-authenticated player's cache
  */
 public class PlayerCache {
-    // Whether player is registered
+    /**
+     * Whether player is registered.
+     */
     public boolean isRegistered;
-    // If player from another location (different IP) joins, session is invalidated using this boolean
+    /**
+     * Whether player was authenticated after leaving.
+     * Used for {@link org.samo_lego.simpleauth.event.AuthEventHandler#onPlayerJoin(ServerPlayerEntity) session validation}.
+     */
     public boolean wasAuthenticated;
-    // Hashed password of player
+    /**
+     * Hashed password of player.
+     */
     public String password;
-    // How many times player has tried to login
+    /**
+     * Stores how many times player has tried to login.
+     */
     public int loginTries;
-    // Last IP of player, used for sessions
+    /**
+     * Last recorded IP of player.
+     * Used for {@link org.samo_lego.simpleauth.event.AuthEventHandler#onPlayerJoin(ServerPlayerEntity) sessions}.
+     */
     public String lastIp;
-    // Time until session is valid
+    /**
+     * Time until session is valid.
+     */
     public long validUntil;
 
-    // Player stats before de-authenticating
+    /**
+     * Player stats before de-authentication.
+     */
     public int lastAir;
     public boolean wasOnFire;
     public boolean wasInPortal;
 
-    // Last recorded position before de-authenticating
+    /**
+     * Last recorded position before de-authentication.
+     */
     public String lastDim;
     public double lastX;
     public double lastY;
@@ -70,12 +88,10 @@ public class PlayerCache {
             if(passwordElement instanceof JsonNull) {
                 if(player != null) {
                     player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
-                    this.isRegistered = false;
-                    this.password = "";
                 }
 
                 // This shouldn't have happened, data seems to be corrupted
-                this.password = null;
+                this.password = "";
                 this.isRegistered = false;
             }
             else {

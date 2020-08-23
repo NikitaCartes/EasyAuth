@@ -51,9 +51,10 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	private static final Timer TIMER = new Timer();
 
-	// HashMap of players that are not authenticated
-	// Rather than storing all the authenticated players, we just store ones that are not authenticated
-	// It stores some data as well, e.g. login tries and user password
+	/**
+	 * HashMap of non-authenticated players.
+	 * Stores their data as {@link org.samo_lego.simpleauth.storage.PlayerCache PlayerCache} object
+	 */
 	public static HashMap<String, PlayerCache> deauthenticatedUsers = new HashMap<>();
 
 	/**
@@ -120,18 +121,22 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// From Fabric API
 		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.onAttackBlock(playerEntity));
-        UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));
-        UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
-        AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
+		UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));
+		UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
+		AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
 		UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-		ServerLifecycleEvents.SERVER_STOPPED.register(minecraftServer -> this.onStopServer());
+		ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(null));
+		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
 	}
 
-	private void onStopServer() {
+	/**
+	 * Called on server stop.
+	 */
+	private void onStopServer(MinecraftServer server) {
 		logInfo("Shutting down SimpleAuth.");
 
 		WriteBatch batch = DB.getLevelDBStore().createWriteBatch();
-		// Writing coords of de-authenticated players to database
+		// Writing coordinates of de-authenticated players to database
 		deauthenticatedUsers.forEach((uuid, playerCache) -> {
 			JsonObject data = new JsonObject();
 			data.addProperty("password", playerCache.password);

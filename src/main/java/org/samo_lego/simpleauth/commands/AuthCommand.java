@@ -30,7 +30,7 @@ public class AuthCommand {
         dispatcher.register(literal("auth")
             .requires(source -> source.hasPermissionLevel(4))
             .then(literal("reload")
-                .executes( ctx -> reloadConfig(ctx.getSource()))
+                .executes( ctx -> reloadConfig(ctx.getSource().getEntity()))
             )
             .then(literal("setGlobalPassword")
                     .then(argument("password", word())
@@ -96,8 +96,7 @@ public class AuthCommand {
     }
 
     // Reloading the config
-    private static int reloadConfig(ServerCommandSource source) {
-        Entity sender = source.getEntity();
+    public static int reloadConfig(Entity sender) {
         config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
 
         if(sender != null)

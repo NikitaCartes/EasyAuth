@@ -47,7 +47,7 @@ public class AuthConfig {
         public int kickTime = 60;
         /**
          * Disables registering and forces logging in with global password.
-         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Locking-server-with-global-password">wiki</a>
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Global-password" target="_blank">wiki</a>
          */
         public boolean enableGlobalPassword = false;
         /**
@@ -56,7 +56,7 @@ public class AuthConfig {
         public String globalPassword;
         /**
          * Tries to rescue players if they are stuck inside a portal on logging in.
-         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Portal-Rescue">wiki</a>
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Portal-Rescue" target="_blank">wiki</a>
          */
         public boolean tryPortalRescue = true;
         /**
@@ -70,13 +70,13 @@ public class AuthConfig {
         public int maxPasswordChars = -1;
         /**
          * Regex of valid playername characters. You probably don't want to change this.
-         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Username-Restriction">wiki</a>
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Username-Restriction" target="_blank">wiki</a>
          */
         public String usernameRegex = "^[a-zA-Z0-9_]{3,16}$";
         /**
          * How long to keep session (auto-logging in the player), in seconds
          * Set to -1 to disable
-         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Sessions">wiki</a>
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Sessions" target="_blank">wiki</a>
          */
         public int sessionTimeoutTime = 60;
 
@@ -92,7 +92,7 @@ public class AuthConfig {
 
         /**
          * Data for spawn (where deauthenticated players are teleported).
-         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Coordinate-Hiding">wiki</a>
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Coordinate-Hiding" target="_blank">wiki</a>
          */
         public static class WorldSpawn {
                 /**
@@ -138,7 +138,7 @@ public class AuthConfig {
         /**
          * Prevents player being kicked because another player with the same name has joined the server.
          */
-        public boolean disableAnotherLocationKick = true;
+        public boolean preventAnotherLocationKick = true;
         /**
          * If player should be invulnerable before authentication.
          */
@@ -181,7 +181,7 @@ public class AuthConfig {
         public boolean allowEntityPunch = false;
         /**
          * Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error).
-         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/GLIBC-problems">wiki</a>
+         * @see <a href="https://github.com/samolego/SimpleAuth/wiki/GLIBC-problems" target="_blank">wiki</a>
          */
         public boolean useBCryptLibrary = false;
     }

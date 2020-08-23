@@ -1,5 +1,7 @@
 package org.samo_lego.simpleauth.utils;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.samo_lego.simpleauth.SimpleAuth;
@@ -33,7 +35,14 @@ public class AuthHelper {
             // Hashed password from DB
             else {
                 JsonObject json = parser.parse(SimpleAuth.DB.getData(uuid)).getAsJsonObject();
-                hashed = json.get("password").getAsString();
+                JsonElement passwordElement = json.get("password");
+                if(passwordElement instanceof JsonNull) {
+                    // This shouldn't have happened, data seems to be corrupted
+                    return -1;
+                }
+                else {
+                    hashed = passwordElement.getAsString();
+                }
             }
 
             if(hashed.equals(""))

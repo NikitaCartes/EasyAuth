@@ -24,12 +24,9 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew javadoc
-    - name: GitHub Pages Javadoc
-      if: success()
-      uses: crazy-max/ghaction-github-pages@v1.4.0
-      with:
-        build_dir: build/docs/javadoc
-        target_branch: gh-pages
-        keep_history: false
-      env:
-        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+   - name: GitHub Pages Javadoc
+     if: success()
+     uses: peaceiris/actions-gh-pages@v3
+     with:
+       github_token: ${{ secrets.GITHUB_TOKEN }}
+       publish_dir: build/docs/javadoc

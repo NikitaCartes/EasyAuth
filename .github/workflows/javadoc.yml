@@ -32,4 +32,4 @@ jobs:
         target_branch: gh-pages
         keep_history: false
       env:
-        GITHUB_PAT: ${{ secrets.pat }}
+        GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

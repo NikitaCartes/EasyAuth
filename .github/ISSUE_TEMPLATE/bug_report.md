@@ -4,7 +4,7 @@ about: Create a report to help us improve
 title: "[BUG] [Fabric/Forge]"
 labels: bug
 assignees: samolego
-
+projects: "Bugs overview"
 ---
 
 **Mod Loader**

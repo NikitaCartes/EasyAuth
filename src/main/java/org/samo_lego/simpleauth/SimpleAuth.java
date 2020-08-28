@@ -52,10 +52,11 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	private static final Timer TIMER = new Timer();
 
 	/**
-	 * HashMap of non-authenticated players.
+	 * HashMap of players that have joined the server.
+	 * It's cleared on server stop in order to save some interactions with database during runtime.
 	 * Stores their data as {@link org.samo_lego.simpleauth.storage.PlayerCache PlayerCache} object
 	 */
-	public static HashMap<String, PlayerCache> deauthenticatedUsers = new HashMap<>();
+	public static HashMap<String, PlayerCache> playerCacheMap = new HashMap<>();
 
 	/**
 	 * Checks whether player is authenticated.
@@ -66,7 +67,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	 */
 	public static boolean isAuthenticated(ServerPlayerEntity player) {
 		String uuid = convertUuid(player);
-		return !deauthenticatedUsers.containsKey(uuid) || deauthenticatedUsers.get(uuid).wasAuthenticated;
+		return playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated;
 	}
 
 	// Getting game directory
@@ -136,8 +137,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		logInfo("Shutting down SimpleAuth.");
 
 		WriteBatch batch = DB.getLevelDBStore().createWriteBatch();
-		// Writing coordinates of de-authenticated players to database
-		deauthenticatedUsers.forEach((uuid, playerCache) -> {
+		// Updating player data.
+		playerCacheMap.forEach((uuid, playerCache) -> {
 			JsonObject data = new JsonObject();
 			data.addProperty("password", playerCache.password);
 
@@ -171,7 +172,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	 * @return LiteralText with appropriate string (login or register)
 	 */
 	public static LiteralText notAuthenticated(PlayerEntity player) {
-        final PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
+        final PlayerCache cache = playerCacheMap.get(convertUuid(player));
         if(SimpleAuth.config.main.enableGlobalPassword || cache.isRegistered)
 			return new LiteralText(
 			        SimpleAuth.config.lang.notAuthenticated + "\n" + SimpleAuth.config.lang.loginRequired
@@ -188,7 +189,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	 * @param msg message to be send to the player
 	 */
 	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
-		PlayerCache playerCache = deauthenticatedUsers.get(convertUuid(player));
+		PlayerCache playerCache = playerCacheMap.get(convertUuid(player));
 		// Teleporting player back
 		if(config.main.spawnOnJoin)
 			teleportPlayer(player, false);
@@ -212,7 +213,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		if(!playerCache.wasOnFire)
 			player.setFireTicks(0);
 
-		deauthenticatedUsers.remove(convertUuid(player));
+		playerCache.isAuthenticated = true;
 
 		// Player no longer needs to be invisible and invulnerable
 		player.setInvulnerable(false);
@@ -231,7 +232,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Marking player as not authenticated
 		String uuid = convertUuid(player);
-		deauthenticatedUsers.put(uuid, new PlayerCache(uuid, player));
+		playerCacheMap.put(uuid, new PlayerCache(uuid, player));
+		playerCacheMap.get(uuid).isAuthenticated = false;
 
 		// Teleporting player to spawn to hide its position
 		if(config.main.spawnOnJoin)
@@ -244,16 +246,15 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		player.setInvulnerable(SimpleAuth.config.experimental.playerInvulnerable);
 		player.setInvisible(SimpleAuth.config.experimental.playerInvisible);
 
-		// Timer should start only if player has joined, not left the server (in case os session)
-		if(player.networkHandler.getConnection().isOpen())
-			TIMER.schedule(new TimerTask() {
-				@Override
-				public void run() {
-					// Kicking player if not authenticated
-					if(!isAuthenticated(player) && player.networkHandler.getConnection().isOpen())
-						player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
-				}
-			}, SimpleAuth.config.main.kickTime * 1000);
+		// Kicks player after a certain amount of time if not authenticated
+		TIMER.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				// Kicking player if not authenticated
+				if(!isAuthenticated(player) && player.networkHandler.getConnection().isOpen())
+					player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
+			}
+		}, SimpleAuth.config.main.kickTime * 1000);
 	}
 
 	/**
@@ -291,7 +292,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			);
 			return;
 		}
-		PlayerCache cache = deauthenticatedUsers.get(convertUuid(player));
+		PlayerCache cache = playerCacheMap.get(convertUuid(player));
 		// Puts player to last cached position
 		try {
 			player.teleport(

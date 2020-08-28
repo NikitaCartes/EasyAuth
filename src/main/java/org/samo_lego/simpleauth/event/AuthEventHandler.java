@@ -12,7 +12,6 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
-import org.samo_lego.simpleauth.mixin.BlockUpdateS2CPacketAccessor;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
 import java.net.SocketAddress;
@@ -68,28 +67,27 @@ public class AuthEventHandler {
             return;
         // Checking if session is still valid
         String uuid = convertUuid(player);
-        PlayerCache playerCache = deauthenticatedUsers.getOrDefault(uuid, null);
+        PlayerCache playerCache = playerCacheMap.getOrDefault(uuid, null);
 
         if (playerCache != null) {
             if (
-                playerCache.wasAuthenticated &&
+                playerCache.isAuthenticated &&
                 playerCache.validUntil >= System.currentTimeMillis() &&
                 player.getIp().equals(playerCache.lastIp)
             ) {
                 authenticatePlayer(player, null); // Makes player authenticated
                 return;
             }
-            // Ugly fix for #13
             player.setInvulnerable(config.experimental.playerInvulnerable);
             player.setInvisible(config.experimental.playerInvisible);
 
             // Invalidating session
-            playerCache.wasAuthenticated = false;
+            playerCache.isAuthenticated = false;
             player.sendMessage(notAuthenticated(player), false);
         }
         else {
             deauthenticatePlayer(player);
-            playerCache = deauthenticatedUsers.get(uuid);
+            playerCache = playerCacheMap.get(uuid);
             playerCache.wasOnFire = false;
         }
 
@@ -102,14 +100,10 @@ public class AuthEventHandler {
             BlockPos pos = player.getBlockPos();
 
             // Faking portal blocks to be air
-            BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket();
-            ((BlockUpdateS2CPacketAccessor) feetPacket).setState(Blocks.AIR.getDefaultState());
-            ((BlockUpdateS2CPacketAccessor) feetPacket).setBlockPos(pos);
+            BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket(pos, Blocks.AIR.getDefaultState());
             player.networkHandler.sendPacket(feetPacket);
 
-            BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket();
-            ((BlockUpdateS2CPacketAccessor) headPacket).setState(Blocks.AIR.getDefaultState());
-            ((BlockUpdateS2CPacketAccessor) headPacket).setBlockPos(pos.up());
+            BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket(pos.up(), Blocks.AIR.getDefaultState());
             player.networkHandler.sendPacket(headPacket);
 
             // Teleporting player to the middle of the block
@@ -118,21 +112,21 @@ public class AuthEventHandler {
     }
 
     public static void onPlayerLeave(ServerPlayerEntity player) {
-        if(isPlayerFake(player) || !isAuthenticated(player) || config.main.sessionTimeoutTime == -1)
-            return;
+        String uuid = convertUuid(player);
+        PlayerCache playerCache = playerCacheMap.get(uuid);
 
-        // Starting session
-        // Putting player to deauthenticated player map
-        deauthenticatePlayer(player);
-        
-        // Setting that player was actually authenticated before leaving
-        PlayerCache playerCache = deauthenticatedUsers.get(convertUuid(player));
-        if(playerCache == null)
-            return;
+        playerCache.lastIp = player.getIp();
+        playerCache.lastAir = player.getAir();
+        playerCache.wasOnFire = player.isOnFire();
+        playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
+        playerCache.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+        playerCache.lastX = player.getX();
+        playerCache.lastY = player.getY();
+        playerCache.lastZ = player.getZ();
 
-        playerCache.wasAuthenticated = true;
         // Setting the session expire time
-        playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
+        if(!isPlayerFake(player) && isAuthenticated(player) && config.main.sessionTimeoutTime != -1)
+            playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
     }
 
     // Player chatting

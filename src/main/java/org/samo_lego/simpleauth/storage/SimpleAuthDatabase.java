@@ -119,13 +119,18 @@ public class SimpleAuthDatabase {
         }
     }
 
-    // Gets the hashed password from DB
+    /**
+     * Gets the hashed password from DB.
+     *
+     * @param uuid uuid of the player to get data for.
+     * @return data as string if player has it, otherwise empty string.
+     */
     public String getData(String uuid){
         try {
             if(this.isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);
         } catch (Error e) {
-            logError("Error getting password: " + e.getMessage());
+            logError("Error getting data: " + e.getMessage());
         }
         return "";
     }

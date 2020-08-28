@@ -1,6 +1,5 @@
 package org.samo_lego.simpleauth.commands;
 
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.DimensionArgumentType;
@@ -25,8 +24,11 @@ import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class AuthCommand {
 
+    /**
+     * Registers the "/auth" command
+     * @param dispatcher
+     */
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-        // Registering the "/auth" command
         dispatcher.register(literal("auth")
             .requires(source -> source.hasPermissionLevel(4))
             .then(literal("reload")
@@ -95,7 +97,12 @@ public class AuthCommand {
         );
     }
 
-    // Reloading the config
+    /**
+     * Reloads the config file.
+     *
+     * @param sender executioner of the command
+     * @return 0
+     */
     public static int reloadConfig(Entity sender) {
         config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
 
@@ -106,14 +113,20 @@ public class AuthCommand {
         return 1;
     }
 
-    // Setting global password
-    private static int setGlobalPassword(ServerCommandSource source, String pass) {
+    /**
+     * Sets global password.
+     *
+     * @param source executioner of the command
+     * @param password password that will be set
+     * @return 0
+     */
+    private static int setGlobalPassword(ServerCommandSource source, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
             // Writing the global pass to config
-            config.main.globalPassword = AuthHelper.hashPassword(pass.toCharArray());
+            config.main.globalPassword = AuthHelper.hashPassword(password.toCharArray());
             config.main.enableGlobalPassword = true;
             config.save(new File("./mods/SimpleAuth/config.json"));
         });
@@ -125,7 +138,16 @@ public class AuthCommand {
         return 1;
     }
 
-    //
+    /**
+     * Sets {@link org.samo_lego.simpleauth.storage.AuthConfig.MainConfig.WorldSpawn global spawn}.
+     *
+     * @param source executioner of the command
+     * @param world world id of global spawn
+     * @param x x coordinate of the global spawn
+     * @param y y coordinate of the global spawn
+     * @param z z coordinate of the global spawn
+     * @return 0
+     */
     private static int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z) {
         // Setting config values and saving
         config.worldSpawn.dimension = String.valueOf(world);
@@ -144,12 +166,18 @@ public class AuthCommand {
         return 1;
     }
 
-    // Deleting (unregistering) user's account
+    /**
+     * Deletes (unregisters) player's account.
+     *
+     * @param source executioner of the command
+     * @param uuid uuid of the player to delete account for
+     * @return 0
+     */
     private static int removeAccount(ServerCommandSource source, String uuid) {
         Entity sender = source.getEntity();
         THREADPOOL.submit(() -> {
             DB.deleteUserData(uuid);
-            SimpleAuth.deauthenticatedUsers.put(uuid, new PlayerCache(uuid, null));
+            SimpleAuth.playerCacheMap.put(uuid, new PlayerCache(uuid, null));
         });
 
         if(sender != null)
@@ -159,39 +187,70 @@ public class AuthCommand {
         return 1; // Success
     }
 
-    // Creating account for user
+    /**
+     * Creates account for player.
+     *
+     * @param source executioner of the command
+     * @param uuid uuid of the player to create account for
+     * @param password new password for the player account
+     * @return 0
+     */
     private static int registerUser(ServerCommandSource source, String uuid, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
         THREADPOOL.submit(() -> {
-            // JSON object holding password (may hold some other info in the future)
-            JsonObject playerdata = new JsonObject();
-            String hash = AuthHelper.hashPassword(password.toCharArray());
-            playerdata.addProperty("password", hash);
-
-            if (DB.registerUser(uuid, playerdata.toString())) {
-                if (sender != null)
-                    ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
-                else
-                    logInfo(config.lang.userdataUpdated);
+            PlayerCache playerCache;
+            if(playerCacheMap.containsKey(uuid)) {
+                playerCache = playerCacheMap.get(uuid);
             }
+            else {
+                playerCache = new PlayerCache(uuid, null);
+            }
+
+            playerCacheMap.put(uuid, playerCache);
+            playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
+            playerCacheMap.get(uuid).isRegistered = true;
+
+            if (sender != null)
+                ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
+            else
+                logInfo(config.lang.userdataUpdated);
         });
         return 0;
     }
 
-    // Force-updating the user's password
+    /**
+     * Force-updates the player's password.
+     *
+     * @param source executioner of the command
+     * @param uuid uuid of the player to update data for
+     * @param password new password for the player
+     * @return 0
+     */
     private static int updatePass(ServerCommandSource source, String uuid, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
         THREADPOOL.submit(() -> {
-            // JSON object holding password (may hold some other info in the future)
-            JsonObject playerdata = new JsonObject();
-            String hash = AuthHelper.hashPassword(password.toCharArray());
-            playerdata.addProperty("password", hash);
+            PlayerCache playerCache;
+            if(playerCacheMap.containsKey(uuid)) {
+                playerCache = playerCacheMap.get(uuid);
+            }
+            else {
+                playerCache = new PlayerCache(uuid, null);
+            }
 
-            DB.updateUserData(uuid, playerdata.toString());
+            playerCacheMap.put(uuid, playerCache);
+            if(!playerCacheMap.get(uuid).isRegistered) {
+                if (sender != null)
+                    ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userNotRegistered), false);
+                else
+                    logInfo(config.lang.userNotRegistered);
+                return;
+            }
+            playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
+
             if (sender != null)
                 ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
             else

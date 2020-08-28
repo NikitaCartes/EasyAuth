@@ -9,6 +9,7 @@ import org.samo_lego.simpleauth.utils.hashing.HasherArgon2;
 import org.samo_lego.simpleauth.utils.hashing.HasherBCrypt;
 
 import static org.samo_lego.simpleauth.SimpleAuth.config;
+import static org.samo_lego.simpleauth.SimpleAuth.playerCacheMap;
 
 public class AuthHelper {
     // Json parser
@@ -29,8 +30,8 @@ public class AuthHelper {
         else {
             String hashed;
             // Password from cache
-            if(SimpleAuth.deauthenticatedUsers.containsKey(uuid))
-                hashed = SimpleAuth.deauthenticatedUsers.get(uuid).password;
+            if(playerCacheMap.containsKey(uuid))
+                hashed = playerCacheMap.get(uuid).password;
 
             // Hashed password from DB
             else {
@@ -45,7 +46,7 @@ public class AuthHelper {
                 }
             }
 
-            if(hashed.equals(""))
+            if(hashed == null)
                 return -1;  // User is not yet registered
 
             // Verify password

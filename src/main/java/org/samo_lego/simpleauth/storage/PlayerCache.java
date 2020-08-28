@@ -17,10 +17,10 @@ public class PlayerCache {
      */
     public boolean isRegistered;
     /**
-     * Whether player was authenticated after leaving.
+     * Whether player is authenticated.
      * Used for {@link org.samo_lego.simpleauth.event.AuthEventHandler#onPlayerJoin(ServerPlayerEntity) session validation}.
      */
-    public boolean wasAuthenticated;
+    public boolean isAuthenticated;
     /**
      * Hashed password of player.
      */
@@ -125,7 +125,7 @@ public class PlayerCache {
             this.isRegistered = false;
             this.password = "";
         }
-        this.wasAuthenticated = false;
+        this.isAuthenticated = false;
         this.loginTries = 0;
     }
 }

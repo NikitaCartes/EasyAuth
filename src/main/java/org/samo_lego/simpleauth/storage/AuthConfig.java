@@ -133,6 +133,7 @@ public class AuthConfig {
         public String playerAlreadyOnline = "§cPlayer %s is already online!";
         public String worldSpawnSet = "§aSpawn for logging in was set successfully.";
         public String corruptedPlayerData = "§cYour data is probably corrupted. Please contact admin.";
+        public String userNotRegistered = "§cThis player is not registered!";
     }
     public static class ExperimentalConfig {
         /**

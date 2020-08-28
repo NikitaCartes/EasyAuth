@@ -112,6 +112,8 @@ public class AuthEventHandler {
     }
 
     public static void onPlayerLeave(ServerPlayerEntity player) {
+        if(isPlayerFake(player))
+            return;
         String uuid = convertUuid(player);
         PlayerCache playerCache = playerCacheMap.get(uuid);
 
@@ -125,7 +127,7 @@ public class AuthEventHandler {
         playerCache.lastZ = player.getZ();
 
         // Setting the session expire time
-        if(!isPlayerFake(player) && isAuthenticated(player) && config.main.sessionTimeoutTime != -1)
+        if(isAuthenticated(player) && config.main.sessionTimeoutTime != -1)
             playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
     }
 

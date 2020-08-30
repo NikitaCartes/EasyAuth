@@ -36,6 +36,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
@@ -160,7 +161,21 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			logError("Error saving player data! " + e.getMessage());
 		}
 
-		// Closing DB connection
+		// Closing threads
+		try {
+            THREADPOOL.shutdownNow();
+			TIMER.cancel();
+			TIMER.purge();
+            if (!THREADPOOL.awaitTermination(100, TimeUnit.MICROSECONDS)) {
+                System.out.println("Still waiting...");
+				Thread.currentThread().interrupt();
+            }
+        } catch (InterruptedException e) {
+		    logError(e.getMessage());
+			THREADPOOL.shutdownNow();
+        }
+
+        // Closing DB connection
 		DB.close();
 	}
 

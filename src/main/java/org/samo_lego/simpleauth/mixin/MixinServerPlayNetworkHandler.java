@@ -68,10 +68,10 @@ public abstract class MixinServerPlayNetworkHandler {
             cancellable = true
     )
     private void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket, CallbackInfo ci) {
-        ActionResult result = PlayerMoveCallback.EVENT.invoker().onPlayerMove(this.player);
+        ActionResult result = PlayerMoveCallback.EVENT.invoker().onPlayerMove(player);
         if (result == ActionResult.FAIL) {
             // A bit ugly, I know. (we need to update player position)
-            this.player.requestTeleport(this.player.getX(), this.player.getY(), this.player.getZ());
+            player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.yaw, player.pitch);
             ci.cancel();
         }
     }

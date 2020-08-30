@@ -20,40 +20,40 @@ public class AccountCommand {
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/account" command
         dispatcher.register(literal("account")
-                .then(literal("unregister")
+            .then(literal("unregister")
+                .executes(ctx -> {
+                    ctx.getSource().getPlayer().sendMessage(
+                            new LiteralText(config.lang.enterPassword),
+                            false
+                    );
+                    return 1;
+                })
+                .then(argument("password", word())
+                        .executes( ctx -> unregister(
+                                ctx.getSource(),
+                                getString(ctx, "password")
+                                )
+                        )
+                )
+            )
+            .then(literal("changePassword")
+                .then(argument("old password", word())
                     .executes(ctx -> {
                         ctx.getSource().getPlayer().sendMessage(
-                                new LiteralText(config.lang.enterPassword),
-                                false
-                        );
+                                new LiteralText(config.lang.enterNewPassword),
+                                false);
                         return 1;
                     })
-                    .then(argument("password", word())
-                            .executes( ctx -> unregister(
+                    .then(argument("new password", word())
+                            .executes( ctx -> changePassword(
                                     ctx.getSource(),
-                                    getString(ctx, "password")
+                                    getString(ctx, "old password"),
+                                    getString(ctx, "new password")
                                     )
                             )
                     )
                 )
-                .then(literal("changePassword")
-                    .then(argument("old password", word())
-                        .executes(ctx -> {
-                            ctx.getSource().getPlayer().sendMessage(
-                                    new LiteralText(config.lang.enterNewPassword),
-                                    false);
-                            return 1;
-                        })
-                        .then(argument("new password", word())
-                                .executes( ctx -> changePassword(
-                                        ctx.getSource(),
-                                        getString(ctx, "old password"),
-                                        getString(ctx, "new password")
-                                        )
-                                )
-                        )
-                    )
-                )
+            )
         );
     }
 

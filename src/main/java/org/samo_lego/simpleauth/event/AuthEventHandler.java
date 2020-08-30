@@ -99,15 +99,15 @@ public class AuthEventHandler {
         if(config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
             BlockPos pos = player.getBlockPos();
 
+            // Teleporting player to the middle of the block
+            player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+
             // Faking portal blocks to be air
             BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket(pos, Blocks.AIR.getDefaultState());
             player.networkHandler.sendPacket(feetPacket);
 
             BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket(pos.up(), Blocks.AIR.getDefaultState());
             player.networkHandler.sendPacket(headPacket);
-
-            // Teleporting player to the middle of the block
-            player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         }
     }
 

@@ -11,7 +11,7 @@ buildName="$projectId-$version-devbuild_$GITHUB_RUN_NUMBER-MC_$mcVersion"
 
 echo "Build is going to be renamed: $buildName.jar"
 # Renaming the dev build
-mv "$projectId-$version.jar" "$buildName.jar"
+mv "$projectId-$version-$mcVersion.jar" "$buildName.jar"
 
 #Setting the buildname for GH actions
 echo "::set-env name=BUILDNAME::$buildName"

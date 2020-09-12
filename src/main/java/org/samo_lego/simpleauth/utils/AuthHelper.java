@@ -22,7 +22,7 @@ public class AuthHelper {
      * @param password password that needs to be checked
      * @return 1 for pass, 0 if password is false, -1 if user is not yet registered
      */
-    public static int checkPass(String uuid, char[] password) {
+    public static int checkPassword(String uuid, char[] password) {
         if(config.main.enableGlobalPassword) {
             // We have global password enabled
             return verifyPassword(password, config.main.globalPassword) ? 1 : 0;
@@ -30,23 +30,12 @@ public class AuthHelper {
         else {
             String hashed;
             // Password from cache
-            if(playerCacheMap.containsKey(uuid))
+            if(playerCacheMap.get(uuid).isRegistered)
                 hashed = playerCacheMap.get(uuid).password;
+            else
+                return -1;
 
-            // Hashed password from DB
-            else {
-                JsonObject json = parser.parse(SimpleAuth.DB.getData(uuid)).getAsJsonObject();
-                JsonElement passwordElement = json.get("password");
-                if(passwordElement instanceof JsonNull) {
-                    // This shouldn't have happened, data seems to be corrupted
-                    return -1;
-                }
-                else {
-                    hashed = passwordElement.getAsString();
-                }
-            }
-
-            if(hashed == null)
+            if(hashed.isEmpty())
                 return -1;  // User is not yet registered
 
             // Verify password

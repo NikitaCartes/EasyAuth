@@ -40,7 +40,7 @@ public class LoginCommand {
         // Putting rest of the command in different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
             int maxLoginTries = config.main.maxLoginTries;
-            int passwordResult = AuthHelper.checkPass(uuid, pass.toCharArray());
+            int passwordResult = AuthHelper.checkPassword(uuid, pass.toCharArray());
 
             if(playerCacheMap.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
                 player.networkHandler.disconnect(new LiteralText(config.lang.loginTriesExceeded));

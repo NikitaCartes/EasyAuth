@@ -7,6 +7,7 @@ import net.minecraft.text.LiteralText;
 
 import static org.samo_lego.simpleauth.SimpleAuth.DB;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 /**
  * Class used for storing the non-authenticated player's cache
@@ -61,6 +62,8 @@ public class PlayerCache {
             return;
 
         if(player != null) {
+            if(config.experimental.debugMode)
+                logInfo("Creating cache for " + player.getName());
             this.lastIp = player.getIp();
 
             this.lastAir = player.getAir();
@@ -89,7 +92,8 @@ public class PlayerCache {
                     player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
                 }
 
-                // This shouldn't have happened, data seems to be corrupted
+                if(config.experimental.debugMode)
+                    logInfo("Password for " + uuid + " is null! Marking as not registered.");
                 this.password = "";
                 this.isRegistered = false;
             }
@@ -126,5 +130,7 @@ public class PlayerCache {
         }
         this.isAuthenticated = false;
         this.loginTries = 0;
+        if(config.experimental.debugMode)
+            logInfo("Cache created. Registered: " + this.isRegistered + ", hashed password: " + this.password);
     }
 }

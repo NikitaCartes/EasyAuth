@@ -181,6 +181,10 @@ public class AuthConfig {
          */
         public boolean allowEntityPunch = false;
         /**
+         * Debug mode. Expect much spam in console.
+         */
+        public boolean debugMode = false;
+        /**
          * Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error).
          * @see <a href="https://github.com/samolego/SimpleAuth/wiki/GLIBC-problems" target="_blank">wiki</a>
          */

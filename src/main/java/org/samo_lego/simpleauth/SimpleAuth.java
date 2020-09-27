@@ -39,6 +39,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
+import static org.samo_lego.simpleauth.commands.AuthCommand.reloadConfig;
+import static org.samo_lego.simpleauth.event.AuthEventHandler.*;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
@@ -122,12 +124,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		PlayerMoveCallback.EVENT.register(AuthEventHandler::onPlayerMove);
 
 		// From Fabric API
-		AttackBlockCallback.EVENT.register((playerEntity, world, hand, blockPos, direction) -> AuthEventHandler.onAttackBlock(playerEntity));
-		UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));
-		UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
-		AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
-		UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-		ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(null));
+		PlayerBlockBreakEvents.BEFORE.register((world, playerEntity, blockPos, blockState, blockEntity) -> onBreakBlock(playerEntity));
+		UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> onUseBlock(player));
+		UseItemCallback.EVENT.register((player, world, hand) -> onUseItem(player));
+		AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> onAttackEntity(player));
+		UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> onUseEntity(player));
+		ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> reloadConfig(null));
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
 	}
 

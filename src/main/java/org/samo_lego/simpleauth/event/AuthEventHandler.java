@@ -174,13 +174,13 @@ public class AuthEventHandler {
         return ActionResult.PASS;
     }
 
-    // Punching a block
-    public static ActionResult onAttackBlock(PlayerEntity player) {
+    // Breaking a block
+    public static boolean onBreakBlock(PlayerEntity player) {
         if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowBlockPunch) {
             player.sendMessage(notAuthenticated(player), false);
-            return ActionResult.FAIL;
+            return false;
         }
-        return ActionResult.PASS;
+        return true;
     }
 
     // Using an item

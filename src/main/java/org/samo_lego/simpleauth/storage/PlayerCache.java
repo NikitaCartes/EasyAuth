@@ -82,7 +82,7 @@ public class PlayerCache {
             this.lastAir = 300;
         }
 
-        String data = DB.getData(uuid);
+        String data = DB.getUserData(uuid);
         if(!data.isEmpty()) {
             // Getting (hashed) password
             JsonObject json = gson.fromJson(data, JsonObject.class);

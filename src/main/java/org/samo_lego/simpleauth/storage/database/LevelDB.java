@@ -124,7 +124,7 @@ public class LevelDB {
      * @param uuid uuid of the player to get data for.
      * @return data as string if player has it, otherwise empty string.
      */
-    public static String getData(String uuid){
+    public static String getUserData(String uuid){
         try {
             if(isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);

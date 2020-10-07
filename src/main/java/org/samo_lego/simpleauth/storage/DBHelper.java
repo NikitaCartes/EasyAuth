@@ -1,23 +1,11 @@
 package org.samo_lego.simpleauth.storage;
 
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBException;
 import org.samo_lego.simpleauth.storage.database.LevelDB;
 import org.samo_lego.simpleauth.storage.database.MongoDB;
 
-import java.io.IOException;
-
-import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
-import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
-import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 
 public class DBHelper {
-    private DB levelDBStore;
-
-    public DB getLevelDBStore() {
-        return this.levelDBStore;
-    }
 
     /**
      * Connects to the DB.
@@ -33,14 +21,8 @@ public class DBHelper {
      * Closes database connection.
      */
     public void close() {
-        if (levelDBStore != null) {
-            try {
-                levelDBStore.close();
-                logInfo("Database connection closed successfully.");
-            } catch (Error | IOException e) {
-                logError(e.getMessage());
-            }
-        }
+        if(!config.main.useMongoDB)
+            LevelDB.close();
     }
 
     /**
@@ -49,7 +31,7 @@ public class DBHelper {
      * @return false if connection is open, otherwise false
      */
     public boolean isClosed() {
-        return levelDBStore == null;
+        return config.main.useMongoDB || LevelDB.isClosed();
     }
 
 
@@ -61,16 +43,9 @@ public class DBHelper {
      * @return true if operation was successful, otherwise false
      */
     public boolean registerUser(String uuid, String data) {
-        try {
-            if(!this.isUserRegistered(uuid)) {
-                levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
-                return true;
-            }
-            return false;
-        } catch (Error e) {
-            logError("Register error: " + e.getMessage());
-            return false;
-        }
+        if(config.main.useMongoDB)
+            return MongoDB.registerUser(uuid, data);
+        return LevelDB.registerUser(uuid, data);
     }
 
     /**
@@ -80,12 +55,7 @@ public class DBHelper {
      * @return true if registered, otherwise false
      */
     public boolean isUserRegistered(String uuid) {
-        try {
-            return levelDBStore.get(bytes("UUID:" + uuid)) != null;
-        } catch (DBException e) {
-            logError(e.getMessage());
-        }
-        return false;
+        return config.main.useMongoDB ? MongoDB.isUserRegistered(uuid) : LevelDB.isUserRegistered(uuid);
     }
 
     /**
@@ -94,11 +64,10 @@ public class DBHelper {
      * @param uuid uuid of player to delete data for
      */
     public void deleteUserData(String uuid) {
-        try {
-            levelDBStore.delete(bytes("UUID:" + uuid));
-        } catch (Error e) {
-            logError(e.getMessage());
-        }
+        if(config.main.useMongoDB)
+            MongoDB.isUserRegistered(uuid);
+        else
+            LevelDB.isUserRegistered(uuid);
     }
 
     /**
@@ -108,11 +77,10 @@ public class DBHelper {
      * @param data data to put inside database
      */
     public void updateUserData(String uuid, String data) {
-        try {
-            levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
-        } catch (Error e) {
-            logError(e.getMessage());
-        }
+        if(config.main.useMongoDB)
+            MongoDB.updateUserData(uuid, data);
+        else
+            LevelDB.updateUserData(uuid, data);
     }
 
     /**
@@ -121,13 +89,7 @@ public class DBHelper {
      * @param uuid uuid of the player to get data for.
      * @return data as string if player has it, otherwise empty string.
      */
-    public String getData(String uuid){
-        try {
-            if(this.isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
-                return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);
-        } catch (Error e) {
-            logError("Error getting data: " + e.getMessage());
-        }
-        return "";
+    public String getUserData(String uuid){
+        return config.main.useMongoDB ? MongoDB.getUserData(uuid) : LevelDB.getUserData(uuid);
     }
 }

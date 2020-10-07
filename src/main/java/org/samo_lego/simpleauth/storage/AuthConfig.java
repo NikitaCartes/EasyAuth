@@ -86,9 +86,9 @@ public class AuthConfig {
         public boolean allowFalling = false;
 
         /**
-         * Whether to tp player to spawn when joining (to hide coordinates)
+         * Whether to tp player to spawn when joining (to hide coordinates).
          */
-        public boolean spawnOnJoin =  false;
+        public boolean spawnOnJoin = false;
 
         /**
          * Data for spawn (where deauthenticated players are teleported).
@@ -103,6 +103,27 @@ public class AuthConfig {
                 public double y;
                 public double z;
         }
+
+        /**
+         * Whether to use MongoDB instead of LevelDB.
+         * Note: you need to install MongoDB yourself.
+         */
+        public boolean useMongoDB = false;
+
+        public static class MongoDBCredentials {
+            /**
+             * Credentials for MongoDB database.
+             * Leave this as-is if you are using LevelDB or don't need
+             * special credentials.
+             */
+            public String host = "localhost";
+            public int port = 27017;
+            public boolean useSsl = true;
+            public String databaseName = "SimpleAuthPlayerData";
+            public String password;
+            public String username;
+        }
+
     }
     public static class LangConfig {
         public String enterPassword = "§6You need to enter your password!";
@@ -193,6 +214,7 @@ public class AuthConfig {
 
     public MainConfig main = new MainConfig();
     public MainConfig.WorldSpawn worldSpawn = new MainConfig.WorldSpawn();
+    public MainConfig.MongoDBCredentials mongoDBCredentials = new MainConfig.MongoDBCredentials();
     public LangConfig lang = new LangConfig();
     public ExperimentalConfig experimental = new ExperimentalConfig();
 

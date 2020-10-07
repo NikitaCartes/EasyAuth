@@ -24,7 +24,7 @@ import org.samo_lego.simpleauth.event.item.DropItemCallback;
 import org.samo_lego.simpleauth.event.item.TakeItemCallback;
 import org.samo_lego.simpleauth.storage.AuthConfig;
 import org.samo_lego.simpleauth.storage.PlayerCache;
-import org.samo_lego.simpleauth.storage.SimpleAuthDatabase;
+import org.samo_lego.simpleauth.storage.DBHelper;
 
 import java.io.File;
 import java.io.FileReader;
@@ -46,7 +46,7 @@ import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class SimpleAuth implements DedicatedServerModInitializer {
 
-    public static SimpleAuthDatabase DB = new SimpleAuthDatabase();
+    public static DBHelper DB = new DBHelper();
 
 	public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
 

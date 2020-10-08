@@ -1,25 +1,27 @@
 package org.samo_lego.simpleauth.storage.database;
 
 
+import com.google.gson.JsonObject;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.ReplaceOneModel;
 import org.bson.Document;
 import org.iq80.leveldb.DBException;
+import org.samo_lego.simpleauth.storage.PlayerCache;
 
-
-import javax.print.Doc;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
-import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
-import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class MongoDB {
     private static MongoCollection<Document> collection;
+    private static MongoClient mongoClient;
 
     public static void initialize() {
         /*mongoClient = MongoClients.create(
@@ -33,7 +35,7 @@ public class MongoDB {
 
                 )
         );*/
-        MongoClient mongoClient = MongoClients.create(String.format("mongodb://%s:%s", config.mongoDBCredentials.host, config.mongoDBCredentials.port));
+        mongoClient = MongoClients.create(String.format("mongodb://%s:%s", config.mongoDBCredentials.host, config.mongoDBCredentials.port));
         MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.databaseName);
         collection = database.getCollection("players");
     }
@@ -66,8 +68,21 @@ public class MongoDB {
     }
 
     public static String getUserData(String uuid){
-            if(isUserRegistered(uuid))
-                return collection.find(eq("UUID", uuid)).iterator().next().getString(uuid);
-        return "";
+        return isUserRegistered(uuid) ? collection.find(eq("UUID", uuid)).iterator().next().getString(uuid) : "";
+    }
+
+    public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
+        List<ReplaceOneModel<Document>> list = new ArrayList<>();
+        playerCacheMap.forEach((uuid, playerCache) -> {
+            JsonObject data = playerCache.toJson();
+            list.add(new ReplaceOneModel<>(eq("UUID", uuid), new Document(uuid, data.toString())));
+        });
+
+        collection.bulkWrite(list);
+    }
+
+    public static boolean close() {
+        mongoClient.close();
+        return true;
     }
 }

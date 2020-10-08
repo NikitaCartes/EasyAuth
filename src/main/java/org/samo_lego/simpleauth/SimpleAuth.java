@@ -1,6 +1,5 @@
 package org.samo_lego.simpleauth;
 
-import com.google.gson.JsonObject;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -16,15 +15,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import org.iq80.leveldb.WriteBatch;
 import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.event.entity.player.*;
 import org.samo_lego.simpleauth.event.item.DropItemCallback;
 import org.samo_lego.simpleauth.event.item.TakeItemCallback;
 import org.samo_lego.simpleauth.storage.AuthConfig;
-import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.storage.DBHelper;
+import org.samo_lego.simpleauth.storage.PlayerCache;
 
 import java.io.File;
 import java.io.FileReader;
@@ -38,7 +36,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
@@ -136,30 +133,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	 */
 	private void onStopServer(MinecraftServer server) {
 		logInfo("Shutting down SimpleAuth.");
-
-		WriteBatch batch = DB.getLevelDBStore().createWriteBatch();
-		// Updating player data.
-		playerCacheMap.forEach((uuid, playerCache) -> {
-			JsonObject data = new JsonObject();
-			data.addProperty("password", playerCache.password);
-
-			JsonObject lastLocation = new JsonObject();
-			lastLocation.addProperty("dim", playerCache.lastDim);
-			lastLocation.addProperty("x", playerCache.lastX);
-			lastLocation.addProperty("y", playerCache.lastY);
-			lastLocation.addProperty("z", playerCache.lastZ);
-
-			data.addProperty("lastLocation", lastLocation.toString());
-
-			batch.put(bytes("UUID:" + uuid), bytes("data:" + data.toString()));
-		});
-		try {
-			// Writing and closing batch
-			DB.getLevelDBStore().write(batch);
-			batch.close();
-		} catch (IOException e) {
-			logError("Error saving player data! " + e.getMessage());
-		}
+		DB.saveAll(playerCacheMap);
 
 		// Closing threads
 		try {

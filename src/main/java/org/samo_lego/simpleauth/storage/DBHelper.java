@@ -3,7 +3,10 @@ package org.samo_lego.simpleauth.storage;
 import org.samo_lego.simpleauth.storage.database.LevelDB;
 import org.samo_lego.simpleauth.storage.database.MongoDB;
 
+import java.util.HashMap;
+
 import static org.samo_lego.simpleauth.SimpleAuth.config;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class DBHelper {
 
@@ -21,8 +24,8 @@ public class DBHelper {
      * Closes database connection.
      */
     public void close() {
-        if(!config.main.useMongoDB)
-            LevelDB.close();
+        if(config.main.useMongoDB && MongoDB.close() || LevelDB.close())
+            logInfo("Database connection closed successfully.");
     }
 
     /**
@@ -65,9 +68,9 @@ public class DBHelper {
      */
     public void deleteUserData(String uuid) {
         if(config.main.useMongoDB)
-            MongoDB.isUserRegistered(uuid);
+            MongoDB.deleteUserData(uuid);
         else
-            LevelDB.isUserRegistered(uuid);
+            LevelDB.deleteUserData(uuid);
     }
 
     /**
@@ -91,5 +94,13 @@ public class DBHelper {
      */
     public String getUserData(String uuid){
         return config.main.useMongoDB ? MongoDB.getUserData(uuid) : LevelDB.getUserData(uuid);
+    }
+
+    public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
+        // Saving player data.
+        if(config.main.useMongoDB)
+            MongoDB.saveFromCache(playerCacheMap);
+        else
+            LevelDB.saveFromCache(playerCacheMap);
     }
 }

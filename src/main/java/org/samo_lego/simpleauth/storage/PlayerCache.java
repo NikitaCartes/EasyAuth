@@ -133,4 +133,25 @@ public class PlayerCache {
         if(config.experimental.debugMode)
             logInfo("Cache created. Registered: " + this.isRegistered + ", hashed password: " + this.password);
     }
+
+    public static PlayerCache fromJson(String json) {
+        PlayerCache playerCache = gson.fromJson(json, PlayerCache.class);
+        System.out.println(playerCache);
+        return playerCache;
+    }
+
+    public JsonObject toJson() {
+        JsonObject cacheJson = new JsonObject();
+        cacheJson.addProperty("password", this.password);
+
+        JsonObject lastLocation = new JsonObject();
+        lastLocation.addProperty("dim", this.lastDim);
+        lastLocation.addProperty("x", this.lastX);
+        lastLocation.addProperty("y", this.lastY);
+        lastLocation.addProperty("z", this.lastZ);
+
+        cacheJson.addProperty("lastLocation", lastLocation.toString());
+
+        return cacheJson;
+    }
 }

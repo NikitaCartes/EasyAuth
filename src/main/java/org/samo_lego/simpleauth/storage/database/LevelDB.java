@@ -1,24 +1,23 @@
 package org.samo_lego.simpleauth.storage.database;
 
+import com.google.gson.JsonObject;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
+import org.iq80.leveldb.WriteBatch;
 import org.samo_lego.simpleauth.SimpleAuth;
+import org.samo_lego.simpleauth.storage.PlayerCache;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
-import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class LevelDB {
     private static DB levelDBStore;
-
-    public static DB getLevelDBStore() {
-        return levelDBStore;
-    }
 
     /**
      * Connects to the LevelDB.
@@ -35,15 +34,16 @@ public class LevelDB {
     /**
      * Closes database connection.
      */
-    public static void close() {
+    public static boolean close() {
         if (levelDBStore != null) {
             try {
                 levelDBStore.close();
-                logInfo("Database connection closed successfully.");
+                return true;
             } catch (Error | IOException e) {
                 logError(e.getMessage());
             }
         }
+        return false;
     }
 
     /**
@@ -132,5 +132,21 @@ public class LevelDB {
             logError("Error getting data: " + e.getMessage());
         }
         return "";
+    }
+
+    public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
+        WriteBatch batch = levelDBStore.createWriteBatch();
+        // Updating player data.
+        playerCacheMap.forEach((uuid, playerCache) -> {
+            JsonObject data = playerCache.toJson();
+            batch.put(bytes("UUID:" + uuid), bytes("data:" + data.toString()));
+        });
+        try {
+            // Writing and closing batch
+            levelDBStore.write(batch);
+            batch.close();
+        } catch (IOException e) {
+            logError("Error saving player data! " + e.getMessage());
+        }
     }
 }

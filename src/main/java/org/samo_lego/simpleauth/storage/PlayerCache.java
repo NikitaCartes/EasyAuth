@@ -63,7 +63,7 @@ public class PlayerCache {
 
         if(player != null) {
             if(config.experimental.debugMode)
-                logInfo("Creating cache for " + player.getName());
+                logInfo("Creating cache for " + player.getName().asString());
             this.lastIp = player.getIp();
 
             this.lastAir = player.getAir();
@@ -99,7 +99,7 @@ public class PlayerCache {
             }
             else {
                 this.password = passwordElement.getAsString();
-                this.isRegistered = true;
+                this.isRegistered = !this.password.isEmpty();
             }
 
 
@@ -131,6 +131,6 @@ public class PlayerCache {
         this.isAuthenticated = false;
         this.loginTries = 0;
         if(config.experimental.debugMode)
-            logInfo("Cache created. Registered: " + this.isRegistered + ", hashed password: " + this.password);
+            logInfo("Cache created. Registered: " + this.isRegistered + ", hashed password: " + this.password + ".");
     }
 }

@@ -28,9 +28,9 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Execute permission for renaming script
-        run: chmod +x ./.github/workflows/renaming.sh
-      - name: Running renaming script
-        run: ./.github/workflows/renaming.sh
+        run: chmod +x ./.github/workflows/main.sh
+      - name: Running main script
+        run: ./.github/workflows/main.sh
 
         # Artifact upload
       - name: Uploading artifacts
@@ -39,3 +39,29 @@ jobs:
           #name: ${{ env.BUILDNAME }}.jar
           name: UNZIP_ME_${{ env.BUILDNAME }}
           path: build/libs/${{ env.BUILDNAME }}.jar
+      - name: Create a Release
+        if: ${{ env.SHOULD_PUBLISH }}
+        id: create_release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # The name of the tag. This should come from the webhook payload, `github.GITHUB_REF` when a user pushes a new tag
+          tag_name: ${{ env.VERSION }}
+          # The name of the release. For example, `Release v1.0.1`
+          release_name: SimpleAuth ${{ env.VERSION }}
+          # Text describing the contents of the tag.
+          body: This release was created automatically, since version was bumped. Should be stable unless I messed up something.
+      - name: Upload a Release Asset
+        if: ${{ env.SHOULD_PUBLISH }}
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # The URL for uploading assets to the release
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          # The path to the asset you want to upload
+          asset_path: build/libs/${{ env.BUILDNAME }}.jar
+          # The name of the asset you want to upload
+          asset_name: ${{ env.BUILDNAME }}
+          asset_content_type: application/zip

@@ -120,8 +120,8 @@ public class AuthConfig {
             public int port = 27017;
             public boolean useSsl = true;
             public String databaseName = "SimpleAuthPlayerData";
-            public String password;
-            public String username;
+            public String password = "";
+            public String username = "";
         }
 
     }

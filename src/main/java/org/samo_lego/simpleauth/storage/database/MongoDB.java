@@ -7,6 +7,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.ReplaceOneModel;
+import com.mongodb.client.model.UpdateOneModel;
 import org.bson.Document;
 import org.iq80.leveldb.DBException;
 import org.samo_lego.simpleauth.storage.PlayerCache;
@@ -35,7 +36,7 @@ public class MongoDB {
 
                 )
         );*/
-        mongoClient = MongoClients.create(String.format("mongodb://%s:%s", config.mongoDBCredentials.host, config.mongoDBCredentials.port));
+        mongoClient = MongoClients.create(String.format("mongodb://%s:%d", config.mongoDBCredentials.host, config.mongoDBCredentials.port));
         MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.databaseName);
         collection = database.getCollection("players");
     }
@@ -72,17 +73,19 @@ public class MongoDB {
     }
 
     public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
-        List<ReplaceOneModel<Document>> list = new ArrayList<>();
+        List<UpdateOneModel<Document>> list = new ArrayList<>();
         playerCacheMap.forEach((uuid, playerCache) -> {
-            JsonObject data = playerCache.toJson();
-            list.add(new ReplaceOneModel<>(eq("UUID", uuid), new Document(uuid, data.toString())));
+            list.add(new UpdateOneModel<>(eq("UUID", uuid), new Document("password", playerCache.password)));
         });
-
         collection.bulkWrite(list);
     }
 
     public static boolean close() {
         mongoClient.close();
         return true;
+    }
+
+    public static boolean isClosed() {
+        return mongoClient == null;
     }
 }

@@ -34,7 +34,7 @@ public class DBHelper {
      * @return false if connection is open, otherwise false
      */
     public boolean isClosed() {
-        return config.main.useMongoDB || LevelDB.isClosed();
+        return config.main.useMongoDB ? MongoDB.isClosed() : LevelDB.isClosed();
     }
 
 

@@ -121,14 +121,16 @@ public class AuthEventHandler {
         playerCache.lastAir = player.getAir();
         playerCache.wasOnFire = player.isOnFire();
         playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-        playerCache.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
-        playerCache.lastX = player.getX();
-        playerCache.lastY = player.getY();
-        playerCache.lastZ = player.getZ();
+        if(isAuthenticated(player)) {
+            playerCache.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+            playerCache.lastX = player.getX();
+            playerCache.lastY = player.getY();
+            playerCache.lastZ = player.getZ();
 
-        // Setting the session expire time
-        if(isAuthenticated(player) && config.main.sessionTimeoutTime != -1)
-            playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
+            // Setting the session expire time
+            if(config.main.sessionTimeoutTime != -1)
+                playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
+        }
     }
 
     // Player chatting

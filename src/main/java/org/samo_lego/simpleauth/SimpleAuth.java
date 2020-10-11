@@ -146,10 +146,10 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			data.addProperty("password", playerCache.password);
 
 			JsonObject lastLocation = new JsonObject();
-			lastLocation.addProperty("dim", playerCache.lastDim);
-			lastLocation.addProperty("x", playerCache.lastX);
-			lastLocation.addProperty("y", playerCache.lastY);
-			lastLocation.addProperty("z", playerCache.lastZ);
+			lastLocation.addProperty("dim", playerCache.lastLocation.lastDim);
+			lastLocation.addProperty("x", playerCache.lastLocation.lastX);
+			lastLocation.addProperty("y", playerCache.lastLocation.lastY);
+			lastLocation.addProperty("z", playerCache.lastLocation.lastZ);
 
 			data.addProperty("lastLocation", lastLocation.toString());
 
@@ -248,8 +248,13 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Marking player as not authenticated
 		String uuid = convertUuid(player);
-		playerCacheMap.put(uuid, new PlayerCache(uuid, player));
-		playerCacheMap.get(uuid).isAuthenticated = false;
+		PlayerCache cache = playerCacheMap.get(uuid);
+		if(cache == null) {
+			cache = new PlayerCache(uuid, player);
+			playerCacheMap.put(uuid, cache);
+		}
+		cache.isAuthenticated = false;
+
 
 		// Teleporting player to spawn to hide its position
 		if(config.main.spawnOnJoin)
@@ -303,8 +308,8 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 					config.worldSpawn.x,
 					config.worldSpawn.y,
 					config.worldSpawn.z,
-					90,
-					90
+					config.worldSpawn.yaw,
+					config.worldSpawn.pitch
 			);
 			return;
 		}
@@ -312,22 +317,22 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Puts player to last cached position
 		try {
 			player.teleport(
-					server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(cache.lastDim))),
-					cache.lastX,
-					cache.lastY,
-					cache.lastZ,
-					0,
-					0
+					server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(cache.lastLocation.lastDim))),
+					cache.lastLocation.lastX,
+					cache.lastLocation.lastY,
+					cache.lastLocation.lastZ,
+					cache.lastLocation.lastYaw,
+					cache.lastLocation.lastPitch
 			);
 		} catch (Error e) {
 			player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
 			logError("Couldn't teleport player " + player.getName().asString());
 			logError(
 				String.format("Last recorded position is X: %s, Y: %s, Z: %s in dimension %s",
-				cache.lastX,
-				cache.lastY,
-				cache.lastZ,
-				cache.lastDim
+				cache.lastLocation.lastX,
+				cache.lastLocation.lastY,
+				cache.lastLocation.lastZ,
+				cache.lastLocation.lastDim
 			));
 		}
 	}

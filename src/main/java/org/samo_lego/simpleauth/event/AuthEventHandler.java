@@ -122,10 +122,12 @@ public class AuthEventHandler {
         playerCache.wasOnFire = player.isOnFire();
         playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
         if(isAuthenticated(player)) {
-            playerCache.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
-            playerCache.lastX = player.getX();
-            playerCache.lastY = player.getY();
-            playerCache.lastZ = player.getZ();
+            playerCache.lastLocation.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+            playerCache.lastLocation.lastX = player.getX();
+            playerCache.lastLocation.lastY = player.getY();
+            playerCache.lastLocation.lastZ = player.getZ();
+            playerCache.lastLocation.lastYaw = player.yaw;
+            playerCache.lastLocation.lastPitch = player.pitch;
 
             // Setting the session expire time
             if(config.main.sessionTimeoutTime != -1)

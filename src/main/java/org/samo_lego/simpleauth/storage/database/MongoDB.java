@@ -6,9 +6,11 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.iq80.leveldb.DBException;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
@@ -73,11 +75,40 @@ public class MongoDB {
     }
 
     public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
-        List<UpdateOneModel<Document>> list = new ArrayList<>();
+        List<InsertOneModel<Document>> writeList = new ArrayList<>();
+        List<UpdateOneModel<Document>> updateList = new ArrayList<>();
         playerCacheMap.forEach((uuid, playerCache) -> {
-            list.add(new UpdateOneModel<>(eq("UUID", uuid), new Document("password", playerCache.password)));
+            // Save as BSON not JSON stringified
+            Document lastLocation = new Document("x", playerCache.lastX)
+                    .append("y", playerCache.lastY)
+                    .append("z", playerCache.lastZ)
+                    .append("dimension", playerCache.lastDim);
+
+            if(!isUserRegistered(uuid)) {
+                writeList.add(new InsertOneModel<>(
+                        new Document("UUID", uuid)
+                            .append("password", playerCache.password)
+                            .append("lastLocation", lastLocation)
+                        )
+                );
+            }
+            else {
+                updateList.add(new UpdateOneModel<>(eq("UUID", uuid),
+                        new Document("UUID", uuid)
+                                .append("password", playerCache.password)
+                                .append("lastLocation", lastLocation)
+                        )
+                );
+            }
         });
-        collection.bulkWrite(list);
+        System.out.println(writeList);
+        System.out.println(updateList);
+        if(!writeList.isEmpty())
+            collection.bulkWrite(writeList);
+        if(!updateList.isEmpty())
+            collection.bulkWrite(updateList);
+
+
     }
 
     public static boolean close() {

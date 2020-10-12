@@ -52,8 +52,8 @@ dependencies {
 	include group: 'org.iq80.leveldb', name: 'leveldb-api', version: '0.12'
 
 	// MongoDB driver
-	implementation 'org.mongodb:mongodb-driver:3.12.7'
-	include 'org.mongodb:mongodb-driver:3.12.7'
+	implementation 'org.mongodb:mongodb-driver-sync:4.1.0'
+	include 'org.mongodb:mongodb-driver-sync:4.1.0'
 
 
 

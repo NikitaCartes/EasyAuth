@@ -176,6 +176,7 @@ public class AuthEventHandler {
 
     // Punching a block
     public static ActionResult onAttackBlock(PlayerEntity player) {
+        DB.saveAll(playerCacheMap); //todo debug only
         if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowBlockPunch) {
             player.sendMessage(notAuthenticated(player), false);
             return ActionResult.FAIL;

@@ -1,11 +1,12 @@
 package org.samo_lego.simpleauth.storage;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 
-import static org.samo_lego.simpleauth.SimpleAuth.DB;
+import java.util.Objects;
+
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
@@ -57,21 +58,21 @@ public class PlayerCache {
 
     private static final Gson gson = new Gson();
 
-    public PlayerCache(String uuid, ServerPlayerEntity player) {
-        if(DB.isClosed())
-            return;
+    public PlayerCache(ServerPlayerEntity player) {
+        if(config.experimental.debugMode)
+            logInfo("Creating cache for " + Objects.requireNonNull(player).getName());
+        this.isAuthenticated = false;
+        this.loginTries = 0;
 
         if(player != null) {
-            if(config.experimental.debugMode)
-                logInfo("Creating cache for " + player.getName());
             this.lastIp = player.getIp();
 
-            this.lastAir = player.getAir();
             this.wasOnFire = player.isOnFire();
+            this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
+            this.lastAir = player.getAir();
 
             // Setting position cache
             this.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
-            this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
             this.lastX = player.getX();
             this.lastY = player.getY();
             this.lastZ = player.getZ();
@@ -82,61 +83,52 @@ public class PlayerCache {
             this.lastAir = 300;
         }
 
-        String data = DB.getUserData(uuid);
-        if(!data.isEmpty()) {
-            // Getting (hashed) password
-            JsonObject json = gson.fromJson(data, JsonObject.class);
-            JsonElement passwordElement = json.get("password");
-            if(passwordElement instanceof JsonNull) {
-                if(player != null) {
-                    player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
-                }
+        this.isRegistered = false;
+        this.password = "";
 
-                if(config.experimental.debugMode)
-                    logInfo("Password for " + uuid + " is null! Marking as not registered.");
-                this.password = "";
-                this.isRegistered = false;
-            }
-            else {
-                this.password = passwordElement.getAsString();
-                this.isRegistered = true;
-            }
-
-
-            // We should check the DB for saved coords
-            if(config.main.spawnOnJoin) {
-                try {
-                    JsonElement lastLoc = json.get("lastLocation");
-                    if (lastLoc != null) {
-                        // Getting DB coords
-                        JsonObject lastLocation = gson.fromJson(lastLoc.getAsString(), JsonObject.class);
-                        this.lastDim = lastLocation.get("dim").isJsonNull() ? config.worldSpawn.dimension : lastLocation.get("dim").getAsString();
-                        this.lastX = lastLocation.get("x").isJsonNull() ? config.worldSpawn.x : lastLocation.get("x").getAsDouble();
-                        this.lastY = lastLocation.get("y").isJsonNull() ? config.worldSpawn.y : lastLocation.get("y").getAsDouble();
-                        this.lastZ = lastLocation.get("z").isJsonNull() ? config.worldSpawn.z : lastLocation.get("z").getAsDouble();
-
-                        // Removing location data from DB
-                        json.remove("lastLocation");
-                        DB.updateUserData(uuid, json.toString());
-                    }
-                } catch (JsonSyntaxException ignored) {
-                    // Player didn't have any coords in db to tp to
-                }
-            }
-        }
-        else {
-            this.isRegistered = false;
-            this.password = "";
-        }
-        this.isAuthenticated = false;
-        this.loginTries = 0;
         if(config.experimental.debugMode)
-            logInfo("Cache created. Registered: " + this.isRegistered + ", hashed password: " + this.password);
+            logInfo("New player cache created.");
     }
 
-    public static PlayerCache fromJson(String json) {
+    public static PlayerCache fromJson(ServerPlayerEntity player, String json) {
+        if(json.isEmpty()) {
+            // Player doesn't have data yet
+            return new PlayerCache(player);
+        }
+        if(config.experimental.debugMode)
+            logInfo("Creating cache for " + Objects.requireNonNull(player).getName());
+
+        // Parsing data from DB
         PlayerCache playerCache = gson.fromJson(json, PlayerCache.class);
-        System.out.println(playerCache);
+
+        playerCache.loginTries = 0;
+        if(playerCache.password != null && !playerCache.password.isEmpty()) {
+            playerCache.isRegistered = true;
+        }
+        else {
+            // Not registered
+            playerCache.isRegistered = false;
+            playerCache.password = "";
+        }
+        if(player != null) {
+            playerCache.lastIp = player.getIp();
+
+            playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
+            playerCache.lastAir = player.getAir();
+            playerCache.wasOnFire = player.isOnFire();
+
+            // Setting position cache
+            playerCache.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+            playerCache.lastX = player.getX();
+            playerCache.lastY = player.getY();
+            playerCache.lastZ = player.getZ();
+        }
+        else {
+            playerCache.wasInPortal = false;
+            playerCache.lastAir = 300;
+            playerCache.wasOnFire = false;
+        }
+
         return playerCache;
     }
 

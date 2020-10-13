@@ -177,7 +177,7 @@ public class AuthCommand {
         Entity sender = source.getEntity();
         THREADPOOL.submit(() -> {
             DB.deleteUserData(uuid);
-            SimpleAuth.playerCacheMap.put(uuid, new PlayerCache(uuid, null));
+            SimpleAuth.playerCacheMap.put(uuid, new PlayerCache(null));
         });
 
         if(sender != null)
@@ -205,7 +205,7 @@ public class AuthCommand {
                 playerCache = playerCacheMap.get(uuid);
             }
             else {
-                playerCache = new PlayerCache(uuid, null);
+                playerCache = new PlayerCache(null);
             }
 
             playerCacheMap.put(uuid, playerCache);
@@ -238,7 +238,7 @@ public class AuthCommand {
                 playerCache = playerCacheMap.get(uuid);
             }
             else {
-                playerCache = new PlayerCache(uuid, null);
+                playerCache = new PlayerCache(null);
             }
 
             playerCacheMap.put(uuid, playerCache);

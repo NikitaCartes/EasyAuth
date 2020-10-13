@@ -1,17 +1,13 @@
 package org.samo_lego.simpleauth.storage.database;
 
 
-import com.google.gson.JsonObject;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.ReplaceOneModel;
-import com.mongodb.client.model.UpdateOneModel;
 import org.bson.Document;
-import org.bson.conversions.Bson;
-import org.iq80.leveldb.DBException;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 
 import java.util.ArrayList;
@@ -20,7 +16,6 @@ import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
-import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 
 public class MongoDB {
     private static MongoCollection<Document> collection;
@@ -44,39 +39,24 @@ public class MongoDB {
     }
 
     public static boolean isUserRegistered(String uuid) {
-        try {
-            return collection.find(eq("UUID", uuid)).iterator().hasNext();
-        } catch (DBException e) {
-            logError(e.getMessage());
-        }
-        return false;
-    }
-
-    public static boolean registerUser(String uuid, String data) {
-        if(!isUserRegistered(uuid)) {
-            collection.insertOne(
-                    new Document(uuid, data)
-            );
-            return true;
-        }
-        return false;
+        return collection.find(eq("UUID", uuid)).iterator().hasNext();
     }
 
     public static void deleteUserData(String uuid) {
         collection.deleteOne(eq("UUID", uuid));
     }
 
-    public static void updateUserData(String uuid, String data) {
-        collection.updateOne(eq("UUID", uuid), new Document(uuid, data));
-    }
-
     public static String getUserData(String uuid){
-        return isUserRegistered(uuid) ? collection.find(eq("UUID", uuid)).iterator().next().getString(uuid) : "";
+        if(isUserRegistered(uuid)) {
+            Document data = collection.find(eq("UUID", uuid)).iterator().next();
+            return data.toJson();
+        }
+        return "";
     }
 
     public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
         List<InsertOneModel<Document>> writeList = new ArrayList<>();
-        List<UpdateOneModel<Document>> updateList = new ArrayList<>();
+        List<ReplaceOneModel<Document>> updateList = new ArrayList<>();
         playerCacheMap.forEach((uuid, playerCache) -> {
             // Save as BSON not JSON stringified
             Document lastLocation = new Document("x", playerCache.lastX)
@@ -93,7 +73,7 @@ public class MongoDB {
                 );
             }
             else {
-                updateList.add(new UpdateOneModel<>(eq("UUID", uuid),
+                updateList.add(new ReplaceOneModel<>(eq("UUID", uuid),
                         new Document("UUID", uuid)
                                 .append("password", playerCache.password)
                                 .append("lastLocation", lastLocation)
@@ -101,8 +81,6 @@ public class MongoDB {
                 );
             }
         });
-        System.out.println(writeList);
-        System.out.println(updateList);
         if(!writeList.isEmpty())
             collection.bulkWrite(writeList);
         if(!updateList.isEmpty())

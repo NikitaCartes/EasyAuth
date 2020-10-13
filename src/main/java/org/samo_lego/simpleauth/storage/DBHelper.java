@@ -47,7 +47,8 @@ public class DBHelper {
      */
     public boolean registerUser(String uuid, String data) {
         if(config.main.useMongoDB)
-            return MongoDB.registerUser(uuid, data);
+            //return MongoDB.registerUser(uuid, data);
+            System.out.println("Not implemented yet.");
         return LevelDB.registerUser(uuid, data);
     }
 
@@ -81,7 +82,8 @@ public class DBHelper {
      */
     public void updateUserData(String uuid, String data) {
         if(config.main.useMongoDB)
-            MongoDB.updateUserData(uuid, data);
+            //MongoDB.updateUserData(uuid, data);
+            System.out.println("Not implemented yet.");
         else
             LevelDB.updateUserData(uuid, data);
     }

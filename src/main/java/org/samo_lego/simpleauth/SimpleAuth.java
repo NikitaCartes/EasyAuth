@@ -220,7 +220,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 		// Marking player as not authenticated
 		String uuid = convertUuid(player);
-		playerCacheMap.put(uuid, new PlayerCache(uuid, player));
+		playerCacheMap.put(uuid, PlayerCache.fromJson(player, DB.getUserData(uuid)));
 		playerCacheMap.get(uuid).isAuthenticated = false;
 
 		// Teleporting player to spawn to hide its position

@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
@@ -284,22 +285,22 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Puts player to last cached position
 		try {
 			player.teleport(
-					server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(cache.lastDim))),
-					cache.lastX,
-					cache.lastY,
-					cache.lastZ,
-					0,
-					0
+					server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(cache.lastLocation.lastDim))),
+					cache.lastLocation.lastX,
+					cache.lastLocation.lastY,
+					cache.lastLocation.lastZ,
+					cache.lastLocation.lastYaw,
+					cache.lastLocation.lastPitch
 			);
 		} catch (Error e) {
 			player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
 			logError("Couldn't teleport player " + player.getName().asString());
 			logError(
 				String.format("Last recorded position is X: %s, Y: %s, Z: %s in dimension %s",
-				cache.lastX,
-				cache.lastY,
-				cache.lastZ,
-				cache.lastDim
+				cache.lastLocation.lastX,
+				cache.lastLocation.lastY,
+				cache.lastLocation.lastZ,
+				cache.lastLocation.lastDim
 			));
 		}
 	}

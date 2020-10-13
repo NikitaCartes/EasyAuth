@@ -51,10 +51,17 @@ public class PlayerCache {
     /**
      * Last recorded position before de-authentication.
      */
-    public String lastDim;
-    public double lastX;
-    public double lastY;
-    public double lastZ;
+    public static class LastLocation {
+        public String lastDim;
+        public double lastX;
+        public double lastY;
+        public double lastZ;
+        public float lastYaw;
+        public float lastPitch;
+    }
+
+    public PlayerCache.LastLocation lastLocation = new PlayerCache.LastLocation();
+
 
     private static final Gson gson = new Gson();
 
@@ -72,10 +79,13 @@ public class PlayerCache {
             this.lastAir = player.getAir();
 
             // Setting position cache
-            this.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
-            this.lastX = player.getX();
-            this.lastY = player.getY();
-            this.lastZ = player.getZ();
+            this.lastLocation.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+            this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
+            this.lastLocation.lastX = player.getX();
+            this.lastLocation.lastY = player.getY();
+            this.lastLocation.lastZ = player.getZ();
+            this.lastLocation.lastYaw = player.yaw;
+            this.lastLocation.lastPitch = player.pitch;
         }
         else {
             this.wasOnFire = false;
@@ -118,10 +128,12 @@ public class PlayerCache {
             playerCache.wasOnFire = player.isOnFire();
 
             // Setting position cache
-            playerCache.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
-            playerCache.lastX = player.getX();
-            playerCache.lastY = player.getY();
-            playerCache.lastZ = player.getZ();
+            playerCache.lastLocation.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+            playerCache.lastLocation.lastX = player.getX();
+            playerCache.lastLocation.lastY = player.getY();
+            playerCache.lastLocation.lastZ = player.getZ();
+            playerCache.lastLocation.lastYaw = player.yaw;
+            playerCache.lastLocation.lastPitch = player.pitch;
         }
         else {
             playerCache.wasInPortal = false;
@@ -137,10 +149,10 @@ public class PlayerCache {
         cacheJson.addProperty("password", this.password);
 
         JsonObject lastLocation = new JsonObject();
-        lastLocation.addProperty("dim", this.lastDim);
-        lastLocation.addProperty("x", this.lastX);
-        lastLocation.addProperty("y", this.lastY);
-        lastLocation.addProperty("z", this.lastZ);
+        lastLocation.addProperty("dim", this.lastLocation.lastDim);
+        lastLocation.addProperty("x", this.lastLocation.lastX);
+        lastLocation.addProperty("y", this.lastLocation.lastY);
+        lastLocation.addProperty("z", this.lastLocation.lastZ);
 
         cacheJson.addProperty("lastLocation", lastLocation.toString());
 

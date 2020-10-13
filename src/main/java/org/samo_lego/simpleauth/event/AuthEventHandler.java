@@ -121,14 +121,18 @@ public class AuthEventHandler {
         playerCache.lastAir = player.getAir();
         playerCache.wasOnFire = player.isOnFire();
         playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-        playerCache.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
-        playerCache.lastX = player.getX();
-        playerCache.lastY = player.getY();
-        playerCache.lastZ = player.getZ();
+        if(isAuthenticated(player)) {
+            playerCache.lastLocation.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+            playerCache.lastLocation.lastX = player.getX();
+            playerCache.lastLocation.lastY = player.getY();
+            playerCache.lastLocation.lastZ = player.getZ();
+            playerCache.lastLocation.lastYaw = player.yaw;
+            playerCache.lastLocation.lastPitch = player.pitch;
 
-        // Setting the session expire time
-        if(isAuthenticated(player) && config.main.sessionTimeoutTime != -1)
-            playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
+            // Setting the session expire time
+            if(config.main.sessionTimeoutTime != -1)
+                playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
+        }
     }
 
     // Player chatting
@@ -174,13 +178,13 @@ public class AuthEventHandler {
         return ActionResult.PASS;
     }
 
-    // Punching a block
-    public static ActionResult onAttackBlock(PlayerEntity player) {
+    // Breaking a block
+    public static boolean onBreakBlock(PlayerEntity player) {
         if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowBlockPunch) {
             player.sendMessage(notAuthenticated(player), false);
-            return ActionResult.FAIL;
+            return false;
         }
-        return ActionResult.PASS;
+        return true;
     }
 
     // Using an item

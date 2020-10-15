@@ -6,16 +6,7 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
 import org.iq80.leveldb.WriteBatch;
 import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
@@ -32,8 +23,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -41,10 +30,8 @@ import java.util.concurrent.TimeUnit;
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.samo_lego.simpleauth.commands.AuthCommand.reloadConfig;
 import static org.samo_lego.simpleauth.event.AuthEventHandler.*;
-import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
-import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class SimpleAuth implements DedicatedServerModInitializer {
 
@@ -52,26 +39,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
 	public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
 
-	private static final Timer TIMER = new Timer();
-
 	/**
 	 * HashMap of players that have joined the server.
 	 * It's cleared on server stop in order to save some interactions with database during runtime.
-	 * Stores their data as {@link org.samo_lego.simpleauth.storage.PlayerCache PlayerCache} object
+	 * Stores their data as {@link org.samo_lego.simpleauth.storage.PlayerCache PlayerCache} object.
 	 */
 	public static HashMap<String, PlayerCache> playerCacheMap = new HashMap<>();
-
-	/**
-	 * Checks whether player is authenticated.
-	 * Fake players always count as authenticated.
-	 *
-	 * @param player player that needs to be checked
-	 * @return false if player is not authenticated, otherwise true
-	 */
-	public static boolean isAuthenticated(ServerPlayerEntity player) {
-		String uuid = convertUuid(player);
-		return playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated;
-	}
 
 	// Getting game directory
 	public static final Path gameDirectory = FabricLoader.getInstance().getGameDir();
@@ -145,14 +118,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 			JsonObject data = new JsonObject();
 			data.addProperty("password", playerCache.password);
 
-			JsonObject lastLocation = new JsonObject();
-			lastLocation.addProperty("dim", playerCache.lastLocation.lastDim);
-			lastLocation.addProperty("x", playerCache.lastLocation.lastX);
-			lastLocation.addProperty("y", playerCache.lastLocation.lastY);
-			lastLocation.addProperty("z", playerCache.lastLocation.lastZ);
-
-			data.addProperty("lastLocation", lastLocation.toString());
-
 			batch.put(bytes("UUID:" + uuid), bytes("data:" + data.toString()));
 		});
 		try {
@@ -166,8 +131,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Closing threads
 		try {
             THREADPOOL.shutdownNow();
-			TIMER.cancel();
-			TIMER.purge();
             if (!THREADPOOL.awaitTermination(100, TimeUnit.MICROSECONDS)) {
 				Thread.currentThread().interrupt();
             }
@@ -178,162 +141,5 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 
         // Closing DB connection
 		DB.close();
-	}
-
-	/**
-	 * Gets the text which tells the player
-	 * to login or register, depending on account status.
-	 *
-	 * @param player player who will get the message
-	 * @return LiteralText with appropriate string (login or register)
-	 */
-	public static LiteralText notAuthenticated(PlayerEntity player) {
-        final PlayerCache cache = playerCacheMap.get(convertUuid(player));
-        if(SimpleAuth.config.main.enableGlobalPassword || cache.isRegistered)
-			return new LiteralText(
-			        SimpleAuth.config.lang.notAuthenticated + "\n" + SimpleAuth.config.lang.loginRequired
-            );
-		return new LiteralText(
-		        SimpleAuth.config.lang.notAuthenticated+ "\n" + SimpleAuth.config.lang.registerRequired
-        );
-	}
-
-	/**
-	 * Authenticates player and sends the success message.
-	 *
-	 * @param player player that needs to be authenticated
-	 * @param msg message to be send to the player
-	 */
-	public static void authenticatePlayer(ServerPlayerEntity player, Text msg) {
-		PlayerCache playerCache = playerCacheMap.get(convertUuid(player));
-		// Teleporting player back
-		if(config.main.spawnOnJoin)
-			teleportPlayer(player, false);
-
-		// Updating blocks if needed (if portal rescue action happened)
-		if(playerCache.wasInPortal) {
-			World world = player.getEntityWorld();
-			BlockPos pos = player.getBlockPos();
-
-			// Sending updates to portal blocks
-			// This is technically not needed, but it cleans the "messed portal" on the client
-			world.updateListeners(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
-			world.updateListeners(pos.up(), world.getBlockState(pos.up()), world.getBlockState(pos.up()), 3);
-		}
-
-		// Setting last air to player
-		if(player.isSubmergedInWater())
-			player.setAir(playerCache.lastAir);
-
-		// In case player is in lava during authentication proccess
-		if(!playerCache.wasOnFire)
-			player.setFireTicks(0);
-
-		playerCache.isAuthenticated = true;
-
-		// Player no longer needs to be invisible and invulnerable
-		player.setInvulnerable(false);
-		player.setInvisible(false);
-		player.sendMessage(msg, false);
-	}
-
-	/**
-	 * De-authenticates the player.
-	 *
-	 * @param player player that needs to be de-authenticated
-	 */
-	public static void deauthenticatePlayer(ServerPlayerEntity player) {
-		if(DB.isClosed())
-			return;
-
-		// Marking player as not authenticated
-		String uuid = convertUuid(player);
-		PlayerCache cache = playerCacheMap.get(uuid);
-		if(cache == null) {
-			cache = new PlayerCache(uuid, player);
-			playerCacheMap.put(uuid, cache);
-		}
-		cache.isAuthenticated = false;
-
-
-		// Teleporting player to spawn to hide its position
-		if(config.main.spawnOnJoin)
-			teleportPlayer(player, true);
-
-		// Player is now not authenticated
-		player.sendMessage(notAuthenticated(player), false);
-
-		// Setting the player to be invisible to mobs and also invulnerable
-		player.setInvulnerable(SimpleAuth.config.experimental.playerInvulnerable);
-		player.setInvisible(SimpleAuth.config.experimental.playerInvisible);
-
-		// Kicks player after a certain amount of time if not authenticated
-		TIMER.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				// Kicking player if not authenticated
-				if(!isAuthenticated(player) && player.networkHandler.getConnection().isOpen())
-					player.networkHandler.disconnect(new LiteralText(SimpleAuth.config.lang.timeExpired));
-			}
-		}, SimpleAuth.config.main.kickTime * 1000);
-	}
-
-	/**
-	 * Checks whether player is a fake player (from CarpetMod).
-	 *
-	 * @param player player that needs to be checked
-	 * @return true if player is fake, otherwise false
-	 */
-	public static boolean isPlayerFake(PlayerEntity player) {
-		// We ask CarpetHelper class since it has the imports needed
-		return FabricLoader.getInstance().isModLoaded("carpet") && isPlayerCarpetFake(player);
-	}
-
-	/**
-	 * Teleports player to spawn or last location that is recorded.
-	 * Last location means the location before de-authentication.
-	 *
-	 * @param player player that needs to be teleported
-	 * @param toSpawn whether to teleport player to spawn (provided in config) or last recorded position
-	 */
-	public static void teleportPlayer(ServerPlayerEntity player, boolean toSpawn) {
-		MinecraftServer server = player.getServer();
-		if(server == null || config.worldSpawn.dimension == null)
-			return;
-
-		if (toSpawn) {
-			// Teleports player to spawn
-			player.teleport(
-					server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(config.worldSpawn.dimension))),
-					config.worldSpawn.x,
-					config.worldSpawn.y,
-					config.worldSpawn.z,
-					config.worldSpawn.yaw,
-					config.worldSpawn.pitch
-			);
-			return;
-		}
-		PlayerCache cache = playerCacheMap.get(convertUuid(player));
-		// Puts player to last cached position
-		try {
-			player.teleport(
-					server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(cache.lastLocation.lastDim))),
-					cache.lastLocation.lastX,
-					cache.lastLocation.lastY,
-					cache.lastLocation.lastZ,
-					cache.lastLocation.lastYaw,
-					cache.lastLocation.lastPitch
-			);
-		} catch (Error e) {
-			player.sendMessage(new LiteralText(config.lang.corruptedPlayerData), false);
-			logError("Couldn't teleport player " + player.getName().asString());
-			logError(
-				String.format("Last recorded position is X: %s, Y: %s, Z: %s in dimension %s",
-				cache.lastLocation.lastX,
-				cache.lastLocation.lastY,
-				cache.lastLocation.lastZ,
-				cache.lastLocation.lastDim
-			));
-		}
 	}
 }

@@ -6,13 +6,13 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import org.samo_lego.simpleauth.utils.AuthHelper;
+import org.samo_lego.simpleauth.utils.PlayerAuth;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static org.samo_lego.simpleauth.SimpleAuth.*;
-import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class LoginCommand {
 
@@ -32,8 +32,8 @@ public class LoginCommand {
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayer();
-        String uuid = convertUuid(player);
-        if (isAuthenticated(player)) {
+        String uuid = ((PlayerAuth) player).getFakeUuid();
+        if (((PlayerAuth) player).isAuthenticated()) {
             player.sendMessage(new LiteralText(config.lang.alreadyAuthenticated), false);
             return 0;
         }
@@ -47,7 +47,8 @@ public class LoginCommand {
                 return;
             }
             else if(passwordResult == 1) {
-                authenticatePlayer(player, new LiteralText(config.lang.successfullyAuthenticated));
+                player.sendMessage(new LiteralText(config.lang.successfullyAuthenticated), false);
+                ((PlayerAuth) player).setAuthenticated(true);
                 return;
             }
             else if(passwordResult == -1) {

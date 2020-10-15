@@ -5,15 +5,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
-import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.utils.AuthHelper;
+import org.samo_lego.simpleauth.utils.PlayerAuth;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static org.samo_lego.simpleauth.SimpleAuth.*;
-import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
 
 public class AccountCommand {
 
@@ -36,7 +35,7 @@ public class AccountCommand {
                         )
                 )
             )
-            .then(literal("changePassword")
+            .then(literal("changePassword") //todo mongodb update
                 .then(argument("old password", word())
                     .executes(ctx -> {
                         ctx.getSource().getPlayer().sendMessage(
@@ -72,13 +71,10 @@ public class AccountCommand {
 
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            if (AuthHelper.checkPassword(convertUuid(player), pass.toCharArray()) == 1) {
-                DB.deleteUserData(convertUuid(player));
-                player.sendMessage(
-                        new LiteralText(config.lang.accountDeleted),
-                        false
-                );
-                SimpleAuth.deauthenticatePlayer(player);
+            if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), pass.toCharArray()) == 1) {
+                DB.deleteUserData(((PlayerAuth) player).getFakeUuid());
+                player.sendMessage(new LiteralText(config.lang.accountDeleted), false);
+                ((PlayerAuth) player).setAuthenticated(false);
                 return;
             }
             player.sendMessage(
@@ -103,7 +99,7 @@ public class AccountCommand {
         }
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            if (AuthHelper.checkPassword(convertUuid(player), oldPass.toCharArray()) == 1) {
+            if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), oldPass.toCharArray()) == 1) {
                 if (newPass.length() < config.main.minPasswordChars) {
                     player.sendMessage(new LiteralText(
                             String.format(config.lang.minPasswordChars, config.main.minPasswordChars)
@@ -117,7 +113,7 @@ public class AccountCommand {
                     return;
                 }
                 // Changing password in playercache
-                playerCacheMap.get(convertUuid(player)).password = AuthHelper.hashPassword(newPass.toCharArray());
+                playerCacheMap.get(((PlayerAuth) player).getFakeUuid()).password = AuthHelper.hashPassword(newPass.toCharArray());
                 player.sendMessage(
                         new LiteralText(config.lang.passwordUpdated),
                         false

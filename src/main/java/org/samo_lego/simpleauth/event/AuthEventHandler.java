@@ -13,13 +13,14 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import org.samo_lego.simpleauth.storage.PlayerCache;
+import org.samo_lego.simpleauth.utils.PlayerAuth;
 
 import java.net.SocketAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.samo_lego.simpleauth.SimpleAuth.*;
-import static org.samo_lego.simpleauth.utils.UuidConverter.convertUuid;
+import static org.samo_lego.simpleauth.SimpleAuth.config;
+import static org.samo_lego.simpleauth.SimpleAuth.playerCacheMap;
 
 /**
  * This class will take care of actions players try to do,
@@ -40,7 +41,7 @@ public class AuthEventHandler {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(incomingPlayerUsername);
 
-        if((onlinePlayer != null && !isPlayerFake(onlinePlayer)) && config.experimental.preventAnotherLocationKick) {
+        if((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && config.experimental.preventAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
             return new LiteralText(
@@ -63,10 +64,10 @@ public class AuthEventHandler {
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
         // If player is fake auth is not needed
-        if (isPlayerFake(player))
+        if (((PlayerAuth) player).canSkipAuth())
             return;
         // Checking if session is still valid
-        String uuid = convertUuid(player);
+        String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache = playerCacheMap.getOrDefault(uuid, null);
 
         if (playerCache != null) {
@@ -75,7 +76,7 @@ public class AuthEventHandler {
                 playerCache.validUntil >= System.currentTimeMillis() &&
                 player.getIp().equals(playerCache.lastIp)
             ) {
-                authenticatePlayer(player, null); // Makes player authenticated
+                ((PlayerAuth) player).setAuthenticated(true);
                 return;
             }
             player.setInvulnerable(config.experimental.playerInvulnerable);
@@ -83,16 +84,14 @@ public class AuthEventHandler {
 
             // Invalidating session
             playerCache.isAuthenticated = false;
-            player.sendMessage(notAuthenticated(player), false);
+            if(config.main.spawnOnJoin)
+                ((PlayerAuth) player).hidePosition(true);
         }
         else {
-            deauthenticatePlayer(player);
+            ((PlayerAuth) player).setAuthenticated(false);
             playerCache = playerCacheMap.get(uuid);
             playerCache.wasOnFire = false;
         }
-
-        if(config.main.spawnOnJoin)
-            teleportPlayer(player, true);
 
 
         // Tries to rescue player from nether portal
@@ -112,26 +111,23 @@ public class AuthEventHandler {
     }
 
     public static void onPlayerLeave(ServerPlayerEntity player) {
-        if(isPlayerFake(player))
+        if(((PlayerAuth) player).canSkipAuth())
             return;
-        String uuid = convertUuid(player);
+        String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache = playerCacheMap.get(uuid);
 
-        playerCache.lastIp = player.getIp();
-        playerCache.lastAir = player.getAir();
-        playerCache.wasOnFire = player.isOnFire();
-        playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-        if(isAuthenticated(player)) {
-            playerCache.lastLocation.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
-            playerCache.lastLocation.lastX = player.getX();
-            playerCache.lastLocation.lastY = player.getY();
-            playerCache.lastLocation.lastZ = player.getZ();
-            playerCache.lastLocation.lastYaw = player.yaw;
-            playerCache.lastLocation.lastPitch = player.pitch;
-
+        if(((PlayerAuth) player).isAuthenticated()) {
+            playerCache.lastIp = player.getIp();
+            playerCache.lastAir = player.getAir();
+            playerCache.wasOnFire = player.isOnFire();
+            playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
+            
             // Setting the session expire time
             if(config.main.sessionTimeoutTime != -1)
                 playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
+        }
+        else {
+            ((PlayerAuth) player).hidePosition(false);
         }
     }
 
@@ -140,12 +136,12 @@ public class AuthEventHandler {
         // Getting the message to then be able to check it
         String msg = chatMessageC2SPacket.getChatMessage();
         if(
-            !isAuthenticated((ServerPlayerEntity) player) &&
+            !((PlayerAuth) player).isAuthenticated() &&
             !msg.startsWith("/login") &&
             !msg.startsWith("/register") &&
             (!config.experimental.allowChat || msg.startsWith("/"))
         ) {
-            player.sendMessage(notAuthenticated(player), false);
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -154,7 +150,7 @@ public class AuthEventHandler {
     // Player movement
     public static ActionResult onPlayerMove(PlayerEntity player) {
         // Player will fall if enabled (prevent fly kick)
-        boolean auth = isAuthenticated((ServerPlayerEntity) player);
+        boolean auth = ((PlayerAuth) player).isAuthenticated();
         if(!auth && config.main.allowFalling && !player.isOnGround() && !player.isInsideWaterOrBubbleColumn()) {
             if(player.isInvulnerable())
                 player.setInvulnerable(false);
@@ -171,8 +167,8 @@ public class AuthEventHandler {
 
     // Using a block (right-click function)
     public static ActionResult onUseBlock(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowBlockUse) {
-            player.sendMessage(notAuthenticated(player), false);
+        if(!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowBlockUse) {
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -180,8 +176,8 @@ public class AuthEventHandler {
 
     // Breaking a block
     public static boolean onBreakBlock(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowBlockPunch) {
-            player.sendMessage(notAuthenticated(player), false);
+        if(!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowBlockPunch) {
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return false;
         }
         return true;
@@ -189,8 +185,8 @@ public class AuthEventHandler {
 
     // Using an item
     public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowItemUse) {
-            player.sendMessage(notAuthenticated(player), false);
+        if(!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowItemUse) {
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
 
@@ -198,16 +194,16 @@ public class AuthEventHandler {
     }
     // Dropping an item
     public static ActionResult onDropItem(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowItemDrop) {
-            player.sendMessage(notAuthenticated(player), false);
+        if(!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowItemDrop) {
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
     }
     // Changing inventory (item moving etc.)
     public static ActionResult onTakeItem(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowItemMoving) {
-            player.sendMessage(notAuthenticated(player), false);
+        if(!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowItemMoving) {
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
 
@@ -215,8 +211,8 @@ public class AuthEventHandler {
     }
     // Attacking an entity
     public static ActionResult onAttackEntity(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.experimental.allowEntityPunch) {
-            player.sendMessage(notAuthenticated(player), false);
+        if(!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowEntityPunch) {
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
 
@@ -224,8 +220,8 @@ public class AuthEventHandler {
     }
     // Interacting with entity
     public static ActionResult onUseEntity(PlayerEntity player) {
-        if(!isAuthenticated((ServerPlayerEntity) player) && !config.main.allowEntityInteract) {
-            player.sendMessage(notAuthenticated(player), false);
+        if(!((PlayerAuth) player).isAuthenticated() && !config.main.allowEntityInteract) {
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
 

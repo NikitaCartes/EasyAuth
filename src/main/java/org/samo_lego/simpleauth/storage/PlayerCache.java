@@ -3,7 +3,14 @@ package org.samo_lego.simpleauth.storage;
 import com.google.gson.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+
+import java.util.Objects;
 
 import static org.samo_lego.simpleauth.SimpleAuth.DB;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
@@ -51,12 +58,10 @@ public class PlayerCache {
      * Last recorded position before de-authentication.
      */
     public static class LastLocation {
-        public String lastDim;
-        public double lastX;
-        public double lastY;
-        public double lastZ;
-        public float lastYaw;
-        public float lastPitch;
+        public ServerWorld dimension;
+        public Vec3d position;
+        public float yaw;
+        public float pitch;
     }
 
     public PlayerCache.LastLocation lastLocation = new PlayerCache.LastLocation();
@@ -77,13 +82,12 @@ public class PlayerCache {
             this.wasOnFire = player.isOnFire();
 
             // Setting position cache
-            this.lastLocation.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+            this.lastLocation.dimension = player.getServerWorld();
+            this.lastLocation.position = player.getPos();
+            this.lastLocation.yaw = player.yaw;
+            this.lastLocation.pitch = player.pitch;
+
             this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-            this.lastLocation.lastX = player.getX();
-            this.lastLocation.lastY = player.getY();
-            this.lastLocation.lastZ = player.getZ();
-            this.lastLocation.lastYaw = player.yaw;
-            this.lastLocation.lastPitch = player.pitch;
         }
         else {
             this.wasOnFire = false;
@@ -112,19 +116,24 @@ public class PlayerCache {
             }
 
 
-            // We should check the DB for saved coords
+            // DEPRECATED, UGLY
             if(config.main.spawnOnJoin) {
                 try {
                     JsonElement lastLoc = json.get("lastLocation");
                     if (lastLoc != null) {
                         // Getting DB coords
                         JsonObject lastLocation = gson.fromJson(lastLoc.getAsString(), JsonObject.class);
-                        this.lastLocation.lastDim = lastLocation.get("dim").isJsonNull() ? config.worldSpawn.dimension : lastLocation.get("dim").getAsString();
-                        this.lastLocation.lastX = lastLocation.get("x").isJsonNull() ? config.worldSpawn.x : lastLocation.get("x").getAsDouble();
-                        this.lastLocation.lastY = lastLocation.get("y").isJsonNull() ? config.worldSpawn.y : lastLocation.get("y").getAsDouble();
-                        this.lastLocation.lastZ = lastLocation.get("z").isJsonNull() ? config.worldSpawn.z : lastLocation.get("z").getAsDouble();
-                        this.lastLocation.lastYaw = lastLocation.get("yaw") == null ? 90 : lastLocation.get("yaw").getAsFloat();
-                        this.lastLocation.lastPitch = lastLocation.get("pitch") == null ? 0 : lastLocation.get("pitch").getAsFloat();
+                        assert player != null;
+                        this.lastLocation.dimension = Objects.requireNonNull(player.getServer()).getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(
+                                lastLocation.get("dim").isJsonNull() ? config.worldSpawn.dimension : lastLocation.get("dim").getAsString())));
+
+                        this.lastLocation.position = new Vec3d(
+                                lastLocation.get("x").isJsonNull() ? config.worldSpawn.x : lastLocation.get("x").getAsDouble(),
+                                lastLocation.get("y").isJsonNull() ? config.worldSpawn.y : lastLocation.get("y").getAsDouble(),
+                                lastLocation.get("z").isJsonNull() ? config.worldSpawn.z : lastLocation.get("z").getAsDouble()
+                        );
+                        this.lastLocation.yaw = lastLocation.get("yaw") == null ? 90 : lastLocation.get("yaw").getAsFloat();
+                        this.lastLocation.pitch = lastLocation.get("pitch") == null ? 0 : lastLocation.get("pitch").getAsFloat();
 
                     }
                 } catch (JsonSyntaxException ignored) {

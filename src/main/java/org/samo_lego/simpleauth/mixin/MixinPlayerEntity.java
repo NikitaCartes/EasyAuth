@@ -113,7 +113,13 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
 
         if(!playerCacheMap.containsKey(this.getFakeUuid())) {
             // First join
-            playerCache = PlayerCache.fromJson(player, DB.getUserData(this.getFakeUuid()));
+            String jsonString =  DB.getUserData(this.getFakeUuid());
+            if(jsonString != null && !jsonString.isEmpty())
+                playerCache = PlayerCache.fromJson(player, jsonString);
+            else
+                playerCache = new PlayerCache(player);
+
+            // Saving to hashmap of player caches
             playerCacheMap.put(this.getFakeUuid(), playerCache);
         }
         else {

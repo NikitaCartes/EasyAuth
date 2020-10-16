@@ -65,6 +65,11 @@ public class PlayerCache {
 
     private static final Gson gson = new Gson();
 
+    /**
+     * Creates an empty cache for player (when player doesn't exist in DB).
+     *
+     * @param player player to create cache for
+     */
     public PlayerCache(ServerPlayerEntity player) {
         if(config.experimental.debugMode)
             logInfo("Creating cache for " + Objects.requireNonNull(player).getName());
@@ -100,10 +105,6 @@ public class PlayerCache {
     }
 
     public static PlayerCache fromJson(ServerPlayerEntity player, String json) {
-        if(json.isEmpty()) {
-            // Player doesn't have data yet
-            return new PlayerCache(player);
-        }
         if(config.experimental.debugMode)
             logInfo("Creating cache for " + Objects.requireNonNull(player).getName());
 
@@ -111,6 +112,8 @@ public class PlayerCache {
         PlayerCache playerCache = gson.fromJson(json, PlayerCache.class);
 
         playerCache.loginTries = 0;
+        playerCache.isAuthenticated = false;
+
         if(playerCache.password != null && !playerCache.password.isEmpty()) {
             playerCache.isRegistered = true;
         }

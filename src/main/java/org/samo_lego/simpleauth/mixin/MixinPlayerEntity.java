@@ -194,7 +194,7 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
         return playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated;
     }
 
-    @Inject(method = "tick()V", at = @At("HEAD"))
+    @Inject(method = "tick()V", at = @At("HEAD"), cancellable = true)
     private void tick(CallbackInfo ci) {
         if(!this.isAuthenticated()) {
             // Checking player timer
@@ -207,6 +207,7 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
                     player.sendMessage(this.getAuthMessage(), false);
                 kickTimer--;
             }
+            ci.cancel();
         }
     }
 

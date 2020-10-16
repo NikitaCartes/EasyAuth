@@ -59,16 +59,10 @@ public class MongoDB {
         List<ReplaceOneModel<Document>> updateList = new ArrayList<>();
         playerCacheMap.forEach((uuid, playerCache) -> {
             // Save as BSON not JSON stringified
-            Document lastLocation = new Document("x", playerCache.lastX)
-                    .append("y", playerCache.lastY)
-                    .append("z", playerCache.lastZ)
-                    .append("dimension", playerCache.lastDim);
-
             if(!isUserRegistered(uuid)) {
                 writeList.add(new InsertOneModel<>(
                         new Document("UUID", uuid)
                             .append("password", playerCache.password)
-                            .append("lastLocation", lastLocation)
                         )
                 );
             }
@@ -76,7 +70,6 @@ public class MongoDB {
                 updateList.add(new ReplaceOneModel<>(eq("UUID", uuid),
                         new Document("UUID", uuid)
                                 .append("password", playerCache.password)
-                                .append("lastLocation", lastLocation)
                         )
                 );
             }

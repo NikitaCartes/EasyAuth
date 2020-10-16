@@ -23,8 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static org.samo_lego.simpleauth.SimpleAuth.config;
-import static org.samo_lego.simpleauth.SimpleAuth.playerCacheMap;
+import static org.samo_lego.simpleauth.SimpleAuth.*;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
 
 @Mixin(PlayerEntity.class)
@@ -114,7 +113,7 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
 
         if(!playerCacheMap.containsKey(this.getFakeUuid())) {
             // First join
-            playerCache = new PlayerCache(this.getFakeUuid(), player);
+            playerCache = PlayerCache.fromJson(player, DB.getUserData(this.getFakeUuid()));
             playerCacheMap.put(this.getFakeUuid(), playerCache);
         }
         else {

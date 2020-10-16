@@ -5,13 +5,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
-
-import java.util.Objects;
 
 import java.util.Objects;
 
@@ -133,12 +127,10 @@ public class PlayerCache {
             playerCache.wasOnFire = player.isOnFire();
 
             // Setting position cache
-            playerCache.lastLocation.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
-            playerCache.lastLocation.lastX = player.getX();
-            playerCache.lastLocation.lastY = player.getY();
-            playerCache.lastLocation.lastZ = player.getZ();
-            playerCache.lastLocation.lastYaw = player.yaw;
-            playerCache.lastLocation.lastPitch = player.pitch;
+            playerCache.lastLocation.dimension = player.getServerWorld();
+            playerCache.lastLocation.position = player.getPos();
+            playerCache.lastLocation.yaw = player.yaw;
+            playerCache.lastLocation.pitch = player.pitch;
         }
         else {
             playerCache.wasInPortal = false;
@@ -152,14 +144,6 @@ public class PlayerCache {
     public JsonObject toJson() {
         JsonObject cacheJson = new JsonObject();
         cacheJson.addProperty("password", this.password);
-
-        JsonObject lastLocation = new JsonObject();
-        lastLocation.addProperty("dim", this.lastLocation.lastDim);
-        lastLocation.addProperty("x", this.lastLocation.lastX);
-        lastLocation.addProperty("y", this.lastLocation.lastY);
-        lastLocation.addProperty("z", this.lastLocation.lastZ);
-
-        cacheJson.addProperty("lastLocation", lastLocation.toString());
 
         return cacheJson;
     }

@@ -25,7 +25,7 @@ public abstract class MixinPlayerManager {
         PlayerJoinServerCallback.EVENT.invoker().onPlayerJoin(serverPlayerEntity);
     }
 
-    @Inject(method = "remove(Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("RETURN"))
+    @Inject(method = "remove(Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("HEAD"))
     private void onPlayerLeave(ServerPlayerEntity serverPlayerEntity, CallbackInfo ci) {
         PlayerLeaveServerCallback.EVENT.invoker().onPlayerLeave(serverPlayerEntity);
     }

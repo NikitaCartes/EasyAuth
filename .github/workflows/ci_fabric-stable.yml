@@ -63,5 +63,5 @@ jobs:
           # The path to the asset you want to upload
           asset_path: build/libs/${{ env.BUILDNAME }}.jar
           # The name of the asset you want to upload
-          asset_name: ${{ env.BUILDNAME }}
+          asset_name: ${{ env.PROJECT_ID }}_fabric-${{ env.VERSION }}-${{ env.MC_VERSION }}.jar
           asset_content_type: application/zip

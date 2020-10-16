@@ -4,6 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+
+import java.util.Objects;
 
 import java.util.Objects;
 
@@ -52,12 +60,10 @@ public class PlayerCache {
      * Last recorded position before de-authentication.
      */
     public static class LastLocation {
-        public String lastDim;
-        public double lastX;
-        public double lastY;
-        public double lastZ;
-        public float lastYaw;
-        public float lastPitch;
+        public ServerWorld dimension;
+        public Vec3d position;
+        public float yaw;
+        public float pitch;
     }
 
     public PlayerCache.LastLocation lastLocation = new PlayerCache.LastLocation();
@@ -79,13 +85,12 @@ public class PlayerCache {
             this.lastAir = player.getAir();
 
             // Setting position cache
-            this.lastLocation.lastDim = String.valueOf(player.getEntityWorld().getRegistryKey().getValue());
+            this.lastLocation.dimension = player.getServerWorld();
+            this.lastLocation.position = player.getPos();
+            this.lastLocation.yaw = player.yaw;
+            this.lastLocation.pitch = player.pitch;
+
             this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-            this.lastLocation.lastX = player.getX();
-            this.lastLocation.lastY = player.getY();
-            this.lastLocation.lastZ = player.getZ();
-            this.lastLocation.lastYaw = player.yaw;
-            this.lastLocation.lastPitch = player.pitch;
         }
         else {
             this.wasOnFire = false;

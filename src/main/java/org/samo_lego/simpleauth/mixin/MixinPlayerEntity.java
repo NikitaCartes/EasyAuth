@@ -50,7 +50,6 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
         assert server != null;
 
         PlayerCache cache = playerCacheMap.get(this.getFakeUuid());
-        System.out.println("Teleporting Player. hide:" + hide);
         if (hide) {
             // Saving position
             cache.lastLocation.dimension = player.getServerWorld();

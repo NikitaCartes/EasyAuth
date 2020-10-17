@@ -131,7 +131,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Closing threads
 		try {
             THREADPOOL.shutdownNow();
-            if (!THREADPOOL.awaitTermination(100, TimeUnit.MICROSECONDS)) {
+            if (!THREADPOOL.awaitTermination(500, TimeUnit.MILLISECONDS)) {
 				Thread.currentThread().interrupt();
             }
         } catch (InterruptedException e) {

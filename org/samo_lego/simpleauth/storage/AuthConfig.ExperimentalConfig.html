@@ -193,11 +193,17 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#premiumAutologin">premiumAutologin</a></span></code>
+<div class="block">Whether players who have a valid session should skip the authentication process.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#preventAnotherLocationKick">preventAnotherLocationKick</a></span></code>
 <div class="block">Prevents player being kicked because another player with the same name has joined the server.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#useBCryptLibrary">useBCryptLibrary</a></span></code>
 <div class="block">Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error).</div>
@@ -373,7 +379,7 @@ extends java.lang.Object</pre>
 <a name="useBCryptLibrary">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>useBCryptLibrary</h4>
 <pre>public&nbsp;boolean useBCryptLibrary</pre>
@@ -382,6 +388,18 @@ extends java.lang.Object</pre>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="https://github.com/samolego/SimpleAuth/wiki/GLIBC-problems" target="_blank">wiki</a></dd>
 </dl>
+</li>
+</ul>
+<a name="premiumAutologin">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>premiumAutologin</h4>
+<pre>public&nbsp;boolean premiumAutologin</pre>
+<div class="block">Whether players who have a valid session should skip the authentication process.
+ You have to set online-mode to true in server.properties!
+ (cracked players will still be able to enter, but they'll need to login)</div>
 </li>
 </ul>
 </li>

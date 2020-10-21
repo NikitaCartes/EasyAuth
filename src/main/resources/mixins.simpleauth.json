@@ -6,6 +6,7 @@
   "server": [
     "MixinPlayerEntity",
     "MixinPlayerManager",
+    "MixinServerLoginNetworkHandler",
     "MixinServerPlayNetworkHandler",
     "MixinSlot"
   ],

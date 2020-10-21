@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+import static org.samo_lego.simpleauth.SimpleAuth.serverProp;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 
 public class AuthConfig {
@@ -191,6 +192,12 @@ public class AuthConfig {
          * @see <a href="https://github.com/samolego/SimpleAuth/wiki/GLIBC-problems" target="_blank">wiki</a>
          */
         public boolean useBCryptLibrary = false;
+        /**
+         * Whether players who have a valid session should skip the authentication process.
+         * You have to set online-mode to true in server.properties!
+         * (cracked players will still be able to enter, but they'll need to login)
+         */
+        public boolean premiumAutologin = false;
     }
 
     public MainConfig main = new MainConfig();
@@ -212,6 +219,10 @@ public class AuthConfig {
                     new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
             )) {
                 config = gson.fromJson(fileReader, AuthConfig.class);
+                if(config.experimental.premiumAutologin && !Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
+                    logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
+                    config.experimental.premiumAutologin = false;
+                }
             } catch (IOException e) {
                 throw new RuntimeException("[SimpleAuth] Problem occurred when trying to load config: ", e);
             }

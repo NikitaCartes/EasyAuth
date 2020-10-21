@@ -58,4 +58,10 @@ public interface PlayerAuth {
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
     boolean canSkipAuth();
+
+    /**
+     * Whether the player is using the mojang account
+     * @return true if paid, false if cracked
+     */
+    boolean isUsingMojangAccount();
 }

@@ -1,5 +1,6 @@
 package org.samo_lego.simpleauth.mixin;
 
+import com.mojang.authlib.GameProfile;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
@@ -17,7 +18,9 @@ import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.event.item.DropItemCallback;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.PlayerAuth;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -26,10 +29,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.SimpleAuth.playerCacheMap;
 import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 @Mixin(PlayerEntity.class)
 public abstract class MixinPlayerEntity implements PlayerAuth {
 
+    @Shadow @Final private GameProfile gameProfile;
     private final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 
     // * 20 for 20 ticks in second
@@ -50,6 +55,8 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
         assert server != null;
 
         PlayerCache cache = playerCacheMap.get(this.getFakeUuid());
+        if(config.main.spawnOnJoin)
+            logInfo("Teleporting " + player.getName().asString() + (hide ? " to spawn." : " to original position."));
         if (hide) {
             // Saving position
             cache.lastLocation.dimension = player.getServerWorld();
@@ -90,14 +97,15 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
     public String getFakeUuid() {
         // If server is in online mode online-mode UUIDs should be used
         assert server != null;
-        if(server.isOnlineMode())
+        if(server.isOnlineMode() && this.isUsingMojangAccount())
             return player.getUuidAsString();
         /*
             Lower case is used for Player and PlAyEr to get same UUID (for password storing)
             Mimicking Mojang behaviour, where players cannot set their name to
             ExAmple if Example is already taken.
         */
-        String playername = player.getName().asString().toLowerCase();
+        // Getting player+s name via GameProfile, in order to be compatible with Drogtor mod
+        String playername = player.getGameProfile().getName().toLowerCase();
         return PlayerEntity.getOfflinePlayerUuid(playername).toString();
 
     }
@@ -172,14 +180,23 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
     }
 
     /**
-     * Checks whether player is a fake player (from CarpetMod).
+     * Checks whether player can skip authentication process.
      *
-     * @return true if player is fake (can skip authentication process), otherwise false
+     * @return true if can skip authentication process, otherwise false
      */
     @Override
     public boolean canSkipAuth() {
         // We ask CarpetHelper class since it has the imports needed
-        return this.isRunningCarpet && isPlayerCarpetFake(this.player);
+        return (this.isRunningCarpet && isPlayerCarpetFake(this.player)) || (isUsingMojangAccount() && config.experimental.premiumAutologin);
+    }
+
+    /**
+     * Whether the player is using the mojang account.
+     * @return true if paid, otherwise false
+     */
+    @Override
+    public boolean isUsingMojangAccount() {
+        return !gameProfile.getId().equals(PlayerEntity.getOfflinePlayerUuid(gameProfile.getName()));
     }
 
     /**
@@ -190,7 +207,7 @@ public abstract class MixinPlayerEntity implements PlayerAuth {
     @Override
     public boolean isAuthenticated() {
         String uuid = ((PlayerAuth) player).getFakeUuid();
-        return playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated;
+        return  this.canSkipAuth() || (playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated);
     }
 
     @Inject(method = "tick()V", at = @At("HEAD"), cancellable = true)

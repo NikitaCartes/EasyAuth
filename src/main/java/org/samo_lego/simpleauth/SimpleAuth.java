@@ -22,6 +22,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,6 +47,14 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	 */
 	public static HashMap<String, PlayerCache> playerCacheMap = new HashMap<>();
 
+	/**
+	 * HashSet of player names that have Mojang accounts.
+	 * If player is saved in here, they will be treated as online-mode ones.
+	 */
+	public static HashSet<String> mojangAccountNamesCache = new HashSet<>();
+
+	public static HashSet<String> accountStatusCache = new HashSet<>();
+
 	// Getting game directory
 	public static final Path gameDirectory = FabricLoader.getInstance().getGameDir();
 
@@ -62,6 +71,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// The support on discord was great! I really appreciate your help.
 		logInfo("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
+		try {
+			serverProp.load(new FileReader(gameDirectory + "/server.properties"));
+		} catch (IOException e) {
+			logError("Error while reading server properties: " + e.getMessage());
+		}
+
 		// Creating data directory (database and config files are stored there)
 		File file = new File(gameDirectory + "/mods/SimpleAuth/leveldbStore");
 		if (!file.exists() && !file.mkdirs())
@@ -70,12 +85,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
 		// Connecting to db
 		DB.openConnection();
-
-		try {
-			serverProp.load(new FileReader(gameDirectory + "/server.properties"));
-		} catch (IOException e) {
-			logError("Error while reading server properties: " + e.getMessage());
-		}
 
 
 		// Registering the commands

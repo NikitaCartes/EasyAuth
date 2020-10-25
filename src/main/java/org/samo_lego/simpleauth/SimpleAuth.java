@@ -53,15 +53,15 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	 */
 	public static HashSet<String> mojangAccountNamesCache = new HashSet<>();
 
-	public static HashSet<String> accountStatusCache = new HashSet<>();
-
 	// Getting game directory
 	public static final Path gameDirectory = FabricLoader.getInstance().getGameDir();
 
 	// Server properties
 	public static Properties serverProp = new Properties();
 
-	// Mod config
+	/**
+	 * Config of the SimpleAuth mod.
+	 */
 	public static AuthConfig config;
 
 	@Override

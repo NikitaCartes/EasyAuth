@@ -1,16 +1,14 @@
 package org.samo_lego.simpleauth.storage;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
-
-import java.util.Objects;
 
 import static org.samo_lego.simpleauth.SimpleAuth.DB;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
@@ -50,8 +48,6 @@ public class PlayerCache {
     /**
      * Player stats before de-authentication.
      */
-    public int lastAir;
-    public boolean wasOnFire;
     public boolean wasInPortal;
 
     /**
@@ -78,9 +74,6 @@ public class PlayerCache {
                 logInfo("Creating cache for " + player.getName().asString());
             this.lastIp = player.getIp();
 
-            this.lastAir = player.getAir();
-            this.wasOnFire = player.isOnFire();
-
             // Setting position cache
             this.lastLocation.dimension = player.getServerWorld();
             this.lastLocation.position = player.getPos();
@@ -90,9 +83,7 @@ public class PlayerCache {
             this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
         }
         else {
-            this.wasOnFire = false;
             this.wasInPortal = false;
-            this.lastAir = 300;
         }
 
         String data = DB.getData(uuid);
@@ -113,32 +104,6 @@ public class PlayerCache {
             else {
                 this.password = passwordElement.getAsString();
                 this.isRegistered = !this.password.isEmpty();
-            }
-
-
-            // DEPRECATED, UGLY
-            if(config.main.spawnOnJoin) {
-                try {
-                    JsonElement lastLoc = json.get("lastLocation");
-                    if (lastLoc != null) {
-                        // Getting DB coords
-                        JsonObject lastLocation = gson.fromJson(lastLoc.getAsString(), JsonObject.class);
-                        assert player != null;
-                        this.lastLocation.dimension = Objects.requireNonNull(player.getServer()).getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(
-                                lastLocation.get("dim").isJsonNull() ? config.worldSpawn.dimension : lastLocation.get("dim").getAsString())));
-
-                        this.lastLocation.position = new Vec3d(
-                                lastLocation.get("x").isJsonNull() ? config.worldSpawn.x : lastLocation.get("x").getAsDouble(),
-                                lastLocation.get("y").isJsonNull() ? config.worldSpawn.y : lastLocation.get("y").getAsDouble(),
-                                lastLocation.get("z").isJsonNull() ? config.worldSpawn.z : lastLocation.get("z").getAsDouble()
-                        );
-                        this.lastLocation.yaw = lastLocation.get("yaw") == null ? 90 : lastLocation.get("yaw").getAsFloat();
-                        this.lastLocation.pitch = lastLocation.get("pitch") == null ? 0 : lastLocation.get("pitch").getAsFloat();
-
-                    }
-                } catch (JsonSyntaxException ignored) {
-                    // Player didn't have any coords in db to tp to
-                }
             }
         }
         else {

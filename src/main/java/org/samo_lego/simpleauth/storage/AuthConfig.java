@@ -82,11 +82,6 @@ public class AuthConfig {
         public int sessionTimeoutTime = 60;
 
         /**
-         * Should deauthenticated players fall if the login mid-air?
-         */
-        public boolean allowFalling = false;
-
-        /**
          * Whether to tp player to spawn when joining (to hide original player coordinates)
          */
         public boolean spawnOnJoin =  false;
@@ -125,7 +120,7 @@ public class AuthConfig {
         public String timeExpired = "§cTime for authentication has expired.";
         public String registerRequired = "§6Type /register <password> <password> to claim this account.";
         public String alreadyRegistered = "§6This account name is already registered!";
-        public String registerSuccess = "§aYou are now authenticated.";
+        public String registerSuccess = "§aAccount was created.";
         public String userdataDeleted = "§aUserdata deleted.";
         public String userdataUpdated = "§aUserdata updated.";
         public String accountDeleted = "§aYour account was successfully deleted!";
@@ -137,6 +132,7 @@ public class AuthConfig {
         public String worldSpawnSet = "§aSpawn for logging in was set successfully.";
         public String corruptedPlayerData = "§cYour data is probably corrupted. Please contact admin.";
         public String userNotRegistered = "§cThis player is not registered!";
+        public String cannotLogout = "§cYou cannot logout!";
     }
     public static class ExperimentalConfig {
         /**

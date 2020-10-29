@@ -9,6 +9,7 @@ import org.samo_lego.simpleauth.utils.PlayerAuth;
 
 import static net.minecraft.server.command.CommandManager.literal;
 import static org.samo_lego.simpleauth.SimpleAuth.config;
+import static org.samo_lego.simpleauth.SimpleAuth.mojangAccountNamesCache;
 
 public class LogoutCommand {
 
@@ -22,8 +23,12 @@ public class LogoutCommand {
     private static int logout(ServerCommandSource serverCommandSource) throws CommandSyntaxException {
         ServerPlayerEntity player = serverCommandSource.getPlayer();
 
-        ((PlayerAuth) player).setAuthenticated(false);
-        player.sendMessage(new LiteralText(config.lang.successfulLogout), false);
+        if(mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
+            ((PlayerAuth) player).setAuthenticated(false);
+            player.sendMessage(new LiteralText(config.lang.successfulLogout), false);
+        }
+        else
+            player.sendMessage(new LiteralText(config.lang.cannotLogout), false);
         return 1;
     }
 }

@@ -17,12 +17,6 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
-var altColor = "altColor";
-var rowColor = "rowColor";
-var tableTab = "tableTab";
-var activeTableTab = "activeTableTab";
 </script>
 <noscript>
 <div>JavaScript is disabled on your browser.</div>
@@ -75,13 +69,13 @@ var activeTableTab = "activeTableTab";
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#method.summary">Method</a></li>
+<li><a href="#methods.inherited.from.class.java.lang.Object">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#method.detail">Method</a></li>
+<li>Method</li>
 </ul>
 </div>
 <a name="skip.navbar.top">
@@ -105,15 +99,10 @@ var activeTableTab = "activeTableTab";
 <div class="description">
 <ul class="blockList">
 <li class="blockList">
-<dl>
-<dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></dd>
-</dl>
 <hr>
 <br>
-<pre>public abstract class <span class="typeNameLabel">MixinPlayerEntity</span>
-extends java.lang.Object
-implements <a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></pre>
+<pre>public class <span class="typeNameLabel">MixinPlayerEntity</span>
+extends java.lang.Object</pre>
 </li>
 </ul>
 </div>
@@ -143,56 +132,6 @@ implements <a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" 
 <!--   -->
 </a>
 <h3>Method Summary</h3>
-<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colLast" scope="col">Method and Description</th>
-</tr>
-<tr id="i0" class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#canSkipAuth--">canSkipAuth</a></span>()</code>
-<div class="block">Checks whether player can skip authentication process.</div>
-</td>
-</tr>
-<tr id="i1" class="rowColor">
-<td class="colFirst"><code>net.minecraft.text.Text</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#getAuthMessage--">getAuthMessage</a></span>()</code>
-<div class="block">Gets the text which tells the player
- to login or register, depending on account status.</div>
-</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>java.lang.String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#getFakeUuid--">getFakeUuid</a></span>()</code>
-<div class="block">Converts player uuid, to ensure player with "nAmE" and "NamE" get same uuid.</div>
-</td>
-</tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#hidePosition-boolean-">hidePosition</a></span>(boolean&nbsp;hide)</code>
-<div class="block">Teleports player to spawn or last location that is recorded.</div>
-</td>
-</tr>
-<tr id="i4" class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#isAuthenticated--">isAuthenticated</a></span>()</code>
-<div class="block">Checks whether player is authenticated.</div>
-</td>
-</tr>
-<tr id="i5" class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#isUsingMojangAccount--">isUsingMojangAccount</a></span>()</code>
-<div class="block">Whether the player is using the mojang account.</div>
-</td>
-</tr>
-<tr id="i6" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#setAuthenticated-boolean-">setAuthenticated</a></span>(boolean&nbsp;authenticated)</code>
-<div class="block">Sets the authentication status of the player.</div>
-</td>
-</tr>
-</table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
@@ -221,142 +160,6 @@ implements <a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" 
 <li class="blockList">
 <h4>MixinPlayerEntity</h4>
 <pre>public&nbsp;MixinPlayerEntity()</pre>
-</li>
-</ul>
-</li>
-</ul>
-<!-- ============ METHOD DETAIL ========== -->
-<ul class="blockList">
-<li class="blockList"><a name="method.detail">
-<!--   -->
-</a>
-<h3>Method Detail</h3>
-<a name="hidePosition-boolean-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>hidePosition</h4>
-<pre>public&nbsp;void&nbsp;hidePosition(boolean&nbsp;hide)</pre>
-<div class="block">Teleports player to spawn or last location that is recorded.
- Last location means the location before de-authentication.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#hidePosition-boolean-">hidePosition</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>hide</code> - whether to teleport player to spawn (provided in config) or last recorded position</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a></dd>
-</dl>
-</li>
-</ul>
-<a name="getFakeUuid--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getFakeUuid</h4>
-<pre>public&nbsp;java.lang.String&nbsp;getFakeUuid()</pre>
-<div class="block">Converts player uuid, to ensure player with "nAmE" and "NamE" get same uuid.
- Both players are not allowed to play, since mod mimics Mojang behaviour.
- of not allowing accounts with same names but different capitalization.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#getFakeUuid--">getFakeUuid</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>converted UUID as string</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a></dd>
-</dl>
-</li>
-</ul>
-<a name="setAuthenticated-boolean-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setAuthenticated</h4>
-<pre>public&nbsp;void&nbsp;setAuthenticated(boolean&nbsp;authenticated)</pre>
-<div class="block">Sets the authentication status of the player.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#setAuthenticated-boolean-">setAuthenticated</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>authenticated</code> - whether player should be authenticated</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a></dd>
-</dl>
-</li>
-</ul>
-<a name="getAuthMessage--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getAuthMessage</h4>
-<pre>public&nbsp;net.minecraft.text.Text&nbsp;getAuthMessage()</pre>
-<div class="block">Gets the text which tells the player
- to login or register, depending on account status.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#getAuthMessage--">getAuthMessage</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>LiteralText with appropriate string (login or register)</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a></dd>
-</dl>
-</li>
-</ul>
-<a name="canSkipAuth--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>canSkipAuth</h4>
-<pre>public&nbsp;boolean&nbsp;canSkipAuth()</pre>
-<div class="block">Checks whether player can skip authentication process.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#canSkipAuth--">canSkipAuth</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if can skip authentication process, otherwise false</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a></dd>
-</dl>
-</li>
-</ul>
-<a name="isUsingMojangAccount--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>isUsingMojangAccount</h4>
-<pre>public&nbsp;boolean&nbsp;isUsingMojangAccount()</pre>
-<div class="block">Whether the player is using the mojang account.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#isUsingMojangAccount--">isUsingMojangAccount</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if paid, otherwise false</dd>
-</dl>
-</li>
-</ul>
-<a name="isAuthenticated--">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>isAuthenticated</h4>
-<pre>public&nbsp;boolean&nbsp;isAuthenticated()</pre>
-<div class="block">Checks whether player is authenticated.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#isAuthenticated--">isAuthenticated</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>false if player is not authenticated, otherwise true.</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a></dd>
-</dl>
 </li>
 </ul>
 </li>
@@ -414,13 +217,13 @@ implements <a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" 
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#method.summary">Method</a></li>
+<li><a href="#methods.inherited.from.class.java.lang.Object">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#method.detail">Method</a></li>
+<li>Method</li>
 </ul>
 </div>
 <a name="skip.navbar.bottom">

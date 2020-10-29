@@ -98,10 +98,6 @@
 <dd>
 <div class="block">Allows attacking mobs.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.MainConfig.html#allowFalling">allowFalling</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.MainConfig.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig.MainConfig</a></dt>
-<dd>
-<div class="block">Should deauthenticated players fall if the login mid-air?</div>
-</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#allowItemDrop">allowItemDrop</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig.ExperimentalConfig</a></dt>
 <dd>
 <div class="block">Allows dropping items from inventory.</div>
@@ -159,9 +155,11 @@
 <dl>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.LangConfig.html#cannotChangePassword">cannotChangePassword</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.LangConfig.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig.LangConfig</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.LangConfig.html#cannotLogout">cannotLogout</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.LangConfig.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig.LangConfig</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.LangConfig.html#cannotUnregister">cannotUnregister</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.LangConfig.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig.LangConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#canSkipAuth--">canSkipAuth()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinPlayerEntity</a></dt>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#canSkipAuth--">canSkipAuth()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
 <dd>
 <div class="block">Checks whether player can skip authentication process.</div>
 </dd>
@@ -261,7 +259,7 @@
 <dl>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/SimpleAuth.html#gameDirectory">gameDirectory</a></span> - Static variable in class org.samo_lego.simpleauth.<a href="org/samo_lego/simpleauth/SimpleAuth.html" title="class in org.samo_lego.simpleauth">SimpleAuth</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#getAuthMessage--">getAuthMessage()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinPlayerEntity</a></dt>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#getAuthMessage--">getAuthMessage()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
 <dd>
 <div class="block">Gets the text which tells the player
  to login or register, depending on account status.</div>
@@ -275,7 +273,7 @@
 <dd>
 <div class="block">Gets the hashed password from DB.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#getFakeUuid--">getFakeUuid()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinPlayerEntity</a></dt>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#getFakeUuid--">getFakeUuid()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
 <dd>
 <div class="block">Converts player uuid, to ensure player with "nAmE" and "NamE" get same uuid.</div>
 </dd>
@@ -317,7 +315,7 @@
 <dd>
 <div class="block">Hashes password with algorithm, depending on config</div>
 </dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#hidePosition-boolean-">hidePosition(boolean)</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinPlayerEntity</a></dt>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#hidePosition-boolean-">hidePosition(boolean)</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
 <dd>
 <div class="block">Teleports player to spawn or last location that is recorded.</div>
 </dd>
@@ -331,7 +329,7 @@
 </a>
 <h2 class="title">I</h2>
 <dl>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#isAuthenticated--">isAuthenticated()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinPlayerEntity</a></dt>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#isAuthenticated--">isAuthenticated()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
 <dd>
 <div class="block">Checks whether player is authenticated.</div>
 </dd>
@@ -359,7 +357,7 @@
 <dd>
 <div class="block">Checks if player is registered.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#isUsingMojangAccount--">isUsingMojangAccount()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinPlayerEntity</a></dt>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#isUsingMojangAccount--">isUsingMojangAccount()</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
 <dd>
 <div class="block">Whether the player is using the mojang account.</div>
 </dd>
@@ -387,10 +385,6 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.LangConfig.html#LangConfig--">LangConfig()</a></span> - Constructor for class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.LangConfig.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig.LangConfig</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/PlayerCache.html#lastAir">lastAir</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/PlayerCache.html" title="class in org.samo_lego.simpleauth.storage">PlayerCache</a></dt>
-<dd>
-<div class="block">Player stats before de-authentication.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/PlayerCache.html#lastIp">lastIp</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/PlayerCache.html" title="class in org.samo_lego.simpleauth.storage">PlayerCache</a></dt>
 <dd>
 <div class="block">Last recorded IP of player.</div>
@@ -462,6 +456,10 @@
 <dt><a href="org/samo_lego/simpleauth/mixin/MixinServerLoginNetworkHandler.html" title="class in org.samo_lego.simpleauth.mixin"><span class="typeNameLink">MixinServerLoginNetworkHandler</span></a> - Class in <a href="org/samo_lego/simpleauth/mixin/package-summary.html">org.samo_lego.simpleauth.mixin</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerLoginNetworkHandler.html#MixinServerLoginNetworkHandler--">MixinServerLoginNetworkHandler()</a></span> - Constructor for class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerLoginNetworkHandler.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerLoginNetworkHandler</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin"><span class="typeNameLink">MixinServerPlayerEntity</span></a> - Class in <a href="org/samo_lego/simpleauth/mixin/package-summary.html">org.samo_lego.simpleauth.mixin</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#MixinServerPlayerEntity--">MixinServerPlayerEntity()</a></span> - Constructor for class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayNetworkHandler.html" title="class in org.samo_lego.simpleauth.mixin"><span class="typeNameLink">MixinServerPlayNetworkHandler</span></a> - Class in <a href="org/samo_lego/simpleauth/mixin/package-summary.html">org.samo_lego.simpleauth.mixin</a></dt>
 <dd>&nbsp;</dd>
@@ -661,6 +659,8 @@
 <dd>
 <div class="block">Saves the config to the given file.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#server">server</a></span> - Variable in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/SimpleAuth.html#serverProp">serverProp</a></span> - Static variable in class org.samo_lego.simpleauth.<a href="org/samo_lego/simpleauth/SimpleAuth.html" title="class in org.samo_lego.simpleauth">SimpleAuth</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.MainConfig.html#sessionTimeoutTime">sessionTimeoutTime</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.MainConfig.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig.MainConfig</a></dt>
@@ -668,7 +668,7 @@
 <div class="block">How long to keep session (auto-logging in the player), in seconds
  Set to -1 to disable</div>
 </dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html#setAuthenticated-boolean-">setAuthenticated(boolean)</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinPlayerEntity</a></dt>
+<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#setAuthenticated-boolean-">setAuthenticated(boolean)</a></span> - Method in class org.samo_lego.simpleauth.mixin.<a href="org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html" title="class in org.samo_lego.simpleauth.mixin">MixinServerPlayerEntity</a></dt>
 <dd>
 <div class="block">Sets the authentication status of the player.</div>
 </dd>
@@ -761,9 +761,9 @@
 <h2 class="title">W</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/PlayerCache.html#wasInPortal">wasInPortal</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/PlayerCache.html" title="class in org.samo_lego.simpleauth.storage">PlayerCache</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/PlayerCache.html#wasOnFire">wasOnFire</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/PlayerCache.html" title="class in org.samo_lego.simpleauth.storage">PlayerCache</a></dt>
-<dd>&nbsp;</dd>
+<dd>
+<div class="block">Player stats before de-authentication.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.MainConfig.WorldSpawn.html#WorldSpawn--">WorldSpawn()</a></span> - Constructor for class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.MainConfig.WorldSpawn.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig.MainConfig.WorldSpawn</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="org/samo_lego/simpleauth/storage/AuthConfig.html#worldSpawn">worldSpawn</a></span> - Variable in class org.samo_lego.simpleauth.storage.<a href="org/samo_lego/simpleauth/storage/AuthConfig.html" title="class in org.samo_lego.simpleauth.storage">AuthConfig</a></dt>

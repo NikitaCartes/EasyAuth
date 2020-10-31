@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.samo_lego.simpleauth.SimpleAuth.serverProp;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class AuthConfig {
     private static final Gson gson = new GsonBuilder()
@@ -230,9 +231,15 @@ public class AuthConfig {
                     new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
             )) {
                 config = gson.fromJson(fileReader, AuthConfig.class);
-                if(config.experimental.premiumAutologin && !Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
-                    logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
-                    config.experimental.premiumAutologin = false;
+                if(!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
+                    if(config.experimental.forceoOfflineUuids) {
+                        logInfo("Server is in offline mode, forceoOfflineUuids option is irrelevant. Setting it to false.");
+                        config.experimental.forceoOfflineUuids = false;
+                    }
+                    if(config.experimental.premiumAutologin) {
+                        logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
+                        config.experimental.premiumAutologin = false;
+                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException("[SimpleAuth] Problem occurred when trying to load config: ", e);

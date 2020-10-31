@@ -64,6 +64,7 @@ public class SimpleAuthDatabase {
      * @param data data to put inside database
      * @return true if operation was successful, otherwise false
      */
+    @Deprecated
     public boolean registerUser(String uuid, String data) {
         try {
             if(!this.isUserRegistered(uuid)) {
@@ -111,6 +112,7 @@ public class SimpleAuthDatabase {
      * @param uuid uuid of the player to update data for
      * @param data data to put inside database
      */
+    @Deprecated
     public void updateUserData(String uuid, String data) {
         try {
             levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));

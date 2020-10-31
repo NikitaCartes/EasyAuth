@@ -30,7 +30,6 @@ public class MixinPlayerAdvancementTracker {
 
     @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V",  at = @At("HEAD"))
     private void startMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        System.out.println(this.advancementFile.isFile());
         if(config.experimental.premiumAutologin && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.advancementFile.isFile()) {
             // Migrate
             String playername = owner.getGameProfile().getName().toLowerCase();

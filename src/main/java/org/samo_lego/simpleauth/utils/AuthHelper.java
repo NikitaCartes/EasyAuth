@@ -1,10 +1,5 @@
 package org.samo_lego.simpleauth.utils;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.utils.hashing.HasherArgon2;
 import org.samo_lego.simpleauth.utils.hashing.HasherBCrypt;
 
@@ -12,9 +7,6 @@ import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.SimpleAuth.playerCacheMap;
 
 public class AuthHelper {
-    // Json parser
-    private static final JsonParser parser = new JsonParser();
-
     /**
      * Checks password of user
      *

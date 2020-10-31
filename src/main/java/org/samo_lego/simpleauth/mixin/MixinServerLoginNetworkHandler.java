@@ -21,12 +21,14 @@ import static org.samo_lego.simpleauth.SimpleAuth.*;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 
 @Mixin(ServerLoginNetworkHandler.class)
-public class MixinServerLoginNetworkHandler {
+public abstract class MixinServerLoginNetworkHandler {
 
     @Shadow
     private GameProfile profile;
     @Shadow
     private int loginTicks;
+
+    @Shadow protected abstract GameProfile toOfflineProfile(GameProfile profile);
 
     /**
      * Fake state of current player.
@@ -46,6 +48,13 @@ public class MixinServerLoginNetworkHandler {
             if (this.loginTicks++ == 600)
                 ((ServerLoginNetworkHandler) (Object) this).disconnect(new TranslatableText("multiplayer.disconnect.slow_login"));
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
+    private void acceptPlayer(CallbackInfo ci) {
+        if(config.experimental.forceoOfflineUuids) {
+            this.profile = this.toOfflineProfile(this.profile);
         }
     }
 

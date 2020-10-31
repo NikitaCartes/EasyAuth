@@ -36,7 +36,7 @@ import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class SimpleAuth implements DedicatedServerModInitializer {
 
-    public static SimpleAuthDatabase DB = new SimpleAuthDatabase();
+    public static final SimpleAuthDatabase DB = new SimpleAuthDatabase();
 
 	public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
 
@@ -45,19 +45,19 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	 * It's cleared on server stop in order to save some interactions with database during runtime.
 	 * Stores their data as {@link org.samo_lego.simpleauth.storage.PlayerCache PlayerCache} object.
 	 */
-	public static HashMap<String, PlayerCache> playerCacheMap = new HashMap<>();
+	public static final HashMap<String, PlayerCache> playerCacheMap = new HashMap<>();
 
 	/**
 	 * HashSet of player names that have Mojang accounts.
 	 * If player is saved in here, they will be treated as online-mode ones.
 	 */
-	public static HashSet<String> mojangAccountNamesCache = new HashSet<>();
+	public static final HashSet<String> mojangAccountNamesCache = new HashSet<>();
 
 	// Getting game directory
 	public static final Path gameDirectory = FabricLoader.getInstance().getGameDir();
 
 	// Server properties
-	public static Properties serverProp = new Properties();
+	public static final Properties serverProp = new Properties();
 
 	/**
 	 * Config of the SimpleAuth mod.

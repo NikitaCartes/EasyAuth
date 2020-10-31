@@ -192,8 +192,23 @@ public class AuthConfig {
          * Whether players who have a valid session should skip the authentication process.
          * You have to set online-mode to true in server.properties!
          * (cracked players will still be able to enter, but they'll need to login)
+         *
+         * This protects premium usernames from being stolen, since cracked players
+         * with name that is found in Mojang database, are kicked.
          */
         public boolean premiumAutologin = false;
+        /**
+         * Whether to modify player uuids to offline style.
+         * Note: this should be used only if you had your server
+         * running in offline mode and you made the switch to use
+         * AuthConfig#premiumAutoLogin AND your players already
+         * have e.g. villager discounts, which are based on uuid.
+         * Other things (advancements, playerdata) are migrated
+         * automatically, so think before enabling this. In case
+         * an online-mode player changes username, they'll loose all
+         * their stuff, unless you migrate it manually.
+         */
+        public boolean forceoOfflineUuids = false;
     }
 
     public MainConfig main = new MainConfig();

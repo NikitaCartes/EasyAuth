@@ -30,7 +30,6 @@ public abstract class MixinPlayerManager {
         PlayerLeaveServerCallback.EVENT.invoker().onPlayerLeave(serverPlayerEntity);
     }
 
-    // Method for kicking player for
     @Inject(method = "checkCanJoin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/text/Text;", at = @At("HEAD"), cancellable = true)
     private void checkCanJoin(SocketAddress socketAddress, GameProfile profile, CallbackInfoReturnable<Text> cir) {
         // Getting the player that is trying to join the server

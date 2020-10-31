@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":42,"i8":42};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"],32:["t6","Deprecated Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -139,7 +139,7 @@ extends java.lang.Object</pre>
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -188,14 +188,14 @@ extends java.lang.Object</pre>
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/SimpleAuthDatabase.html#registerUser-java.lang.String-java.lang.String-">registerUser</a></span>(java.lang.String&nbsp;uuid,
             java.lang.String&nbsp;data)</code>
-<div class="block">Inserts the data for the player.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </td>
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/SimpleAuthDatabase.html#updateUserData-java.lang.String-java.lang.String-">updateUserData</a></span>(java.lang.String&nbsp;uuid,
               java.lang.String&nbsp;data)</code>
-<div class="block">Updates player's data.</div>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 </td>
 </tr>
 </table>
@@ -286,8 +286,10 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>registerUser</h4>
-<pre>public&nbsp;boolean&nbsp;registerUser(java.lang.String&nbsp;uuid,
-                            java.lang.String&nbsp;data)</pre>
+<pre>@Deprecated
+public&nbsp;boolean&nbsp;registerUser(java.lang.String&nbsp;uuid,
+                                        java.lang.String&nbsp;data)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">Inserts the data for the player.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -334,8 +336,10 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>updateUserData</h4>
-<pre>public&nbsp;void&nbsp;updateUserData(java.lang.String&nbsp;uuid,
-                           java.lang.String&nbsp;data)</pre>
+<pre>@Deprecated
+public&nbsp;void&nbsp;updateUserData(java.lang.String&nbsp;uuid,
+                                       java.lang.String&nbsp;data)</pre>
+<div class="block"><span class="deprecatedLabel">Deprecated.</span>&nbsp;</div>
 <div class="block">Updates player's data.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>

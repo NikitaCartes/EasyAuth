@@ -230,7 +230,7 @@ implements net.fabricmc.api.DedicatedServerModInitializer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>DB</h4>
-<pre>public static&nbsp;<a href="../../../org/samo_lego/simpleauth/storage/SimpleAuthDatabase.html" title="class in org.samo_lego.simpleauth.storage">SimpleAuthDatabase</a> DB</pre>
+<pre>public static final&nbsp;<a href="../../../org/samo_lego/simpleauth/storage/SimpleAuthDatabase.html" title="class in org.samo_lego.simpleauth.storage">SimpleAuthDatabase</a> DB</pre>
 </li>
 </ul>
 <a name="THREADPOOL">
@@ -248,7 +248,7 @@ implements net.fabricmc.api.DedicatedServerModInitializer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>playerCacheMap</h4>
-<pre>public static&nbsp;java.util.HashMap&lt;java.lang.String,<a href="../../../org/samo_lego/simpleauth/storage/PlayerCache.html" title="class in org.samo_lego.simpleauth.storage">PlayerCache</a>&gt; playerCacheMap</pre>
+<pre>public static final&nbsp;java.util.HashMap&lt;java.lang.String,<a href="../../../org/samo_lego/simpleauth/storage/PlayerCache.html" title="class in org.samo_lego.simpleauth.storage">PlayerCache</a>&gt; playerCacheMap</pre>
 <div class="block">HashMap of players that have joined the server.
  It's cleared on server stop in order to save some interactions with database during runtime.
  Stores their data as <a href="../../../org/samo_lego/simpleauth/storage/PlayerCache.html" title="class in org.samo_lego.simpleauth.storage"><code>PlayerCache</code></a> object.</div>
@@ -260,7 +260,7 @@ implements net.fabricmc.api.DedicatedServerModInitializer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>mojangAccountNamesCache</h4>
-<pre>public static&nbsp;java.util.HashSet&lt;java.lang.String&gt; mojangAccountNamesCache</pre>
+<pre>public static final&nbsp;java.util.HashSet&lt;java.lang.String&gt; mojangAccountNamesCache</pre>
 <div class="block">HashSet of player names that have Mojang accounts.
  If player is saved in here, they will be treated as online-mode ones.</div>
 </li>
@@ -280,7 +280,7 @@ implements net.fabricmc.api.DedicatedServerModInitializer</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>serverProp</h4>
-<pre>public static&nbsp;java.util.Properties serverProp</pre>
+<pre>public static final&nbsp;java.util.Properties serverProp</pre>
 </li>
 </ul>
 <a name="config">

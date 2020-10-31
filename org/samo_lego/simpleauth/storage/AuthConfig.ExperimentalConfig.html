@@ -181,29 +181,35 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#forceoOfflineUuids">forceoOfflineUuids</a></span></code>
+<div class="block">Whether to modify player uuids to offline style.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#playerInvisible">playerInvisible</a></span></code>
 <div class="block">If player should be invisible to mobs before authentication.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#playerInvulnerable">playerInvulnerable</a></span></code>
 <div class="block">If player should be invulnerable before authentication.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#premiumAutologin">premiumAutologin</a></span></code>
 <div class="block">Whether players who have a valid session should skip the authentication process.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#preventAnotherLocationKick">preventAnotherLocationKick</a></span></code>
 <div class="block">Prevents player being kicked because another player with the same name has joined the server.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/storage/AuthConfig.ExperimentalConfig.html#useBCryptLibrary">useBCryptLibrary</a></span></code>
 <div class="block">Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error).</div>
@@ -393,13 +399,34 @@ extends java.lang.Object</pre>
 <a name="premiumAutologin">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>premiumAutologin</h4>
 <pre>public&nbsp;boolean premiumAutologin</pre>
 <div class="block">Whether players who have a valid session should skip the authentication process.
  You have to set online-mode to true in server.properties!
- (cracked players will still be able to enter, but they'll need to login)</div>
+ (cracked players will still be able to enter, but they'll need to login)
+
+ This protects premium usernames from being stolen, since cracked players
+ with name that is found in Mojang database, are kicked.</div>
+</li>
+</ul>
+<a name="forceoOfflineUuids">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>forceoOfflineUuids</h4>
+<pre>public&nbsp;boolean forceoOfflineUuids</pre>
+<div class="block">Whether to modify player uuids to offline style.
+ Note: this should be used only if you had your server
+ running in offline mode and you made the switch to use
+ AuthConfig#premiumAutoLogin AND your players already
+ have e.g. villager discounts, which are based on uuid.
+ Other things (advancements, playerdata) are migrated
+ automatically, so think before enabling this. In case
+ an online-mode player changes username, they'll loose all
+ their stuff, unless you migrate it manually.</div>
 </li>
 </ul>
 </li>

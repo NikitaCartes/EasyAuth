@@ -11,7 +11,8 @@
     "MixinServerPlayerEntity",
     "MixinServerPlayNetworkHandler",
     "MixinSlot",
-    "MixinWorldSaveHandler"
+    "MixinWorldSaveHandler",
+    "ServerStatHandlerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

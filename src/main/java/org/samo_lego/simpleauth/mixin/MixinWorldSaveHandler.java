@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import static org.samo_lego.simpleauth.SimpleAuth.config;
 import static org.samo_lego.simpleauth.SimpleAuth.mojangAccountNamesCache;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 @Mixin(WorldSaveHandler.class)
 public class MixinWorldSaveHandler {
@@ -73,16 +74,27 @@ public class MixinWorldSaveHandler {
     )
     private CompoundTag migratePlayerData(CompoundTag compoundTag, PlayerEntity player) {
         // Checking for offline player data only if online doesn't exist yet
-        if(config.experimental.premiumAutologin && mojangAccountNamesCache.contains(player.getGameProfile().getName()) && !this.fileExists) {
-            File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
+        String playername = player.getGameProfile().getName().toLowerCase();
+        if(config.experimental.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
+            if(config.experimental.debugMode)
+                    logInfo("Migrating data for " + playername);
+                File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
             if (file.exists() && file.isFile())
                 try {
                     compoundTag = NbtIo.readCompressed(new FileInputStream(file));
                 }
                 catch (IOException e) {
-                    LOGGER.warn("Failed to load player data for {}", player.getGameProfile().getName());
+                    LOGGER.warn("Failed to load player data for {}", playername);
                 }
         }
+        else if(config.experimental.debugMode)
+            logInfo("Not migrating " +
+                    playername +
+                    ", as premium status is: " +
+                    mojangAccountNamesCache.contains(playername) +
+                    "and data file is " + (this.fileExists ? "" : "not") +
+                    " present."
+            );
         return compoundTag;
     }
 }

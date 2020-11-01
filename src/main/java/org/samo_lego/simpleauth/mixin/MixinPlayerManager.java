@@ -85,10 +85,6 @@ public abstract class MixinPlayerManager {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
         if(config.experimental.premiumAutologin && !config.experimental.forceoOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
             ((ServerStatHandlerAccessor) serverStatHandler).setFile(onlineFile);
-            System.out.println("File: " + ((ServerStatHandlerAccessor) serverStatHandler).getFile().getName());
         }
-        else
-            System.out.println("Nope: " + ((ServerStatHandlerAccessor) serverStatHandler).getFile().getName());
-
     }
 }

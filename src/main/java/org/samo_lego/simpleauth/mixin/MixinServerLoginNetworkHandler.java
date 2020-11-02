@@ -16,6 +16,8 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.samo_lego.simpleauth.SimpleAuth.*;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
@@ -78,7 +80,9 @@ public abstract class MixinServerLoginNetworkHandler {
         if(config.experimental.premiumAutologin) {
             try {
                 String playername = packet.getProfile().getName().toLowerCase();
-                if(playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString())) {
+                Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
+                Matcher matcher = pattern.matcher(playername);
+                if(playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches()) {
                     // Player definitely doesn't have a mojang account
                     this.acceptCrackedPlayer = true;
 

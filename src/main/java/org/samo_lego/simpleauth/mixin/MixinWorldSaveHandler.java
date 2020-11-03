@@ -92,7 +92,7 @@ public class MixinWorldSaveHandler {
                     playername +
                     ", as premium status is: " +
                     mojangAccountNamesCache.contains(playername) +
-                    "and data file is " + (this.fileExists ? "" : "not") +
+                    " and data file is " + (this.fileExists ? "" : "not") +
                     " present."
             );
         return compoundTag;

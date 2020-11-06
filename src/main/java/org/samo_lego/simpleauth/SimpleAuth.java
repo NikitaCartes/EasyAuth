@@ -41,15 +41,23 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 	 * It's cleared on server stop in order to save some interactions with database during runtime.
 	 * Stores their data as {@link org.samo_lego.simpleauth.storage.PlayerCache PlayerCache} object.
 	 */
-	public static HashMap<String, PlayerCache> playerCacheMap = new HashMap<>();
+	public static final HashMap<String, PlayerCache> playerCacheMap = new HashMap<>();
+
+	/**
+	 * HashSet of player names that have Mojang accounts.
+	 * If player is saved in here, they will be treated as online-mode ones.
+	 */
+	public static final HashSet<String> mojangAccountNamesCache = new HashSet<>();
 
 	// Getting game directory
 	public static final Path gameDirectory = FabricLoader.getInstance().getGameDir();
 
 	// Server properties
-	public static Properties serverProp = new Properties();
+	public static final Properties serverProp = new Properties();
 
-	// Mod config
+	/**
+	 * Config of the SimpleAuth mod.
+	 */
 	public static AuthConfig config;
 
 	@Override
@@ -59,6 +67,12 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// The support on discord was great! I really appreciate your help.
 		logInfo("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
+		try {
+			serverProp.load(new FileReader(gameDirectory + "/server.properties"));
+		} catch (IOException e) {
+			logError("Error while reading server properties: " + e.getMessage());
+		}
+
 		// Creating data directory (database and config files are stored there)
 		File file = new File(gameDirectory + "/mods/SimpleAuth/leveldbStore");
 		if (!file.exists() && !file.mkdirs())
@@ -67,12 +81,6 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
 		// Connecting to db
 		DB.openConnection();
-
-		try {
-			serverProp.load(new FileReader(gameDirectory + "/server.properties"));
-		} catch (IOException e) {
-			logError("Error while reading server properties: " + e.getMessage());
-		}
 
 
 		// Registering the commands
@@ -113,7 +121,7 @@ public class SimpleAuth implements DedicatedServerModInitializer {
 		// Closing threads
 		try {
             THREADPOOL.shutdownNow();
-            if (!THREADPOOL.awaitTermination(100, TimeUnit.MICROSECONDS)) {
+            if (!THREADPOOL.awaitTermination(500, TimeUnit.MILLISECONDS)) {
 				Thread.currentThread().interrupt();
             }
         } catch (InterruptedException e) {

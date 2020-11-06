@@ -21,7 +21,7 @@ echo "MC_VERSION=$mcVersion" >> $GITHUB_ENV
 
 
 # Checks if build is stable (I always bump version when I release stable, uploadable version)
-latestRelease=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest" | grep -oP '"tag_name": "\K(.*)(?=")')
+latestRelease=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/releases" | grep -oP '(?<="tag_name": ")[^"]*' | head -n 1)
 echo "Latest release is: $latestRelease"
 
 

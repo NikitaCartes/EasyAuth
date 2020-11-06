@@ -4,10 +4,15 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
   "server": [
+    "MixinPlayerAdvancementTracker",
     "MixinPlayerEntity",
     "MixinPlayerManager",
+    "MixinServerLoginNetworkHandler",
+    "MixinServerPlayerEntity",
     "MixinServerPlayNetworkHandler",
-    "MixinSlot"
+    "MixinSlot",
+    "MixinWorldSaveHandler",
+    "ServerStatHandlerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

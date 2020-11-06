@@ -63,7 +63,6 @@ public class AuthEventHandler {
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
-        // If player is fake auth is not needed
         if (((PlayerAuth) player).canSkipAuth())
             return;
         // Checking if session is still valid
@@ -76,22 +75,12 @@ public class AuthEventHandler {
                 playerCache.validUntil >= System.currentTimeMillis() &&
                 player.getIp().equals(playerCache.lastIp)
             ) {
+                // Valid session
                 ((PlayerAuth) player).setAuthenticated(true);
                 return;
             }
-            player.setInvulnerable(config.experimental.playerInvulnerable);
-            player.setInvisible(config.experimental.playerInvisible);
-
-            // Invalidating session
-            playerCache.isAuthenticated = false;
-            if(config.main.spawnOnJoin)
-                ((PlayerAuth) player).hidePosition(true);
         }
-        else {
-            ((PlayerAuth) player).setAuthenticated(false);
-            playerCache = playerCacheMap.get(uuid);
-            playerCache.wasOnFire = false;
-        }
+        ((PlayerAuth) player).setAuthenticated(false);
 
 
         // Tries to rescue player from nether portal
@@ -116,10 +105,8 @@ public class AuthEventHandler {
         String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache = playerCacheMap.get(uuid);
 
-        if(((PlayerAuth) player).isAuthenticated()) {
+        if(playerCache.isAuthenticated) {
             playerCache.lastIp = player.getIp();
-            playerCache.lastAir = player.getAir();
-            playerCache.wasOnFire = player.isOnFire();
             playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
             
             // Setting the session expire time
@@ -151,13 +138,8 @@ public class AuthEventHandler {
     public static ActionResult onPlayerMove(PlayerEntity player) {
         // Player will fall if enabled (prevent fly kick)
         boolean auth = ((PlayerAuth) player).isAuthenticated();
-        if(!auth && config.main.allowFalling && !player.isOnGround() && !player.isInsideWaterOrBubbleColumn()) {
-            if(player.isInvulnerable())
-                player.setInvulnerable(false);
-            return ActionResult.PASS;
-        }
         // Otherwise movement should be disabled
-        else if(!auth && !config.experimental.allowMovement) {
+        if(!auth && !config.experimental.allowMovement) {
             if(!player.isInvulnerable())
                 player.setInvulnerable(true);
             return ActionResult.FAIL;

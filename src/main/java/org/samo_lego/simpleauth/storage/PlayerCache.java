@@ -1,11 +1,14 @@
 package org.samo_lego.simpleauth.storage;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 
 import java.util.Objects;
 
@@ -46,8 +49,6 @@ public class PlayerCache {
     /**
      * Player stats before de-authentication.
      */
-    public int lastAir;
-    public boolean wasOnFire;
     public boolean wasInPortal;
 
     /**
@@ -60,7 +61,7 @@ public class PlayerCache {
         public float pitch;
     }
 
-    public PlayerCache.LastLocation lastLocation = new PlayerCache.LastLocation();
+    public final PlayerCache.LastLocation lastLocation = new PlayerCache.LastLocation();
 
 
     private static final Gson gson = new Gson();
@@ -79,10 +80,6 @@ public class PlayerCache {
         if(player != null) {
             this.lastIp = player.getIp();
 
-            this.wasOnFire = player.isOnFire();
-            this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-            this.lastAir = player.getAir();
-
             // Setting position cache
             this.lastLocation.dimension = player.getServerWorld();
             this.lastLocation.position = player.getPos();
@@ -92,9 +89,7 @@ public class PlayerCache {
             this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
         }
         else {
-            this.wasOnFire = false;
             this.wasInPortal = false;
-            this.lastAir = 300;
         }
 
         this.isRegistered = false;

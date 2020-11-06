@@ -23,7 +23,9 @@ import com.google.gson.GsonBuilder;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+import static org.samo_lego.simpleauth.SimpleAuth.serverProp;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
+import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class AuthConfig {
     private static final Gson gson = new GsonBuilder()
@@ -79,11 +81,6 @@ public class AuthConfig {
          * @see <a href="https://github.com/samolego/SimpleAuth/wiki/Sessions" target="_blank">wiki</a>
          */
         public int sessionTimeoutTime = 60;
-
-        /**
-         * Should deauthenticated players fall if the login mid-air?
-         */
-        public boolean allowFalling = false;
 
         /**
          * Whether to tp player to spawn when joining (to hide original player coordinates).
@@ -145,7 +142,7 @@ public class AuthConfig {
         public String timeExpired = "§cTime for authentication has expired.";
         public String registerRequired = "§6Type /register <password> <password> to claim this account.";
         public String alreadyRegistered = "§6This account name is already registered!";
-        public String registerSuccess = "§aYou are now authenticated.";
+        public String registerSuccess = "§aAccount was created.";
         public String userdataDeleted = "§aUserdata deleted.";
         public String userdataUpdated = "§aUserdata updated.";
         public String accountDeleted = "§aYour account was successfully deleted!";
@@ -157,6 +154,7 @@ public class AuthConfig {
         public String worldSpawnSet = "§aSpawn for logging in was set successfully.";
         public String corruptedPlayerData = "§cYour data is probably corrupted. Please contact admin.";
         public String userNotRegistered = "§cThis player is not registered!";
+        public String cannotLogout = "§cYou cannot logout!";
     }
     public static class ExperimentalConfig {
         /**
@@ -212,6 +210,27 @@ public class AuthConfig {
          * @see <a href="https://github.com/samolego/SimpleAuth/wiki/GLIBC-problems" target="_blank">wiki</a>
          */
         public boolean useBCryptLibrary = false;
+        /**
+         * Whether players who have a valid session should skip the authentication process.
+         * You have to set online-mode to true in server.properties!
+         * (cracked players will still be able to enter, but they'll need to login)
+         *
+         * This protects premium usernames from being stolen, since cracked players
+         * with name that is found in Mojang database, are kicked.
+         */
+        public boolean premiumAutologin = false;
+        /**
+         * Whether to modify player uuids to offline style.
+         * Note: this should be used only if you had your server
+         * running in offline mode and you made the switch to use
+         * AuthConfig#premiumAutoLogin AND your players already
+         * have e.g. villager discounts, which are based on uuid.
+         * Other things (advancements, playerdata) are migrated
+         * automatically, so think before enabling this. In case
+         * an online-mode player changes username, they'll loose all
+         * their stuff, unless you migrate it manually.
+         */
+        public boolean forceoOfflineUuids = false;
     }
 
     public MainConfig main = new MainConfig();
@@ -234,6 +253,16 @@ public class AuthConfig {
                     new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
             )) {
                 config = gson.fromJson(fileReader, AuthConfig.class);
+                if(!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
+                    if(config.experimental.forceoOfflineUuids) {
+                        logInfo("Server is in offline mode, forceoOfflineUuids option is irrelevant. Setting it to false.");
+                        config.experimental.forceoOfflineUuids = false;
+                    }
+                    if(config.experimental.premiumAutologin) {
+                        logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
+                        config.experimental.premiumAutologin = false;
+                    }
+                }
             } catch (IOException e) {
                 throw new RuntimeException("[SimpleAuth] Problem occurred when trying to load config: ", e);
             }

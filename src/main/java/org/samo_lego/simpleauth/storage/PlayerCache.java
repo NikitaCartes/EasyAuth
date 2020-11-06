@@ -1,14 +1,11 @@
 package org.samo_lego.simpleauth.storage;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 
 import java.util.Objects;
 
@@ -121,8 +118,6 @@ public class PlayerCache {
             playerCache.lastIp = player.getIp();
 
             playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-            playerCache.lastAir = player.getAir();
-            playerCache.wasOnFire = player.isOnFire();
 
             // Setting position cache
             playerCache.lastLocation.dimension = player.getServerWorld();
@@ -132,8 +127,6 @@ public class PlayerCache {
         }
         else {
             playerCache.wasInPortal = false;
-            playerCache.lastAir = 300;
-            playerCache.wasOnFire = false;
         }
 
         return playerCache;

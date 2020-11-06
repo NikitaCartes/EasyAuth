@@ -64,7 +64,7 @@ public class LevelDB {
      * @return true if operation was successful, otherwise false
      */
     @Deprecated
-    public boolean registerUser(String uuid, String data) {
+    public static boolean registerUser(String uuid, String data) {
         try {
             if(!isUserRegistered(uuid)) {
                 levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
@@ -112,7 +112,7 @@ public class LevelDB {
      * @param data data to put inside database
      */
     @Deprecated
-    public void updateUserData(String uuid, String data) {
+    public static void updateUserData(String uuid, String data) {
         try {
             levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
         } catch (Error e) {

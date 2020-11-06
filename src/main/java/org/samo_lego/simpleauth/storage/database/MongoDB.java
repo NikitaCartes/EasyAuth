@@ -32,6 +32,7 @@ public class MongoDB {
                         config.mongoDBCredentials.useSsl
 
                 )
+            playerCache.wasOnFire = false;
         );*/
         mongoClient = MongoClients.create(String.format("mongodb://%s:%d", config.mongoDBCredentials.host, config.mongoDBCredentials.port));
         MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.databaseName);

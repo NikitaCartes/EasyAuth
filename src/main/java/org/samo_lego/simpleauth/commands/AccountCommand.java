@@ -71,7 +71,7 @@ public class AccountCommand {
 
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), pass.toCharArray()) == 1) {
+            if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), pass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
                 DB.deleteUserData(((PlayerAuth) player).getFakeUuid());
                 player.sendMessage(new LiteralText(config.lang.accountDeleted), false);
                 ((PlayerAuth) player).setAuthenticated(false);
@@ -99,7 +99,7 @@ public class AccountCommand {
         }
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), oldPass.toCharArray()) == 1) {
+            if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), oldPass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
                 if (newPass.length() < config.main.minPasswordChars) {
                     player.sendMessage(new LiteralText(
                             String.format(config.lang.minPasswordChars, config.main.minPasswordChars)

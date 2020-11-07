@@ -9,7 +9,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
-import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.storage.AuthConfig;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.AuthHelper;
@@ -93,7 +92,7 @@ public class AuthCommand {
             .then(literal("update")
                 .then(argument("uuid", word())
                     .then(argument("password", word())
-                        .executes( ctx -> updatePass(
+                        .executes( ctx -> updatePassword(
                                 ctx.getSource(),
                                 getString(ctx, "uuid"),
                                 getString(ctx, "password")
@@ -188,7 +187,7 @@ public class AuthCommand {
         Entity sender = source.getEntity();
         THREADPOOL.submit(() -> {
             DB.deleteUserData(uuid);
-            SimpleAuth.playerCacheMap.put(uuid, new PlayerCache(null));
+            playerCacheMap.put(uuid, null);
         });
 
         if(sender != null)
@@ -216,12 +215,11 @@ public class AuthCommand {
                 playerCache = playerCacheMap.get(uuid);
             }
             else {
-                playerCache = new PlayerCache(null);
+                playerCache = PlayerCache.fromJson(null, uuid);
             }
 
             playerCacheMap.put(uuid, playerCache);
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
-            playerCacheMap.get(uuid).isRegistered = true;
 
             if (sender != null)
                 ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
@@ -239,7 +237,7 @@ public class AuthCommand {
      * @param password new password for the player
      * @return 0
      */
-    private static int updatePass(ServerCommandSource source, String uuid, String password) {
+    private static int updatePassword(ServerCommandSource source, String uuid, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
@@ -249,11 +247,11 @@ public class AuthCommand {
                 playerCache = playerCacheMap.get(uuid);
             }
             else {
-                playerCache = new PlayerCache(null);
+                playerCache = PlayerCache.fromJson(null, uuid);
             }
 
             playerCacheMap.put(uuid, playerCache);
-            if(!playerCacheMap.get(uuid).isRegistered) {
+            if(!playerCacheMap.get(uuid).password.isEmpty()) {
                 if (sender != null)
                     ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userNotRegistered), false);
                 else

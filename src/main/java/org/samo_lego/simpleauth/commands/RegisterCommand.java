@@ -63,12 +63,11 @@ public class RegisterCommand {
             }
 
             PlayerCache playerCache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
-            if (!playerCache.isRegistered) {
+            if (playerCache.password.isEmpty()) {
                 ((PlayerAuth) player).setAuthenticated(true);
                 player.sendMessage(new LiteralText(config.lang.registerSuccess), false);
 
                 playerCache.password = hashPassword(pass1.toCharArray());
-                playerCache.isRegistered = true;
                 return;
             }
             player.sendMessage(new LiteralText(config.lang.alreadyRegistered), false);

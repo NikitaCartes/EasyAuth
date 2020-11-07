@@ -1,6 +1,5 @@
 package org.samo_lego.simpleauth.storage.database;
 
-import com.google.gson.JsonObject;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
@@ -140,8 +139,8 @@ public class LevelDB {
         WriteBatch batch = levelDBStore.createWriteBatch();
         // Updating player data.
         playerCacheMap.forEach((uuid, playerCache) -> {
-            JsonObject data = playerCache.toJson();
-            batch.put(bytes("UUID:" + uuid), bytes("data:" + data.toString()));
+            String data = playerCache.toJson();
+            batch.put(bytes("UUID:" + uuid), bytes("data:" + data));
         });
         try {
             // Writing and closing batch

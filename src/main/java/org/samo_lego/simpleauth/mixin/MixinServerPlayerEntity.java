@@ -11,7 +11,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Final;
@@ -92,14 +91,13 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     public String getFakeUuid() {
         // If server is in online mode online-mode UUIDs should be used
         assert server != null;
-        if(server.isOnlineMode() && this.isUsingMojangAccount())
+        if(server.isOnlineMode() && this.isUsingMojangAccount() && !config.experimental.forceoOfflineUuids)
             return player.getUuidAsString();
         /*
             Lower case is used for Player and PlAyEr to get same UUID (for password storing)
             Mimicking Mojang behaviour, where players cannot set their name to
             ExAmple if Example is already taken.
         */
-        // Getting player+s name via GameProfile, in order to be compatible with Drogtor mod
         String playername = player.getGameProfile().getName().toLowerCase();
         return PlayerEntity.getOfflinePlayerUuid(playername).toString();
 
@@ -116,7 +114,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
 
         if(!playerCacheMap.containsKey(this.getFakeUuid())) {
             // First join
-            playerCache = new PlayerCache(this.getFakeUuid(), player);
+            playerCache = PlayerCache.fromJson(player, this.getFakeUuid());
             playerCacheMap.put(this.getFakeUuid(), playerCache);
         }
         else {
@@ -157,12 +155,12 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     @Override
     public Text getAuthMessage() {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
-        if(SimpleAuth.config.main.enableGlobalPassword || cache.isRegistered)
+        if(!config.main.enableGlobalPassword && cache.password.isEmpty())
             return new LiteralText(
-                    SimpleAuth.config.lang.notAuthenticated + "\n" + SimpleAuth.config.lang.loginRequired
+                    config.lang.notAuthenticated+ "\n" + config.lang.registerRequired
             );
         return new LiteralText(
-                SimpleAuth.config.lang.notAuthenticated+ "\n" + SimpleAuth.config.lang.registerRequired
+                config.lang.notAuthenticated + "\n" + config.lang.loginRequired
         );
     }
 

@@ -22,20 +22,33 @@ public class MongoDB {
     private static MongoClient mongoClient;
 
     public static void initialize() {
-        /*mongoClient = MongoClients.create(
+
+        /*MongoCredential credential = MongoCredential.createCredential(
+                config.mongoDBCredentials.username,
+                config.mongoDBCredentials.userSourceDatabase,
+                config.mongoDBCredentials.password.toCharArray()
+        );
+
+        mongoClient = MongoClients.create(
+                MongoClientSettings.builder()
+                        .applyToClusterSettings(builder ->
+                                builder.hosts(Collections.singletonList(new ServerAddress(config.mongoDBCredentials.host, config.mongoDBCredentials.port))))
+                        .applyToSslSettings(builder -> builder.enabled(config.mongoDBCredentials.useSsl))
+                        .credential(credential)
+                        .build());*/
+        mongoClient = MongoClients.create(
                 String.format(
-                        "mongodb://%s:%s@%s:%s/?authSource=db1&ssl=%s",
+                        "mongodb://%s:%s@%s:%d/?authSource=%s&useSsl=%b",
                         config.mongoDBCredentials.username,
                         config.mongoDBCredentials.password,
                         config.mongoDBCredentials.host,
                         config.mongoDBCredentials.port,
+                        config.mongoDBCredentials.userSourceDatabase,
                         config.mongoDBCredentials.useSsl
-
                 )
-            playerCache.wasOnFire = false;
-        );*/
-        mongoClient = MongoClients.create(String.format("mongodb://%s:%d", config.mongoDBCredentials.host, config.mongoDBCredentials.port));
-        MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.databaseName);
+        );
+        //mongoClient = MongoClients.create(String.format("mongodb://%s:%d", config.mongoDBCredentials.host, config.mongoDBCredentials.port));
+        MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.simpleAuthDatabase);
         collection = database.getCollection("players");
     }
 
@@ -71,6 +84,9 @@ public class MongoDB {
                 updateList.add(new ReplaceOneModel<>(eq("UUID", uuid),
                         new Document("UUID", uuid)
                                 .append("password", playerCache.password)
+                                .append("is_authenticated", playerCache.isAuthenticated)
+                                .append("last_ip", playerCache.lastIp)
+                                .append("valid_until", playerCache.validUntil)
                         )
                 );
             }

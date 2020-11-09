@@ -30,6 +30,7 @@ import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 public class AuthConfig {
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
+            .serializeNulls()
             .create();
 
     // If player is not authenticated, following conditions apply
@@ -112,15 +113,15 @@ public class AuthConfig {
         public static class MongoDBCredentials {
             /**
              * Credentials for MongoDB database.
-             * Leave this as-is if you are using LevelDB or don't need
-             * special credentials.
+             * Leave this as-is if you are using LevelDB.
              */
+            public String username = "";
+            public String password = "";
             public String host = "localhost";
             public int port = 27017;
+            public String simpleAuthDatabase = "SimpleAuthPlayerData";
+            public String userSourceDatabase = "";
             public boolean useSsl = true;
-            public String databaseName = "SimpleAuthPlayerData";
-            public String password = "";
-            public String username = "";
         }
 
     }

@@ -3,6 +3,7 @@ package org.samo_lego.simpleauth.storage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -23,6 +24,7 @@ public class PlayerCache {
      * Used for {@link org.samo_lego.simpleauth.event.AuthEventHandler#onPlayerJoin(ServerPlayerEntity) session validation}.
      */
     @Expose
+    @SerializedName("is_authenticated")
     public boolean isAuthenticated = false;
     /**
      * Hashed password of player.
@@ -38,11 +40,13 @@ public class PlayerCache {
      * Used for {@link org.samo_lego.simpleauth.event.AuthEventHandler#onPlayerJoin(ServerPlayerEntity) sessions}.
      */
     @Expose
+    @SerializedName("last_ip")
     public String lastIp;
     /**
      * Time until session is valid.
      */
     @Expose
+    @SerializedName("valid_until")
     public long validUntil;
 
     /**
@@ -72,30 +76,23 @@ public class PlayerCache {
      *
      * @param player player to create cache for
      */
-    public PlayerCache(ServerPlayerEntity player) {
-        if(player != null) {
-            this.lastIp = player.getIp();
 
-            // Setting position cache
-            this.lastLocation.dimension = player.getServerWorld();
-            this.lastLocation.position = player.getPos();
-            this.lastLocation.yaw = player.yaw;
-            this.lastLocation.pitch = player.pitch;
-
-            this.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-        }
-    }
 
     public static PlayerCache fromJson(ServerPlayerEntity player, String fakeUuid) {
         if(config.experimental.debugMode)
             logInfo("Creating cache for " + Objects.requireNonNull(player).getGameProfile().getName());
 
-        PlayerCache playerCache = new PlayerCache(player);;
-
         String json = DB.getUserData(fakeUuid);
-        if(!json.isEmpty()) {
-            // Parsing data from DB
-            playerCache = gson.fromJson(json, PlayerCache.class);
+        // Parsing data from DB
+        PlayerCache playerCache = gson.fromJson(json, PlayerCache.class);
+        if(player != null) {
+            // Setting position cache
+            playerCache.lastLocation.dimension = player.getServerWorld();
+            playerCache.lastLocation.position = player.getPos();
+            playerCache.lastLocation.yaw = player.yaw;
+            playerCache.lastLocation.pitch = player.pitch;
+
+            playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
         }
 
         return playerCache;

@@ -46,10 +46,8 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public void hidePosition(boolean hide) {
-        assert server != null;
-
         PlayerCache cache = playerCacheMap.get(this.getFakeUuid());
-        if(config.main.spawnOnJoin)
+        if(config.experimental.debugMode)
             logInfo("Teleporting " + player.getName().asString() + (hide ? " to spawn." : " to original position."));
         if (hide) {
             // Saving position
@@ -110,19 +108,11 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public void setAuthenticated(boolean authenticated) {
-        PlayerCache playerCache;
+        PlayerCache playerCache = playerCacheMap.get(this.getFakeUuid());
+        if(this.isAuthenticated() == authenticated)
+            return;
+        playerCache.isAuthenticated = authenticated;
 
-        if(!playerCacheMap.containsKey(this.getFakeUuid())) {
-            // First join
-            playerCache = PlayerCache.fromJson(player, this.getFakeUuid());
-            playerCacheMap.put(this.getFakeUuid(), playerCache);
-        }
-        else {
-            playerCache = playerCacheMap.get(this.getFakeUuid());
-            if(this.isAuthenticated() == authenticated)
-                return;
-            playerCache.isAuthenticated = authenticated;
-        }
 
         player.setInvulnerable(!authenticated && config.experimental.playerInvulnerable);
         player.setInvisible(!authenticated && config.experimental.playerInvisible);

@@ -67,18 +67,24 @@ public class AuthEventHandler {
             return;
         // Checking if session is still valid
         String uuid = ((PlayerAuth) player).getFakeUuid();
-        PlayerCache playerCache = playerCacheMap.getOrDefault(uuid, null);
+        PlayerCache playerCache;
 
-        if (playerCache != null) {
-            if (
-                playerCache.isAuthenticated &&
-                playerCache.validUntil >= System.currentTimeMillis() &&
-                player.getIp().equals(playerCache.lastIp)
-            ) {
-                // Valid session
-                ((PlayerAuth) player).setAuthenticated(true);
-                return;
-            }
+        if(!playerCacheMap.containsKey(uuid)) {
+            // First join
+            playerCache = PlayerCache.fromJson(player, uuid);
+            playerCacheMap.put(uuid, playerCache);
+        }
+        else {
+            playerCache = playerCacheMap.get(uuid);
+        }
+
+        if (
+            playerCache.isAuthenticated &&
+            playerCache.validUntil >= System.currentTimeMillis() &&
+            player.getIp().equals(playerCache.lastIp)
+        ) {
+            // Valid session
+            return;
         }
         ((PlayerAuth) player).setAuthenticated(false);
 
@@ -113,9 +119,8 @@ public class AuthEventHandler {
             if(config.main.sessionTimeoutTime != -1)
                 playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
         }
-        else {
+        else if(config.main.spawnOnJoin)
             ((PlayerAuth) player).hidePosition(false);
-        }
     }
 
     // Player chatting

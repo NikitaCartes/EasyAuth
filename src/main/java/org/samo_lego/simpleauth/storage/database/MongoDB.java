@@ -22,20 +22,6 @@ public class MongoDB {
     private static MongoClient mongoClient;
 
     public static void initialize() {
-
-        /*MongoCredential credential = MongoCredential.createCredential(
-                config.mongoDBCredentials.username,
-                config.mongoDBCredentials.userSourceDatabase,
-                config.mongoDBCredentials.password.toCharArray()
-        );
-
-        mongoClient = MongoClients.create(
-                MongoClientSettings.builder()
-                        .applyToClusterSettings(builder ->
-                                builder.hosts(Collections.singletonList(new ServerAddress(config.mongoDBCredentials.host, config.mongoDBCredentials.port))))
-                        .applyToSslSettings(builder -> builder.enabled(config.mongoDBCredentials.useSsl))
-                        .credential(credential)
-                        .build());*/
         mongoClient = MongoClients.create(
                 String.format(
                         "mongodb://%s:%s@%s:%d/?authSource=%s&useSsl=%b",
@@ -47,7 +33,6 @@ public class MongoDB {
                         config.mongoDBCredentials.useSsl
                 )
         );
-        //mongoClient = MongoClients.create(String.format("mongodb://%s:%d", config.mongoDBCredentials.host, config.mongoDBCredentials.port));
         MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.simpleAuthDatabase);
         collection = database.getCollection("players");
     }

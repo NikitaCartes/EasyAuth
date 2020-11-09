@@ -106,21 +106,47 @@ public class AuthConfig {
 
         /**
          * Whether to use MongoDB instead of LevelDB.
-         * Note: you need to install MongoDB yourself.
+         * Note: you need to install MongoDB yourself, as well
+         * as create a user (account) that will be used by SimpleAuth
+         * to manage its database.
          */
         public boolean useMongoDB = false;
 
+        /**
+         * Credentials for MongoDB database.
+         * Leave this as-is if you are using LevelDB.
+         */
         public static class MongoDBCredentials {
             /**
-             * Credentials for MongoDB database.
-             * Leave this as-is if you are using LevelDB.
+             * Username for the database access.
              */
             public String username = "";
+            /**
+             * Password for the database access.
+             */
             public String password = "";
-            public String host = "localhost";
-            public int port = 27017;
-            public String simpleAuthDatabase = "SimpleAuthPlayerData";
+            /**
+             * Database where user with provided credentials
+             * is located.
+             */
             public String userSourceDatabase = "";
+            /**
+             * Database host (address).
+             */
+            public String host = "localhost";
+            /**
+             * Database port.
+             * Default: 27017
+             */
+            public int port = 27017;
+            /**
+             * Name of the new database in which SimpleAuth should
+             * store player data.
+             */
+            public String simpleAuthDatabase = "SimpleAuthPlayerData";
+            /**
+             * Whether to use ssl connection.
+             */
             public boolean useSsl = true;
         }
 
@@ -153,7 +179,6 @@ public class AuthConfig {
         public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
         public String playerAlreadyOnline = "§cPlayer %s is already online!";
         public String worldSpawnSet = "§aSpawn for logging in was set successfully.";
-        public String corruptedPlayerData = "§cYour data is probably corrupted. Please contact admin.";
         public String userNotRegistered = "§cThis player is not registered!";
         public String cannotLogout = "§cYou cannot logout!";
     }

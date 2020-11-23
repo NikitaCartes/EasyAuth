@@ -83,8 +83,13 @@ public class PlayerCache {
             logInfo("Creating cache for " + Objects.requireNonNull(player).getGameProfile().getName());
 
         String json = DB.getUserData(fakeUuid);
-        // Parsing data from DB
-        PlayerCache playerCache = gson.fromJson(json, PlayerCache.class);
+        PlayerCache playerCache;
+        if(!json.isEmpty()) {
+            // Parsing data from DB
+            playerCache = gson.fromJson(json, PlayerCache.class);
+        }
+        else
+            playerCache = new PlayerCache();
         if(player != null) {
             // Setting position cache
             playerCache.lastLocation.dimension = player.getServerWorld();

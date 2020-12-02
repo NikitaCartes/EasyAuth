@@ -162,7 +162,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     @Override
     public boolean canSkipAuth() {
         // We ask CarpetHelper class since it has the imports needed
-        return (this.isRunningCarpet && isPlayerCarpetFake(this.player)) || (isUsingMojangAccount() && config.experimental.premiumAutologin);
+        return (this.isRunningCarpet && isPlayerCarpetFake(this.player)) || (isUsingMojangAccount() && config.main.premiumAutologin);
     }
 
     /**

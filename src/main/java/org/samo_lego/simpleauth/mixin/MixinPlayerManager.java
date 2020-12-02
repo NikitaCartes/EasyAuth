@@ -66,7 +66,7 @@ public abstract class MixinPlayerManager {
             ordinal = 1
     )
     private File migrateOfflineStats(File file, PlayerEntity player) {
-        if(config.experimental.premiumAutologin && !config.experimental.forceoOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount()) {
+        if(config.main.premiumAutologin && !config.experimental.forceoOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount()) {
             String playername = player.getGameProfile().getName();
             file = new File(file.getParent(), PlayerEntity.getOfflinePlayerUuid(playername) + ".json");
         }
@@ -83,7 +83,7 @@ public abstract class MixinPlayerManager {
     )
     private void migrateOfflineStats(PlayerEntity player, CallbackInfoReturnable<ServerStatHandler> cir, UUID uUID, ServerStatHandler serverStatHandler, File serverStatsDir, File playerStatFile) {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
-        if(config.experimental.premiumAutologin && !config.experimental.forceoOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
+        if(config.main.premiumAutologin && !config.experimental.forceoOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
             ((ServerStatHandlerAccessor) serverStatHandler).setFile(onlineFile);
         }
     }

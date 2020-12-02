@@ -75,7 +75,7 @@ public class MixinWorldSaveHandler {
     private CompoundTag migratePlayerData(CompoundTag compoundTag, PlayerEntity player) {
         // Checking for offline player data only if online doesn't exist yet
         String playername = player.getGameProfile().getName().toLowerCase();
-        if(config.experimental.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
+        if(config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
             if(config.experimental.debugMode)
                     logInfo("Migrating data for " + playername);
                 File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");

@@ -44,7 +44,7 @@ public abstract class MixinServerLoginNetworkHandler {
      */
     @Inject(method = "tick()V", at = @At("HEAD"), cancellable = true)
     private void preTick(CallbackInfo ci) {
-        if (this.acceptCrackedPlayer && config.experimental.premiumAutologin) {
+        if (this.acceptCrackedPlayer && config.main.premiumAutologin) {
             ((ServerLoginNetworkHandler) (Object) this).acceptPlayer();
 
             if (this.loginTicks++ == 600)
@@ -77,12 +77,12 @@ public abstract class MixinServerLoginNetworkHandler {
             cancellable = true
     )
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
-        if(config.experimental.premiumAutologin) {
+        if(config.main.premiumAutologin) {
             try {
                 String playername = packet.getProfile().getName().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
-                if(playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches()) {
+                if(playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername)) {
                     // Player definitely doesn't have a mojang account
                     this.acceptCrackedPlayer = true;
 

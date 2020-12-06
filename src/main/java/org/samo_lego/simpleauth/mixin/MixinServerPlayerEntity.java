@@ -102,17 +102,15 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     }
 
     /**
-     * Sets the authentication status of the player.
+     * Sets the authentication status of the player
+     * and hides coordinates if needed.
      *
      * @param authenticated whether player should be authenticated
      */
     @Override
     public void setAuthenticated(boolean authenticated) {
         PlayerCache playerCache = playerCacheMap.get(this.getFakeUuid());
-        if(this.isAuthenticated() == authenticated)
-            return;
         playerCache.isAuthenticated = authenticated;
-
 
         player.setInvulnerable(!authenticated && config.experimental.playerInvulnerable);
         player.setInvisible(!authenticated && config.experimental.playerInvisible);
@@ -167,7 +165,8 @@ public class MixinServerPlayerEntity implements PlayerAuth {
 
     /**
      * Whether the player is using the mojang account.
-     * @return true if paid, otherwise false
+     *
+     * @return true if they are  using mojang account, otherwise false
      */
     @Override
     public boolean isUsingMojangAccount() {

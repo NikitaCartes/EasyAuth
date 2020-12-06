@@ -119,8 +119,12 @@ public class AuthEventHandler {
             if(config.main.sessionTimeoutTime != -1)
                 playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
         }
-        else if(config.main.spawnOnJoin)
+        else if(config.main.spawnOnJoin) {
             ((PlayerAuth) player).hidePosition(false);
+
+            player.setInvulnerable(!config.experimental.playerInvulnerable);
+            player.setInvisible(!config.experimental.playerInvisible);
+        }
     }
 
     // Player chatting

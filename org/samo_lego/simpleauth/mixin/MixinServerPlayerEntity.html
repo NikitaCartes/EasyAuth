@@ -208,7 +208,8 @@ implements <a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" 
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../org/samo_lego/simpleauth/mixin/MixinServerPlayerEntity.html#setAuthenticated-boolean-">setAuthenticated</a></span>(boolean&nbsp;authenticated)</code>
-<div class="block">Sets the authentication status of the player.</div>
+<div class="block">Sets the authentication status of the player
+ and hides coordinates if needed.</div>
 </td>
 </tr>
 </table>
@@ -313,7 +314,8 @@ implements <a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" 
 <li class="blockList">
 <h4>setAuthenticated</h4>
 <pre>public&nbsp;void&nbsp;setAuthenticated(boolean&nbsp;authenticated)</pre>
-<div class="block">Sets the authentication status of the player.</div>
+<div class="block">Sets the authentication status of the player
+ and hides coordinates if needed.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#setAuthenticated-boolean-">setAuthenticated</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
@@ -373,7 +375,7 @@ implements <a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" 
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html#isUsingMojangAccount--">isUsingMojangAccount</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../org/samo_lego/simpleauth/utils/PlayerAuth.html" title="interface in org.samo_lego.simpleauth.utils">PlayerAuth</a></code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if paid, otherwise false</dd>
+<dd>true if they are  using mojang account, otherwise false</dd>
 </dl>
 </li>
 </ul>

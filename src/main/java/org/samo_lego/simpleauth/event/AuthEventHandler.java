@@ -122,8 +122,8 @@ public class AuthEventHandler {
         else if(config.main.spawnOnJoin) {
             ((PlayerAuth) player).hidePosition(false);
 
-            player.setInvulnerable(!config.experimental.playerInvulnerable);
-            player.setInvisible(!config.experimental.playerInvisible);
+            player.setInvulnerable(false);
+            player.setInvisible(false);
         }
     }
 

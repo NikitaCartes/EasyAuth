@@ -7,9 +7,9 @@ import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.util.ActionResult;
 
 public interface ChatCallback {
-    Event<ChatCallback> EVENT = EventFactory.createArrayBacked(ChatCallback.class, listeners -> (player, chatMessageC2SPacket) -> {
+    Event<ChatCallback> EVENT = EventFactory.createArrayBacked(ChatCallback.class, listeners -> (player, message) -> {
         for (ChatCallback event : listeners) {
-            ActionResult result = event.onPlayerChat(player, chatMessageC2SPacket);
+            ActionResult result = event.onPlayerChat(player, message);
 
             if (result != ActionResult.PASS) {
                 return result;
@@ -18,5 +18,5 @@ public interface ChatCallback {
         return ActionResult.PASS;
     });
 
-    ActionResult onPlayerChat(PlayerEntity player, ChatMessageC2SPacket chatMessageC2SPacket);
+    ActionResult onPlayerChat(PlayerEntity player, String message);
 }

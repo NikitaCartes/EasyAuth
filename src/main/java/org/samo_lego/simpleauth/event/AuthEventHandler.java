@@ -117,7 +117,7 @@ public class AuthEventHandler {
             
             // Setting the session expire time
             if(config.main.sessionTimeoutTime != -1)
-                playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000;
+                playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000L;
         }
         else if(config.main.spawnOnJoin) {
             ((PlayerAuth) player).hidePosition(false);
@@ -128,14 +128,13 @@ public class AuthEventHandler {
     }
 
     // Player chatting
-    public static ActionResult onPlayerChat(PlayerEntity player, ChatMessageC2SPacket chatMessageC2SPacket) {
+    public static ActionResult onPlayerChat(PlayerEntity player, String message) {
         // Getting the message to then be able to check it
-        String msg = chatMessageC2SPacket.getChatMessage();
         if(
             !((PlayerAuth) player).isAuthenticated() &&
-            !msg.startsWith("/login") &&
-            !msg.startsWith("/register") &&
-            (!config.experimental.allowChat || msg.startsWith("/"))
+            !message.startsWith("/login") &&
+            !message.startsWith("/register") &&
+            (!config.experimental.allowChat || message.startsWith("/"))
         ) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;

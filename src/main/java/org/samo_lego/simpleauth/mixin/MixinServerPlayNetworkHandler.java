@@ -24,17 +24,16 @@ public abstract class MixinServerPlayNetworkHandler {
     public ServerPlayerEntity player;
 
     @Inject(
-            method = "onGameMessage(Lnet/minecraft/network/packet/c2s/play/ChatMessageC2SPacket;)V",
+            method = "method_31286(Ljava/lang/String;)V",
             at = @At(
                     value = "INVOKE",
-                    // Thanks to Liach for helping me out!
-                    target = "net/minecraft/network/NetworkThreadUtils.forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/server/world/ServerWorld;)V",
+                    target = "Lnet/minecraft/server/network/ServerPlayerEntity;updateLastActionTime()V",
                     shift = At.Shift.AFTER
             ),
             cancellable = true
     )
-    private void onChatMessage(ChatMessageC2SPacket chatMessageC2SPacket, CallbackInfo ci) {
-        ActionResult result = ChatCallback.EVENT.invoker().onPlayerChat(this.player, chatMessageC2SPacket);
+    private void onPlayerChat(String message, CallbackInfo ci) {
+        ActionResult result = ChatCallback.EVENT.invoker().onPlayerChat(this.player, message);
         if (result == ActionResult.FAIL) {
             ci.cancel();
         }

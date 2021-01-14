@@ -9,6 +9,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.event.entity.player.PlayerJoinServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PlayerLeaveServerCallback;
 import org.samo_lego.simpleauth.event.entity.player.PrePlayerJoinCallback;
@@ -36,12 +37,12 @@ public abstract class MixinPlayerManager {
 
     @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("RETURN"))
     private void onPlayerConnect(ClientConnection clientConnection, ServerPlayerEntity serverPlayerEntity, CallbackInfo ci) {
-        PlayerJoinServerCallback.EVENT.invoker().onPlayerJoin(serverPlayerEntity);
+        AuthEventHandler.onPlayerJoin(serverPlayerEntity);
     }
 
     @Inject(method = "remove(Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("HEAD"))
     private void onPlayerLeave(ServerPlayerEntity serverPlayerEntity, CallbackInfo ci) {
-        PlayerLeaveServerCallback.EVENT.invoker().onPlayerLeave(serverPlayerEntity);
+        AuthEventHandler.onPlayerLeave(serverPlayerEntity);
     }
 
     @Inject(method = "checkCanJoin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/text/Text;", at = @At("HEAD"), cancellable = true)
@@ -49,7 +50,7 @@ public abstract class MixinPlayerManager {
         // Getting the player that is trying to join the server
         PlayerManager manager = (PlayerManager) (Object) this;
 
-        LiteralText returnText = PrePlayerJoinCallback.EVENT.invoker().checkCanPlayerJoinServer(socketAddress, profile, manager);
+        LiteralText returnText = AuthEventHandler.checkCanPlayerJoinServer(profile, manager);
 
         if(returnText != null) {
             // Canceling player joining with the returnText message

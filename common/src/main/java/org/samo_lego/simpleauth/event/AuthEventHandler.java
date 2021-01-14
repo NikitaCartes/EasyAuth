@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,7 +14,6 @@ import net.minecraft.util.math.BlockPos;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.PlayerAuth;
 
-import java.net.SocketAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,9 +26,15 @@ import static org.samo_lego.simpleauth.SimpleAuth.playerCacheMap;
  */
 public class AuthEventHandler {
 
-    // Player pre-join
-    // Returns text as a reason for disconnect or null to pass
-    public static LiteralText checkCanPlayerJoinServer(SocketAddress socketAddress, GameProfile profile, PlayerManager manager) {
+    /**
+     * Player pre-join.
+     * Returns text as a reason for disconnect or null to pass
+     *
+     * @param profile GameProfile of the player
+     * @param manager PlayerManager
+     * @return TExt if player should be disconnected
+     */
+    public static LiteralText checkCanPlayerJoinServer(GameProfile profile, PlayerManager manager) {
         // Getting the player
         String incomingPlayerUsername = profile.getName();
         PlayerEntity onlinePlayer = manager.getPlayer(incomingPlayerUsername);

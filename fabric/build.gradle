@@ -1,0 +1,68 @@
+plugins {
+	id "com.github.johnrengelman.shadow" version "5.0.0"
+}
+
+repositories {
+	// Carpet mod
+	maven {
+		url 'https://jitpack.io'
+	}
+	maven {
+		url 'https://masa.dy.fi/maven'
+	}
+}
+
+configurations {
+	shadow
+}
+
+architectury {
+	platformSetupLoomIde()
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+	mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
+	modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+
+	// Fabric API. This is technically optional, but you probably want it anyway.
+	modImplementation  "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_version}"
+
+	compileOnly(project(path: ":common")) {
+		transitive = false
+		exclude(module: "fabric-api")
+	}
+	runtimeOnly(project(path: ":common", configuration: "transformedRuntime")) {
+		transitive = false
+		exclude(module: "fabric-api")
+	}
+	shadow(project(path: ":common", configuration: "transformed")) {
+		transitive = false
+		exclude(module: "fabric-api")
+	}
+
+	// carpetMod
+	// from masa's maven
+	//modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
+	//modImplementation "carpet:fabric-carpet:1.16-${project.carpet_core_version}"
+	// jitpack for quicker updating
+	modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
+}
+
+processResources {
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+	inputs.property "version", project.version
+}
+
+shadowJar {
+	configurations = [project.configurations.shadow]
+	classifier "shadow"
+}
+
+remapJar {
+	dependsOn(shadowJar)
+	input.set(shadowJar.archivePath)
+	archiveClassifier = "fabric"
+}

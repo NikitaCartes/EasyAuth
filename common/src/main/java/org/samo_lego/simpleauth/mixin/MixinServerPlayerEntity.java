@@ -1,6 +1,5 @@
 package org.samo_lego.simpleauth.mixin;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -32,7 +31,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     // * 20 for 20 ticks in second
     private int kickTimer = config.main.kickTime * 20;
 
-    private final boolean isRunningCarpet = FabricLoader.getInstance().isModLoaded("carpet");
+    private final boolean isRunningCarpet = false;//FabricLoader.getInstance().isModLoaded("carpet"); //todo
 
     @Final
     @Shadow

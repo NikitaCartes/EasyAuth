@@ -13,13 +13,15 @@ architectury {
 loom {
     // Enable this for yarn to work
     //useFabricMixin = true
-    mixinConfigs = ["simpleauth.mixins.json"]
+    mixinConfigs = ["mixins.simpleauth.json"]
 }
 
 dependencies {
     minecraft("com.mojang:minecraft:${rootProject.architect.minecraft}")
     mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
     forge("net.minecraftforge:forge:${rootProject.architect.minecraft}-${rootProject.forge_version}")
+    // Remove the next line if you don't want to depend on the API
+    modCompile("me.shedaniel:architectury:${rootProject.architectury_version}:forge")
 
     compileOnly(project(path: ":common")) {
         transitive = false
@@ -48,7 +50,7 @@ remapJar {
 jar {
     manifest {
         attributes([
-                "MixinConfigs": "simpleauth.mixins.json",
+                "MixinConfigs": "mixins.simpleauth.json",
         ])
     }
 }

@@ -32,7 +32,7 @@ public class AuthEventHandler {
      *
      * @param profile GameProfile of the player
      * @param manager PlayerManager
-     * @return TExt if player should be disconnected
+     * @return Text if player should be disconnected
      */
     public static LiteralText checkCanPlayerJoinServer(GameProfile profile, PlayerManager manager) {
         // Getting the player

@@ -17,19 +17,19 @@ loom {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:${rootProject.architect.minecraft}")
+    minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
     mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
-    forge("net.minecraftforge:forge:${rootProject.architect.minecraft}-${rootProject.forge_version}")
+    forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     // Remove the next line if you don't want to depend on the API
     modCompile("me.shedaniel:architectury:${rootProject.architectury_version}:forge")
 
     compileOnly(project(path: ":common")) {
         transitive = false
     }
-    runtimeOnly(project(path: ":common", configuration: "transformForgeFakeMod")) {
+    runtimeOnly(project(path: ":common", configuration: "transformDevelopmentForge")) {
         transitive = false
     }
-    shadow(project(path: ":common", configuration: "transformForge")) {
+    shadow(project(path: ":common", configuration: "transformProductionForge")) {
         transitive = false
     }
 }

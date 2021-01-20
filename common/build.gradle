@@ -5,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${rootProject.architect.minecraft}"
+    minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
     mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
     // We depend on fabric loader here to use the fabric @Environment annotations
     // Do NOT use other classes from fabric loader
@@ -41,6 +41,6 @@ dependencies {
     include 'net.java.dev.jna:jna:5.5.0'
 }
 
-architect {
+architectury {
     common()
 }

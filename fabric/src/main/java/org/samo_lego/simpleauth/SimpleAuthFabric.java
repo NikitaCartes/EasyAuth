@@ -6,13 +6,15 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+import org.samo_lego.simpleauth.commands.*;
+import org.samo_lego.simpleauth.event.AuthEventHandler;
 
 public class SimpleAuthFabric implements DedicatedServerModInitializer {
 
 	@Override
 	public void onInitializeServer() {
 		SimpleAuth.init(FabricLoader.getInstance().getGameDir());
-
+		//FabricLoader.getInstance().isModLoaded("carpet");
 
 		// Registering the commands
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
@@ -29,7 +31,7 @@ public class SimpleAuthFabric implements DedicatedServerModInitializer {
 		UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
 		AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
 		UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-		ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthEventHandler.reloadConfig(null));
+		ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(null));
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
 	}
 

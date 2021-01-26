@@ -3,6 +3,7 @@ package org.samo_lego.simpleauth;
 import com.mojang.brigadier.CommandDispatcher;
 import me.shedaniel.architectury.platform.forge.EventBuses;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -15,8 +16,9 @@ import org.samo_lego.simpleauth.commands.*;
 public class SimpleAuthForge {
     public SimpleAuthForge() {
         // Submit our event bus to let architectury register our content on the right time
-        EventBuses.registerModEventBus(SimpleAuth.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
+        //EventBuses.registerModEventBus(SimpleAuth.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
         SimpleAuth.init(FMLPaths.GAMEDIR.get());
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent

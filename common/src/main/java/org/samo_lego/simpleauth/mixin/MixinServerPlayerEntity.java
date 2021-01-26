@@ -11,16 +11,17 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.samo_lego.simpleauth.storage.PlayerCache;
+import org.samo_lego.simpleauth.utils.PlatformSpecific;
 import org.samo_lego.simpleauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static org.samo_lego.simpleauth.SimpleAuth.*;
-import static org.samo_lego.simpleauth.utils.CarpetHelper.isPlayerCarpetFake;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 @Mixin(ServerPlayerEntity.class)
@@ -29,9 +30,8 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     private final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 
     // * 20 for 20 ticks in second
+    @Unique
     private int kickTimer = config.main.kickTime * 20;
-
-    private final boolean isRunningCarpet = false;//FabricLoader.getInstance().isModLoaded("carpet"); //todo
 
     @Final
     @Shadow
@@ -158,8 +158,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public boolean canSkipAuth() {
-        // We ask CarpetHelper class since it has the imports needed
-        return (this.isRunningCarpet && isPlayerCarpetFake(this.player)) || (isUsingMojangAccount() && config.main.premiumAutologin);
+        return PlatformSpecific.isPlayerFake(this.player) || (isUsingMojangAccount() && config.main.premiumAutologin);
     }
 
     /**

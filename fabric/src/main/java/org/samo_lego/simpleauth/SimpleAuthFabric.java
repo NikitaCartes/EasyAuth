@@ -1,6 +1,6 @@
 package org.samo_lego.simpleauth;
 
-import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
@@ -9,10 +9,10 @@ import net.minecraft.server.MinecraftServer;
 import org.samo_lego.simpleauth.commands.*;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
 
-public class SimpleAuthFabric implements DedicatedServerModInitializer {
+public class SimpleAuthFabric implements ModInitializer {
 
 	@Override
-	public void onInitializeServer() {
+	public void onInitialize() {
 		SimpleAuth.init(FabricLoader.getInstance().getGameDir());
 		//FabricLoader.getInstance().isModLoaded("carpet");
 

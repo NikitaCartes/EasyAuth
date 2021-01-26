@@ -27,31 +27,10 @@ public abstract class MixinServerLoginNetworkHandler {
 
     @Shadow
     private GameProfile profile;
-    @Shadow
-    private int loginTicks;
 
     @Shadow protected abstract GameProfile toOfflineProfile(GameProfile profile);
 
-    /**
-     * Fake state of current player.
-     */
-    @Unique
-    private boolean acceptCrackedPlayer = false;
-
-    /**
-     * Mimicks the ticking if autologin is enabled.
-     * @param ci
-     */
-    @Inject(method = "tick()V", at = @At("HEAD"), cancellable = true)
-    private void preTick(CallbackInfo ci) {
-        if (this.acceptCrackedPlayer && config.main.premiumAutologin) {
-            ((ServerLoginNetworkHandler) (Object) this).acceptPlayer();
-
-            if (this.loginTicks++ == 600)
-                ((ServerLoginNetworkHandler) (Object) this).disconnect(new TranslatableText("multiplayer.disconnect.slow_login"));
-            ci.cancel();
-        }
-    }
+    @Shadow private ServerLoginNetworkHandler.State state;
 
     @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
     private void acceptPlayer(CallbackInfo ci) {
@@ -84,7 +63,7 @@ public abstract class MixinServerLoginNetworkHandler {
                 Matcher matcher = pattern.matcher(playername);
                 if(playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername)) {
                     // Player definitely doesn't have a mojang account
-                    this.acceptCrackedPlayer = true;
+                    state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
                     this.profile = packet.getProfile();
                     ci.cancel();
@@ -109,7 +88,7 @@ public abstract class MixinServerLoginNetworkHandler {
                     else if(response == HttpURLConnection.HTTP_NO_CONTENT) {
                         // Player doesn't have a Mojang account
                         httpsURLConnection.disconnect();
-                        this.acceptCrackedPlayer = true;
+                        state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
                         this.profile = packet.getProfile();
                         ci.cancel();

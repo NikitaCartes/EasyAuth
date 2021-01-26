@@ -19,7 +19,6 @@ public class SimpleAuthForge {
         SimpleAuth.init(FMLPaths.GAMEDIR.get());
     }
 
-    // Registering the commands
     @SubscribeEvent
     public void registerCommands(RegisterCommandsEvent event) {
         CommandDispatcher<ServerCommandSource> dispatcher = event.getDispatcher();
@@ -31,9 +30,7 @@ public class SimpleAuthForge {
         AuthCommand.registerCommand(dispatcher);
     }
 
-    /**
-     * Called on server stop.
-     */
+
     @SubscribeEvent
     public void onStopServer(FMLServerStoppedEvent event) {
         SimpleAuth.stop();

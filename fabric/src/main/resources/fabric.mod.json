@@ -14,16 +14,12 @@
   },
 
   "license": "MIT",
-  "environment": "server",
+  "environment": "*",
   "entrypoints": {
-    "server": [
-      "org.samo_lego.simpleauth.SimpleAuth"
+    "main": [
+      "org.samo_lego.simpleauth.SimpleAuthFabric"
     ]
   },
-  "mixins": [
-    "mixins.simpleauth.json"
-  ],
-
   "depends": {
     "fabricloader": ">=0.8.8",
     "fabric": "*"

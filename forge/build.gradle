@@ -14,6 +14,7 @@ loom {
     // Enable this for yarn to work
     //useFabricMixin = true
     mixinConfigs = ["mixins.simpleauth.json"]
+    useFabricMixin = true
 }
 
 dependencies {

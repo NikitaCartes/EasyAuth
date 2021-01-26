@@ -1,7 +1,5 @@
 package org.samo_lego.simpleauth;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.MinecraftServer;
 import org.samo_lego.simpleauth.storage.AuthConfig;
 import org.samo_lego.simpleauth.storage.DBHelper;
 import org.samo_lego.simpleauth.storage.PlayerCache;

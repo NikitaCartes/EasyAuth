@@ -2,17 +2,14 @@ package org.samo_lego.simpleauth.event;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.TypedActionResult;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.samo_lego.simpleauth.utils.PlayerAuth;
 
 import static net.minecraftforge.eventbus.api.EventPriority.HIGHEST;
 import static org.samo_lego.simpleauth.SimpleAuth.MOD_ID;
-import static org.samo_lego.simpleauth.SimpleAuth.config;
 
 /**
  * This class will take care of actions players try to do,

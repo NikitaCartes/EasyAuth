@@ -14,7 +14,6 @@ public class SimpleAuthFabric implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		SimpleAuth.init(FabricLoader.getInstance().getGameDir());
-		//FabricLoader.getInstance().isModLoaded("carpet");
 
 		// Registering the commands
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {

@@ -132,7 +132,7 @@ public class AuthEventHandler {
     }
 
     // Player chatting
-    public static ActionResult onPlayerChat(PlayerEntity player, String message) {
+    public static ActionResult onPlayerChat(ServerPlayerEntity player, String message) {
         // Getting the message to then be able to check it
         if(
             !((PlayerAuth) player).isAuthenticated() &&
@@ -147,7 +147,7 @@ public class AuthEventHandler {
     }
 
     // Player movement
-    public static ActionResult onPlayerMove(PlayerEntity player) {
+    public static ActionResult onPlayerMove(ServerPlayerEntity player) {
         // Player will fall if enabled (prevent fly kick)
         boolean auth = ((PlayerAuth) player).isAuthenticated();
         // Otherwise movement should be disabled
@@ -195,7 +195,7 @@ public class AuthEventHandler {
         return ActionResult.PASS;
     }
     // Changing inventory (item moving etc.)
-    public static ActionResult onTakeItem(PlayerEntity player) {
+    public static ActionResult onTakeItem(ServerPlayerEntity player) {
         if(!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowItemMoving) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;

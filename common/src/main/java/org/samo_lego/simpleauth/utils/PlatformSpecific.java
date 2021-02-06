@@ -7,6 +7,6 @@ public class PlatformSpecific {
     @ExpectPlatform
     public static boolean isPlayerFake(PlayerEntity player) {
         // Replaced by Architectury
-        return false;
+        throw new AssertionError();
     }
 }

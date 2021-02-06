@@ -9,8 +9,6 @@ loom {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-    mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
     // We depend on fabric loader here to use the fabric @Environment annotations
     // Do NOT use other classes from fabric loader
     modCompile "net.fabricmc:fabric-loader:${rootProject.loader_version}"

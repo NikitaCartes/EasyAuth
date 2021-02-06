@@ -1,7 +1,19 @@
-plugins {
-    id "architectury-plugin" version "2.0.65"
-    id "forgified-fabric-loom" version "0.6.54" apply false
+buildscript {
+    repositories {
+        maven { url "https://maven.shedaniel.me/" }
+    }
+
+    dependencies {
+        classpath 'com.netflix.nebula:gradle-aggregate-javadocs-plugin:2.2.+'
+    }
 }
+
+
+plugins {
+    id "architectury-plugin" version "2.0.68"
+    id "forgified-fabric-loom" version "0.6.64" apply false
+}
+
 
 architectury {
     minecraft = rootProject.minecraft_version
@@ -13,7 +25,13 @@ subprojects {
     loom {
         silentMojangMappingsLicense()
     }
+
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
+    }
 }
+apply plugin: 'nebula-aggregate-javadocs'
 
 allprojects {
     apply plugin: "java"
@@ -31,7 +49,7 @@ allprojects {
         // We'll use that if it's available, but otherwise we'll use the older option.
         def targetVersion = 8
         if (JavaVersion.current().isJava9Compatible()) {
-            options.release = 8
+            options.release = targetVersion
         }
     }
 

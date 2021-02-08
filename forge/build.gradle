@@ -33,28 +33,19 @@ dependencies {
 
     // Password hashing
     // Argon2
-    implementation "de.mkammerer:argon2-jvm:${argon2_version}"
-    include "de.mkammerer:argon2-jvm:${argon2_version}"
+    shadow "de.mkammerer:argon2-jvm:${argon2_version}"
 
     // BCrypt
-    implementation "at.favre.lib:bcrypt:${bcrypt_version}"
-    implementation "at.favre.lib:bytes:${bytes_version}"
-    include "at.favre.lib:bcrypt:${bcrypt_version}"
-    include "at.favre.lib:bytes:${bytes_version}"
+    shadow "at.favre.lib:bcrypt:${bcrypt_version}"
+    shadow "at.favre.lib:bytes:${bytes_version}"
 
     // Storage
-    // LevelDB database
-    implementation 'org.iq80.leveldb:leveldb:0.12'
-    implementation 'org.iq80.leveldb:leveldb-api:0.12'
-    include 'org.iq80.leveldb:leveldb:0.12'
-    include 'org.iq80.leveldb:leveldb-api:0.12'
-
-    // MongoDB driver
-    implementation 'org.mongodb:mongodb-driver-sync:4.1.0'
-    include 'org.mongodb:mongodb-driver-sync:4.1.0'
+    // leveldb
+    shadow group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
+    shadow group: 'org.iq80.leveldb', name: 'leveldb-api', version: '0.12'
 
     // JNA lib
-    include 'net.java.dev.jna:jna:5.5.0'
+    shadow 'net.java.dev.jna:jna:5.5.0'
 }
 
 shadowJar {

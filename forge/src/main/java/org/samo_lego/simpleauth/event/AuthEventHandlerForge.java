@@ -38,7 +38,7 @@ public class AuthEventHandlerForge {
     @SubscribeEvent(priority = HIGHEST)
     public static void onAttackBlock(PlayerInteractEvent.LeftClickBlock event) {
         PlayerEntity player = event.getPlayer();
-        if(AuthEventHandler.onBreakBlock(player)) {
+        if(!AuthEventHandler.onBreakBlock(player)) {
             event.setCanceled(true);
         }
     }

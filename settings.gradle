@@ -5,7 +5,7 @@ pluginManagement {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
-        maven { url "https://dl.bintray.com/shedaniel/cloth" }
+        maven { url "https://maven.shedaniel.me/" }
         maven { url "https://files.minecraftforge.net/maven/" }
         gradlePluginPortal()
     }

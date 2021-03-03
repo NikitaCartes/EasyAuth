@@ -18,16 +18,17 @@ configurations {
 
 architectury {
 	platformSetupLoomIde()
+	fabric()
 }
 
 dependencies {
 	modImplementation("net.fabricmc:fabric-loader:${rootProject.loader_version}")
 	modImplementation("net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_version}")
 
-	compileOnly(project(path: ":common")) {
+	implementation(project(path: ":common")) {
 		transitive = false
 	}
-	runtimeOnly(project(path: ":common", configuration: "transformDevelopmentFabric")) {
+	developmentFabric(project(path: ":common")) {
 		transitive = false
 	}
 	shadow(project(path: ":common", configuration: "transformProductionFabric")) {

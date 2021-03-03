@@ -8,6 +8,7 @@ configurations {
 
 architectury {
     platformSetupLoomIde()
+    forge()
 }
 
 loom {
@@ -21,10 +22,10 @@ dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modCompile("me.shedaniel:architectury:${rootProject.architectury_version}:forge")
 
-    compileOnly(project(path: ":common")) {
+    implementation(project(path: ":common")) {
         transitive = false
     }
-    runtimeOnly(project(path: ":common", configuration: "transformDevelopmentForge")) {
+    developmentForge(project(path: ":common")) {
         transitive = false
     }
     shadow(project(path: ":common", configuration: "transformProductionForge")) {

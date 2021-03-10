@@ -40,6 +40,7 @@ public class MixinPlayerAdvancementTracker {
     @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V",  at = @At("TAIL"))
     private void endMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
         if(config.main.premiumAutologin && !config.experimental.forceoOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount()) {
+            // Changes the file name to use online UUID
             this.advancementFile = new File(this.advancementFile.getParent(), owner.getUuid() + ".json");
         }
     }

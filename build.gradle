@@ -21,11 +21,6 @@ architectury {
 
 subprojects {
     apply plugin: "forgified-fabric-loom"
-
-    loom {
-        silentMojangMappingsLicense()
-    }
-
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")

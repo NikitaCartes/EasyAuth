@@ -20,7 +20,6 @@ loom {
 
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
-    modCompile("me.shedaniel:architectury:${rootProject.architectury_version}:forge")
 
     implementation(project(path: ":common")) {
         transitive = false

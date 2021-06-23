@@ -52,12 +52,12 @@ public class MixinServerPlayerEntity implements PlayerAuth {
             // Saving position
             cache.lastLocation.dimension = player.getServerWorld();
             cache.lastLocation.position = player.getPos();
-            cache.lastLocation.yaw = player.yaw;
-            cache.lastLocation.pitch = player.pitch;
+            cache.lastLocation.yaw = player.getYaw(0);
+            cache.lastLocation.pitch = player.getPitch(0);
 
             // Teleports player to spawn
             player.teleport(
-                    server.getWorld(RegistryKey.of(Registry.DIMENSION, new Identifier(config.worldSpawn.dimension))),
+                    server.getWorld(RegistryKey.of(Registry.WORLD_KEY, new Identifier(config.worldSpawn.dimension))),
                     config.worldSpawn.x,
                     config.worldSpawn.y,
                     config.worldSpawn.z,

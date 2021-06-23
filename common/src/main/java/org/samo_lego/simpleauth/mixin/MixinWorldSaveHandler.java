@@ -1,7 +1,7 @@
 package org.samo_lego.simpleauth.mixin;
 
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.world.WorldSaveHandler;
 import org.apache.logging.log4j.Logger;
@@ -53,7 +53,7 @@ public class MixinWorldSaveHandler {
             ),
             locals = LocalCapture.CAPTURE_FAILHARD
     )
-    private void fileExists(PlayerEntity playerEntity, CallbackInfoReturnable<CompoundTag> cir, CompoundTag compoundTag, File file) {
+    private void fileExists(PlayerEntity playerEntity, CallbackInfoReturnable<NbtCompound> cir, NbtCompound compoundTag, File file) {
         // @ModifyVariable cannot capture locals
         this.fileExists = file.exists();
     }
@@ -72,7 +72,7 @@ public class MixinWorldSaveHandler {
                     target = "Ljava/io/File;exists()Z"
             )
     )
-    private CompoundTag migratePlayerData(CompoundTag compoundTag, PlayerEntity player) {
+    private NbtCompound migratePlayerData(NbtCompound compoundTag, PlayerEntity player) {
         // Checking for offline player data only if online doesn't exist yet
         String playername = player.getGameProfile().getName().toLowerCase();
         if(config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {

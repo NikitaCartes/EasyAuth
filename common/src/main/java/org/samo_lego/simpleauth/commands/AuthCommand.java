@@ -145,7 +145,7 @@ public class AuthCommand {
     }
 
     /**
-     * Sets {@link org.samo_lego.simpleauth.storage.AuthConfig.MainConfig.WorldSpawn global spawn}.
+     * Sets {@link AuthConfig.MainConfig.WorldSpawn global spawn}.
      *
      * @param source executioner of the command
      * @param world world id of global spawn

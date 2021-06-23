@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Objects;
@@ -64,7 +65,7 @@ public class PlayerCache {
         public float pitch;
     }
 
-    public final PlayerCache.LastLocation lastLocation = new PlayerCache.LastLocation();
+    public final LastLocation lastLocation = new LastLocation();
 
 
     private static final Gson gson = new GsonBuilder()
@@ -94,10 +95,11 @@ public class PlayerCache {
             // Setting position cache
             playerCache.lastLocation.dimension = player.getServerWorld();
             playerCache.lastLocation.position = player.getPos();
-            playerCache.lastLocation.yaw = player.yaw;
-            playerCache.lastLocation.pitch = player.pitch;
+            playerCache.lastLocation.yaw = player.getYaw(0);
+            playerCache.lastLocation.pitch = player.getPitch(0);
 
-            playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
+            playerCache.wasInPortal = player.getServerWorld().getBlockState(player.getBlockPos()).getBlock().equals(Blocks.NETHER_PORTAL);
+            //playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
         }
 
         return playerCache;

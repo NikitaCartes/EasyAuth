@@ -29,7 +29,7 @@ public class SimpleAuth {
     /**
      * HashMap of players that have joined the server.
      * It's cleared on server stop in order to save some interactions with database during runtime.
-     * Stores their data as {@link org.samo_lego.simpleauth.storage.PlayerCache PlayerCache} object.
+     * Stores their data as {@link PlayerCache PlayerCache} object.
      */
     public static final HashMap<String, PlayerCache> playerCacheMap = new HashMap<>();
 

@@ -49,8 +49,8 @@ public class AuthCommand {
                         ctx.getSource().getEntityOrThrow().getX(),
                         ctx.getSource().getEntityOrThrow().getY(),
                         ctx.getSource().getEntityOrThrow().getZ(),
-                        ctx.getSource().getEntityOrThrow().yaw,
-                        ctx.getSource().getEntityOrThrow().pitch
+                        ctx.getSource().getEntityOrThrow().getYaw(),
+                        ctx.getSource().getEntityOrThrow().getPitch()
                     ))
                     .then(argument("dimension", DimensionArgumentType.dimension())
                             .then(argument("position", BlockPosArgumentType.blockPos())
@@ -145,7 +145,7 @@ public class AuthCommand {
     }
 
     /**
-     * Sets {@link org.samo_lego.simpleauth.storage.AuthConfig.MainConfig.WorldSpawn global spawn}.
+     * Sets {@link AuthConfig.MainConfig.WorldSpawn global spawn}.
      *
      * @param source executioner of the command
      * @param world world id of global spawn

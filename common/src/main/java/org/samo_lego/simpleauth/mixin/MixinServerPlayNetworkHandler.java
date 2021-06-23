@@ -22,7 +22,7 @@ public abstract class MixinServerPlayNetworkHandler {
     public ServerPlayerEntity player;
 
     @Inject(
-            method = "method_31286(Lnet/minecraft/server/filter/TextStream$Message;)V",
+            method = "handleMessage(Lnet/minecraft/server/filter/TextStream$Message;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/server/network/ServerPlayerEntity;updateLastActionTime()V",
@@ -68,7 +68,7 @@ public abstract class MixinServerPlayNetworkHandler {
         ActionResult result = AuthEventHandler.onPlayerMove(player);
         if (result == ActionResult.FAIL) {
             // A bit ugly, I know. (we need to update player position)
-            player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(0), player.getPitch(0));
+            player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
             ci.cancel();
         }
     }

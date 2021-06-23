@@ -1,3 +1,4 @@
 accessWidener	v1	named
 
 accessible class net/minecraft/server/network/ServerLoginNetworkHandler$State
+accessible    field    net/minecraft/entity/Entity    yaw    F

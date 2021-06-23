@@ -24,10 +24,9 @@ public abstract class MixinSlot {
             player.networkHandler.sendPacket(
                     new ScreenHandlerSlotUpdateS2CPacket(
                             -2,
-                            player.inventory.selectedSlot,
-                            player.inventory.getStack(player.inventory.selectedSlot))
+                            player.getInventory().selectedSlot,
+                            player.getInventory().getStack(player.getInventory().selectedSlot))
             );
-            player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(-1, -1, player.inventory.getCursorStack()));
             cir.setReturnValue(false);
         }
     }

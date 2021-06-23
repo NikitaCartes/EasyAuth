@@ -3,6 +3,7 @@ package org.samo_lego.simpleauth.mixin;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.server.filter.TextStream;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
@@ -21,7 +22,7 @@ public abstract class MixinServerPlayNetworkHandler {
     public ServerPlayerEntity player;
 
     @Inject(
-            method = "method_31286(Ljava/lang/String;)V",
+            method = "method_31286(Lnet/minecraft/server/filter/TextStream$Message;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/server/network/ServerPlayerEntity;updateLastActionTime()V",
@@ -29,8 +30,8 @@ public abstract class MixinServerPlayNetworkHandler {
             ),
             cancellable = true
     )
-    private void onPlayerChat(String message, CallbackInfo ci) {
-        ActionResult result = AuthEventHandler.onPlayerChat(this.player, message);
+    private void onPlayerChat(TextStream.Message message, CallbackInfo ci) {
+        ActionResult result = AuthEventHandler.onPlayerChat(this.player, message.getFiltered());
         if (result == ActionResult.FAIL) {
             ci.cancel();
         }
@@ -67,7 +68,7 @@ public abstract class MixinServerPlayNetworkHandler {
         ActionResult result = AuthEventHandler.onPlayerMove(player);
         if (result == ActionResult.FAIL) {
             // A bit ugly, I know. (we need to update player position)
-            player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.yaw, player.pitch);
+            player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(0), player.getPitch(0));
             ci.cancel();
         }
     }

@@ -52,8 +52,8 @@ public class MixinServerPlayerEntity implements PlayerAuth {
             // Saving position
             cache.lastLocation.dimension = player.getServerWorld();
             cache.lastLocation.position = player.getPos();
-            cache.lastLocation.yaw = player.getYaw(0);
-            cache.lastLocation.pitch = player.getPitch(0);
+            cache.lastLocation.yaw = player.getYaw();
+            cache.lastLocation.pitch = player.getPitch();
 
             // Teleports player to spawn
             player.teleport(

@@ -95,11 +95,10 @@ public class PlayerCache {
             // Setting position cache
             playerCache.lastLocation.dimension = player.getServerWorld();
             playerCache.lastLocation.position = player.getPos();
-            playerCache.lastLocation.yaw = player.getYaw(0);
-            playerCache.lastLocation.pitch = player.getPitch(0);
+            playerCache.lastLocation.yaw = player.getYaw();
+            playerCache.lastLocation.pitch = player.getPitch();
 
-            playerCache.wasInPortal = player.getServerWorld().getBlockState(player.getBlockPos()).getBlock().equals(Blocks.NETHER_PORTAL);
-            //playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
+            playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);
         }
 
         return playerCache;

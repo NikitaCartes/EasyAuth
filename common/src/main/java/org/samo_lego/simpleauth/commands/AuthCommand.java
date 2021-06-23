@@ -49,8 +49,8 @@ public class AuthCommand {
                         ctx.getSource().getEntityOrThrow().getX(),
                         ctx.getSource().getEntityOrThrow().getY(),
                         ctx.getSource().getEntityOrThrow().getZ(),
-                        ctx.getSource().getEntityOrThrow().yaw,
-                        ctx.getSource().getEntityOrThrow().pitch
+                        ctx.getSource().getEntityOrThrow().getYaw(),
+                        ctx.getSource().getEntityOrThrow().getPitch()
                     ))
                     .then(argument("dimension", DimensionArgumentType.dimension())
                             .then(argument("position", BlockPosArgumentType.blockPos())

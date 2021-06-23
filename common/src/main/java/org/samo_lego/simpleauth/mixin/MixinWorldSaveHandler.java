@@ -46,7 +46,7 @@ public class MixinWorldSaveHandler {
      * @param file
      */
     @Inject(
-            method = "loadPlayerData(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/nbt/CompoundTag;",
+            method = "loadPlayerData(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/nbt/NbtCompound;",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/io/File;exists()Z"
@@ -66,7 +66,7 @@ public class MixinWorldSaveHandler {
      * @return compoundTag containing migrated data.
      */
     @ModifyVariable(
-            method = "loadPlayerData(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/nbt/CompoundTag;",
+            method = "loadPlayerData(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/nbt/NbtCompound;",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/io/File;exists()Z"

@@ -94,7 +94,7 @@ public class AuthEventHandler {
 
 
         // Tries to rescue player from nether portal
-        if(config.main.tryPortalRescue && player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL)) {
+        if(config.main.tryPortalRescue && player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL)) {
             BlockPos pos = player.getBlockPos();
 
             // Teleporting player to the middle of the block
@@ -117,8 +117,8 @@ public class AuthEventHandler {
 
         if(playerCache.isAuthenticated) {
             playerCache.lastIp = player.getIp();
-            playerCache.wasInPortal = player.getBlockState().getBlock().equals(Blocks.NETHER_PORTAL);
-            
+            playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);
+
             // Setting the session expire time
             if(config.main.sessionTimeoutTime != -1)
                 playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000L;

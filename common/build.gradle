@@ -11,9 +11,9 @@ loom {
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations
     // Do NOT use other classes from fabric loader
-    modCompile "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
 
-    modCompile("me.shedaniel:architectury:${rootProject.architectury_version}") {
+    modImplementation ("me.shedaniel:architectury:${rootProject.architectury_version}") {
         exclude(module: "fabric-api")
     }
 

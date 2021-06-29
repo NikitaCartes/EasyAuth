@@ -5,11 +5,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.storage.PlayerCache;
 import org.samo_lego.simpleauth.utils.PlatformSpecific;
 import org.samo_lego.simpleauth.utils.PlayerAuth;
@@ -20,6 +22,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static org.samo_lego.simpleauth.SimpleAuth.*;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
@@ -196,6 +199,16 @@ public class MixinServerPlayerEntity implements PlayerAuth {
                 --kickTimer;
             }
             ci.cancel();
+        }
+    }
+
+    // Player item dropping
+    @Inject(method = "dropSelectedItem(Z)Z", at = @At("HEAD"), cancellable = true)
+    private void dropSelectedItem(boolean dropEntireStack, CallbackInfoReturnable<Boolean> cir) {
+        ActionResult result = AuthEventHandler.onDropItem(player);
+
+        if (result == ActionResult.FAIL) {
+            cir.setReturnValue(false);
         }
     }
 }

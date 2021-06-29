@@ -4,7 +4,6 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "MixinPlayerAdvancementTracker",
-    "MixinPlayerEntity",
     "MixinPlayerManager",
     "MixinServerLoginNetworkHandler",
     "MixinServerPlayerEntity",

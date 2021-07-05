@@ -1,92 +1,83 @@
 plugins {
-    id 'java'
     id 'fabric-loom' version '0.9-SNAPSHOT'
-    id "com.github.johnrengelman.shadow" version "5.0.0"
 }
 
-apply plugin: 'java'
-apply plugin: 'fabric-loom'
+
+// Add any additional repositories
+repositories {
+	maven { name 'Carpet'; url 'https://jitpack.io' }
+	//maven { name 'Masa'; url 'https://masa.dy.fi/maven' }
+}
 
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
+version = "${project.mod_version}-${project.minecraft_version}"
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 
-// Declare dependencies
-dependencies {
-    // Fabric
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    // Mods
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
-
-    // Password hashing
-	// Argon2
-    implementation "de.mkammerer:argon2-jvm:${argon2_version}"
-    include "de.mkammerer:argon2-jvm:${argon2_version}"
-
-    // BCrypt
-    implementation "at.favre.lib:bcrypt:${bcrypt_version}"
-    implementation "at.favre.lib:bytes:${bytes_version}"
-    include "at.favre.lib:bcrypt:${bcrypt_version}"
-    include "at.favre.lib:bytes:${bytes_version}"
-
-    // Storage
-    // LevelDB database
-    implementation 'org.iq80.leveldb:leveldb:0.12'
-    implementation 'org.iq80.leveldb:leveldb-api:0.12'
-    include 'org.iq80.leveldb:leveldb:0.12'
-    include 'org.iq80.leveldb:leveldb-api:0.12'
-
-    // MongoDB driver
-    implementation 'org.mongodb:mongodb-driver-sync:4.1.0'
-    include 'org.mongodb:mongodb-driver-sync:4.1.0'
-
-    // JNA lib
-    include 'net.java.dev.jna:jna:5.5.0'
-
-    //classpath 'com.netflix.nebula:gradle-aggregate-javadocs-plugin:2.2.+'
-
-}
-
-configurations {
-    shadow
+minecraft {
 }
 
 loom {
-    accessWidener("src/main/resources/simpleauth.accesswidener")
+	accessWidener("src/main/resources/simpleauth.accesswidener")
+}
+
+// Declare dependencies
+dependencies {
+	// Fabric
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// Mods
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
+
+	// Password hashing
+	// Argon2
+	implementation "de.mkammerer:argon2-jvm:${argon2_version}"
+	include "de.mkammerer:argon2-jvm:${argon2_version}"
+
+	// BCrypt
+	implementation "at.favre.lib:bcrypt:${bcrypt_version}"
+	implementation "at.favre.lib:bytes:${bytes_version}"
+	include "at.favre.lib:bcrypt:${bcrypt_version}"
+	include "at.favre.lib:bytes:${bytes_version}"
+
+	// Storage
+	// LevelDB database
+	implementation 'org.iq80.leveldb:leveldb:0.12'
+	implementation 'org.iq80.leveldb:leveldb-api:0.12'
+	include 'org.iq80.leveldb:leveldb:0.12'
+	include 'org.iq80.leveldb:leveldb-api:0.12'
+
+	// MongoDB driver
+	implementation 'org.mongodb:mongodb-driver-sync:4.1.0'
+	include 'org.mongodb:mongodb-driver-sync:4.1.0'
+
+	// JNA lib
+	include 'net.java.dev.jna:jna:5.5.0'
+
 }
 
 // Produce a sources distribution
 java {
-    withSourcesJar()
+	withSourcesJar()
 }
 
-// Add the licence to all distributions
-tasks.withType(Jar).configureEach {
-    it.from rootProject.file('LICENCE')
+// Add the licence to the distribution
+jar {
+	from "LICENCE"
 }
 
 // Process any resources
 processResources {
-    inputs.property 'id', project.mod_id
-    inputs.property 'name', project.mod_name
-    inputs.property 'version', project.mod_version
+	inputs.property 'id', project.mod_id
+	inputs.property 'name', project.mod_name
+	inputs.property 'version', project.version
 
-    // fabric.mod.json
-    filesMatching('fabric.mod.json') {
-        expand(['id': project.mod_id, 'name': project.mod_name, 'version': project.mod_version])
-    }
+	// fabric.mod.json
+	filesMatching('fabric.mod.json') {
+		expand(['id': project.mod_id, 'name': project.mod_name, 'version': project.version])
+	}
 }
 
-// Add any additional repositories
-repositories {
-    mavenCentral()
-    maven { name 'Fabric'; url 'https://maven.fabricmc.net/' }
-    maven { name 'Carpet'; url 'https://jitpack.io' }
-    maven { url = "https://jitpack.io" }
-    //maven { name 'Masa'; url 'https://masa.dy.fi/maven' }
-    gradlePluginPortal()
-}

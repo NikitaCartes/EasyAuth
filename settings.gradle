@@ -5,5 +5,3 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-
-rootProject.name = 'simpleauth'

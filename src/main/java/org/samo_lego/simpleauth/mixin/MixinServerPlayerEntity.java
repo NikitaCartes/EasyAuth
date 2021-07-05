@@ -1,5 +1,6 @@
 package org.samo_lego.simpleauth.mixin;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -13,7 +14,7 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.samo_lego.simpleauth.event.AuthEventHandler;
 import org.samo_lego.simpleauth.storage.PlayerCache;
-import org.samo_lego.simpleauth.utils.PlatformSpecific;
+import org.samo_lego.simpleauth.utils.CarpetHelper;
 import org.samo_lego.simpleauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -161,7 +162,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public boolean canSkipAuth() {
-        return PlatformSpecific.isPlayerFake(this.player) || (isUsingMojangAccount() && config.main.premiumAutologin);
+        return (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(this.player)) || (isUsingMojangAccount() && config.main.premiumAutologin);
     }
 
     /**

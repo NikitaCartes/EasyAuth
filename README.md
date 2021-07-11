@@ -1,6 +1,8 @@
 ## Simple Authentication Mod
 
-Since Samolego deprecated his mod, I consider updating it to the latest version.
+Since samo_lego deprecated his mod, I consider updating it to the latest version.
+
+For Minecraft 1.16 and below you can check [original repository](https://github.com/samolego/SimpleAuth).
 
 See [wiki](https://github.com/samolego/SimpleAuth/wiki) for more information.
 
@@ -25,4 +27,3 @@ This project is licensed under the `MIT` license.
 ```
 ./gradlew clean build
 ```
-4. Delete `"accessWidener": "simpleauth.accesswidener"` from `fabric.mod.json` in your `.jar`

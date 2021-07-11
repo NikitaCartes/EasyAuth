@@ -1,41 +1,39 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+# Automatically build the project and run any configured tests for every push
+# and submitted pull request. This can help catch issues that only occur on
+# certain platforms or Java versions, and provides a first line of defence
+# against bad commits.
 
-name: Fabric Snapshot CI
-
+name: Build snapshot version
 on:
   push:
-    branches: fabric-snapshot
+    branches: fabric-1.17
   pull_request:
-    branches: fabric-snapshot
+    branches: fabric-1.17
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        java: [16]
+        os: [ubuntu-20.04, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-        name: Fetching branches
-        with:
-          ref: 'fabric-snapshot' # Branch to build from
-      - name: Set up JDK 1.8
+      - name: checkout repository
+        uses: actions/checkout@v2
+      - name: validate gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+      - name: setup jdk ${{ matrix.java }}
         uses: actions/setup-java@v1
         with:
-          java-version: 1.8
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Build with Gradle
+          java-version: ${{ matrix.java }}
+      - name: make gradle wrapper executable
+        if: ${{ runner.os != 'Windows' }}
+        run: chmod +x ./gradlew
+      - name: build
         run: ./gradlew build
-      - name: Execute permission for renaming script
-        run: chmod +x ./.github/workflows/renaming.sh
-      - name: Running renaming script
-        run: ./.github/workflows/renaming.sh
-
-        # Artifact upload
-      - name: Uploading artifacts
+      - name: capture build artifacts
+        if: ${{ runner.os == 'Linux' && matrix.java == '16' }} # Only upload artifacts built from latest java on one OS
         uses: actions/upload-artifact@v2
         with:
-          #name: ${{ env.BUILDNAME }}.jar
-          name: UNZIP_ME_${{ env.BUILDNAME }}
-          path: build/libs/${{ env.BUILDNAME }}.jar
+          name: Artifacts
+          path: build/libs/

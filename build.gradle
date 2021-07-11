@@ -2,11 +2,10 @@ plugins {
     id 'fabric-loom' version '0.9-SNAPSHOT'
 }
 
-
 // Add any additional repositories
 repositories {
-	maven { name 'Carpet'; url 'https://jitpack.io' }
-	//maven { name 'Masa'; url 'https://masa.dy.fi/maven' }
+	//maven { name 'Carpet'; url 'https://jitpack.io' }
+	maven { name 'Carpet'; url 'https://masa.dy.fi/maven' }
 }
 
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
@@ -30,7 +29,8 @@ dependencies {
 
 	// Mods
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
+	//modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
+	modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
 
 	// Password hashing
 	// Argon2

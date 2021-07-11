@@ -6,18 +6,19 @@
   "name": "Simple Authentication Mod",
   "description": "A mod that tries to keep authentication for players simple via commands.",
   "authors": [
-    "samo_lego"
+    "samo_lego",
+    "NikitaCartes"
   ],
   "contact": {
-    "homepage": "https://samolego.github.io/projects",
-    "sources": "https://github.com/samolego/SimpleAuth"
+    "homepage": "https://github.com/NikitaCartes/SimpleAuth",
+    "sources": "https://github.com/NikitaCartes/SimpleAuth"
   },
 
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "org.samo_lego.simpleauth.SimpleAuthFabric"
+      "org.samo_lego.simpleauth.SimpleAuth"
     ]
   },
   "accessWidener": "simpleauth.accesswidener",
@@ -25,8 +26,9 @@
     "mixins.simpleauth.json"
   ],
   "depends": {
-    "fabricloader": ">=0.8.8",
-    "fabric": "*"
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.17.1"
   },
   "suggests": {
     "flamingo": "*"

@@ -7,11 +7,11 @@ public class SimpleLogger {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void logError(String error) {
-        LOGGER.error("[SimpleAuth] " + error);
+        LOGGER.error("[EasyAuth] " + error);
     }
 
     public static void logInfo(String info) {
-        LOGGER.info("[SimpleAuth] " + info);
+        LOGGER.info("[EasyAuth] " + info);
     }
 
 }

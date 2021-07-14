@@ -33,7 +33,7 @@ public class MongoDB {
                         config.mongoDBCredentials.useSsl
                 )
         );
-        MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.simpleAuthDatabase);
+        MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.easyAuthDatabase);
         collection = database.getCollection("players");
     }
 

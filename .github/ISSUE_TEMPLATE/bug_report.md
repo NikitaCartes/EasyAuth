@@ -1,19 +1,15 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG] [Fabric/Forge]"
+title: "[BUG]"
 labels: bug
-assignees: samolego
+assignees: NikitaCartes
 projects: "Bugs overview"
 ---
 
-**Mod Loader**
-- [x] Fabric
-- [ ] Forge
-
 **Versions**
-* SimpleAuth X.Y.Z
-* Fabric API X.Y.Z / Forge X.Y.Z
+* EasyAuth X.Y.Z
+* Fabric API X.Y.Z
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -27,7 +23,6 @@ Steps to reproduce the behavior:
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
-
 
 **Additional context**
 Add any other context about the problem here.

@@ -110,7 +110,7 @@ public class AuthConfig {
         /**
          * Whether to use MongoDB instead of LevelDB.
          * Note: you need to install MongoDB yourself, as well
-         * as create a user (account) that will be used by SimpleAuth
+         * as create a user (account) that will be used by EasyAuth
          * to manage its database.
          */
         public boolean useMongoDB = false;
@@ -143,10 +143,10 @@ public class AuthConfig {
              */
             public int port = 27017;
             /**
-             * Name of the new database in which SimpleAuth should
+             * Name of the new database in which EasyAuth should
              * store player data.
              */
-            public String simpleAuthDatabase = "SimpleAuthPlayerData";
+            public String easyAuthDatabase = "EasyAuthPlayerData";
             /**
              * Whether to use ssl connection.
              */
@@ -306,7 +306,7 @@ public class AuthConfig {
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException("[SimpleAuth] Problem occurred when trying to load config: ", e);
+                throw new RuntimeException("[EasyAuth] Problem occurred when trying to load config: ", e);
             }
         }
         else {

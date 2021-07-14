@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "id": "simpleauth",
+  "id": "easyauth",
   "version": "${version}",
 
-  "name": "Simple Authentication Mod",
-  "description": "A mod that tries to keep authentication for players simple via commands.",
+  "name": "Easy Authentication Mod",
+  "description": "A mod that tries to keep authentication for players easy via commands.",
   "authors": [
-    "samo_lego",
-    "NikitaCartes"
+    "NikitaCartes",
+    "samo_lego"
   ],
   "contact": {
-    "homepage": "https://github.com/NikitaCartes/SimpleAuth",
-    "sources": "https://github.com/NikitaCartes/SimpleAuth"
+    "homepage": "https://github.com/NikitaCartes/EasyAuth",
+    "sources": "https://github.com/NikitaCartes/EasyAuth"
   },
 
   "license": "MIT",

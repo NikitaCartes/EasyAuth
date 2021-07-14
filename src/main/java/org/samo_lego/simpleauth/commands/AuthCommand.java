@@ -110,7 +110,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int reloadConfig(Entity sender) {
-        config = AuthConfig.load(new File("./mods/SimpleAuth/config.json"));
+        config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
 
         if(sender != null)
             ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.configurationReloaded), false);
@@ -134,7 +134,7 @@ public class AuthCommand {
             // Writing the global pass to config
             config.main.globalPassword = AuthHelper.hashPassword(password.toCharArray());
             config.main.enableGlobalPassword = true;
-            config.save(new File("./mods/SimpleAuth/config.json"));
+            config.save(new File("./mods/EasyAuth/config.json"));
         });
 
         if(sender != null)
@@ -165,7 +165,7 @@ public class AuthCommand {
         config.worldSpawn.yaw = yaw;
         config.worldSpawn.pitch = pitch;
         config.main.spawnOnJoin = true;
-        config.save(new File("./mods/SimpleAuth/config.json"));
+        config.save(new File("./mods/EasyAuth/config.json"));
 
         // Getting sender
         Entity sender = source.getEntity();

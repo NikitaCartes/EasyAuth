@@ -27,7 +27,7 @@ import static org.samo_lego.simpleauth.utils.SimpleLogger.logError;
 import static org.samo_lego.simpleauth.utils.SimpleLogger.logInfo;
 
 public class SimpleAuth implements ModInitializer {
-    public static final String MOD_ID = "simpleauth";
+    public static final String MOD_ID = "easyauth";
 
 
     public static DBHelper DB = new DBHelper();
@@ -54,16 +54,16 @@ public class SimpleAuth implements ModInitializer {
     public static final Properties serverProp = new Properties();
 
     /**
-     * Config of the SimpleAuth mod.
+     * Config of the EasyAuth mod.
      */
     public static AuthConfig config;
 
 
     public static void init(Path gameDir) {
         gameDirectory = gameDir;
-        logInfo("SimpleAuth mod by samo_lego, NikitaCartes.");
+        logInfo("EasyAuth mod by samo_lego, NikitaCartes.");
         // The support on discord was great! I really appreciate your help.
-        logInfo("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
+        // logInfo("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
         try {
             serverProp.load(new FileReader(gameDirectory + "/server.properties"));
@@ -72,11 +72,11 @@ public class SimpleAuth implements ModInitializer {
         }
 
         // Creating data directory (database and config files are stored there)
-        File file = new File(gameDirectory + "/mods/SimpleAuth/leveldbStore");
+        File file = new File(gameDirectory + "/mods/EasyAuth/leveldbStore");
         if (!file.exists() && !file.mkdirs())
-            throw new RuntimeException("[SimpleAuth] Error creating directory!");
+            throw new RuntimeException("[EasyAuth] Error creating directory!");
         // Loading config
-        config = AuthConfig.load(new File(gameDirectory + "/mods/SimpleAuth/config.json"));
+        config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
         // Connecting to db
         DB.openConnection();
     }
@@ -85,7 +85,7 @@ public class SimpleAuth implements ModInitializer {
      * Called on server stop.
      */
     public static void stop() {
-        logInfo("Shutting down SimpleAuth.");
+        logInfo("Shutting down EasyAuth.");
         DB.saveAll(playerCacheMap);
 
         // Closing threads

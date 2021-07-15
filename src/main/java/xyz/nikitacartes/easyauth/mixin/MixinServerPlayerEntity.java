@@ -91,7 +91,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     public String getFakeUuid() {
         // If server is in online mode online-mode UUIDs should be used
         assert server != null;
-        if(server.isOnlineMode() && this.isUsingMojangAccount() && !EasyAuth.config.experimental.forceoOfflineUuids)
+        if(server.isOnlineMode() && this.isUsingMojangAccount() && !EasyAuth.config.experimental.forcedOfflineUuids)
             return player.getUuidAsString();
         /*
             Lower case is used for Player and PlAyEr to get same UUID (for password storing)

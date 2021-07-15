@@ -14,7 +14,7 @@ Libraries that the project is using:
 - `leveldb (BSD-3-Clause)` https://github.com/google/leveldb
 - `JNA (Apache 2 || LGPLv3)` https://github.com/java-native-access/jna
 
-This project is licensed under the `MIT` license.
+This project licensed under the `MIT` license.
 
 # For mod developers
 

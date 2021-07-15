@@ -24,7 +24,7 @@ import xyz.nikitacartes.easyauth.utils.EasyLogger;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
 
@@ -39,16 +39,16 @@ public class AuthConfig {
         /**
          * Allows "right-clicking" on an entity (e.g. clicking on villagers).
          */
-        public boolean allowEntityInteract = false;
+        public final boolean allowEntityInteract = false;
         /**
          * Maximum login tries before kicking the player from server.
          * Set to -1 to allow unlimited, not recommended however.
          */
-        public int maxLoginTries = 1;
+        public final int maxLoginTries = 1;
         /**
          * Time after which player will be kicked if not authenticated - in seconds
          */
-        public int kickTime = 60;
+        public final int kickTime = 60;
         /**
          * Disables registering and forces logging in with global password.
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Global-password" target="_blank">wiki</a>
@@ -62,27 +62,27 @@ public class AuthConfig {
          * Tries to rescue players if they are stuck inside a portal on logging in.
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Portal-Rescue" target="_blank">wiki</a>
          */
-        public boolean tryPortalRescue = true;
+        public final boolean tryPortalRescue = true;
         /**
          * Minimum length of password.
          */
-        public int minPasswordChars = 4;
+        public final int minPasswordChars = 4;
         /**
          * Maximum length of password.
          * Set -1 to disable.
          */
-        public int maxPasswordChars = -1;
+        public final int maxPasswordChars = -1;
         /**
          * Regex of valid playername characters. You probably don't want to change this.
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Username-Restriction" target="_blank">wiki</a>
          */
-        public String usernameRegex = "^[a-zA-Z0-9_]{3,16}$";
+        public final String usernameRegex = "^[a-zA-Z0-9_]{3,16}$";
         /**
          * How long to keep session (auto-logging in the player), in seconds
          * Set to -1 to disable
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Sessions" target="_blank">wiki</a>
          */
-        public int sessionTimeoutTime = 60;
+        public final int sessionTimeoutTime = 60;
 
         /**
          * Whether to tp player to spawn when joining (to hide original player coordinates).
@@ -111,7 +111,7 @@ public class AuthConfig {
          * as create a user (account) that will be used by EasyAuth
          * to manage its database.
          */
-        public boolean useMongoDB = false;
+        public final boolean useMongoDB = false;
 
         /**
          * Credentials for MongoDB database.
@@ -121,34 +121,34 @@ public class AuthConfig {
             /**
              * Username for the database access.
              */
-            public String username = "";
+            public final String username = "";
             /**
              * Password for the database access.
              */
-            public String password = "";
+            public final String password = "";
             /**
              * Database where user with provided credentials
              * is located.
              */
-            public String userSourceDatabase = "";
+            public final String userSourceDatabase = "";
             /**
              * Database host (address).
              */
-            public String host = "localhost";
+            public final String host = "localhost";
             /**
              * Database port.
              * Default: 27017
              */
-            public int port = 27017;
+            public final int port = 27017;
             /**
              * Name of the new database in which EasyAuth should
              * store player data.
              */
-            public String easyAuthDatabase = "EasyAuthPlayerData";
+            public final String easyAuthDatabase = "EasyAuthPlayerData";
             /**
              * Whether to use ssl connection.
              */
-            public boolean useSsl = true;
+            public final boolean useSsl = true;
         }
 
         /**
@@ -164,101 +164,99 @@ public class AuthConfig {
         /**
          * Contains a list of lower case (!) player names
          * that should always be treated as offline.
-         *
+         * <p>
          * Used when  AuthConfig#premiumAutoLogin is enabled
          * and you have some players that want to use username,
          * that is already taken.
          */
-        public ArrayList<String> forcedOfflinePlayers = new ArrayList<>(Arrays.asList(
-                ""
-        ));
+        public final ArrayList<String> forcedOfflinePlayers = new ArrayList<>(Collections.singletonList(""));
 
     }
     public static class LangConfig {
-        public String enterPassword = "\u00A76You need to enter your password!";
-        public String enterNewPassword = "\u00A74You need to enter new password!";
-        public String wrongPassword = "\u00A74Wrong password!";
-        public String matchPassword = "\u00A76Passwords must match!";
-        public String passwordUpdated = "\u00A7aYour password was updated successfully!";
-        public String loginRequired = "\u00A76Use /login <password> to authenticate!";
-        public String loginTriesExceeded = "\u00A74Too many login tries.";
-        public String globalPasswordSet = "\u00A7aGlobal password was successfully set!";
-        public String cannotChangePassword = "\u00A7cYou cannot change password!";
-        public String cannotUnregister = "\u00A7cYou cannot unregister this account!";
-        public String notAuthenticated = "\u00A7cYou are not authenticated!";
-        public String alreadyAuthenticated = "\u00A76You are already authenticated.";
-        public String successfullyAuthenticated = "\u00A7aYou are now authenticated.";
-		public String successfulLogout = "\u00A7aLogged out successfully.";
-        public String timeExpired = "\u00A7cTime for authentication has expired.";
-        public String registerRequired = "\u00A76Type /register <password> <password> to claim this account.";
-        public String alreadyRegistered = "\u00A76This account name is already registered!";
-        public String registerSuccess = "\u00A7aAccount was created.";
-        public String userdataDeleted = "\u00A7aUserdata deleted.";
-        public String userdataUpdated = "\u00A7aUserdata updated.";
-        public String accountDeleted = "\u00A7aYour account was successfully deleted!";
-        public String configurationReloaded = "\u00A7aConfiguration file was reloaded successfully.";
-        public String maxPasswordChars = "\u00A76Password can be at most %d characters long!";
-        public String minPasswordChars = "\u00A76Password needs to be at least %d characters long!";
-        public String disallowedUsername = "\u00A76Invalid username characters! Allowed character regex: %s";
-        public String playerAlreadyOnline = "\u00A7cPlayer %s is already online!";
-        public String worldSpawnSet = "\u00A7aSpawn for logging in was set successfully.";
-        public String userNotRegistered = "\u00A7cThis player is not registered!";
-        public String cannotLogout = "\u00A7cYou cannot logout!";
+        public final String enterPassword = "\u00A76You need to enter your password!";
+        public final String enterNewPassword = "\u00A74You need to enter new password!";
+        public final String wrongPassword = "\u00A74Wrong password!";
+        public final String matchPassword = "\u00A76Passwords must match!";
+        public final String passwordUpdated = "\u00A7aYour password was updated successfully!";
+        public final String loginRequired = "\u00A76Use /login <password> to authenticate!";
+        public final String loginTriesExceeded = "\u00A74Too many login tries.";
+        public final String globalPasswordSet = "\u00A7aGlobal password was successfully set!";
+        public final String cannotChangePassword = "\u00A7cYou cannot change password!";
+        public final String cannotUnregister = "\u00A7cYou cannot unregister this account!";
+        public final String notAuthenticated = "\u00A7cYou are not authenticated!";
+        public final String alreadyAuthenticated = "\u00A76You are already authenticated.";
+        public final String successfullyAuthenticated = "\u00A7aYou are now authenticated.";
+		public final String successfulLogout = "\u00A7aLogged out successfully.";
+        public final String timeExpired = "\u00A7cTime for authentication has expired.";
+        public final String registerRequired = "\u00A76Type /register <password> <password> to claim this account.";
+        public final String alreadyRegistered = "\u00A76This account name is already registered!";
+        public final String registerSuccess = "\u00A7aAccount was created.";
+        public final String userdataDeleted = "\u00A7aUserdata deleted.";
+        public final String userdataUpdated = "\u00A7aUserdata updated.";
+        public final String accountDeleted = "\u00A7aYour account was successfully deleted!";
+        public final String configurationReloaded = "\u00A7aConfiguration file was reloaded successfully.";
+        public final String maxPasswordChars = "\u00A76Password can be at most %d characters long!";
+        public final String minPasswordChars = "\u00A76Password needs to be at least %d characters long!";
+        public final String disallowedUsername = "\u00A76Invalid username characters! Allowed character regex: %s";
+        public final String playerAlreadyOnline = "\u00A7cPlayer %s is already online!";
+        public final String worldSpawnSet = "\u00A7aSpawn for logging in was set successfully.";
+        public final String userNotRegistered = "\u00A7cThis player is not registered!";
+        public final String cannotLogout = "\u00A7cYou cannot logout!";
     }
     public static class ExperimentalConfig {
         /**
          * Prevents player being kicked because another player with the same name has joined the server.
          */
-        public boolean preventAnotherLocationKick = true;
+        public final boolean preventAnotherLocationKick = true;
         /**
          * If player should be invulnerable before authentication.
          */
-        public boolean playerInvulnerable = true;
+        public final boolean playerInvulnerable = true;
         /**
          * If player should be invisible to mobs before authentication.
          */
-        public boolean playerInvisible = true;
+        public final boolean playerInvisible = true;
         /**
          * Allows chat (but not commands, except for /login and /register).
          */
-        public boolean allowChat = false;
+        public final boolean allowChat = false;
         /**
          * Allows player movement.
          */
-        public boolean allowMovement = false;
+        public final boolean allowMovement = false;
         /**
          * Allows block "use" - right clicking (e.g. opening a chest).
          */
-        public boolean allowBlockUse = false;
+        public final boolean allowBlockUse = false;
         /**
          *  Allows mining or punching blocks.
          */
-        public boolean allowBlockPunch = false;
+        public final boolean allowBlockPunch = false;
         /**
          * Allows dropping items from inventory.
          */
-        public boolean allowItemDrop = false;
+        public final boolean allowItemDrop = false;
         /**
          * Allows moving item through inventory.
          */
-        public boolean allowItemMoving = false;
+        public final boolean allowItemMoving = false;
         /**
          * Allows item "use" - right click function (e.g. using a bow).
          */
-        public boolean allowItemUse = false;
+        public final boolean allowItemUse = false;
         /**
          * Allows attacking mobs.
          */
-        public boolean allowEntityPunch = false;
+        public final boolean allowEntityPunch = false;
         /**
          * Debug mode. Expect much spam in console.
          */
-        public boolean debugMode = false;
+        public final boolean debugMode = false;
         /**
          * Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error).
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/GLIBC-problems" target="_blank">wiki</a>
          */
-        public boolean useBCryptLibrary = false;
+        public final boolean useBCryptLibrary = false;
         /**
          * Whether to modify player uuids to offline style.
          * Note: this should be used only if you had your server
@@ -270,19 +268,19 @@ public class AuthConfig {
          * an online-mode player changes username, they'll loose all
          * their stuff, unless you migrate it manually.
          */
-        public boolean forceoOfflineUuids = false;
+        public boolean forcedOfflineUuids = false;
         /**
          * To use existing database from SimpleAuth replace this string with "SimpleAuth".
          * Database will be saved in mods/<databaseFolder>
          */
-        public String databaseFolder = "EasyAuth";
+        public final String databaseFolder = "EasyAuth";
     }
 
-    public MainConfig main = new MainConfig();
-    public MainConfig.WorldSpawn worldSpawn = new MainConfig.WorldSpawn();
-    public MainConfig.MongoDBCredentials mongoDBCredentials = new MainConfig.MongoDBCredentials();
-    public LangConfig lang = new LangConfig();
-    public ExperimentalConfig experimental = new ExperimentalConfig();
+    public final MainConfig main = new MainConfig();
+    public final MainConfig.WorldSpawn worldSpawn = new MainConfig.WorldSpawn();
+    public final MainConfig.MongoDBCredentials mongoDBCredentials = new MainConfig.MongoDBCredentials();
+    public final LangConfig lang = new LangConfig();
+    public final ExperimentalConfig experimental = new ExperimentalConfig();
 
 
     /**
@@ -299,9 +297,9 @@ public class AuthConfig {
             )) {
                 config = gson.fromJson(fileReader, AuthConfig.class);
                 if(!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
-                    if(config.experimental.forceoOfflineUuids) {
-                        EasyLogger.logInfo("Server is in offline mode, forceoOfflineUuids option is irrelevant. Setting it to false.");
-                        config.experimental.forceoOfflineUuids = false;
+                    if(config.experimental.forcedOfflineUuids) {
+                        EasyLogger.logInfo("Server is in offline mode, forcedOfflineUuids option is irrelevant. Setting it to false.");
+                        config.experimental.forcedOfflineUuids = false;
                     }
                     if(config.main.premiumAutologin) {
                         EasyLogger.logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");

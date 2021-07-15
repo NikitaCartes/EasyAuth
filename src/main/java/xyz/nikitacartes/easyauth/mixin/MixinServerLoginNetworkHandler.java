@@ -31,7 +31,7 @@ public abstract class MixinServerLoginNetworkHandler {
 
     @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
     private void acceptPlayer(CallbackInfo ci) {
-        if(EasyAuth.config.experimental.forceoOfflineUuids) {
+        if(EasyAuth.config.experimental.forcedOfflineUuids) {
             this.profile = this.toOfflineProfile(this.profile);
         }
     }

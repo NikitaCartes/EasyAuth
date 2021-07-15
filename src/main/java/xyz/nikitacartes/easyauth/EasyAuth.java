@@ -11,7 +11,6 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.DBHelper;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import java.io.File;
 import java.io.FileReader;
@@ -23,6 +22,9 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 
 public class EasyAuth implements ModInitializer {
     public static final String MOD_ID = "easyauth";
@@ -59,14 +61,14 @@ public class EasyAuth implements ModInitializer {
 
     public static void init(Path gameDir) {
         gameDirectory = gameDir;
-        EasyLogger.logInfo("EasyAuth mod by samo_lego, NikitaCartes.");
+        logInfo("EasyAuth mod by samo_lego, NikitaCartes.");
         // The support on discord was great! I really appreciate your help.
         // logInfo("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
         try {
             serverProp.load(new FileReader(gameDirectory + "/server.properties"));
         } catch (IOException e) {
-            EasyLogger.logError("Error while reading server properties: " + e.getMessage());
+            logError("Error while reading server properties: " + e.getMessage());
         }
 
         // Creating data directory (database and config files are stored there)
@@ -83,7 +85,7 @@ public class EasyAuth implements ModInitializer {
      * Called on server stop.
      */
     public static void stop() {
-        EasyLogger.logInfo("Shutting down EasyAuth.");
+        logInfo("Shutting down EasyAuth.");
         DB.saveAll(playerCacheMap);
 
         // Closing threads
@@ -93,7 +95,7 @@ public class EasyAuth implements ModInitializer {
                 Thread.currentThread().interrupt();
             }
         } catch (InterruptedException e) {
-            EasyLogger.logError(e.getMessage());
+            logError(e.getMessage());
             THREADPOOL.shutdownNow();
         }
 

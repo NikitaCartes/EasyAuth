@@ -6,7 +6,6 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +13,9 @@ import java.util.HashMap;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
+
 
 public class LevelDB {
     private static DB levelDBStore;
@@ -24,9 +26,9 @@ public class LevelDB {
     public static void initialize() {
         Options options = new Options();
         try {
-            levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + EasyAuth.config.experimental.databaseFolder + "/levelDBStore"), options);
+            levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + config.experimental.databaseFolder + "/levelDBStore"), options);
         } catch (IOException e) {
-            EasyLogger.logError(e.getMessage());
+            logError(e.getMessage());
         }
     }
 
@@ -39,7 +41,7 @@ public class LevelDB {
                 levelDBStore.close();
                 return true;
             } catch (Error | IOException e) {
-                EasyLogger.logError(e.getMessage());
+                logError(e.getMessage());
             }
         }
         return false;
@@ -71,7 +73,7 @@ public class LevelDB {
             }
             return false;
         } catch (Error e) {
-            EasyLogger.logError("Register error: " + e.getMessage());
+            logError("Register error: " + e.getMessage());
             return false;
         }
     }
@@ -86,7 +88,7 @@ public class LevelDB {
         try {
             return levelDBStore.get(bytes("UUID:" + uuid)) != null;
         } catch (DBException e) {
-            EasyLogger.logError(e.getMessage());
+            logError(e.getMessage());
         }
         return false;
     }
@@ -100,7 +102,7 @@ public class LevelDB {
         try {
             levelDBStore.delete(bytes("UUID:" + uuid));
         } catch (Error e) {
-            EasyLogger.logError(e.getMessage());
+            logError(e.getMessage());
         }
     }
 
@@ -115,7 +117,7 @@ public class LevelDB {
         try {
             levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
         } catch (Error e) {
-            EasyLogger.logError(e.getMessage());
+            logError(e.getMessage());
         }
     }
 
@@ -130,7 +132,7 @@ public class LevelDB {
             if(isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);
         } catch (Error e) {
-            EasyLogger.logError("Error getting data: " + e.getMessage());
+            logError("Error getting data: " + e.getMessage());
         }
         return "";
     }
@@ -147,7 +149,7 @@ public class LevelDB {
             levelDBStore.write(batch);
             batch.close();
         } catch (IOException e) {
-            EasyLogger.logError("Error saving player data! " + e.getMessage());
+            logError("Error saving player data! " + e.getMessage());
         }
     }
 }

@@ -14,12 +14,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import xyz.nikitacartes.easyauth.EasyAuth;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 @Mixin(WorldSaveHandler.class)
 public class MixinWorldSaveHandler {
@@ -73,9 +75,9 @@ public class MixinWorldSaveHandler {
     private NbtCompound migratePlayerData(NbtCompound compoundTag, PlayerEntity player) {
         // Checking for offline player data only if online doesn't exist yet
         String playername = player.getGameProfile().getName().toLowerCase();
-        if(EasyAuth.config.main.premiumAutologin && EasyAuth.mojangAccountNamesCache.contains(playername) && !this.fileExists) {
-            if(EasyAuth.config.experimental.debugMode)
-                    EasyLogger.logInfo("Migrating data for " + playername);
+        if(config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
+            if(config.experimental.debugMode)
+                    logInfo("Migrating data for " + playername);
                 File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
             if (file.exists() && file.isFile())
                 try {
@@ -85,11 +87,11 @@ public class MixinWorldSaveHandler {
                     LOGGER.warn("Failed to load player data for {}", playername);
                 }
         }
-        else if(EasyAuth.config.experimental.debugMode)
-            EasyLogger.logInfo("Not migrating " +
+        else if(config.experimental.debugMode)
+            logInfo("Not migrating " +
                     playername +
                     ", as premium status is: " +
-                    EasyAuth.mojangAccountNamesCache.contains(playername) +
+                    mojangAccountNamesCache.contains(playername) +
                     " and data file is " + (this.fileExists ? "" : "not") +
                     " present."
             );

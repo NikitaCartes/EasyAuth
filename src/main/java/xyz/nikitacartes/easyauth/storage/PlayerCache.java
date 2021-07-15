@@ -9,12 +9,12 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import java.util.Objects;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.DB;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 /**
  * Class used for storing the non-authenticated player's cache
@@ -81,7 +81,7 @@ public class PlayerCache {
 
     public static PlayerCache fromJson(ServerPlayerEntity player, String fakeUuid) {
         if(config.experimental.debugMode)
-            EasyLogger.logInfo("Creating cache for " + Objects.requireNonNull(player).getGameProfile().getName());
+            logInfo("Creating cache for " + Objects.requireNonNull(player).getGameProfile().getName());
 
         String json = DB.getUserData(fakeUuid);
         PlayerCache playerCache;

@@ -2,11 +2,11 @@ package xyz.nikitacartes.easyauth.storage;
 
 import xyz.nikitacartes.easyauth.storage.database.LevelDB;
 import xyz.nikitacartes.easyauth.storage.database.MongoDB;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import java.util.HashMap;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 public class DBHelper {
 
@@ -25,7 +25,7 @@ public class DBHelper {
      */
     public void close() {
         if(config.main.useMongoDB && MongoDB.close() || LevelDB.close())
-            EasyLogger.logInfo("Database connection closed successfully.");
+            logInfo("Database connection closed successfully.");
     }
 
     /**

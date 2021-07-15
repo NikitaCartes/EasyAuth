@@ -2,7 +2,8 @@ package xyz.nikitacartes.easyauth.utils.hashing;
 
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
+
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 
 public class HasherArgon2 {
 
@@ -21,7 +22,7 @@ public class HasherArgon2 {
             return HASHER.verify(hashed, password);
         }
         catch (Error e) {
-            EasyLogger.logError("Argon2 password verification error: " + e);
+            logError("Argon2 password verification error: " + e);
             return false;
         } finally {
             // Wipe confidential data
@@ -39,7 +40,7 @@ public class HasherArgon2 {
         try {
             return HASHER.hash(10, 65536, 1, password);
         } catch (Error e) {
-            EasyLogger.logError("Argon2 password hashing error: " + e);
+            logError("Argon2 password hashing error: " + e);
         }
         return null;
     }

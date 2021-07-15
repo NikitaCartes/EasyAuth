@@ -9,11 +9,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
-import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import java.io.File;
 
@@ -21,6 +19,8 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 public class AuthCommand {
 
@@ -110,12 +110,12 @@ public class AuthCommand {
      * @return 0
      */
     public static int reloadConfig(Entity sender) {
-        EasyAuth.config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
+        config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
 
         if(sender != null)
-            ((PlayerEntity) sender).sendMessage(new LiteralText(EasyAuth.config.lang.configurationReloaded), false);
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.configurationReloaded), false);
         else
-            EasyLogger.logInfo(EasyAuth.config.lang.configurationReloaded);
+            logInfo(config.lang.configurationReloaded);
         return 1;
     }
 
@@ -130,17 +130,17 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
         // Different thread to avoid lag spikes
-        EasyAuth.THREADPOOL.submit(() -> {
+        THREADPOOL.submit(() -> {
             // Writing the global pass to config
-            EasyAuth.config.main.globalPassword = AuthHelper.hashPassword(password.toCharArray());
-            EasyAuth.config.main.enableGlobalPassword = true;
-            EasyAuth.config.save(new File("./mods/EasyAuth/config.json"));
+            config.main.globalPassword = AuthHelper.hashPassword(password.toCharArray());
+            config.main.enableGlobalPassword = true;
+            config.save(new File("./mods/EasyAuth/config.json"));
         });
 
         if(sender != null)
-            ((PlayerEntity) sender).sendMessage(new LiteralText(EasyAuth.config.lang.globalPasswordSet), false);
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.globalPasswordSet), false);
         else
-            EasyLogger.logInfo(EasyAuth.config.lang.globalPasswordSet);
+            logInfo(config.lang.globalPasswordSet);
         return 1;
     }
 
@@ -158,21 +158,21 @@ public class AuthCommand {
      */
     private static int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z, float yaw, float pitch) {
         // Setting config values and saving
-        EasyAuth.config.worldSpawn.dimension = String.valueOf(world);
-        EasyAuth.config.worldSpawn.x = x;
-        EasyAuth.config.worldSpawn.y = y;
-        EasyAuth.config.worldSpawn.z = z;
-        EasyAuth.config.worldSpawn.yaw = yaw;
-        EasyAuth.config.worldSpawn.pitch = pitch;
-        EasyAuth.config.main.spawnOnJoin = true;
-        EasyAuth.config.save(new File("./mods/EasyAuth/config.json"));
+        config.worldSpawn.dimension = String.valueOf(world);
+        config.worldSpawn.x = x;
+        config.worldSpawn.y = y;
+        config.worldSpawn.z = z;
+        config.worldSpawn.yaw = yaw;
+        config.worldSpawn.pitch = pitch;
+        config.main.spawnOnJoin = true;
+        config.save(new File("./mods/EasyAuth/config.json"));
 
         // Getting sender
         Entity sender = source.getEntity();
         if(sender != null)
-            ((PlayerEntity) sender).sendMessage(new LiteralText(EasyAuth.config.lang.worldSpawnSet), false);
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.worldSpawnSet), false);
         else
-            EasyLogger.logInfo(EasyAuth.config.lang.worldSpawnSet);
+            logInfo(config.lang.worldSpawnSet);
         return 1;
     }
 
@@ -185,15 +185,15 @@ public class AuthCommand {
      */
     private static int removeAccount(ServerCommandSource source, String uuid) {
         Entity sender = source.getEntity();
-        EasyAuth.THREADPOOL.submit(() -> {
-            EasyAuth.DB.deleteUserData(uuid);
-            EasyAuth.playerCacheMap.put(uuid, null);
+        THREADPOOL.submit(() -> {
+            DB.deleteUserData(uuid);
+            playerCacheMap.put(uuid, null);
         });
 
         if(sender != null)
-            ((PlayerEntity) sender).sendMessage(new LiteralText(EasyAuth.config.lang.userdataDeleted), false);
+            ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataDeleted), false);
         else
-            EasyLogger.logInfo(EasyAuth.config.lang.userdataDeleted);
+            logInfo(config.lang.userdataDeleted);
         return 1; // Success
     }
 
@@ -209,22 +209,22 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        EasyAuth.THREADPOOL.submit(() -> {
+        THREADPOOL.submit(() -> {
             PlayerCache playerCache;
-            if(EasyAuth.playerCacheMap.containsKey(uuid)) {
-                playerCache = EasyAuth.playerCacheMap.get(uuid);
+            if(playerCacheMap.containsKey(uuid)) {
+                playerCache = playerCacheMap.get(uuid);
             }
             else {
                 playerCache = PlayerCache.fromJson(null, uuid);
             }
 
-            EasyAuth.playerCacheMap.put(uuid, playerCache);
-            EasyAuth.playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
+            playerCacheMap.put(uuid, playerCache);
+            playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
 
             if (sender != null)
-                ((PlayerEntity) sender).sendMessage(new LiteralText(EasyAuth.config.lang.userdataUpdated), false);
+                ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
             else
-                EasyLogger.logInfo(EasyAuth.config.lang.userdataUpdated);
+                logInfo(config.lang.userdataUpdated);
         });
         return 0;
     }
@@ -241,29 +241,29 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        EasyAuth.THREADPOOL.submit(() -> {
+        THREADPOOL.submit(() -> {
             PlayerCache playerCache;
-            if(EasyAuth.playerCacheMap.containsKey(uuid)) {
-                playerCache = EasyAuth.playerCacheMap.get(uuid);
+            if(playerCacheMap.containsKey(uuid)) {
+                playerCache = playerCacheMap.get(uuid);
             }
             else {
                 playerCache = PlayerCache.fromJson(null, uuid);
             }
 
-            EasyAuth.playerCacheMap.put(uuid, playerCache);
-            if(!EasyAuth.playerCacheMap.get(uuid).password.isEmpty()) {
+            playerCacheMap.put(uuid, playerCache);
+            if(!playerCacheMap.get(uuid).password.isEmpty()) {
                 if (sender != null)
-                    ((PlayerEntity) sender).sendMessage(new LiteralText(EasyAuth.config.lang.userNotRegistered), false);
+                    ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userNotRegistered), false);
                 else
-                    EasyLogger.logInfo(EasyAuth.config.lang.userNotRegistered);
+                    logInfo(config.lang.userNotRegistered);
                 return;
             }
-            EasyAuth.playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
+            playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
 
             if (sender != null)
-                ((PlayerEntity) sender).sendMessage(new LiteralText(EasyAuth.config.lang.userdataUpdated), false);
+                ((PlayerEntity) sender).sendMessage(new LiteralText(config.lang.userdataUpdated), false);
             else
-                EasyLogger.logInfo(EasyAuth.config.lang.userdataUpdated);
+                logInfo(config.lang.userdataUpdated);
         });
         return 0;
     }

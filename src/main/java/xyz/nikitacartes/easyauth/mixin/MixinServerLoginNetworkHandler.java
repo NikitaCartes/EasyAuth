@@ -9,8 +9,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import xyz.nikitacartes.easyauth.EasyAuth;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -18,6 +16,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class MixinServerLoginNetworkHandler {
@@ -31,7 +32,7 @@ public abstract class MixinServerLoginNetworkHandler {
 
     @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
     private void acceptPlayer(CallbackInfo ci) {
-        if(EasyAuth.config.experimental.forcedOfflineUuids) {
+        if(config.experimental.forcedOfflineUuids) {
             this.profile = this.toOfflineProfile(this.profile);
         }
     }
@@ -53,19 +54,19 @@ public abstract class MixinServerLoginNetworkHandler {
             cancellable = true
     )
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
-        if(EasyAuth.config.main.premiumAutologin) {
+        if(config.main.premiumAutologin) {
             try {
                 String playername = packet.getProfile().getName().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
-                if(EasyAuth.playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || EasyAuth.config.main.forcedOfflinePlayers.contains(playername)) {
+                if(playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername)) {
                     // Player definitely doesn't have a mojang account
                     state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
                     this.profile = packet.getProfile();
                     ci.cancel();
                 }
-                else if(!EasyAuth.mojangAccountNamesCache.contains(playername))  {
+                else if(!mojangAccountNamesCache.contains(playername))  {
                     // Checking account status from API
                     HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://api.mojang.com/users/profiles/minecraft/" + playername).openConnection();
                     httpsURLConnection.setRequestMethod("GET");
@@ -79,7 +80,7 @@ public abstract class MixinServerLoginNetworkHandler {
 
 
                         // Caches the request
-                        EasyAuth.mojangAccountNamesCache.add(playername);
+                        mojangAccountNamesCache.add(playername);
                         // Authentication continues in original method
                     }
                     else if(response == HttpURLConnection.HTTP_NO_CONTENT) {
@@ -92,7 +93,7 @@ public abstract class MixinServerLoginNetworkHandler {
                     }
                 }
             } catch (IOException e) {
-                EasyLogger.logError(e.getMessage());
+                logError(e.getMessage());
             }
         }
     }

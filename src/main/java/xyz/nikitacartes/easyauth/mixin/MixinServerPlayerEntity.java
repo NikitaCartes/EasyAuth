@@ -12,7 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-import xyz.nikitacartes.easyauth.EasyAuth;
+
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.CarpetHelper;
@@ -25,7 +25,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
+
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 @Mixin(ServerPlayerEntity.class)
 public class MixinServerPlayerEntity implements PlayerAuth {
@@ -34,7 +36,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
 
     // * 20 for 20 ticks in second
     @Unique
-    private int kickTimer = EasyAuth.config.main.kickTime * 20;
+    private int kickTimer = config.main.kickTime * 20;
 
     @Final
     @Shadow
@@ -48,9 +50,9 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public void hidePosition(boolean hide) {
-        PlayerCache cache = EasyAuth.playerCacheMap.get(this.getFakeUuid());
-        if(EasyAuth.config.experimental.debugMode)
-            EasyLogger.logInfo("Teleporting " + player.getName().asString() + (hide ? " to spawn." : " to original position."));
+        PlayerCache cache = playerCacheMap.get(this.getFakeUuid());
+        if(config.experimental.debugMode)
+            logInfo("Teleporting " + player.getName().asString() + (hide ? " to spawn." : " to original position."));
         if (hide) {
             // Saving position
             cache.lastLocation.dimension = player.getServerWorld();
@@ -60,12 +62,12 @@ public class MixinServerPlayerEntity implements PlayerAuth {
 
             // Teleports player to spawn
             player.teleport(
-                    server.getWorld(RegistryKey.of(Registry.WORLD_KEY, new Identifier(EasyAuth.config.worldSpawn.dimension))),
-                    EasyAuth.config.worldSpawn.x,
-                    EasyAuth.config.worldSpawn.y,
-                    EasyAuth.config.worldSpawn.z,
-                    EasyAuth.config.worldSpawn.yaw,
-                    EasyAuth.config.worldSpawn.pitch
+                    server.getWorld(RegistryKey.of(Registry.WORLD_KEY, new Identifier(config.worldSpawn.dimension))),
+                    config.worldSpawn.x,
+                    config.worldSpawn.y,
+                    config.worldSpawn.z,
+                    config.worldSpawn.yaw,
+                    config.worldSpawn.pitch
             );
             return;
         }
@@ -91,7 +93,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     public String getFakeUuid() {
         // If server is in online mode online-mode UUIDs should be used
         assert server != null;
-        if(server.isOnlineMode() && this.isUsingMojangAccount() && !EasyAuth.config.experimental.forcedOfflineUuids)
+        if(server.isOnlineMode() && this.isUsingMojangAccount() && !config.experimental.forcedOfflineUuids)
             return player.getUuidAsString();
         /*
             Lower case is used for Player and PlAyEr to get same UUID (for password storing)
@@ -111,18 +113,18 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public void setAuthenticated(boolean authenticated) {
-        PlayerCache playerCache = EasyAuth.playerCacheMap.get(this.getFakeUuid());
+        PlayerCache playerCache = playerCacheMap.get(this.getFakeUuid());
         playerCache.isAuthenticated = authenticated;
 
-        player.setInvulnerable(!authenticated && EasyAuth.config.experimental.playerInvulnerable);
-        player.setInvisible(!authenticated && EasyAuth.config.experimental.playerInvisible);
+        player.setInvulnerable(!authenticated && config.experimental.playerInvulnerable);
+        player.setInvisible(!authenticated && config.experimental.playerInvisible);
 
         // Teleporting player (hiding / restoring position)
-        if(EasyAuth.config.main.spawnOnJoin)
+        if(config.main.spawnOnJoin)
             this.hidePosition(!authenticated);
 
         if(authenticated) {
-            kickTimer = EasyAuth.config.main.kickTime * 20;
+            kickTimer = config.main.kickTime * 20;
             // Updating blocks if needed (if portal rescue action happened)
             if(playerCache.wasInPortal) {
                 World world = player.getEntityWorld();
@@ -144,13 +146,13 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public Text getAuthMessage() {
-        final PlayerCache cache = EasyAuth.playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
-        if(!EasyAuth.config.main.enableGlobalPassword && cache.password.isEmpty())
+        final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
+        if(!config.main.enableGlobalPassword && cache.password.isEmpty())
             return new LiteralText(
-                    EasyAuth.config.lang.notAuthenticated+ "\n" + EasyAuth.config.lang.registerRequired
+                    config.lang.notAuthenticated+ "\n" + config.lang.registerRequired
             );
         return new LiteralText(
-                EasyAuth.config.lang.notAuthenticated + "\n" + EasyAuth.config.lang.loginRequired
+                config.lang.notAuthenticated + "\n" + config.lang.loginRequired
         );
     }
 
@@ -161,7 +163,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public boolean canSkipAuth() {
-        return (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(this.player)) || (isUsingMojangAccount() && EasyAuth.config.main.premiumAutologin);
+        return (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(this.player)) || (isUsingMojangAccount() && config.main.premiumAutologin);
     }
 
     /**
@@ -171,7 +173,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
      */
     @Override
     public boolean isUsingMojangAccount() {
-        return EasyAuth.mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase());
+        return mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase());
     }
 
     /**
@@ -182,7 +184,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     @Override
     public boolean isAuthenticated() {
         String uuid = ((PlayerAuth) player).getFakeUuid();
-        return  this.canSkipAuth() || (EasyAuth.playerCacheMap.containsKey(uuid) && EasyAuth.playerCacheMap.get(uuid).isAuthenticated);
+        return  this.canSkipAuth() || (playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated);
     }
 
     @Inject(method = "playerTick()V", at = @At("HEAD"), cancellable = true)
@@ -190,7 +192,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
         if(!this.isAuthenticated()) {
             // Checking player timer
             if(kickTimer <= 0 && player.networkHandler.getConnection().isOpen()) {
-                player.networkHandler.disconnect(new LiteralText(EasyAuth.config.lang.timeExpired));
+                player.networkHandler.disconnect(new LiteralText(config.lang.timeExpired));
             }
             else {
                 // Sending authentication prompt every 10 seconds

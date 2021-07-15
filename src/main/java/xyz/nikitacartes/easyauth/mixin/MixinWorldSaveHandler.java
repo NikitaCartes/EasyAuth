@@ -1,0 +1,98 @@
+package xyz.nikitacartes.easyauth.mixin;
+
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.world.WorldSaveHandler;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import xyz.nikitacartes.easyauth.EasyAuth;
+import xyz.nikitacartes.easyauth.utils.EasyLogger;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+@Mixin(WorldSaveHandler.class)
+public class MixinWorldSaveHandler {
+
+    @Final
+    @Shadow
+    private File playerDataDir;
+
+    @Unique
+    private boolean fileExists;
+
+    @Final
+    @Shadow
+    private static Logger LOGGER;
+
+    /**
+     * Saves whether player save file exists.
+     *
+     * @param playerEntity
+     * @param cir
+     * @param compoundTag
+     * @param file
+     */
+    @Inject(
+            method = "loadPlayerData(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/nbt/NbtCompound;",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Ljava/io/File;exists()Z"
+            ),
+            locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    private void fileExists(PlayerEntity playerEntity, CallbackInfoReturnable<NbtCompound> cir, NbtCompound compoundTag, File file) {
+        // @ModifyVariable cannot capture locals
+        this.fileExists = file.exists();
+    }
+
+    /**
+     * Loads offline-uuid player data to compoundTag in order to migrate from offline to online.
+     *
+     * @param compoundTag null compound tag.
+     * @param player player who might need migration of datd.
+     * @return compoundTag containing migrated data.
+     */
+    @ModifyVariable(
+            method = "loadPlayerData(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/nbt/NbtCompound;",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Ljava/io/File;exists()Z"
+            )
+    )
+    private NbtCompound migratePlayerData(NbtCompound compoundTag, PlayerEntity player) {
+        // Checking for offline player data only if online doesn't exist yet
+        String playername = player.getGameProfile().getName().toLowerCase();
+        if(EasyAuth.config.main.premiumAutologin && EasyAuth.mojangAccountNamesCache.contains(playername) && !this.fileExists) {
+            if(EasyAuth.config.experimental.debugMode)
+                    EasyLogger.logInfo("Migrating data for " + playername);
+                File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
+            if (file.exists() && file.isFile())
+                try {
+                    compoundTag = NbtIo.readCompressed(new FileInputStream(file));
+                }
+                catch (IOException e) {
+                    LOGGER.warn("Failed to load player data for {}", playername);
+                }
+        }
+        else if(EasyAuth.config.experimental.debugMode)
+            EasyLogger.logInfo("Not migrating " +
+                    playername +
+                    ", as premium status is: " +
+                    EasyAuth.mojangAccountNamesCache.contains(playername) +
+                    " and data file is " + (this.fileExists ? "" : "not") +
+                    " present."
+            );
+        return compoundTag;
+    }
+}

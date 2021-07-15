@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "xyz.nikitacartes.easyauth.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "MixinPlayerAdvancementTracker",
+    "MixinPlayerManager",
+    "MixinServerLoginNetworkHandler",
+    "MixinServerPlayerEntity",
+    "MixinServerPlayNetworkHandler",
+    "MixinSlot",
+    "MixinWorldSaveHandler",
+    "ServerStatHandlerAccessor"
+  ],
+  "minVersion": "0.8",
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

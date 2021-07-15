@@ -17,7 +17,7 @@ minecraft {
 }
 
 loom {
-	accessWidener("src/main/resources/simpleauth.accesswidener")
+	accessWidener("src/main/resources/easyauth.accesswidener")
 }
 
 // Declare dependencies

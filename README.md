@@ -1,10 +1,10 @@
-## Simple Authentication Mod
+## Easy Authentication Mod
 
 Since samo_lego deprecated his mod, I consider updating it to the latest version.
 
 For Minecraft 1.16 and below you can check [original repository](https://github.com/samolego/SimpleAuth).
 
-See [wiki](https://github.com/samolego/SimpleAuth/wiki) for more information.
+See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 
 ## License
 Libraries that the project is using:

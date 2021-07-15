@@ -18,12 +18,12 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "org.samo_lego.simpleauth.SimpleAuth"
+      "xyz.nikitacartes.easyauth.EasyAuth"
     ]
   },
-  "accessWidener": "simpleauth.accesswidener",
+  "accessWidener": "easyauth.accesswidener",
   "mixins": [
-    "mixins.simpleauth.json"
+    "mixins.easyauth.json"
   ],
   "depends": {
     "fabricloader": ">=0.11.3",

@@ -273,6 +273,11 @@ public class AuthConfig {
          * their stuff, unless you migrate it manually.
          */
         public boolean forceoOfflineUuids = false;
+        /**
+         * To use existing database from SimpleAuth replace this string with "SimpleAuth".
+         * Database will be saved in mods/<databaseFolder>
+         */
+        public String databaseFolder = "EasyAuth";
     }
 
     public MainConfig main = new MainConfig();

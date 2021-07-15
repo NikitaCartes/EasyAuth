@@ -9,7 +9,7 @@ repositories {
 }
 
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
-version = "${project.mod_version}-${project.minecraft_version}"
+version = "${project.mod_version}"
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 

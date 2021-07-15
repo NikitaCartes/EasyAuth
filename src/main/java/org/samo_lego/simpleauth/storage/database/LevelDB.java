@@ -6,6 +6,7 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.samo_lego.simpleauth.SimpleAuth;
 import org.samo_lego.simpleauth.storage.PlayerCache;
+import static org.samo_lego.simpleauth.SimpleAuth.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class LevelDB {
     public static void initialize() {
         Options options = new Options();
         try {
-            levelDBStore = factory.open(new File(SimpleAuth.gameDirectory + "/mods/EasyAuth/levelDBStore"), options);
+            levelDBStore = factory.open(new File(SimpleAuth.gameDirectory + "/mods/" + config.experimental.databaseFolder + "/levelDBStore"), options);
         } catch (IOException e) {
             logError(e.getMessage());
         }

@@ -83,7 +83,7 @@ public class AuthConfig {
          * Set to -1 to disable
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Sessions" target="_blank">wiki</a>
          */
-        public int sessionTimeoutTime = 60;
+        public int sessionTimeoutTime = 3600;
 
         /**
          * Whether to tp player to spawn when joining (to hide original player coordinates).

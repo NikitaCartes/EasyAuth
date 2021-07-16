@@ -26,7 +26,7 @@ public class LevelDB {
     public static void initialize() {
         Options options = new Options();
         try {
-            levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + config.experimental.databaseFolder + "/levelDBStore"), options);
+            levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + (config.experimental.useSimpleAuthDatabase ? "SimpleAuth" : "EasyAuth") + "/levelDBStore"), options);
         } catch (IOException e) {
             logError(e.getMessage());
         }

@@ -65,7 +65,7 @@ public class PlayerCache {
         public float pitch;
     }
 
-    public final LastLocation lastLocation = new LastLocation();
+    public final PlayerCache.LastLocation lastLocation = new PlayerCache.LastLocation();
 
 
     private static final Gson gson = new GsonBuilder()

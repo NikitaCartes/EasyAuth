@@ -174,35 +174,14 @@ public class AuthConfig {
 
     }
     public static class LangConfig {
-        public String enterPassword = "\u00A76You need to enter your password!";
-        public String enterNewPassword = "\u00A74You need to enter new password!";
-        public String wrongPassword = "\u00A74Wrong password!";
-        public String matchPassword = "\u00A76Passwords must match!";
-        public String passwordUpdated = "\u00A7aYour password was updated successfully!";
-        public String loginRequired = "\u00A76Use /login <password> to authenticate!";
-        public String loginTriesExceeded = "\u00A74Too many login tries.";
         public String globalPasswordSet = "\u00A7aGlobal password was successfully set!";
-        public String cannotChangePassword = "\u00A7cYou cannot change password!";
-        public String cannotUnregister = "\u00A7cYou cannot unregister this account!";
-        public String notAuthenticated = "\u00A7cYou are not authenticated!";
-        public String alreadyAuthenticated = "\u00A76You are already authenticated.";
-        public String successfullyAuthenticated = "\u00A7aYou are now authenticated.";
-		public String successfulLogout = "\u00A7aLogged out successfully.";
-        public String timeExpired = "\u00A7cTime for authentication has expired.";
-        public String registerRequired = "\u00A76Type /register <password> <password> to claim this account.";
-        public String alreadyRegistered = "\u00A76This account name is already registered!";
-        public String registerSuccess = "\u00A7aAccount was created.";
         public String userdataDeleted = "\u00A7aUserdata deleted.";
         public String userdataUpdated = "\u00A7aUserdata updated.";
-        public String accountDeleted = "\u00A7aYour account was successfully deleted!";
         public String configurationReloaded = "\u00A7aConfiguration file was reloaded successfully.";
-        public String maxPasswordChars = "\u00A76Password can be at most %d characters long!";
-        public String minPasswordChars = "\u00A76Password needs to be at least %d characters long!";
         public String disallowedUsername = "\u00A76Invalid username characters! Allowed character regex: %s";
         public String playerAlreadyOnline = "\u00A7cPlayer %s is already online!";
         public String worldSpawnSet = "\u00A7aSpawn for logging in was set successfully.";
         public String userNotRegistered = "\u00A7cThis player is not registered!";
-        public String cannotLogout = "\u00A7cYou cannot logout!";
     }
     public static class ExperimentalConfig {
         /**

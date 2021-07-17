@@ -4,8 +4,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -148,12 +148,8 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     public Text getAuthMessage() {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
         if(!config.main.enableGlobalPassword && cache.password.isEmpty())
-            return new LiteralText(
-                    config.lang.notAuthenticated+ "\n" + config.lang.registerRequired
-            );
-        return new LiteralText(
-                config.lang.notAuthenticated + "\n" + config.lang.loginRequired
-        );
+            return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.registerRequired"));
+        return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.loginRequired"));
     }
 
     /**
@@ -192,7 +188,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
         if(!this.isAuthenticated()) {
             // Checking player timer
             if(kickTimer <= 0 && player.networkHandler.getConnection().isOpen()) {
-                player.networkHandler.disconnect(new LiteralText(config.lang.timeExpired));
+                player.networkHandler.disconnect(new TranslatableText("text.easyauth.timeExpired"));
             }
             else {
                 // Sending authentication prompt every 10 seconds

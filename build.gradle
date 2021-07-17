@@ -6,6 +6,7 @@ plugins {
 repositories {
 	//maven { name 'Carpet'; url 'https://jitpack.io' }
 	maven { name 'Carpet'; url 'https://masa.dy.fi/maven' }
+	maven { url "https://maven.nucleoid.xyz/" }
 }
 
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
@@ -26,6 +27,9 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// Translations
+	modImplementation include("fr.catcore:server-translations-api:${project.server_translations_version}")
 
 	// Mods
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

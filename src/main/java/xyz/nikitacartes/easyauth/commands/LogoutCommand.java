@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
 import static net.minecraft.server.command.CommandManager.literal;
@@ -25,10 +25,10 @@ public class LogoutCommand {
 
         if(!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
             ((PlayerAuth) player).setAuthenticated(false);
-            player.sendMessage(new LiteralText(config.lang.successfulLogout), false);
+            player.sendMessage(new TranslatableText("text.easyauth.successfulLogout"), false);
         }
         else
-            player.sendMessage(new LiteralText(config.lang.cannotLogout), false);
+            player.sendMessage(new TranslatableText("text.easyauth.cannotLogout"), false);
         return 1;
     }
 }

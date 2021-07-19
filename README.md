@@ -6,7 +6,22 @@ For Minecraft 1.16 and below you can check [original repository](https://github.
 
 See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 
-## License
+[Curseforge](https://www.curseforge.com/minecraft/mc-mods/easyauth), [Modrinth](https://modrinth.com/mod/easyauth)
+
+### Contributors
+
+* Many thanks for @samolego, author of SimpleAuth, for his mod, and his permission on creating this fork
+
+Thank you so much for those who have already helped with translation of the mod!
+* @alphatoasterous (Russian)
+* @Neubulae (Chinese)
+* @Zailer43 (Spanish)
+* @Kljunas2 (Slovene)
+* @Bendimester23 (Hungarian)
+* @luizffgv (Brazilian Portuguese)
+
+
+### License
 Libraries that the project is using:
 - `Argon2 (LGPLv3)` https://github.com/phxql/argon2-jvm
 - `BCrypt (Apache 2)` https://github.com/patrickfav/bcrypt
@@ -16,14 +31,3 @@ Libraries that the project is using:
 
 This project licensed under the `MIT` license.
 
-# For mod developers
-
-## Changing code
-
-1. Clone the repository. Then run `./gradlew genSources`
-2. Edit the code you want.
-3. To build run the following command:
-
-```
-./gradlew clean build
-```

@@ -15,7 +15,7 @@
   },
 
   "license": "MIT",
-  "environment": "*",
+  "environment": "server",
   "entrypoints": {
     "main": [
       "xyz.nikitacartes.easyauth.EasyAuth"

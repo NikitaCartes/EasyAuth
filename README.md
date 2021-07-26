@@ -31,3 +31,7 @@ Libraries that the project is using:
 
 This project licensed under the `MIT` license.
 
+
+### Dependencies 
+This mod requires:
+- `Fabric API` https://www.curseforge.com/minecraft/mc-mods/fabric-api/files

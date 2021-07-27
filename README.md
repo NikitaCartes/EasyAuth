@@ -34,4 +34,4 @@ This project licensed under the `MIT` license.
 
 ### Dependencies 
 This mod requires:
-- `Fabric API` https://www.curseforge.com/minecraft/mc-mods/fabric-api/files
+- `Fabric API` [CurseForge](https://www.curseforge.com/minecraft/mc-mods/fabric-api), [Modrinth](https://modrinth.com/mod/fabric-api)

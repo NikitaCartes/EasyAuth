@@ -1,10 +1,8 @@
 plugins {
-    id 'fabric-loom' version '0.9.38'
+    id 'fabric-loom' version '0.9-SNAPSHOT'
 }
 
-// Add any additional repositories
 repositories {
-	//maven { name 'Carpet'; url 'https://jitpack.io' }
 	maven { name 'Carpet'; url 'https://masa.dy.fi/maven' }
 	maven { url "https://maven.nucleoid.xyz/" }
 }
@@ -12,16 +10,13 @@ repositories {
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
 version = "${project.mod_version}"
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
-
-minecraft {
-}
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16
 
 loom {
-	accessWidener("src/main/resources/easyauth.accesswidener")
+	accessWidenerPath = file("src/main/resources/easyauth.accesswidener")
 }
 
-// Declare dependencies
 dependencies {
 	// Fabric
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -63,23 +58,24 @@ dependencies {
 
 }
 
-// Produce a sources distribution
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = "UTF-8"
+	it.options.release = 16
+}
+
 java {
 	withSourcesJar()
 }
 
-// Add the licence to the distribution
 jar {
 	from "LICENCE"
 }
 
-// Process any resources
 processResources {
 	inputs.property 'id', project.mod_id
 	inputs.property 'name', project.mod_name
 	inputs.property 'version', project.version
 
-	// fabric.mod.json
 	filesMatching('fabric.mod.json') {
 		expand(['id': project.mod_id, 'name': project.mod_name, 'version': project.version])
 	}

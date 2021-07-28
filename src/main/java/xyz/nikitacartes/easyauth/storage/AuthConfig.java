@@ -249,7 +249,22 @@ public class AuthConfig {
          * their stuff, unless you migrate it manually.
          */
         public boolean forcedOfflineUuids = false;
+        /**
+         * LevelDB database is hard to move,
+         * so the best solution for now would be to use old DB
+         * from SimpleAuth folder
+         */
         public boolean useSimpleAuthDatabase = false;
+        /**
+         * Cancellation of packets with player's movement and
+         * teleportation back leads to an increase number of that packets.
+         * That settings limits players teleportation.
+         * This settings is server-wide so maximum rate would be
+         * (1000/teleportationTimeoutInMs) per seconds for every unauthorised players.
+         * Value 0 would effectively disable this settings
+         * so players will be teleported after each packet.
+         */
+        public long teleportationTimeoutInMs = 5;
     }
 
     public MainConfig main = new MainConfig();

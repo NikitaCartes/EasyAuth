@@ -67,8 +67,6 @@ public abstract class MixinServerPlayNetworkHandler {
     private void onPlayerMove(PlayerMoveC2SPacket playerMoveC2SPacket, CallbackInfo ci) {
         ActionResult result = AuthEventHandler.onPlayerMove(player);
         if (result == ActionResult.FAIL) {
-            // A bit ugly, I know. (we need to update player position)
-            player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
             ci.cancel();
         }
     }

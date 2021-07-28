@@ -25,6 +25,8 @@ import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
  */
 public class AuthEventHandler {
 
+    public static long lastAcceptedPacket = 0;
+
     /**
      * Player pre-join.
      * Returns text as a reason for disconnect or null to pass
@@ -151,6 +153,10 @@ public class AuthEventHandler {
         boolean auth = ((PlayerAuth) player).isAuthenticated();
         // Otherwise movement should be disabled
         if(!auth && !config.experimental.allowMovement) {
+            if (System.nanoTime() >= lastAcceptedPacket + config.experimental.teleportationTimeoutInMs * 1000000) {
+                player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
+                lastAcceptedPacket = System.nanoTime();
+            }
             if(!player.isInvulnerable())
                 player.setInvulnerable(true);
             return ActionResult.FAIL;

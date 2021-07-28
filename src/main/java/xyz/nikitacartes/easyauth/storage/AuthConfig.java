@@ -257,11 +257,11 @@ public class AuthConfig {
         public boolean useSimpleAuthDatabase = false;
         /**
          * Cancellation of packets with player's movement and
-         * teleportation back leads to an increase number of that packets.
-         * That settings limits players teleportation.
-         * This settings is server-wide so maximum rate would be
-         * (1000/teleportationTimeoutInMs) per seconds for every unauthorised players.
-         * Value 0 would effectively disable this settings
+         * teleportation back leads to an increase number of these packets.
+         * That setting limits players teleportation.
+         * This setting is server-wide so maximum rate would be
+         * (1000/teleportationTimeoutInMs) per seconds for all unauthorised players.
+         * Value 0 would effectively disable this setting
          * so players will be teleported after each packet.
          */
         public long teleportationTimeoutInMs = 5;

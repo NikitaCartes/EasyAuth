@@ -5,6 +5,7 @@ plugins {
 repositories {
 	maven { name 'Carpet'; url 'https://masa.dy.fi/maven' }
 	maven { url "https://maven.nucleoid.xyz/" }
+	maven { name 'Jitpack'; url 'https://jitpack.io' }
 }
 
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
@@ -28,8 +29,8 @@ dependencies {
 
 	// Mods
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	//modImplementation "com.github.gnembon:fabric-carpet:${project.carpet_branch}-SNAPSHOT"
 	modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
+	modImplementation 'com.github.astei:lazydfu:0.1.2'
 
 	// Password hashing
 	// Argon2

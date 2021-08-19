@@ -187,7 +187,7 @@ public class AuthCommand {
         Entity sender = source.getEntity();
         THREADPOOL.submit(() -> {
             DB.deleteUserData(uuid);
-            playerCacheMap.put(uuid, null);
+            playerCacheMap.remove(uuid);
         });
 
         if(sender != null)

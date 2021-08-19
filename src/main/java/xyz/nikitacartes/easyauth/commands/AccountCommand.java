@@ -71,10 +71,13 @@ public class AccountCommand {
 
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), pass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
-                DB.deleteUserData(((PlayerAuth) player).getFakeUuid());
+            String uuid = ((PlayerAuth) player).getFakeUuid();
+            if (AuthHelper.checkPassword(uuid, pass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
+                DB.deleteUserData(uuid);
                 player.sendMessage(new TranslatableText("text.easyauth.accountDeleted"), false);
                 ((PlayerAuth) player).setAuthenticated(false);
+                player.networkHandler.disconnect(new TranslatableText("text.easyauth.accountDeleted"));
+                playerCacheMap.remove(uuid);
                 return;
             }
             player.sendMessage(

@@ -1,3 +1,9 @@
+### 1.9.6, Minecraft 1.17.1, 1.17.0
+
+1) Fix [#11](https://github.com/NikitaCartes/EasyAuth/issues/11)
+   - Fix `account unregister <password>` not unregistering account
+   - Fix `auth remove <uuid>` crashing server on it's stopping
+
 ### 1.9.5, Minecraft 1.17.1
 
 1) Fix [#8](https://github.com/NikitaCartes/EasyAuth/issues/8)

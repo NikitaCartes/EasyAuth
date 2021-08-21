@@ -8,8 +8,7 @@ import net.minecraft.text.TranslatableText;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -22,8 +21,8 @@ public class RegisterCommand {
 
         // Registering the "/register" command
         dispatcher.register(literal("register")
-            .then(argument("password", word())
-                .then(argument("passwordAgain", word())
+            .then(argument("password", string())
+                .then(argument("passwordAgain", string())
                     .executes( ctx -> register(ctx.getSource(), getString(ctx, "password"), getString(ctx, "passwordAgain")))
             ))
         .executes(ctx -> {

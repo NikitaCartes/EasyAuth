@@ -15,8 +15,7 @@ import xyz.nikitacartes.easyauth.utils.AuthHelper;
 
 import java.io.File;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -35,7 +34,7 @@ public class AuthCommand {
                 .executes( ctx -> reloadConfig(ctx.getSource().getEntity()))
             )
             .then(literal("setGlobalPassword")
-                    .then(argument("password", word())
+                    .then(argument("password", string())
                             .executes( ctx -> setGlobalPassword(
                                     ctx.getSource(),
                                     getString(ctx, "password")
@@ -80,7 +79,7 @@ public class AuthCommand {
             )
             .then(literal("register")
                 .then(argument("uuid", word())
-                    .then(argument("password", word())
+                    .then(argument("password", string())
                         .executes( ctx -> registerUser(
                                 ctx.getSource(),
                                 getString(ctx, "uuid"),
@@ -91,7 +90,7 @@ public class AuthCommand {
             )
             .then(literal("update")
                 .then(argument("uuid", word())
-                    .then(argument("password", word())
+                    .then(argument("password", string())
                         .executes( ctx -> updatePassword(
                                 ctx.getSource(),
                                 getString(ctx, "uuid"),

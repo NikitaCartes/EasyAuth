@@ -8,8 +8,7 @@ import net.minecraft.text.TranslatableText;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.getString;
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
+import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -27,7 +26,7 @@ public class AccountCommand {
                     );
                     return 1;
                 })
-                .then(argument("password", word())
+                .then(argument("password", string())
                         .executes( ctx -> unregister(
                                 ctx.getSource(),
                                 getString(ctx, "password")
@@ -36,14 +35,14 @@ public class AccountCommand {
                 )
             )
             .then(literal("changePassword") //todo mongodb update
-                .then(argument("old password", word())
+                .then(argument("old password", string())
                     .executes(ctx -> {
                         ctx.getSource().getPlayer().sendMessage(
                                 new TranslatableText("text.easyauth.enterNewPassword"),
                                 false);
                         return 1;
                     })
-                    .then(argument("new password", word())
+                    .then(argument("new password", string())
                             .executes( ctx -> changePassword(
                                     ctx.getSource(),
                                     getString(ctx, "old password"),

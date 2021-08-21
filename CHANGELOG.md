@@ -1,3 +1,9 @@
+### 1.9.7, Minecraft 1.17.1, 1.17.0
+
+1) Fix crash on account unregistering
+2) Add alias `\l` for `\login` and setting for disabling it
+3) Allow special characters like `@,#!` in password (you will need to enclose password in quotes if you use them)
+
 ### 1.9.6, Minecraft 1.17.1, 1.17.0
 
 1) Fix [#11](https://github.com/NikitaCartes/EasyAuth/issues/11)

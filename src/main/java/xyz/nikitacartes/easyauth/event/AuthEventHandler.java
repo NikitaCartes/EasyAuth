@@ -116,7 +116,7 @@ public class AuthEventHandler {
         String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache = playerCacheMap.get(uuid);
 
-        if(playerCache.isAuthenticated) {
+        if(playerCache != null && playerCache.isAuthenticated) {
             playerCache.lastIp = player.getIp();
             playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);
 
@@ -138,6 +138,7 @@ public class AuthEventHandler {
         if(
             !((PlayerAuth) player).isAuthenticated() &&
             !message.startsWith("/login") &&
+            !(message.startsWith("/l") && config.experimental.enableAliases) &&
             !message.startsWith("/register") &&
             (!config.experimental.allowChat || message.startsWith("/"))
         ) {

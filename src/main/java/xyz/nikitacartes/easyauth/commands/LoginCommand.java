@@ -2,6 +2,7 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
@@ -17,8 +18,14 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
 public class LoginCommand {
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-        // Registering the "/login" command
-        dispatcher.register(literal("login")
+        LiteralCommandNode<ServerCommandSource> node = registerLogin(dispatcher); // Registering the "/login" command
+        if (config.experimental.enableAliases) {
+            dispatcher.register(literal("l").redirect(node));
+        }
+    }
+
+    public static LiteralCommandNode<ServerCommandSource> registerLogin(CommandDispatcher<ServerCommandSource> dispatcher) {
+        return dispatcher.register(literal("login")
                 .then(argument("password", word())
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))

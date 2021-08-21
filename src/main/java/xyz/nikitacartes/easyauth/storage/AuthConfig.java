@@ -265,6 +265,11 @@ public class AuthConfig {
          * so players will be teleported after each packet.
          */
         public long teleportationTimeoutInMs = 5;
+        /**
+         * Enabling or disabling aliases.
+         * For now, it's only affects `\l` as alias for `\login`
+         */
+        public boolean enableAliases = true;
     }
 
     public MainConfig main = new MainConfig();

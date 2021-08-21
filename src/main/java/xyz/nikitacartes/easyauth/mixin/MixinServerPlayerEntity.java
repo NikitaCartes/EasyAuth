@@ -190,6 +190,9 @@ public class MixinServerPlayerEntity implements PlayerAuth {
             if(kickTimer <= 0 && player.networkHandler.getConnection().isOpen()) {
                 player.networkHandler.disconnect(new TranslatableText("text.easyauth.timeExpired"));
             }
+            else if (!playerCacheMap.containsKey(((PlayerAuth) player).getFakeUuid())) {
+                player.networkHandler.disconnect(new TranslatableText("text.easyauth.accountDeleted"));
+            }
             else {
                 // Sending authentication prompt every 10 seconds
                 if(kickTimer % 200 == 0)

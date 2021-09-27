@@ -25,37 +25,33 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Translations
-	modImplementation include("fr.catcore:server-translations-api:${project.server_translations_version}")
+	modImplementation(include("fr.catcore:server-translations-api:${project.server_translations_version}"))
 
 	// Mods
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
-	modImplementation 'com.github.astei:lazydfu:0.1.2'
+	modImplementation "com.github.astei:lazydfu:${lazydfu_version}"
 
 	// Password hashing
 	// Argon2
-	implementation "de.mkammerer:argon2-jvm:${argon2_version}"
-	include "de.mkammerer:argon2-jvm:${argon2_version}"
+	implementation(include("de.mkammerer:argon2-jvm:${argon2_version}"))
 
 	// BCrypt
-	implementation "at.favre.lib:bcrypt:${bcrypt_version}"
-	implementation "at.favre.lib:bytes:${bytes_version}"
-	include "at.favre.lib:bcrypt:${bcrypt_version}"
-	include "at.favre.lib:bytes:${bytes_version}"
+	implementation(include("at.favre.lib:bcrypt:${bcrypt_version}"))
+	implementation(include("at.favre.lib:bytes:${bytes_version}"))
 
 	// Storage
 	// LevelDB database
-	implementation 'org.iq80.leveldb:leveldb:0.12'
-	implementation 'org.iq80.leveldb:leveldb-api:0.12'
-	include 'org.iq80.leveldb:leveldb:0.12'
-	include 'org.iq80.leveldb:leveldb-api:0.12'
+	implementation(include("org.iq80.leveldb:leveldb:${leveldb_version}"))
+	implementation(include("org.iq80.leveldb:leveldb-api:${leveldb_version}"))
 
 	// MongoDB driver
-	implementation 'org.mongodb:mongodb-driver-sync:4.1.0'
-	include 'org.mongodb:mongodb-driver-sync:4.1.0'
+	implementation(include("org.mongodb:mongodb-driver-sync:${mongodb_version}"))
+	implementation(include("org.mongodb:mongodb-driver-core:${mongodb_version}"))
+	implementation(include("org.mongodb:bson:${mongodb_version}"))
 
 	// JNA lib
-	include 'net.java.dev.jna:jna:5.5.0'
+	include "net.java.dev.jna:jna:${jna_version}"
 
 }
 

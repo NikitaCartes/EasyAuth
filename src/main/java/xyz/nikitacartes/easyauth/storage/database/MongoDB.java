@@ -24,7 +24,7 @@ public class MongoDB {
     public static void initialize() {
         mongoClient = MongoClients.create(
                 String.format(
-                        "mongodb://%s:%s@%s:%d/?authSource=%s&useSsl=%b",
+                        "mongodb://%s:%s@%s:%d/?authSource=%s&tls=%b",
                         config.mongoDBCredentials.username,
                         config.mongoDBCredentials.password,
                         config.mongoDBCredentials.host,

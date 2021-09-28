@@ -18,7 +18,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import java.io.File;
 
 @Mixin(PlayerAdvancementTracker.class)
-public class MixinPlayerAdvancementTracker {
+public class PlayerAdvancementTrackerMixin {
 
     @Mutable
     @Shadow

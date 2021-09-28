@@ -30,7 +30,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 @Mixin(ServerPlayerEntity.class)
-public class MixinServerPlayerEntity implements PlayerAuth {
+public class ServerPlayerEntityMixin implements PlayerAuth {
 
     private final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 

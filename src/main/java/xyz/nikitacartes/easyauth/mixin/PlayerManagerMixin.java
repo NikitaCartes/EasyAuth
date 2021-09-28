@@ -24,7 +24,7 @@ import java.util.UUID;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 
 @Mixin(PlayerManager.class)
-public abstract class MixinPlayerManager {
+public abstract class PlayerManagerMixin {
 
     @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("RETURN"))
     private void onPlayerConnect(ClientConnection clientConnection, ServerPlayerEntity serverPlayerEntity, CallbackInfo ci) {

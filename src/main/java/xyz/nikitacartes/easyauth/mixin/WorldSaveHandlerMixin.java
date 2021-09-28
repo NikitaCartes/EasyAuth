@@ -24,7 +24,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 @Mixin(WorldSaveHandler.class)
-public class MixinWorldSaveHandler {
+public class WorldSaveHandlerMixin {
 
     @Final
     @Shadow

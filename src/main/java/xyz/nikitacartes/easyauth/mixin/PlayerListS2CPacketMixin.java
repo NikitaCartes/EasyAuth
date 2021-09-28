@@ -16,7 +16,7 @@ import java.util.List;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 
 @Mixin(PlayerListS2CPacket.class)
-public class MixinPlayerListS2CPacket {
+public class PlayerListS2CPacketMixin {
 
     @ModifyVariable(
             method = "<init>(Lnet/minecraft/network/packet/s2c/play/PlayerListS2CPacket$Action;[Lnet/minecraft/server/network/ServerPlayerEntity;)V",

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Slot.class)
-public abstract class MixinSlot {
+public abstract class SlotMixin {
     // Denying item moving etc.
     @Inject(method = "canTakeItems(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At(value = "HEAD"), cancellable = true)
     private void canTakeItems(PlayerEntity playerEntity, CallbackInfoReturnable<Boolean> cir) {

@@ -21,7 +21,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 
 @Mixin(ServerLoginNetworkHandler.class)
-public abstract class MixinServerLoginNetworkHandler {
+public abstract class ServerLoginNetworkHandlerMixin {
 
     @Shadow
     GameProfile profile;

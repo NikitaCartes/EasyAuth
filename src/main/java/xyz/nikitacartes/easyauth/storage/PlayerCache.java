@@ -34,7 +34,7 @@ public class PlayerCache {
     @Expose
     public String password = "";
     /**
-     * Stores how many times player has tried to login.
+     * Stores how many times player has tried to log in.
      */
     public int loginTries = 0;
     /**

@@ -44,7 +44,7 @@ public class AuthConfig {
         public boolean allowEntityInteract = false;
         /**
          * Maximum login tries before kicking the player from server.
-         * Set to -1 to allow unlimited, not recommended however.
+         * Set to -1 to allow unlimited, not recommended, however.
          */
         public int maxLoginTries = 1;
         /**
@@ -132,7 +132,7 @@ public class AuthConfig {
         /**
          * Whether players who have a valid session should skip the authentication process.
          * You have to set online-mode to true in server.properties!
-         * (cracked players will still be able to enter, but they'll need to login)
+         * (cracked players will still be able to enter, but they'll need to log in)
          *
          * This protects premium usernames from being stolen, since cracked players
          * with name that is found in Mojang database, are kicked.
@@ -143,7 +143,7 @@ public class AuthConfig {
          * Contains a list of lower case (!) player names
          * that should always be treated as offline.
          * <p>
-         * Used when  AuthConfig#premiumAutoLogin is enabled
+         * Used when  AuthConfig#premiumAutoLogin is enabled,
          * and you have some players that want to use username,
          * that is already taken.
          */
@@ -189,7 +189,7 @@ public class AuthConfig {
          */
         public boolean allowMovement = false;
         /**
-         * Allows block "use" - right clicking (e.g. opening a chest).
+         * Allows block "use" - right-clicking (e.g. opening a chest).
          */
         public boolean allowBlockUse = false;
         /**
@@ -224,12 +224,12 @@ public class AuthConfig {
         /**
          * Whether to modify player uuids to offline style.
          * Note: this should be used only if you had your server
-         * running in offline mode and you made the switch to use
+         * running in offline mode, and you made the switch to use
          * AuthConfig#premiumAutoLogin AND your players already
          * have e.g. villager discounts, which are based on uuid.
          * Other things (advancements, playerdata) are migrated
          * automatically, so think before enabling this. In case
-         * an online-mode player changes username, they'll loose all
+         * an online-mode player changes username, they'll lose all
          * their stuff, unless you migrate it manually.
          */
         public boolean forcedOfflineUuids = false;

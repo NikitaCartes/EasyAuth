@@ -125,7 +125,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
 
         if (authenticated) {
             kickTimer = config.main.kickTime * 20;
-            // Updating blocks if needed (if portal rescue action happened)
+            // Updating blocks if needed (in case if portal rescue action happened)
             if (playerCache.wasInPortal) {
                 World world = player.getEntityWorld();
                 BlockPos pos = player.getBlockPos();
@@ -155,7 +155,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     /**
      * Checks whether player can skip authentication process.
      *
-     * @return true if can skip authentication process, otherwise false
+     * @return true if player can skip authentication process, otherwise false
      */
     @Override
     public boolean canSkipAuth() {

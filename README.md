@@ -6,7 +6,7 @@ For Minecraft 1.16 and below you can check [original repository](https://github.
 
 See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 
-[Curseforge](https://www.curseforge.com/minecraft/mc-mods/easyauth), [Modrinth](https://modrinth.com/mod/easyauth)
+[CurseForge](https://www.curseforge.com/minecraft/mc-mods/easyauth), [Modrinth](https://modrinth.com/mod/easyauth)
 
 ### Contributors
 

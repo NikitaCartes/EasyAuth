@@ -62,7 +62,7 @@ public class MixinWorldSaveHandler {
      * Loads offline-uuid player data to compoundTag in order to migrate from offline to online.
      *
      * @param compoundTag null compound tag.
-     * @param player      player who might need migration of datd.
+     * @param player      player who might need migration of data.
      * @return compoundTag containing migrated data.
      */
     @ModifyVariable(

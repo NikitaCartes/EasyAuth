@@ -24,13 +24,13 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 public abstract class MixinServerLoginNetworkHandler {
 
     @Shadow
-    private GameProfile profile;
+    GameProfile profile;
 
     @Shadow
     protected abstract GameProfile toOfflineProfile(GameProfile profile);
 
     @Shadow
-    private ServerLoginNetworkHandler.State state;
+    ServerLoginNetworkHandler.State state;
 
     @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
     private void acceptPlayer(CallbackInfo ci) {

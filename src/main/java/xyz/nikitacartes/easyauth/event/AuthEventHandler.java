@@ -150,7 +150,7 @@ public class AuthEventHandler {
     public static ActionResult onPlayerMove(ServerPlayerEntity player) {
         // Player will fall if enabled (prevent fly kick)
         boolean auth = ((PlayerAuth) player).isAuthenticated();
-        // Otherwise movement should be disabled
+        // Otherwise, movement should be disabled
         if (!auth && !config.experimental.allowMovement) {
             if (System.nanoTime() >= lastAcceptedPacket + config.experimental.teleportationTimeoutInMs * 1000000) {
                 player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());

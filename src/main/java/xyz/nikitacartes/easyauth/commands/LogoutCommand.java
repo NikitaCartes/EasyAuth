@@ -9,7 +9,6 @@ import net.minecraft.text.TranslatableText;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
 import static net.minecraft.server.command.CommandManager.literal;
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
 
 public class LogoutCommand {

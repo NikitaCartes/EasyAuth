@@ -14,6 +14,7 @@ import java.util.Objects;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.DB;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 /**
@@ -106,5 +107,10 @@ public class PlayerCache {
 
     public String toJson() {
         return gson.toJson(this);
+    }
+
+    public static boolean isAuthenticated(String uuid) {
+        PlayerCache playerCache = playerCacheMap.get(uuid);
+        return (playerCache != null && playerCache.isAuthenticated);
     }
 }

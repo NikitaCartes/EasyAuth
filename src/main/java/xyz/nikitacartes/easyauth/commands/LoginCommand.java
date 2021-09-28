@@ -3,6 +3,7 @@ package xyz.nikitacartes.easyauth.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
@@ -55,6 +56,7 @@ public class LoginCommand {
             else if(passwordResult == AuthHelper.PasswordOptions.CORRECT) {
                 player.sendMessage(new TranslatableText("text.easyauth.successfullyAuthenticated"), false);
                 ((PlayerAuth) player).setAuthenticated(true);
+                player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;
             }
             else if(passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {

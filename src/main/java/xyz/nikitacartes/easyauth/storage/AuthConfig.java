@@ -148,6 +148,11 @@ public class AuthConfig {
          */
         public ArrayList<String> forcedOfflinePlayers = new ArrayList<>(Collections.singletonList(""));
 
+        /**
+         * Hide unauthenticated pLayers from player list
+         */
+        public boolean hideUnauthenticatedPLayersFromPlayerList = true;
+
     }
     public static class LangConfig {
         public String globalPasswordSet = "\u00A7aGlobal password was successfully set!";

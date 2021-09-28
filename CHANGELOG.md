@@ -1,3 +1,16 @@
+### 2.0.2, Minecraft 1.17.1
+
+1) Add setting which hide unauthenticated players from tab list
+   - `hideUnauthenticatedPLayersFromPlayerList` in `config.json`
+   - `True` by default
+
+### 2.0.1, Minecraft 1.17.1
+
+1) Fix problem with MongoDB ([#15](https://github.com/NikitaCartes/EasyAuth/issues/15)) 
+2) Change `config.json`:
+   - Delete `mongoDBCredentials` section
+   - Add `MongoDBConnectionString` and `MongoDBDatabase` in main section 
+
 ### 1.9.7, Minecraft 1.17.1, 1.17.0
 
 1) Fix crash on account unregistering

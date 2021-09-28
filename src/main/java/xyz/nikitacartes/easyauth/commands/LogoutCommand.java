@@ -2,6 +2,7 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
@@ -24,6 +25,7 @@ public class LogoutCommand {
         ServerPlayerEntity player = serverCommandSource.getPlayer();
 
         if(!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
+            player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             ((PlayerAuth) player).setAuthenticated(false);
             player.sendMessage(new TranslatableText("text.easyauth.successfulLogout"), false);
         }

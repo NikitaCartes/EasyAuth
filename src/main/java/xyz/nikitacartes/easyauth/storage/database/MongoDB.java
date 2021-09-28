@@ -23,17 +23,9 @@ public class MongoDB {
 
     public static void initialize() {
         mongoClient = MongoClients.create(
-                String.format(
-                        "mongodb://%s:%s@%s:%d/?authSource=%s&tls=%b",
-                        config.mongoDBCredentials.username,
-                        config.mongoDBCredentials.password,
-                        config.mongoDBCredentials.host,
-                        config.mongoDBCredentials.port,
-                        config.mongoDBCredentials.userSourceDatabase,
-                        config.mongoDBCredentials.useSsl
-                )
+                config.main.MongoDBConnectionString
         );
-        MongoDatabase database = mongoClient.getDatabase(config.mongoDBCredentials.easyAuthDatabase);
+        MongoDatabase database = mongoClient.getDatabase(config.main.MongoDBDatabase);
         collection = database.getCollection("players");
     }
 

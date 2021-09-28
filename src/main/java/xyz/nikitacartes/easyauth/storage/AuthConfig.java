@@ -115,42 +115,18 @@ public class AuthConfig {
         public boolean useMongoDB = false;
 
         /**
-         * Credentials for MongoDB database.
+         * Connections String for MongoDB database.
+         * @see <a href="https://docs.mongodb.com/manual/reference/connection-string/" target="_blank">documentation</a>
          * Leave this as-is if you are using LevelDB.
          */
-        public static class MongoDBCredentials {
-            /**
-             * Username for the database access.
-             */
-            public String username = "";
-            /**
-             * Password for the database access.
-             */
-            public String password = "";
-            /**
-             * Database where user with provided credentials
-             * is located.
-             */
-            public String userSourceDatabase = "";
-            /**
-             * Database host (address).
-             */
-            public String host = "localhost";
-            /**
-             * Database port.
-             * Default: 27017
-             */
-            public int port = 27017;
-            /**
-             * Name of the new database in which EasyAuth should
-             * store player data.
-             */
-            public String easyAuthDatabase = "EasyAuthPlayerData";
-            /**
-             * Whether to use ssl connection.
-             */
-            public boolean useSsl = true;
-        }
+        public String MongoDBConnectionString = "mongodb://[username:password@]host[:port][/[defaultauthdb][?options]]";
+
+        /**
+         * Name of the new database in which EasyAuth should
+         * store player data.
+         * Leave this as-is if you are using LevelDB.
+         */
+        public String MongoDBDatabase = "EasyAuthPlayerData";
 
         /**
          * Whether players who have a valid session should skip the authentication process.
@@ -274,7 +250,6 @@ public class AuthConfig {
 
     public MainConfig main = new MainConfig();
     public MainConfig.WorldSpawn worldSpawn = new MainConfig.WorldSpawn();
-    public MainConfig.MongoDBCredentials mongoDBCredentials = new MainConfig.MongoDBCredentials();
     public LangConfig lang = new LangConfig();
     public ExperimentalConfig experimental = new ExperimentalConfig();
 

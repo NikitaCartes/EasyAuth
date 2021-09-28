@@ -26,13 +26,15 @@ public abstract class MixinServerLoginNetworkHandler {
     @Shadow
     private GameProfile profile;
 
-    @Shadow protected abstract GameProfile toOfflineProfile(GameProfile profile);
+    @Shadow
+    protected abstract GameProfile toOfflineProfile(GameProfile profile);
 
-    @Shadow private ServerLoginNetworkHandler.State state;
+    @Shadow
+    private ServerLoginNetworkHandler.State state;
 
     @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
     private void acceptPlayer(CallbackInfo ci) {
-        if(config.experimental.forcedOfflineUuids) {
+        if (config.experimental.forcedOfflineUuids) {
             this.profile = this.toOfflineProfile(this.profile);
         }
     }
@@ -41,6 +43,7 @@ public abstract class MixinServerLoginNetworkHandler {
      * Checks whether the player has purchased an account.
      * If so, server is presented as online, and continues as in normal-online mode.
      * Otherwise, player is marked as ready to be accepted into the game.
+     *
      * @param packet
      * @param ci
      */
@@ -54,19 +57,18 @@ public abstract class MixinServerLoginNetworkHandler {
             cancellable = true
     )
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
-        if(config.main.premiumAutologin) {
+        if (config.main.premiumAutologin) {
             try {
                 String playername = packet.getProfile().getName().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
-                if(playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername)) {
+                if (playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername)) {
                     // Player definitely doesn't have a mojang account
                     state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
                     this.profile = packet.getProfile();
                     ci.cancel();
-                }
-                else if(!mojangAccountNamesCache.contains(playername))  {
+                } else if (!mojangAccountNamesCache.contains(playername)) {
                     // Checking account status from API
                     HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://api.mojang.com/users/profiles/minecraft/" + playername).openConnection();
                     httpsURLConnection.setRequestMethod("GET");
@@ -82,8 +84,7 @@ public abstract class MixinServerLoginNetworkHandler {
                         // Caches the request
                         mojangAccountNamesCache.add(playername);
                         // Authentication continues in original method
-                    }
-                    else if(response == HttpURLConnection.HTTP_NO_CONTENT) {
+                    } else if (response == HttpURLConnection.HTTP_NO_CONTENT) {
                         // Player doesn't have a Mojang account
                         httpsURLConnection.disconnect();
                         state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;

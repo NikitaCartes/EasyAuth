@@ -51,7 +51,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     @Override
     public void hidePosition(boolean hide) {
         PlayerCache cache = playerCacheMap.get(this.getFakeUuid());
-        if(config.experimental.debugMode)
+        if (config.experimental.debugMode)
             logInfo("Teleporting " + player.getName().asString() + (hide ? " to spawn." : " to original position."));
         if (hide) {
             // Saving position
@@ -93,7 +93,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     public String getFakeUuid() {
         // If server is in online mode online-mode UUIDs should be used
         assert server != null;
-        if(server.isOnlineMode() && this.isUsingMojangAccount() && !config.experimental.forcedOfflineUuids)
+        if (server.isOnlineMode() && this.isUsingMojangAccount() && !config.experimental.forcedOfflineUuids)
             return player.getUuidAsString();
         /*
             Lower case is used for Player and PlAyEr to get same UUID (for password storing)
@@ -120,13 +120,13 @@ public class MixinServerPlayerEntity implements PlayerAuth {
         player.setInvisible(!authenticated && config.experimental.playerInvisible);
 
         // Teleporting player (hiding / restoring position)
-        if(config.main.spawnOnJoin)
+        if (config.main.spawnOnJoin)
             this.hidePosition(!authenticated);
 
-        if(authenticated) {
+        if (authenticated) {
             kickTimer = config.main.kickTime * 20;
             // Updating blocks if needed (if portal rescue action happened)
-            if(playerCache.wasInPortal) {
+            if (playerCache.wasInPortal) {
                 World world = player.getEntityWorld();
                 BlockPos pos = player.getBlockPos();
 
@@ -147,7 +147,7 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     @Override
     public Text getAuthMessage() {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
-        if(!config.main.enableGlobalPassword && cache.password.isEmpty())
+        if (!config.main.enableGlobalPassword && cache.password.isEmpty())
             return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.registerRequired"));
         return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.loginRequired"));
     }
@@ -180,22 +180,20 @@ public class MixinServerPlayerEntity implements PlayerAuth {
     @Override
     public boolean isAuthenticated() {
         String uuid = ((PlayerAuth) player).getFakeUuid();
-        return  this.canSkipAuth() || (playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated);
+        return this.canSkipAuth() || (playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated);
     }
 
     @Inject(method = "playerTick()V", at = @At("HEAD"), cancellable = true)
     private void playerTick(CallbackInfo ci) {
-        if(!this.isAuthenticated()) {
+        if (!this.isAuthenticated()) {
             // Checking player timer
-            if(kickTimer <= 0 && player.networkHandler.getConnection().isOpen()) {
+            if (kickTimer <= 0 && player.networkHandler.getConnection().isOpen()) {
                 player.networkHandler.disconnect(new TranslatableText("text.easyauth.timeExpired"));
-            }
-            else if (!playerCacheMap.containsKey(((PlayerAuth) player).getFakeUuid())) {
+            } else if (!playerCacheMap.containsKey(((PlayerAuth) player).getFakeUuid())) {
                 player.networkHandler.disconnect(new TranslatableText("text.easyauth.accountDeleted"));
-            }
-            else {
+            } else {
                 // Sending authentication prompt every 10 seconds
-                if(kickTimer % 200 == 0)
+                if (kickTimer % 200 == 0)
                     player.sendMessage(this.getAuthMessage(), false);
                 --kickTimer;
             }

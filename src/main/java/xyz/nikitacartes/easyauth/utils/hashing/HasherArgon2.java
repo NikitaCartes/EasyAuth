@@ -14,14 +14,13 @@ public class HasherArgon2 {
      * Verifies password
      *
      * @param password character array of password string
-     * @param hashed hashed password
+     * @param hashed   hashed password
      * @return true if password was correct
      */
     public static boolean verify(char[] password, String hashed) {
         try {
             return HASHER.verify(hashed, password);
-        }
-        catch (Error e) {
+        } catch (Error e) {
             logError("Argon2 password verification error: " + e);
             return false;
         } finally {

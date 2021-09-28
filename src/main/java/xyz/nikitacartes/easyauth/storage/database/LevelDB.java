@@ -67,7 +67,7 @@ public class LevelDB {
     @Deprecated
     public static boolean registerUser(String uuid, String data) {
         try {
-            if(!isUserRegistered(uuid)) {
+            if (!isUserRegistered(uuid)) {
                 levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
                 return true;
             }
@@ -127,9 +127,9 @@ public class LevelDB {
      * @param uuid uuid of the player to get data for.
      * @return data as string if player has it, otherwise empty string.
      */
-    public static String getUserData(String uuid){
+    public static String getUserData(String uuid) {
         try {
-            if(isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
+            if (isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);
         } catch (Error e) {
             logError("Error getting data: " + e.getMessage());

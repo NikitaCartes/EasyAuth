@@ -18,40 +18,40 @@ public class AccountCommand {
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/account" command
         dispatcher.register(literal("account")
-            .then(literal("unregister")
-                .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(
-                            new TranslatableText("text.easyauth.enterPassword"),
-                            false
-                    );
-                    return 1;
-                })
-                .then(argument("password", string())
-                        .executes( ctx -> unregister(
-                                ctx.getSource(),
-                                getString(ctx, "password")
+                .then(literal("unregister")
+                        .executes(ctx -> {
+                            ctx.getSource().getPlayer().sendMessage(
+                                    new TranslatableText("text.easyauth.enterPassword"),
+                                    false
+                            );
+                            return 1;
+                        })
+                        .then(argument("password", string())
+                                .executes(ctx -> unregister(
+                                                ctx.getSource(),
+                                                getString(ctx, "password")
+                                        )
                                 )
                         )
                 )
-            )
-            .then(literal("changePassword") //todo mongodb update
-                .then(argument("old password", string())
-                    .executes(ctx -> {
-                        ctx.getSource().getPlayer().sendMessage(
-                                new TranslatableText("text.easyauth.enterNewPassword"),
-                                false);
-                        return 1;
-                    })
-                    .then(argument("new password", string())
-                            .executes( ctx -> changePassword(
-                                    ctx.getSource(),
-                                    getString(ctx, "old password"),
-                                    getString(ctx, "new password")
-                                    )
-                            )
-                    )
+                .then(literal("changePassword") //todo mongodb update
+                        .then(argument("old password", string())
+                                .executes(ctx -> {
+                                    ctx.getSource().getPlayer().sendMessage(
+                                            new TranslatableText("text.easyauth.enterNewPassword"),
+                                            false);
+                                    return 1;
+                                })
+                                .then(argument("new password", string())
+                                        .executes(ctx -> changePassword(
+                                                        ctx.getSource(),
+                                                        getString(ctx, "old password"),
+                                                        getString(ctx, "new password")
+                                                )
+                                        )
+                                )
+                        )
                 )
-            )
         );
     }
 
@@ -105,8 +105,7 @@ public class AccountCommand {
                 if (newPass.length() < config.main.minPasswordChars) {
                     player.sendMessage(new TranslatableText("text.easyauth.minPasswordChars", config.main.minPasswordChars), false);
                     return;
-                }
-                else if (newPass.length() > config.main.maxPasswordChars && config.main.maxPasswordChars != -1) {
+                } else if (newPass.length() > config.main.maxPasswordChars && config.main.maxPasswordChars != -1) {
                     player.sendMessage(new TranslatableText("text.easyauth.maxPasswordChars", config.main.maxPasswordChars), false);
                     return;
                 }
@@ -116,11 +115,10 @@ public class AccountCommand {
                         new TranslatableText("text.easyauth.passwordUpdated"),
                         false
                 );
-            }
-            else
+            } else
                 player.sendMessage(
-                    new TranslatableText("text.easyauth.wrongPassword"),
-                    false
+                        new TranslatableText("text.easyauth.wrongPassword"),
+                        false
                 );
         });
         return 0;

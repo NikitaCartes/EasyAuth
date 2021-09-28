@@ -49,22 +49,20 @@ public class LoginCommand {
             int maxLoginTries = config.main.maxLoginTries;
             AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(uuid, pass.toCharArray());
 
-            if(playerCacheMap.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
+            if (playerCacheMap.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
                 player.networkHandler.disconnect(new TranslatableText("text.easyauth.loginTriesExceeded"));
                 return;
-            }
-            else if(passwordResult == AuthHelper.PasswordOptions.CORRECT) {
+            } else if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
                 player.sendMessage(new TranslatableText("text.easyauth.successfullyAuthenticated"), false);
                 ((PlayerAuth) player).setAuthenticated(true);
                 player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;
-            }
-            else if(passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
+            } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
                 player.sendMessage(new TranslatableText("text.easyauth.registerRequired"), false);
                 return;
             }
             // Kicking the player out
-            else if(maxLoginTries == 1) {
+            else if (maxLoginTries == 1) {
                 player.networkHandler.disconnect(new TranslatableText("text.easyauth.wrongPassword"));
                 return;
             }

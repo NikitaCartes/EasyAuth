@@ -14,7 +14,7 @@ public class DBHelper {
      * Connects to the DB.
      */
     public void openConnection() {
-        if(config.main.useMongoDB)
+        if (config.main.useMongoDB)
             MongoDB.initialize();
         else
             LevelDB.initialize();
@@ -24,7 +24,7 @@ public class DBHelper {
      * Closes database connection.
      */
     public void close() {
-        if(config.main.useMongoDB && MongoDB.close() || LevelDB.close())
+        if (config.main.useMongoDB && MongoDB.close() || LevelDB.close())
             logInfo("Database connection closed successfully.");
     }
 
@@ -46,7 +46,7 @@ public class DBHelper {
      * @return true if operation was successful, otherwise false
      */
     public boolean registerUser(String uuid, String data) {
-        if(config.main.useMongoDB)
+        if (config.main.useMongoDB)
             //return MongoDB.registerUser(uuid, data);
             System.out.println("Not implemented yet.");
         return LevelDB.registerUser(uuid, data);
@@ -68,7 +68,7 @@ public class DBHelper {
      * @param uuid uuid of player to delete data for
      */
     public void deleteUserData(String uuid) {
-        if(config.main.useMongoDB)
+        if (config.main.useMongoDB)
             MongoDB.deleteUserData(uuid);
         else
             LevelDB.deleteUserData(uuid);
@@ -81,7 +81,7 @@ public class DBHelper {
      * @param data data to put inside database
      */
     public void updateUserData(String uuid, String data) {
-        if(config.main.useMongoDB)
+        if (config.main.useMongoDB)
             //MongoDB.updateUserData(uuid, data);
             System.out.println("Not implemented yet.");
         else
@@ -94,13 +94,13 @@ public class DBHelper {
      * @param uuid uuid of the player to get data for.
      * @return data as string if player has it, otherwise empty string.
      */
-    public String getUserData(String uuid){
+    public String getUserData(String uuid) {
         return config.main.useMongoDB ? MongoDB.getUserData(uuid) : LevelDB.getUserData(uuid);
     }
 
     public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         // Saving player data.
-        if(config.main.useMongoDB)
+        if (config.main.useMongoDB)
             MongoDB.saveFromCache(playerCacheMap);
         else
             LevelDB.saveFromCache(playerCacheMap);

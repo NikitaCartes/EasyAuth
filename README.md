@@ -13,6 +13,7 @@ See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 * Many thanks for @samolego, author of SimpleAuth, for his mod, and his permission on creating this fork
 
 Thank you so much for those who have already helped with translation of the mod!
+
 * @alphatoasterous (Russian)
 * @Neubulae (Chinese)
 * @Zailer43 (Spanish)
@@ -21,9 +22,10 @@ Thank you so much for those who have already helped with translation of the mod!
 * @luizffgv (Brazilian Portuguese)
 * @Uxzylon (French)
 
-
 ### License
+
 Libraries that the project is using:
+
 - `Argon2 (LGPLv3)` https://github.com/phxql/argon2-jvm
 - `BCrypt (Apache 2)` https://github.com/patrickfav/bcrypt
 - `Bytes (Apache 2)` https://github.com/patrickfav/bytes-java
@@ -32,7 +34,9 @@ Libraries that the project is using:
 
 This project licensed under the `MIT` license.
 
+### Dependencies
 
-### Dependencies 
 This mod requires:
-- `Fabric API` [CurseForge](https://www.curseforge.com/minecraft/mc-mods/fabric-api), [Modrinth](https://modrinth.com/mod/fabric-api)
+
+- `Fabric API` [CurseForge](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
+  , [Modrinth](https://modrinth.com/mod/fabric-api)

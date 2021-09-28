@@ -28,18 +28,18 @@ public class MixinPlayerAdvancementTracker {
     @Shadow
     private ServerPlayerEntity owner;
 
-    @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V",  at = @At("HEAD"))
+    @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V", at = @At("HEAD"))
     private void startMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        if(config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.advancementFile.isFile()) {
+        if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.advancementFile.isFile()) {
             // Migrate
             String playername = owner.getGameProfile().getName();
             this.advancementFile = new File(this.advancementFile.getParent(), PlayerEntity.getOfflinePlayerUuid(playername) + ".json");
         }
     }
 
-    @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V",  at = @At("TAIL"))
+    @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V", at = @At("TAIL"))
     private void endMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        if(config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount()) {
+        if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount()) {
             // Changes the file name to use online UUID
             this.advancementFile = new File(this.advancementFile.getParent(), owner.getUuid() + ".json");
         }

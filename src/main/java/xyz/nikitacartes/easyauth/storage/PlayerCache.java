@@ -81,18 +81,17 @@ public class PlayerCache {
 
 
     public static PlayerCache fromJson(ServerPlayerEntity player, String fakeUuid) {
-        if(config.experimental.debugMode)
+        if (config.experimental.debugMode)
             logInfo("Creating cache for " + Objects.requireNonNull(player).getGameProfile().getName());
 
         String json = DB.getUserData(fakeUuid);
         PlayerCache playerCache;
-        if(!json.isEmpty()) {
+        if (!json.isEmpty()) {
             // Parsing data from DB
             playerCache = gson.fromJson(json, PlayerCache.class);
-        }
-        else
+        } else
             playerCache = new PlayerCache();
-        if(player != null) {
+        if (player != null) {
             // Setting position cache
             playerCache.lastLocation.dimension = player.getServerWorld();
             playerCache.lastLocation.position = player.getPos();

@@ -13,6 +13,7 @@ public interface ServerStatHandlerAccessor {
     @Accessor("file")
     File getFile();
 
-    @Accessor("file") @Mutable
+    @Accessor("file")
+    @Mutable
     void setFile(File file);
 }

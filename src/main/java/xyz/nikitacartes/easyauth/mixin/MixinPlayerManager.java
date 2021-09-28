@@ -43,7 +43,7 @@ public abstract class MixinPlayerManager {
 
         LiteralText returnText = AuthEventHandler.checkCanPlayerJoinServer(profile, manager);
 
-        if(returnText != null) {
+        if (returnText != null) {
             // Canceling player joining with the returnText message
             cir.setReturnValue(returnText);
         }
@@ -59,7 +59,7 @@ public abstract class MixinPlayerManager {
     )
     private void migrateOfflineStats(PlayerEntity player, CallbackInfoReturnable<ServerStatHandler> cir, UUID uUID, ServerStatHandler serverStatHandler, File serverStatsDir, File playerStatFile) {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
-        if(config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
+        if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
             String playername = player.getGameProfile().getName();
             File offlineFile = new File(onlineFile.getParent(), PlayerEntity.getOfflinePlayerUuid(playername) + ".json");
             offlineFile.renameTo(onlineFile);

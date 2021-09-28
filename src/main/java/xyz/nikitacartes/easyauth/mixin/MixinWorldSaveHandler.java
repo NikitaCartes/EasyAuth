@@ -62,7 +62,7 @@ public class MixinWorldSaveHandler {
      * Loads offline-uuid player data to compoundTag in order to migrate from offline to online.
      *
      * @param compoundTag null compound tag.
-     * @param player player who might need migration of datd.
+     * @param player      player who might need migration of datd.
      * @return compoundTag containing migrated data.
      */
     @ModifyVariable(
@@ -75,19 +75,17 @@ public class MixinWorldSaveHandler {
     private NbtCompound migratePlayerData(NbtCompound compoundTag, PlayerEntity player) {
         // Checking for offline player data only if online doesn't exist yet
         String playername = player.getGameProfile().getName().toLowerCase();
-        if(config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
-            if(config.experimental.debugMode)
-                    logInfo("Migrating data for " + playername);
-                File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
+        if (config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
+            if (config.experimental.debugMode)
+                logInfo("Migrating data for " + playername);
+            File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
             if (file.exists() && file.isFile())
                 try {
                     compoundTag = NbtIo.readCompressed(new FileInputStream(file));
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     LOGGER.warn("Failed to load player data for {}", playername);
                 }
-        }
-        else if(config.experimental.debugMode)
+        } else if (config.experimental.debugMode)
             logInfo("Not migrating " +
                     playername +
                     ", as premium status is: " +

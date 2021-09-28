@@ -25,80 +25,81 @@ public class AuthCommand {
 
     /**
      * Registers the "/auth" command
+     *
      * @param dispatcher
      */
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("auth")
-            .requires(source -> source.hasPermissionLevel(4))
-            .then(literal("reload")
-                .executes( ctx -> reloadConfig(ctx.getSource().getEntity()))
-            )
-            .then(literal("setGlobalPassword")
-                    .then(argument("password", string())
-                            .executes( ctx -> setGlobalPassword(
-                                    ctx.getSource(),
-                                    getString(ctx, "password")
-                            ))
-                    )
-            )
-            .then(literal("setSpawn")
-                    .executes( ctx -> setSpawn(
-                        ctx.getSource(),
-                        ctx.getSource().getEntityOrThrow().getEntityWorld().getRegistryKey().getValue(),
-                        ctx.getSource().getEntityOrThrow().getX(),
-                        ctx.getSource().getEntityOrThrow().getY(),
-                        ctx.getSource().getEntityOrThrow().getZ(),
-                        ctx.getSource().getEntityOrThrow().getYaw(),
-                        ctx.getSource().getEntityOrThrow().getPitch()
-                    ))
-                    .then(argument("dimension", DimensionArgumentType.dimension())
-                            .then(argument("position", BlockPosArgumentType.blockPos())
-                                .then(argument("angle", RotationArgumentType.rotation())
-                                    .executes(ctx -> setSpawn(
-                                            ctx.getSource(),
-                                            DimensionArgumentType.getDimensionArgument(ctx, "dimension").getRegistryKey().getValue(),
-                                            BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
-                                            // +1 to not spawn player in ground
-                                            BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,
-                                            BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ(),
-                                            RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).y,
-                                            RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).x
-                                    )
-                                )
-                            )
+                .requires(source -> source.hasPermissionLevel(4))
+                .then(literal("reload")
+                        .executes(ctx -> reloadConfig(ctx.getSource().getEntity()))
+                )
+                .then(literal("setGlobalPassword")
+                        .then(argument("password", string())
+                                .executes(ctx -> setGlobalPassword(
+                                        ctx.getSource(),
+                                        getString(ctx, "password")
+                                ))
                         )
-                    )
-            )
-            .then(literal("remove")
-                .then(argument("uuid", word())
-                    .executes( ctx -> removeAccount(
-                            ctx.getSource(),
-                            getString(ctx, "uuid")
-                    ))
                 )
-            )
-            .then(literal("register")
-                .then(argument("uuid", word())
-                    .then(argument("password", string())
-                        .executes( ctx -> registerUser(
+                .then(literal("setSpawn")
+                        .executes(ctx -> setSpawn(
                                 ctx.getSource(),
-                                getString(ctx, "uuid"),
-                                getString(ctx, "password")
+                                ctx.getSource().getEntityOrThrow().getEntityWorld().getRegistryKey().getValue(),
+                                ctx.getSource().getEntityOrThrow().getX(),
+                                ctx.getSource().getEntityOrThrow().getY(),
+                                ctx.getSource().getEntityOrThrow().getZ(),
+                                ctx.getSource().getEntityOrThrow().getYaw(),
+                                ctx.getSource().getEntityOrThrow().getPitch()
                         ))
-                    )
+                        .then(argument("dimension", DimensionArgumentType.dimension())
+                                .then(argument("position", BlockPosArgumentType.blockPos())
+                                        .then(argument("angle", RotationArgumentType.rotation())
+                                                .executes(ctx -> setSpawn(
+                                                                ctx.getSource(),
+                                                                DimensionArgumentType.getDimensionArgument(ctx, "dimension").getRegistryKey().getValue(),
+                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
+                                                                // +1 to not spawn player in ground
+                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,
+                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ(),
+                                                                RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).y,
+                                                                RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).x
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
                 )
-            )
-            .then(literal("update")
-                .then(argument("uuid", word())
-                    .then(argument("password", string())
-                        .executes( ctx -> updatePassword(
-                                ctx.getSource(),
-                                getString(ctx, "uuid"),
-                                getString(ctx, "password")
-                        ))
-                    )
+                .then(literal("remove")
+                        .then(argument("uuid", word())
+                                .executes(ctx -> removeAccount(
+                                        ctx.getSource(),
+                                        getString(ctx, "uuid")
+                                ))
+                        )
                 )
-            )
+                .then(literal("register")
+                        .then(argument("uuid", word())
+                                .then(argument("password", string())
+                                        .executes(ctx -> registerUser(
+                                                ctx.getSource(),
+                                                getString(ctx, "uuid"),
+                                                getString(ctx, "password")
+                                        ))
+                                )
+                        )
+                )
+                .then(literal("update")
+                        .then(argument("uuid", word())
+                                .then(argument("password", string())
+                                        .executes(ctx -> updatePassword(
+                                                ctx.getSource(),
+                                                getString(ctx, "uuid"),
+                                                getString(ctx, "password")
+                                        ))
+                                )
+                        )
+                )
         );
     }
 
@@ -111,7 +112,7 @@ public class AuthCommand {
     public static int reloadConfig(Entity sender) {
         config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
 
-        if(sender != null)
+        if (sender != null)
             ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.configurationReloaded"), false);
         else
             logInfo(config.lang.configurationReloaded);
@@ -121,7 +122,7 @@ public class AuthCommand {
     /**
      * Sets global password.
      *
-     * @param source executioner of the command
+     * @param source   executioner of the command
      * @param password password that will be set
      * @return 0
      */
@@ -136,7 +137,7 @@ public class AuthCommand {
             config.save(new File("./mods/EasyAuth/config.json"));
         });
 
-        if(sender != null)
+        if (sender != null)
             ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.globalPasswordSet"), false);
         else
             logInfo(config.lang.globalPasswordSet);
@@ -147,12 +148,12 @@ public class AuthCommand {
      * Sets {@link AuthConfig.MainConfig.WorldSpawn global spawn}.
      *
      * @param source executioner of the command
-     * @param world world id of global spawn
-     * @param x x coordinate of the global spawn
-     * @param y y coordinate of the global spawn
-     * @param z z coordinate of the global spawn
-     * @param yaw player yaw (y rotation)
-     * @param pitch player pitch (x rotation)
+     * @param world  world id of global spawn
+     * @param x      x coordinate of the global spawn
+     * @param y      y coordinate of the global spawn
+     * @param z      z coordinate of the global spawn
+     * @param yaw    player yaw (y rotation)
+     * @param pitch  player pitch (x rotation)
      * @return 0
      */
     private static int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z, float yaw, float pitch) {
@@ -168,7 +169,7 @@ public class AuthCommand {
 
         // Getting sender
         Entity sender = source.getEntity();
-        if(sender != null)
+        if (sender != null)
             ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.worldSpawnSet"), false);
         else
             logInfo(config.lang.worldSpawnSet);
@@ -179,7 +180,7 @@ public class AuthCommand {
      * Deletes (unregisters) player's account.
      *
      * @param source executioner of the command
-     * @param uuid uuid of the player to delete account for
+     * @param uuid   uuid of the player to delete account for
      * @return 0
      */
     private static int removeAccount(ServerCommandSource source, String uuid) {
@@ -189,7 +190,7 @@ public class AuthCommand {
             playerCacheMap.remove(uuid);
         });
 
-        if(sender != null)
+        if (sender != null)
             ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.userdataDeleted"), false);
         else
             logInfo(config.lang.userdataDeleted);
@@ -199,8 +200,8 @@ public class AuthCommand {
     /**
      * Creates account for player.
      *
-     * @param source executioner of the command
-     * @param uuid uuid of the player to create account for
+     * @param source   executioner of the command
+     * @param uuid     uuid of the player to create account for
      * @param password new password for the player account
      * @return 0
      */
@@ -210,10 +211,9 @@ public class AuthCommand {
 
         THREADPOOL.submit(() -> {
             PlayerCache playerCache;
-            if(playerCacheMap.containsKey(uuid)) {
+            if (playerCacheMap.containsKey(uuid)) {
                 playerCache = playerCacheMap.get(uuid);
-            }
-            else {
+            } else {
                 playerCache = PlayerCache.fromJson(null, uuid);
             }
 
@@ -231,8 +231,8 @@ public class AuthCommand {
     /**
      * Force-updates the player's password.
      *
-     * @param source executioner of the command
-     * @param uuid uuid of the player to update data for
+     * @param source   executioner of the command
+     * @param uuid     uuid of the player to update data for
      * @param password new password for the player
      * @return 0
      */
@@ -242,15 +242,14 @@ public class AuthCommand {
 
         THREADPOOL.submit(() -> {
             PlayerCache playerCache;
-            if(playerCacheMap.containsKey(uuid)) {
+            if (playerCacheMap.containsKey(uuid)) {
                 playerCache = playerCacheMap.get(uuid);
-            }
-            else {
+            } else {
                 playerCache = PlayerCache.fromJson(null, uuid);
             }
 
             playerCacheMap.put(uuid, playerCache);
-            if(!playerCacheMap.get(uuid).password.isEmpty()) {
+            if (!playerCacheMap.get(uuid).password.isEmpty()) {
                 if (sender != null)
                     ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.userNotRegistered"), false);
                 else

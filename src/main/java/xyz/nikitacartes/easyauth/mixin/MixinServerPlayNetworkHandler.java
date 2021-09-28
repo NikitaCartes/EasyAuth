@@ -47,15 +47,16 @@ public abstract class MixinServerPlayNetworkHandler {
             cancellable = true
     )
     private void onPlayerAction(PlayerActionC2SPacket packet, CallbackInfo ci) {
-        if(packet.getAction() == SWAP_ITEM_WITH_OFFHAND) {
+        if (packet.getAction() == SWAP_ITEM_WITH_OFFHAND) {
             ActionResult result = AuthEventHandler.onTakeItem(this.player);
             if (result == ActionResult.FAIL) {
                 ci.cancel();
             }
         }
     }
+
     @Inject(
-            method="onPlayerMove(Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket;)V",
+            method = "onPlayerMove(Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
                     // Thanks to Liach for helping me out!

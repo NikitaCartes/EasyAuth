@@ -24,12 +24,11 @@ public class LogoutCommand {
     private static int logout(ServerCommandSource serverCommandSource) throws CommandSyntaxException {
         ServerPlayerEntity player = serverCommandSource.getPlayer();
 
-        if(!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
+        if (!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
             player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             ((PlayerAuth) player).setAuthenticated(false);
             player.sendMessage(new TranslatableText("text.easyauth.successfulLogout"), false);
-        }
-        else
+        } else
             player.sendMessage(new TranslatableText("text.easyauth.cannotLogout"), false);
         return 1;
     }

@@ -61,6 +61,7 @@ public interface PlayerAuth {
 
     /**
      * Whether the player is using the mojang account
+     *
      * @return true if paid, false if cracked
      */
     boolean isUsingMojangAccount();

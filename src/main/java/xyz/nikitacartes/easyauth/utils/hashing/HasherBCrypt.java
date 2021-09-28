@@ -10,14 +10,13 @@ public class HasherBCrypt {
      * Verifies password
      *
      * @param password character array of password string
-     * @param hashed hashed password
+     * @param hashed   hashed password
      * @return true if password was correct
      */
     public static boolean verify(char[] password, String hashed) {
         try {
             return BCrypt.verifyer().verify(password, hashed).verified;
-        }
-        catch (Error e) {
+        } catch (Error e) {
             logError("BCrypt password verification error: " + e);
             return false;
         }

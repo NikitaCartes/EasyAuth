@@ -37,8 +37,8 @@ public class MongoDB {
         collection.deleteOne(eq("UUID", uuid));
     }
 
-    public static String getUserData(String uuid){
-        if(isUserRegistered(uuid)) {
+    public static String getUserData(String uuid) {
+        if (isUserRegistered(uuid)) {
             Document data = collection.find(eq("UUID", uuid)).iterator().next();
             return data.toJson();
         }
@@ -50,27 +50,26 @@ public class MongoDB {
         List<ReplaceOneModel<Document>> updateList = new ArrayList<>();
         playerCacheMap.forEach((uuid, playerCache) -> {
             // Save as BSON not JSON stringified
-            if(!isUserRegistered(uuid)) {
+            if (!isUserRegistered(uuid)) {
                 writeList.add(new InsertOneModel<>(
-                        new Document("UUID", uuid)
-                            .append("password", playerCache.password)
+                                new Document("UUID", uuid)
+                                        .append("password", playerCache.password)
                         )
                 );
-            }
-            else {
+            } else {
                 updateList.add(new ReplaceOneModel<>(eq("UUID", uuid),
-                        new Document("UUID", uuid)
-                                .append("password", playerCache.password)
-                                .append("is_authenticated", playerCache.isAuthenticated)
-                                .append("last_ip", playerCache.lastIp)
-                                .append("valid_until", playerCache.validUntil)
+                                new Document("UUID", uuid)
+                                        .append("password", playerCache.password)
+                                        .append("is_authenticated", playerCache.isAuthenticated)
+                                        .append("last_ip", playerCache.lastIp)
+                                        .append("valid_until", playerCache.validUntil)
                         )
                 );
             }
         });
-        if(!writeList.isEmpty())
+        if (!writeList.isEmpty())
             collection.bulkWrite(writeList);
-        if(!updateList.isEmpty())
+        if (!updateList.isEmpty())
             collection.bulkWrite(updateList);
 
 

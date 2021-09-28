@@ -1,20 +1,21 @@
 /**
  * This class has been adapted from old Lithium's config file
+ *
  * @author jellysquid https://github.com/jellysquid3/Lithium/blob/1.15.x/fabric/src/main/java/me/jellysquid/mods/lithium/common/config/LithiumConfig.java
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * <p>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package xyz.nikitacartes.easyauth.storage;
 
 import com.google.gson.Gson;
@@ -154,6 +155,7 @@ public class AuthConfig {
         public boolean hideUnauthenticatedPLayersFromPlayerList = true;
 
     }
+
     public static class LangConfig {
         public String globalPasswordSet = "\u00A7aGlobal password was successfully set!";
         public String userdataDeleted = "\u00A7aUserdata deleted.";
@@ -164,6 +166,7 @@ public class AuthConfig {
         public String worldSpawnSet = "\u00A7aSpawn for logging in was set successfully.";
         public String userNotRegistered = "\u00A7cThis player is not registered!";
     }
+
     public static class ExperimentalConfig {
         /**
          * Prevents player being kicked because another player with the same name has joined the server.
@@ -272,12 +275,12 @@ public class AuthConfig {
                     new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
             )) {
                 config = gson.fromJson(fileReader, AuthConfig.class);
-                if(!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
-                    if(config.experimental.forcedOfflineUuids) {
+                if (!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
+                    if (config.experimental.forcedOfflineUuids) {
                         logInfo("Server is in offline mode, forcedOfflineUuids option is irrelevant. Setting it to false.");
                         config.experimental.forcedOfflineUuids = false;
                     }
-                    if(config.main.premiumAutologin) {
+                    if (config.main.premiumAutologin) {
                         logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
                         config.main.premiumAutologin = false;
                     }
@@ -285,8 +288,7 @@ public class AuthConfig {
             } catch (IOException e) {
                 throw new RuntimeException("[EasyAuth] Problem occurred when trying to load config: ", e);
             }
-        }
-        else {
+        } else {
             config = new AuthConfig();
         }
         config.save(file);

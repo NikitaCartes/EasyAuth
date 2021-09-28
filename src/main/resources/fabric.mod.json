@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "easyauth",
   "version": "${version}",
-
   "name": "Easy Authentication Mod",
   "description": "A mod that tries to keep authentication for players easy via commands.",
   "authors": [
@@ -13,7 +12,6 @@
     "homepage": "https://github.com/NikitaCartes/EasyAuth",
     "sources": "https://github.com/NikitaCartes/EasyAuth"
   },
-
   "license": "MIT",
   "environment": "server",
   "entrypoints": {

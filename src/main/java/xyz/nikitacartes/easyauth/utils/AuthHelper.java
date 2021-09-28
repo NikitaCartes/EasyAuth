@@ -10,18 +10,17 @@ public class AuthHelper {
     /**
      * Checks password of user
      *
-     * @param uuid uuid of player, stored in database
+     * @param uuid     uuid of player, stored in database
      * @param password password that needs to be checked
      * @return 1 for pass, 0 if password is false, -1 if user is not yet registered
      */
     public static PasswordOptions checkPassword(String uuid, char[] password) {
-        if(config.main.enableGlobalPassword) {
+        if (config.main.enableGlobalPassword) {
             // We have global password enabled
             return verifyPassword(password, config.main.globalPassword) ? PasswordOptions.CORRECT : PasswordOptions.WRONG;
-        }
-        else {
+        } else {
             String hashed = playerCacheMap.get(uuid).password;
-            if(hashed.isEmpty())
+            if (hashed.isEmpty())
                 return PasswordOptions.NOT_REGISTERED;
 
             // Verify password
@@ -36,14 +35,14 @@ public class AuthHelper {
      * @return hashed password as string
      */
     public static String hashPassword(char[] password) {
-        if(config.experimental.useBCryptLibrary)
+        if (config.experimental.useBCryptLibrary)
             return HasherBCrypt.hash(password);
         else
             return HasherArgon2.hash(password);
     }
 
     private static boolean verifyPassword(char[] pass, String hashed) {
-        if(config.experimental.useBCryptLibrary)
+        if (config.experimental.useBCryptLibrary)
             return HasherBCrypt.verify(pass, hashed);
         else
             return HasherArgon2.verify(pass, hashed);

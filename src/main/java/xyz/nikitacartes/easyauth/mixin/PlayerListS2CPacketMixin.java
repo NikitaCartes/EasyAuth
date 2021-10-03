@@ -1,11 +1,13 @@
 package xyz.nikitacartes.easyauth.mixin;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
+import xyz.nikitacartes.easyauth.utils.CarpetHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
 import java.util.ArrayList;
@@ -18,6 +20,12 @@ import static xyz.nikitacartes.easyauth.EasyAuth.config;
 @Mixin(PlayerListS2CPacket.class)
 public class PlayerListS2CPacketMixin {
 
+    private static boolean hideFromTabList(ServerPlayerEntity player) {
+        return !(PlayerCache.isAuthenticated(((PlayerAuth) player).getFakeUuid()) ||
+                (((PlayerAuth) player).isUsingMojangAccount() && config.main.premiumAutologin) ||
+                (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(player)));
+    }
+
     @ModifyVariable(
             method = "<init>(Lnet/minecraft/network/packet/s2c/play/PlayerListS2CPacket$Action;[Lnet/minecraft/server/network/ServerPlayerEntity;)V",
             at = @At("HEAD"),
@@ -26,7 +34,7 @@ public class PlayerListS2CPacketMixin {
         if (config.main.hideUnauthenticatedPLayersFromPlayerList) {
             List<ServerPlayerEntity> temp = new ArrayList<>();
             Collections.addAll(temp, players);
-            temp.removeIf(player -> !PlayerCache.isAuthenticated(((PlayerAuth) player).getFakeUuid()));
+            temp.removeIf(PlayerListS2CPacketMixin::hideFromTabList);
             return temp.toArray(new ServerPlayerEntity[0]);
         }
         return players;
@@ -38,7 +46,7 @@ public class PlayerListS2CPacketMixin {
             argsOnly = true)
     private static Collection<ServerPlayerEntity> playerListS2CPacket(Collection<ServerPlayerEntity> players) {
         if (config.main.hideUnauthenticatedPLayersFromPlayerList) {
-            players.removeIf(player -> !PlayerCache.isAuthenticated(((PlayerAuth) player).getFakeUuid()));
+            players.removeIf(PlayerListS2CPacketMixin::hideFromTabList);
         }
         return players;
     }

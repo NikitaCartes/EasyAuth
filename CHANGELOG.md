@@ -1,3 +1,12 @@
+### 2.0.3, Minecraft 1.17.1, 21w37a+
+
+1) Fix problem with registration ([#14](https://github.com/NikitaCartes/EasyAuth/issues/14))
+    - argon2 library split to two libs, and I didn't include one of it
+    - Update libraries
+2) Improve hiding in TabList
+    - Now premium players shown in it
+    - as well as carpet's fake-player
+
 ### 2.0.2, Minecraft 1.17.1
 
 1) Add setting which hide unauthenticated players from tab list

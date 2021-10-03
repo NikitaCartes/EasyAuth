@@ -35,6 +35,7 @@ dependencies {
     // Password hashing
     // Argon2
     implementation(include("de.mkammerer:argon2-jvm:${argon2_version}"))
+    implementation(include("de.mkammerer:argon2-jvm-nolibs:${argon2_version}"))
 
     // BCrypt
     implementation(include("at.favre.lib:bcrypt:${bcrypt_version}"))

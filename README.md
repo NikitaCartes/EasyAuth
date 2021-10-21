@@ -8,6 +8,10 @@ See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 
 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/easyauth), [Modrinth](https://modrinth.com/mod/easyauth)
 
+[Discord](https://discord.gg/UY4nhvUzaK)
+
+[My Whitelist mod](https://github.com/NikitaCartes/EasyWhitelist), that changes whitelist behaviour from uuid-based to name-based, allowing it to be use at offline mode
+
 ### Contributors
 
 * Many thanks for @samolego, author of SimpleAuth, for his mod, and his permission on creating this fork

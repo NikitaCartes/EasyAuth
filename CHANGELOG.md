@@ -1,4 +1,4 @@
-### 2.0.3, Minecraft 1.17.1, 1.18-pre1
+### 2.0.4, Minecraft 1.17.1, 1.18-pre1
 
 1) With enabled [global password](https://github.com/NikitaCartes/EasyAuth/wiki/Global-password) player can log in with global password or password set by `auth register`
 

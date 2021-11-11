@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "0.10-SNAPSHOT"
+    id "fabric-loom" version "0.10.56"
 }
 
 repositories {
@@ -12,8 +12,8 @@ repositories {
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
 version = "${project.mod_version}"
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 loom {
     accessWidenerPath = file("src/main/resources/easyauth.accesswidener")
@@ -62,7 +62,7 @@ dependencies {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 16
+    it.options.release = 17
 }
 
 java {

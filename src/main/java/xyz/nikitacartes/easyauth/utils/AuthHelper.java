@@ -15,11 +15,13 @@ public class AuthHelper {
      * @return 1 for pass, 0 if password is false, -1 if user is not yet registered
      */
     public static PasswordOptions checkPassword(String uuid, char[] password) {
+        String hashed = playerCacheMap.get(uuid).password;
         if (config.main.enableGlobalPassword) {
             // We have global password enabled
-            return verifyPassword(password, config.main.globalPassword) ? PasswordOptions.CORRECT : PasswordOptions.WRONG;
+            // Player must know global password or password set by auth register
+            char [] passwordCopy = password.clone();
+            return (verifyPassword(password, config.main.globalPassword) || (!hashed.isEmpty() && verifyPassword(passwordCopy, hashed))) ? PasswordOptions.CORRECT : PasswordOptions.WRONG;
         } else {
-            String hashed = playerCacheMap.get(uuid).password;
             if (hashed.isEmpty())
                 return PasswordOptions.NOT_REGISTERED;
 

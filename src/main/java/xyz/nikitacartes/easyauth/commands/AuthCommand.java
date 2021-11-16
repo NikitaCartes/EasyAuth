@@ -7,13 +7,18 @@ import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 
 import java.io.File;
+import java.util.Locale;
+import java.util.UUID;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -100,6 +105,14 @@ public class AuthCommand {
                                 )
                         )
                 )
+                .then(literal("uuid")
+                        .then(argument("player", word())
+                                .executes(ctx -> getOfflineUuid(
+                                        ctx.getSource(),
+                                        getString(ctx, "player")
+                                ))
+                        )
+                )
         );
     }
 
@@ -158,14 +171,17 @@ public class AuthCommand {
      */
     private static int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z, float yaw, float pitch) {
         // Setting config values and saving
-        config.worldSpawn.dimension = String.valueOf(world);
-        config.worldSpawn.x = x;
-        config.worldSpawn.y = y;
-        config.worldSpawn.z = z;
-        config.worldSpawn.yaw = yaw;
-        config.worldSpawn.pitch = pitch;
-        config.main.spawnOnJoin = true;
-        config.save(new File("./mods/EasyAuth/config.json"));
+        // Different thread to avoid lag spikes
+        THREADPOOL.submit(() -> {
+            config.worldSpawn.dimension = String.valueOf(world);
+            config.worldSpawn.x = x;
+            config.worldSpawn.y = y;
+            config.worldSpawn.z = z;
+            config.worldSpawn.yaw = yaw;
+            config.worldSpawn.pitch = pitch;
+            config.main.spawnOnJoin = true;
+            config.save(new File("./mods/EasyAuth/config.json"));
+        });
 
         // Getting sender
         Entity sender = source.getEntity();
@@ -264,5 +280,30 @@ public class AuthCommand {
                 logInfo(config.lang.userdataUpdated);
         });
         return 0;
+    }
+
+    /**
+     * Return offline uuid for player in lowercase
+     *
+     * @param source executioner of the command
+     * @param player player to get uuid from
+     * @return 0
+     */
+    private static int getOfflineUuid(ServerCommandSource source, String player) {
+        // Getting the player who send the command
+        Entity sender = source.getEntity();
+
+        UUID uuid = PlayerEntity.getOfflinePlayerUuid(player.toLowerCase(Locale.ROOT));
+
+        if (sender != null) {
+            ((PlayerEntity) sender).sendMessage(
+                    new TranslatableText("text.easyauth.offlineUuid", player, uuid).
+                            append(new TranslatableText(" [" + uuid + "]").
+                                    setStyle(Style.EMPTY.withClickEvent(
+                                            new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))).
+                                    formatted(Formatting.YELLOW)), false);
+        } else
+            logInfo(String.format(config.lang.offlineUuid, player, uuid));
+        return 1;
     }
 }

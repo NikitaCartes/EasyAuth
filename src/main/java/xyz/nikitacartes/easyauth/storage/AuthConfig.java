@@ -157,14 +157,15 @@ public class AuthConfig {
     }
 
     public static class LangConfig {
-        public String globalPasswordSet = "\u00A7aGlobal password was successfully set!";
-        public String userdataDeleted = "\u00A7aUserdata deleted.";
-        public String userdataUpdated = "\u00A7aUserdata updated.";
-        public String configurationReloaded = "\u00A7aConfiguration file was reloaded successfully.";
-        public String disallowedUsername = "\u00A76Invalid username characters! Allowed character regex: %s";
-        public String playerAlreadyOnline = "\u00A7cPlayer %s is already online!";
-        public String worldSpawnSet = "\u00A7aSpawn for logging in was set successfully.";
-        public String userNotRegistered = "\u00A7cThis player is not registered!";
+        public String globalPasswordSet = "Global password was successfully set!";
+        public String userdataDeleted = "Userdata deleted.";
+        public String userdataUpdated = "Userdata updated.";
+        public String configurationReloaded = "Configuration file was reloaded successfully.";
+        public String disallowedUsername = "Invalid username characters! Allowed character regex: %s";
+        public String playerAlreadyOnline = "Player %s is already online!";
+        public String worldSpawnSet = "Spawn for logging in was set successfully.";
+        public String userNotRegistered = "This player is not registered!";
+        public String offlineUuid = "Offline UUID for %s is %s";
     }
 
     public static class ExperimentalConfig {

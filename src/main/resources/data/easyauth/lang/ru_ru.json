@@ -28,5 +28,6 @@
   "text.easyauth.worldSpawnSet": "§aТочка спавна для авторзиации успешно установлена.",
   "text.easyauth.corruptedPlayerData": "§cВаши данные, скорее всего, повреждены. Свяжитесь с администрацией.",
   "text.easyauth.userNotRegistered": "§cЭтот игрок не зарегистрирован!",
-  "text.easyauth.cannotLogout": "§cВы не можете выйти!"
+  "text.easyauth.cannotLogout": "§cВы не можете выйти!",
+  "text.easyauth.offlineUuid": "Оффлайн UUID для игрока %s (нажмите для копирования):"
 }

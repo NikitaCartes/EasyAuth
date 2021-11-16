@@ -25,11 +25,11 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Translations
-    modImplementation(include("fr.catcore:server-translations-api:${project.server_translations_version}"))
+    modImplementation(include("fr.catcore:server-translations-api:${project.server_translations_version}+${project.server_translations_branch}"))
 
     // Mods
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "carpet:fabric-carpet:${project.minecraft_version}-${project.carpet_core_version}"
+    modImplementation "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
     modImplementation "com.github.astei:lazydfu:${lazydfu_version}"
 
     // Password hashing

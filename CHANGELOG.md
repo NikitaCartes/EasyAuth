@@ -1,6 +1,7 @@
 ### 2.0.5, Minecraft 1.17.1, 1.18-pre1
 
 1) `auth uuid <player>` that would give correct offline uuid fot that player nickname in lower case
+2) Add [permission](https://github.com/NikitaCartes/EasyAuth/wiki/Permissions) support
 
 ### 2.0.4, Minecraft 1.17.1, 1.18-pre1
 

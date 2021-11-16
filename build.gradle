@@ -1,11 +1,12 @@
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id "fabric-loom" version "0.10-SNAPSHOT"
 }
 
 repositories {
-    maven { name 'Carpet'; url 'https://masa.dy.fi/maven' }
+    maven { name "Carpet"; url "https://masa.dy.fi/maven" }
     maven { url "https://maven.nucleoid.xyz/" }
-    maven { name 'Jitpack'; url 'https://jitpack.io' }
+    maven { name "Jitpack"; url "https://jitpack.io" }
+    maven { name "Permission"; url "https://oss.sonatype.org/content/repositories/snapshots"}
 }
 
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
@@ -26,6 +27,9 @@ dependencies {
 
     // Translations
     modImplementation(include("fr.catcore:server-translations-api:${project.server_translations_version}+${project.server_translations_branch}"))
+
+    // Permissions
+    modImplementation include("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}")
 
     // Mods
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -70,12 +74,12 @@ jar {
 }
 
 processResources {
-    inputs.property 'id', project.mod_id
-    inputs.property 'name', project.mod_name
-    inputs.property 'version', project.version
+    inputs.property "id", project.mod_id
+    inputs.property "name", project.mod_name
+    inputs.property "version", project.version
 
-    filesMatching('fabric.mod.json') {
-        expand(['id': project.mod_id, 'name': project.mod_name, 'version': project.version])
+    filesMatching("fabric.mod.json") {
+        expand(["id": project.mod_id, "name": project.mod_name, "version": project.version])
     }
 }
 

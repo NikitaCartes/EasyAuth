@@ -1,6 +1,7 @@
 package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.DimensionArgumentType;
 import net.minecraft.command.argument.RotationArgumentType;
@@ -35,11 +36,13 @@ public class AuthCommand {
      */
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("auth")
-                .requires(source -> source.hasPermissionLevel(4))
+                .requires(Permissions.require("easyauth.commands.auth.root", 4))
                 .then(literal("reload")
+                        .requires(Permissions.require("easyauth.commands.auth.reload", 4))
                         .executes(ctx -> reloadConfig(ctx.getSource().getEntity()))
                 )
                 .then(literal("setGlobalPassword")
+                        .requires(Permissions.require("easyauth.commands.auth.setGlobalPassword", 4))
                         .then(argument("password", string())
                                 .executes(ctx -> setGlobalPassword(
                                         ctx.getSource(),
@@ -48,6 +51,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("setSpawn")
+                        .requires(Permissions.require("easyauth.commands.auth.setSpawn", 4))
                         .executes(ctx -> setSpawn(
                                 ctx.getSource(),
                                 ctx.getSource().getEntityOrThrow().getEntityWorld().getRegistryKey().getValue(),
@@ -76,6 +80,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("remove")
+                        .requires(Permissions.require("easyauth.commands.auth.remove", 4))
                         .then(argument("uuid", word())
                                 .executes(ctx -> removeAccount(
                                         ctx.getSource(),
@@ -84,6 +89,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("register")
+                        .requires(Permissions.require("easyauth.commands.auth.register", 4))
                         .then(argument("uuid", word())
                                 .then(argument("password", string())
                                         .executes(ctx -> registerUser(
@@ -95,6 +101,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("update")
+                        .requires(Permissions.require("easyauth.commands.auth.update", 4))
                         .then(argument("uuid", word())
                                 .then(argument("password", string())
                                         .executes(ctx -> updatePassword(
@@ -106,6 +113,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("uuid")
+                        .requires(Permissions.require("easyauth.commands.auth.uuid", 4))
                         .then(argument("player", word())
                                 .executes(ctx -> getOfflineUuid(
                                         ctx.getSource(),

@@ -2,13 +2,15 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.TranslatableText;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.*;
+import static com.mojang.brigadier.arguments.StringArgumentType.getString;
+import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -18,7 +20,9 @@ public class AccountCommand {
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/account" command
         dispatcher.register(literal("account")
+                .requires(Permissions.require("easyauth.commands.account.root", true))
                 .then(literal("unregister")
+                        .requires(Permissions.require("easyauth.commands.account.unregister", true))
                         .executes(ctx -> {
                             ctx.getSource().getPlayer().sendMessage(
                                     new TranslatableText("text.easyauth.enterPassword"),
@@ -35,6 +39,7 @@ public class AccountCommand {
                         )
                 )
                 .then(literal("changePassword") //todo mongodb update
+                        .requires(Permissions.require("easyauth.commands.account.changePassword", true))
                         .then(argument("old password", string())
                                 .executes(ctx -> {
                                     ctx.getSource().getPlayer().sendMessage(

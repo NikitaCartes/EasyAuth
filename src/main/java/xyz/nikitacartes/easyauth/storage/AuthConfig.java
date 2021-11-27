@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 public class AuthConfig {
     private static final Gson gson = new GsonBuilder()
@@ -53,6 +53,7 @@ public class AuthConfig {
         public int kickTime = 60;
         /**
          * Disables registering and forces logging in with global password.
+         *
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Global-password" target="_blank">wiki</a>
          */
         public boolean enableGlobalPassword = false;
@@ -62,6 +63,7 @@ public class AuthConfig {
         public String globalPassword;
         /**
          * Tries to rescue players if they are stuck inside a portal on logging in.
+         *
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Portal-Rescue" target="_blank">wiki</a>
          */
         public boolean tryPortalRescue = true;
@@ -76,12 +78,14 @@ public class AuthConfig {
         public int maxPasswordChars = -1;
         /**
          * Regex of valid playername characters. You probably don't want to change this.
+         *
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Username-Restriction" target="_blank">wiki</a>
          */
         public String usernameRegex = "^[a-zA-Z0-9_]{3,16}$";
         /**
          * How long to keep session (auto-logging in the player), in seconds
          * Set to -1 to disable
+         *
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Sessions" target="_blank">wiki</a>
          */
         public int sessionTimeoutTime = 3600;
@@ -114,31 +118,28 @@ public class AuthConfig {
          * to manage its database.
          */
         public boolean useMongoDB = false;
-
         /**
          * Connections String for MongoDB database.
+         *
          * @see <a href="https://docs.mongodb.com/manual/reference/connection-string/" target="_blank">documentation</a>
          * Leave this as-is if you are using LevelDB.
          */
         public String MongoDBConnectionString = "mongodb://[username:password@]host[:port][/[defaultauthdb][?options]]";
-
         /**
          * Name of the new database in which EasyAuth should
          * store player data.
          * Leave this as-is if you are using LevelDB.
          */
         public String MongoDBDatabase = "EasyAuthPlayerData";
-
         /**
          * Whether players who have a valid session should skip the authentication process.
          * You have to set online-mode to true in server.properties!
          * (cracked players will still be able to enter, but they'll need to log in)
-         *
+         * <p>
          * This protects premium usernames from being stolen, since cracked players
          * with name that is found in Mojang database, are kicked.
          */
         public boolean premiumAutologin = false;
-
         /**
          * Contains a list of lower case (!) player names
          * that should always be treated as offline.
@@ -148,11 +149,10 @@ public class AuthConfig {
          * that is already taken.
          */
         public ArrayList<String> forcedOfflinePlayers = new ArrayList<>(Collections.singletonList(""));
-
         /**
          * Hide unauthenticated pLayers from player list
          */
-        public boolean hideUnauthenticatedPLayersFromPlayerList = true;
+        public boolean hideUnauthenticatedPLayersFromPlayerList = false;
 
     }
 
@@ -166,6 +166,7 @@ public class AuthConfig {
         public String worldSpawnSet = "Spawn for logging in was set successfully.";
         public String userNotRegistered = "This player is not registered!";
         public String offlineUuid = "Offline UUID for %s is %s";
+        public String registeredPlayers = "List of registered players:\n";
     }
 
     public static class ExperimentalConfig {
@@ -194,7 +195,7 @@ public class AuthConfig {
          */
         public boolean allowBlockUse = false;
         /**
-         *  Allows mining or punching blocks.
+         * Allows mining or punching blocks.
          */
         public boolean allowBlockPunch = false;
         /**
@@ -219,6 +220,7 @@ public class AuthConfig {
         public boolean debugMode = false;
         /**
          * Whether to use BCrypt instead of Argon2 (GLIBC_2.25 error).
+         *
          * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/GLIBC-problems" target="_blank">wiki</a>
          */
         public boolean useBCryptLibrary = false;

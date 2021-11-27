@@ -121,6 +121,10 @@ public class AuthCommand {
                                 ))
                         )
                 )
+                .then(literal("list")
+                        .requires(Permissions.require("easyauth.commands.auth.list", 4))
+                        .executes(ctx -> getRegisteredPlayers(ctx.getSource()))
+                )
         );
     }
 
@@ -273,7 +277,7 @@ public class AuthCommand {
             }
 
             playerCacheMap.put(uuid, playerCache);
-            if (!playerCacheMap.get(uuid).password.isEmpty()) {
+            if (playerCacheMap.get(uuid).password.isEmpty()) {
                 if (sender != null)
                     ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.userNotRegistered"), false);
                 else
@@ -312,6 +316,44 @@ public class AuthCommand {
                                     formatted(Formatting.YELLOW)), false);
         } else
             logInfo(String.format(config.lang.offlineUuid, player, uuid));
+        return 1;
+    }
+
+    /**
+     * List of registered uuid
+     *
+     * @param source executioner of the command
+     * @return 0
+     */
+    public static int getRegisteredPlayers(ServerCommandSource source) {
+        Entity sender = source.getEntity();
+
+        THREADPOOL.submit(() -> {
+            if (sender != null) {
+                int i = 0;
+                TranslatableText message = new TranslatableText("text.easyauth.registeredPlayers");
+                for (var entry : playerCacheMap.entrySet()) {
+                    if (!entry.getValue().password.isEmpty()) {
+                        i++;
+                        message.append(new TranslatableText("\n" + i + ": [" + entry.getKey() + "]").
+                                setStyle(Style.EMPTY.withClickEvent(
+                                        new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, entry.getKey()))).
+                                formatted(Formatting.YELLOW));
+                    }
+                }
+                ((PlayerEntity) sender).sendMessage(message, false);
+            } else {
+                int i = 0;
+                StringBuilder message = new StringBuilder(config.lang.registeredPlayers);
+                for (var entry : playerCacheMap.entrySet()) {
+                    if (!entry.getValue().password.isEmpty()) {
+                        i++;
+                        message.append("\n").append(i).append(": [").append(entry.getKey()).append("]");
+                    }
+                }
+                logInfo(message.toString());
+            }
+        });
         return 1;
     }
 }

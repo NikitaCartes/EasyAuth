@@ -2,6 +2,9 @@
 
 1) `auth uuid <player>` that would give correct offline uuid fot that player nickname in lower case
 2) Add [permission](https://github.com/NikitaCartes/EasyAuth/wiki/Permissions) support
+3) Add `auth list` command to print all registered players
+4) Fix `auth update` command
+5) Temporally disable `hideUnauthenticatedPLayersFromPlayerList` by default
 
 ### 2.0.4, Minecraft 1.17.1, 1.18-pre1
 

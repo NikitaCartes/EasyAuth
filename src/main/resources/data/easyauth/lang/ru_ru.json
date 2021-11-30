@@ -4,12 +4,12 @@
   "text.easyauth.wrongPassword": "§4Неверный пароль!",
   "text.easyauth.matchPassword": "§6Пароли должны совпадать!",
   "text.easyauth.passwordUpdated": "§aВаш пароль был успешно обновлен!",
-  "text.easyauth.loginRequired": "§cВы не авторизованы!\n§6Используйте /login для входа!",
+  "text.easyauth.loginRequired": "§cВы не авторизованы!\n§6Используйте /login, /l для входа!",
   "text.easyauth.loginTriesExceeded": "§4Слишком много попыток.",
   "text.easyauth.globalPasswordSet": "§aГлобальный пароль был успешно установлен!",
   "text.easyauth.cannotChangePassword": "§cВы не можете сменить пароль!",
   "text.easyauth.cannotUnregister": "§cВы не можете удалить этот аккаунт!",
-  "text.easyauth.notAuthenticated": "§cВы не авторизованы!\n§6Используйте /login или /register.",
+  "text.easyauth.notAuthenticated": "§cВы не авторизованы!\n§6Используйте /login, /l или /register.",
   "text.easyauth.alreadyAuthenticated": "§6Вы уже авторизованы.",
   "text.easyauth.successfullyAuthenticated": "§aВы авторизованы.",
   "text.easyauth.successfulLogout": "§aВы вышли.",
@@ -29,5 +29,6 @@
   "text.easyauth.corruptedPlayerData": "§cВаши данные, скорее всего, повреждены. Свяжитесь с администрацией.",
   "text.easyauth.userNotRegistered": "§cЭтот игрок не зарегистрирован!",
   "text.easyauth.cannotLogout": "§cВы не можете выйти!",
-  "text.easyauth.offlineUuid": "Оффлайн UUID для игрока %s (нажмите для копирования):"
+  "text.easyauth.offlineUuid": "Оффлайн UUID для игрока %s (нажмите для копирования):",
+  "text.easyauth.registeredPlayers": "Список зарегестрированных игроков:\n"
 }

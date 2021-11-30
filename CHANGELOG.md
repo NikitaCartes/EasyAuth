@@ -5,6 +5,7 @@
 3) Add `auth list` command to print all registered players
 4) Fix `auth update` command
 5) Temporally disable `hideUnauthenticatedPLayersFromPlayerList` by default
+6) Czech translation, thanks to @DavidCZ2051
 
 ### 2.0.4, Minecraft 1.17.1, 1.18-pre1
 

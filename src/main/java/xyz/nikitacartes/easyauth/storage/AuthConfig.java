@@ -167,6 +167,7 @@ public class AuthConfig {
         public String userNotRegistered = "This player is not registered!";
         public String offlineUuid = "Offline UUID for %s is %s";
         public String registeredPlayers = "List of registered players:\n";
+        public String addToForcedOffline = "Player successfully added into forcedOfflinePlayers list";
     }
 
     public static class ExperimentalConfig {

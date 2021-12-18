@@ -36,9 +36,9 @@ public class AuthCommand {
      */
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("auth")
-                .requires(Permissions.require("easyauth.commands.auth.root", 4))
+                .requires(Permissions.require("easyauth.commands.auth.root", 3))
                 .then(literal("reload")
-                        .requires(Permissions.require("easyauth.commands.auth.reload", 4))
+                        .requires(Permissions.require("easyauth.commands.auth.reload", 3))
                         .executes(ctx -> reloadConfig(ctx.getSource().getEntity()))
                 )
                 .then(literal("setGlobalPassword")
@@ -51,7 +51,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("setSpawn")
-                        .requires(Permissions.require("easyauth.commands.auth.setSpawn", 4))
+                        .requires(Permissions.require("easyauth.commands.auth.setSpawn", 3))
                         .executes(ctx -> setSpawn(
                                 ctx.getSource(),
                                 ctx.getSource().getEntityOrThrow().getEntityWorld().getRegistryKey().getValue(),
@@ -80,7 +80,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("remove")
-                        .requires(Permissions.require("easyauth.commands.auth.remove", 4))
+                        .requires(Permissions.require("easyauth.commands.auth.remove", 3))
                         .then(argument("uuid", word())
                                 .executes(ctx -> removeAccount(
                                         ctx.getSource(),
@@ -89,7 +89,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("register")
-                        .requires(Permissions.require("easyauth.commands.auth.register", 4))
+                        .requires(Permissions.require("easyauth.commands.auth.register", 3))
                         .then(argument("uuid", word())
                                 .then(argument("password", string())
                                         .executes(ctx -> registerUser(
@@ -101,7 +101,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("update")
-                        .requires(Permissions.require("easyauth.commands.auth.update", 4))
+                        .requires(Permissions.require("easyauth.commands.auth.update", 3))
                         .then(argument("uuid", word())
                                 .then(argument("password", string())
                                         .executes(ctx -> updatePassword(
@@ -113,7 +113,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("uuid")
-                        .requires(Permissions.require("easyauth.commands.auth.uuid", 4))
+                        .requires(Permissions.require("easyauth.commands.auth.uuid", 3))
                         .then(argument("player", word())
                                 .executes(ctx -> getOfflineUuid(
                                         ctx.getSource(),
@@ -122,8 +122,17 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("list")
-                        .requires(Permissions.require("easyauth.commands.auth.list", 4))
+                        .requires(Permissions.require("easyauth.commands.auth.list", 3))
                         .executes(ctx -> getRegisteredPlayers(ctx.getSource()))
+                )
+                .then(literal("addToForcedOffline")
+                        .requires(Permissions.require("easyauth.commands.auth.addToForcedOffline", 3))
+                        .then(argument("player", word())
+                                .executes(ctx -> addPlayerToForcedOffline(
+                                        ctx.getSource(),
+                                        getString(ctx, "player")
+                                ))
+                        )
                 )
         );
     }
@@ -356,4 +365,29 @@ public class AuthCommand {
         });
         return 1;
     }
+
+
+    /**
+     * Add player in forcedOfflinePlayers list
+     *
+     * @param source executioner of the command
+     * @param player player to add in list
+     * @return 0
+     */
+    private static int addPlayerToForcedOffline(ServerCommandSource source, String player) {
+        // Getting the player who send the command
+        Entity sender = source.getEntity();
+
+        THREADPOOL.submit(() -> {
+            config.main.forcedOfflinePlayers.add(player.toLowerCase(Locale.ROOT));
+            config.save(new File("./mods/EasyAuth/config.json"));
+        });
+
+        if (sender != null) {
+            ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.addToForcedOffline"), false);
+        } else
+            logInfo(config.lang.addToForcedOffline);
+        return 1;
+    }
+
 }

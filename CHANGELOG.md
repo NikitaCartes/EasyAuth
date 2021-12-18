@@ -1,3 +1,8 @@
+### 2.0.6, Minecraft 1.17.1, 1.18.x
+
+1) Add `auth addToForcedOffline` command to add player in `forcedOfflinePlayers` list
+2) Change default op-level for `auth *` from 4 to level 3 (except for `setGlobalPassword`)
+
 ### 2.0.5, Minecraft 1.17, 1.17.1, 1.18
 
 1) `auth uuid <player>` that would give correct offline uuid fot that player nickname in lower case

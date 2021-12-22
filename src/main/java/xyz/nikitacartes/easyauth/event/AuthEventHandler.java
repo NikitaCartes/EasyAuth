@@ -68,8 +68,11 @@ public class AuthEventHandler {
 
     // Player joining the server
     public static void onPlayerJoin(ServerPlayerEntity player) {
-        if (((PlayerAuth) player).canSkipAuth())
+        if (((PlayerAuth) player).canSkipAuth()) {
+            player.setInvulnerable(false);
+            player.setInvisible(false);
             return;
+        }
         // Checking if session is still valid
         String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache;
@@ -88,6 +91,8 @@ public class AuthEventHandler {
                         player.getIp().equals(playerCache.lastIp)
         ) {
             // Valid session
+            player.setInvulnerable(false);
+            player.setInvisible(false);
             return;
         }
         ((PlayerAuth) player).setAuthenticated(false);

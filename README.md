@@ -26,6 +26,7 @@ Thank you so much for those who have already helped with translation of the mod!
 * @luizffgv (Brazilian Portuguese)
 * @Uxzylon (French)
 * @DavidCZ2051 (Czech)
+* @egeesin (Turkish)
 
 ### License
 

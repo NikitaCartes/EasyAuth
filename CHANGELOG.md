@@ -3,6 +3,7 @@
 1) Add `auth addToForcedOffline <player>` command to add player in `forcedOfflinePlayers` list
 2) Change default op-level for `auth *` from 4 to level 3 (except for `setGlobalPassword`)
 3) Fix [#23](https://github.com/NikitaCartes/EasyAuth/issues/23) when players sometimes stays invulnerable after login
+4) Turkish translation, thanks to @egeesin
 
 ### 2.0.5, Minecraft 1.17, 1.17.1, 1.18
 

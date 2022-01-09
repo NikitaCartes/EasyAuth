@@ -22,6 +22,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: "${{ runner.os }}-easyauth-${{ hashFiles('**/*.gradle*') }}"
+          restore-keys: |
+            ${{ runner.os }}-easyauth-
+
       - name: Build
         run: ./gradlew build
 

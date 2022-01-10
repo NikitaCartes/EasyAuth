@@ -29,7 +29,7 @@
   "text.easyauth.corruptedPlayerData": "§cVerilerin büyük ihtimalle bozuldu. Lütfen yöneticiye ulaşın.",
   "text.easyauth.userNotRegistered": "§cBu oyuncu kayıtlı değil!",
   "text.easyauth.cannotLogout": "§cÇıkış yapamazsın!",
-  "text.easyauth.offlineUuid": "%s adlı oyuncunun çevrimdışı UUID'si (kopyalamak için tıkla)",
-  "text.easyauth.registeredPlayers": "Kayıtlı oyuncuların listesi:\n",
+  "text.easyauth.offlineUuid": "%s adlı oyuncunun çevrimdışı UUID'si (kopyalamak için tıkla)\n",
+  "text.easyauth.registeredPlayers": "Kayıtlı oyuncuların listesi:",
   "text.easyauth.addToForcedOffline": "Oyuncu başarılı bir şekilde forcedOfflinePlayers (Çevrimdışıya Zorlanan Oyuncular) listesine eklendi"
 }

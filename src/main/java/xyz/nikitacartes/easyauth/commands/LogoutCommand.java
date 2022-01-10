@@ -6,8 +6,8 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.TranslatableText;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
@@ -28,9 +28,9 @@ public class LogoutCommand {
         if (!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
             player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             ((PlayerAuth) player).setAuthenticated(false);
-            player.sendMessage(new TranslatableText("text.easyauth.successfulLogout"), false);
+            player.sendMessage(TranslationHelper.getSuccessfulLogout(), false);
         } else
-            player.sendMessage(new TranslatableText("text.easyauth.cannotLogout"), false);
+            player.sendMessage(TranslationHelper.getCannotLogout(), false);
         return 1;
     }
 }

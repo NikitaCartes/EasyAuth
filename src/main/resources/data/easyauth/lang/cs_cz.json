@@ -29,6 +29,6 @@
   "text.easyauth.corruptedPlayerData": "§cVaše data jsou pravděpodobně poškozená. Prosím kontaktujte admina.",
   "text.easyauth.userNotRegistered": "§cTenhle hráč není zaregistrovaný!",
   "text.easyauth.cannotLogout": "§cNemůžete se odhlásit!",
-  "text.easyauth.offlineUuid": "Offline UUID pro hráče %s je (click to copy)",
-  "text.easyauth.registeredPlayers": "Seznam registrovaných hráčů:\n"
+  "text.easyauth.offlineUuid": "Offline UUID pro hráče %s je (click to copy)\n",
+  "text.easyauth.registeredPlayers": "Seznam registrovaných hráčů:"
 }

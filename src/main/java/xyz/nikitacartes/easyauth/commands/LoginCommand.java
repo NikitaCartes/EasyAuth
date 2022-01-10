@@ -7,9 +7,9 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.TranslatableText;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
@@ -23,8 +23,8 @@ public class LoginCommand {
         LiteralCommandNode<ServerCommandSource> node = registerLogin(dispatcher); // Registering the "/login" command
         if (config.experimental.enableAliases) {
             dispatcher.register(literal("l")
-                .requires(Permissions.require("easyauth.commands.login", true))
-                .redirect(node));
+                    .requires(Permissions.require("easyauth.commands.login", true))
+                    .redirect(node));
         }
     }
 
@@ -35,7 +35,7 @@ public class LoginCommand {
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(new TranslatableText("text.easyauth.enterPassword"), false);
+                    ctx.getSource().getPlayer().sendMessage(TranslationHelper.getEnterPassword(), false);
                     return 0;
                 }));
     }
@@ -46,7 +46,7 @@ public class LoginCommand {
         ServerPlayerEntity player = source.getPlayer();
         String uuid = ((PlayerAuth) player).getFakeUuid();
         if (((PlayerAuth) player).isAuthenticated()) {
-            player.sendMessage(new TranslatableText("text.easyauth.alreadyAuthenticated"), false);
+            player.sendMessage(TranslationHelper.getAlreadyAuthenticated(), false);
             return 0;
         }
         // Putting rest of the command in different thread to avoid lag spikes
@@ -55,24 +55,24 @@ public class LoginCommand {
             AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(uuid, pass.toCharArray());
 
             if (playerCacheMap.get(uuid).loginTries >= maxLoginTries && maxLoginTries != -1) {
-                player.networkHandler.disconnect(new TranslatableText("text.easyauth.loginTriesExceeded"));
+                player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
                 return;
             } else if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
-                player.sendMessage(new TranslatableText("text.easyauth.successfullyAuthenticated"), false);
+                player.sendMessage(TranslationHelper.getSuccessfullyAuthenticated(), false);
                 ((PlayerAuth) player).setAuthenticated(true);
                 player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;
             } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
-                player.sendMessage(new TranslatableText("text.easyauth.registerRequired"), false);
+                player.sendMessage(TranslationHelper.getRegisterRequired(), false);
                 return;
             }
             // Kicking the player out
             else if (maxLoginTries == 1) {
-                player.networkHandler.disconnect(new TranslatableText("text.easyauth.wrongPassword"));
+                player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                 return;
             }
             // Sending wrong pass message
-            player.sendMessage(new TranslatableText("text.easyauth.wrongPassword"), false);
+            player.sendMessage(TranslationHelper.getWrongPassword(), false);
             // ++ the login tries
             playerCacheMap.get(uuid).loginTries += 1;
         });

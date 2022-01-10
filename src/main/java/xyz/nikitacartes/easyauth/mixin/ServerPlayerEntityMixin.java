@@ -4,6 +4,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -12,11 +13,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-
-import xyz.nikitacartes.easyauth.event.AuthEventHandler;
-import xyz.nikitacartes.easyauth.storage.PlayerCache;
-import xyz.nikitacartes.easyauth.utils.CarpetHelper;
-import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,6 +21,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.storage.PlayerCache;
+import xyz.nikitacartes.easyauth.utils.CarpetHelper;
+import xyz.nikitacartes.easyauth.utils.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
@@ -33,14 +34,12 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 public class ServerPlayerEntityMixin implements PlayerAuth {
 
     private final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-
-    // * 20 for 20 ticks in second
-    @Unique
-    private int kickTimer = config.main.kickTime * 20;
-
     @Final
     @Shadow
     public MinecraftServer server;
+    // * 20 for 20 ticks in second
+    @Unique
+    private int kickTimer = config.main.kickTime * 20;
 
     /**
      * Teleports player to spawn or last location that is recorded.
@@ -106,39 +105,6 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     }
 
     /**
-     * Sets the authentication status of the player
-     * and hides coordinates if needed.
-     *
-     * @param authenticated whether player should be authenticated
-     */
-    @Override
-    public void setAuthenticated(boolean authenticated) {
-        PlayerCache playerCache = playerCacheMap.get(this.getFakeUuid());
-        playerCache.isAuthenticated = authenticated;
-
-        player.setInvulnerable(!authenticated && config.experimental.playerInvulnerable);
-        player.setInvisible(!authenticated && config.experimental.playerInvisible);
-
-        // Teleporting player (hiding / restoring position)
-        if (config.main.spawnOnJoin)
-            this.hidePosition(!authenticated);
-
-        if (authenticated) {
-            kickTimer = config.main.kickTime * 20;
-            // Updating blocks if needed (in case if portal rescue action happened)
-            if (playerCache.wasInPortal) {
-                World world = player.getEntityWorld();
-                BlockPos pos = player.getBlockPos();
-
-                // Sending updates to portal blocks
-                // This is technically not needed, but it cleans the "messed portal" on the client
-                world.updateListeners(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
-                world.updateListeners(pos.up(), world.getBlockState(pos.up()), world.getBlockState(pos.up()), 3);
-            }
-        }
-    }
-
-    /**
      * Gets the text which tells the player
      * to login or register, depending on account status.
      *
@@ -147,9 +113,21 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     @Override
     public Text getAuthMessage() {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
-        if (!config.main.enableGlobalPassword && cache.password.isEmpty())
-            return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.registerRequired"));
-        return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.loginRequired"));
+        if (!config.main.enableGlobalPassword && cache.password.isEmpty()) {
+            if (config.experimental.enableServerSideTranslation) {
+                return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.registerRequired"));
+            } else {
+                return new LiteralText(config.lang.notAuthenticated + "\n" + config.lang.registerRequired);
+            }
+        } else {
+            if (config.experimental.enableServerSideTranslation) {
+                return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.loginRequired"));
+            } else {
+                return new LiteralText(config.lang.notAuthenticated + "\n" + config.lang.loginRequired);
+            }
+        }
+
+
     }
 
     /**
@@ -183,14 +161,47 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
         return this.canSkipAuth() || (playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated);
     }
 
+    /**
+     * Sets the authentication status of the player
+     * and hides coordinates if needed.
+     *
+     * @param authenticated whether player should be authenticated
+     */
+    @Override
+    public void setAuthenticated(boolean authenticated) {
+        PlayerCache playerCache = playerCacheMap.get(this.getFakeUuid());
+        playerCache.isAuthenticated = authenticated;
+
+        player.setInvulnerable(!authenticated && config.experimental.playerInvulnerable);
+        player.setInvisible(!authenticated && config.experimental.playerInvisible);
+
+        // Teleporting player (hiding / restoring position)
+        if (config.main.spawnOnJoin)
+            this.hidePosition(!authenticated);
+
+        if (authenticated) {
+            kickTimer = config.main.kickTime * 20;
+            // Updating blocks if needed (in case if portal rescue action happened)
+            if (playerCache.wasInPortal) {
+                World world = player.getEntityWorld();
+                BlockPos pos = player.getBlockPos();
+
+                // Sending updates to portal blocks
+                // This is technically not needed, but it cleans the "messed portal" on the client
+                world.updateListeners(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
+                world.updateListeners(pos.up(), world.getBlockState(pos.up()), world.getBlockState(pos.up()), 3);
+            }
+        }
+    }
+
     @Inject(method = "playerTick()V", at = @At("HEAD"), cancellable = true)
     private void playerTick(CallbackInfo ci) {
         if (!this.isAuthenticated()) {
             // Checking player timer
             if (kickTimer <= 0 && player.networkHandler.getConnection().isOpen()) {
-                player.networkHandler.disconnect(new TranslatableText("text.easyauth.timeExpired"));
+                player.networkHandler.disconnect(TranslationHelper.getTimeExpired());
             } else if (!playerCacheMap.containsKey(((PlayerAuth) player).getFakeUuid())) {
-                player.networkHandler.disconnect(new TranslatableText("text.easyauth.accountDeleted"));
+                player.networkHandler.disconnect(TranslationHelper.getAccountDeleted());
             } else {
                 // Sending authentication prompt every 10 seconds
                 if (kickTimer % 200 == 0)

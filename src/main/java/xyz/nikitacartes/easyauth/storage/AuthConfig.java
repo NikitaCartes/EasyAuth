@@ -157,16 +157,38 @@ public class AuthConfig {
     }
 
     public static class LangConfig {
-        public String globalPasswordSet = "Global password was successfully set!";
-        public String userdataDeleted = "Userdata deleted.";
-        public String userdataUpdated = "Userdata updated.";
-        public String configurationReloaded = "Configuration file was reloaded successfully.";
-        public String disallowedUsername = "Invalid username characters! Allowed character regex: %s";
-        public String playerAlreadyOnline = "Player %s is already online!";
-        public String worldSpawnSet = "Spawn for logging in was set successfully.";
-        public String userNotRegistered = "This player is not registered!";
-        public String offlineUuid = "Offline UUID for %s is %s";
-        public String registeredPlayers = "List of registered players:\n";
+        public String enterPassword = "§6You need to enter your password!";
+        public String enterNewPassword = "§4You need to enter new password!";
+        public String wrongPassword = "§4Wrong password!";
+        public String matchPassword = "§6Passwords must match!";
+        public String passwordUpdated = "§aYour password was updated successfully!";
+        public String loginRequired = "§cYou are not authenticated!\n§6Use /login, /l to authenticate!";
+        public String loginTriesExceeded = "§4Too many login tries.";
+        public String globalPasswordSet = "§aGlobal password was successfully set!";
+        public String cannotChangePassword = "§cYou cannot change password!";
+        public String cannotUnregister = "§cYou cannot unregister this account!";
+        public String notAuthenticated = "§cYou are not authenticated!\n§6Try with /login, /l or /register.";
+        public String alreadyAuthenticated = "§6You are already authenticated.";
+        public String successfullyAuthenticated = "§aYou are now authenticated.";
+        public String successfulLogout = "§aLogged out successfully.";
+        public String timeExpired = "§cTime for authentication has expired.";
+        public String registerRequired = "§6Type /register \u003cpassword\u003e \u003cpassword\u003e to claim this account.";
+        public String alreadyRegistered = "§6This account name is already registered!";
+        public String registerSuccess = "§aYou are now authenticated.";
+        public String userdataDeleted = "§aUserdata deleted.";
+        public String userdataUpdated = "§aUserdata updated.";
+        public String accountDeleted = "§aYour account was successfully deleted!";
+        public String configurationReloaded = "§aConfiguration file was reloaded successfully.";
+        public String maxPasswordChars = "§6Password can be at most %d characters long!";
+        public String minPasswordChars = "§6Password needs to be at least %d characters long!";
+        public String disallowedUsername = "§6Invalid username characters! Allowed character regex: %s";
+        public String playerAlreadyOnline = "§cPlayer %s is already online!";
+        public String worldSpawnSet = "§aSpawn for logging in was set successfully.";
+        public String corruptedPlayerData = "§cYour data is probably corrupted. Please contact admin.";
+        public String userNotRegistered = "§cThis player is not registered!";
+        public String cannotLogout = "§cYou cannot logout!";
+        public String offlineUuid = "Offline UUID for %s is ";
+        public String registeredPlayers = "List of registered players:";
         public String addToForcedOffline = "Player successfully added into forcedOfflinePlayers list";
     }
 
@@ -258,6 +280,11 @@ public class AuthConfig {
          * For now, it's only affects `\l` as alias for `\login`
          */
         public boolean enableAliases = true;
+        /**
+         * Enabling or disabling server-side translation.
+         * When this parameter is false the translation from `config.json` is used.
+         */
+        public boolean enableServerSideTranslation = true;
     }
 
     public MainConfig main = new MainConfig();

@@ -29,7 +29,7 @@
   "text.easyauth.corruptedPlayerData": "§cYour data is probably corrupted. Please contact admin.",
   "text.easyauth.userNotRegistered": "§cThis player is not registered!",
   "text.easyauth.cannotLogout": "§cYou cannot logout!",
-  "text.easyauth.offlineUuid": "Offline UUID for player %s is (click to copy)",
-  "text.easyauth.registeredPlayers": "List of registered players:\n",
+  "text.easyauth.offlineUuid": "Offline UUID for player %s is (click to copy)\n",
+  "text.easyauth.registeredPlayers": "List of registered players:",
   "text.easyauth.addToForcedOffline": "Player successfully added into forcedOfflinePlayers list"
 }

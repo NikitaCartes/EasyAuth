@@ -8,14 +8,11 @@ import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
+import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import java.io.File;
 import java.util.Locale;
@@ -147,7 +144,7 @@ public class AuthCommand {
         config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
 
         if (sender != null)
-            ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.configurationReloaded"), false);
+            ((PlayerEntity) sender).sendMessage(TranslationHelper.getConfigurationReloaded(), false);
         else
             logInfo(config.lang.configurationReloaded);
         return 1;
@@ -172,7 +169,7 @@ public class AuthCommand {
         });
 
         if (sender != null)
-            ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.globalPasswordSet"), false);
+            ((PlayerEntity) sender).sendMessage(TranslationHelper.getGlobalPasswordSet(), false);
         else
             logInfo(config.lang.globalPasswordSet);
         return 1;
@@ -207,7 +204,7 @@ public class AuthCommand {
         // Getting sender
         Entity sender = source.getEntity();
         if (sender != null)
-            ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.worldSpawnSet"), false);
+            ((PlayerEntity) sender).sendMessage(TranslationHelper.getWorldSpawnSet(), false);
         else
             logInfo(config.lang.worldSpawnSet);
         return 1;
@@ -228,7 +225,7 @@ public class AuthCommand {
         });
 
         if (sender != null)
-            ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.userdataDeleted"), false);
+            ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataDeleted(), false);
         else
             logInfo(config.lang.userdataDeleted);
         return 1; // Success
@@ -258,7 +255,7 @@ public class AuthCommand {
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
 
             if (sender != null)
-                ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.userdataUpdated"), false);
+                ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataUpdated(), false);
             else
                 logInfo(config.lang.userdataUpdated);
         });
@@ -288,7 +285,7 @@ public class AuthCommand {
             playerCacheMap.put(uuid, playerCache);
             if (playerCacheMap.get(uuid).password.isEmpty()) {
                 if (sender != null)
-                    ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.userNotRegistered"), false);
+                    ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserNotRegistered(), false);
                 else
                     logInfo(config.lang.userNotRegistered);
                 return;
@@ -296,7 +293,7 @@ public class AuthCommand {
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
 
             if (sender != null)
-                ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.userdataUpdated"), false);
+                ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataUpdated(), false);
             else
                 logInfo(config.lang.userdataUpdated);
         });
@@ -318,11 +315,7 @@ public class AuthCommand {
 
         if (sender != null) {
             ((PlayerEntity) sender).sendMessage(
-                    new TranslatableText("text.easyauth.offlineUuid", player, uuid).
-                            append(new TranslatableText(" [" + uuid + "]").
-                                    setStyle(Style.EMPTY.withClickEvent(
-                                            new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))).
-                                    formatted(Formatting.YELLOW)), false);
+                    TranslationHelper.getOfflineUuid(player, uuid), false);
         } else
             logInfo(String.format(config.lang.offlineUuid, player, uuid));
         return 1;
@@ -339,28 +332,9 @@ public class AuthCommand {
 
         THREADPOOL.submit(() -> {
             if (sender != null) {
-                int i = 0;
-                TranslatableText message = new TranslatableText("text.easyauth.registeredPlayers");
-                for (var entry : playerCacheMap.entrySet()) {
-                    if (!entry.getValue().password.isEmpty()) {
-                        i++;
-                        message.append(new TranslatableText("\n" + i + ": [" + entry.getKey() + "]").
-                                setStyle(Style.EMPTY.withClickEvent(
-                                        new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, entry.getKey()))).
-                                formatted(Formatting.YELLOW));
-                    }
-                }
-                ((PlayerEntity) sender).sendMessage(message, false);
+                ((PlayerEntity) sender).sendMessage(TranslationHelper.getRegisteredPlayers(false), false);
             } else {
-                int i = 0;
-                StringBuilder message = new StringBuilder(config.lang.registeredPlayers);
-                for (var entry : playerCacheMap.entrySet()) {
-                    if (!entry.getValue().password.isEmpty()) {
-                        i++;
-                        message.append("\n").append(i).append(": [").append(entry.getKey()).append("]");
-                    }
-                }
-                logInfo(message.toString());
+                logInfo(TranslationHelper.getRegisteredPlayers(true).asString());
             }
         });
         return 1;
@@ -384,7 +358,7 @@ public class AuthCommand {
         });
 
         if (sender != null) {
-            ((PlayerEntity) sender).sendMessage(new TranslatableText("text.easyauth.addToForcedOffline"), false);
+            ((PlayerEntity) sender).sendMessage(TranslationHelper.getAddToForcedOffline(), false);
         } else
             logInfo(config.lang.addToForcedOffline);
         return 1;

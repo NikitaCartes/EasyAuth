@@ -72,7 +72,7 @@ public class EasyAuth implements ModInitializer {
         }
 
         // Creating data directory (database and config files are stored there)
-        File file = new File(gameDirectory + "/mods/EasyAuth/leveldbStore");
+        File file = new File(gameDirectory + "/mods/EasyAuth/levelDBStore");
         if (!file.exists() && !file.mkdirs())
             throw new RuntimeException("[EasyAuth] Error creating directory!");
         // Loading config

@@ -1,3 +1,9 @@
+### 2.1.0, Minecraft 1.18.x
+
+1) Fix Turkish translation
+2) Mod was trying to create two different folder for DB (`levelDBStore` and `leveldbStore`) [#29](https://github.com/NikitaCartes/EasyAuth/issues/29). Sometimes this resulted in an error [#6](https://github.com/NikitaCartes/EasyAuth/issues/6).
+3) Remove lag spike on first connection of player [#31](https://github.com/NikitaCartes/EasyAuth/issues/31)
+
 ### 2.0.6, Minecraft 1.18.x
 
 1) Add `auth addToForcedOffline <player>` command to add player in `forcedOfflinePlayers` list

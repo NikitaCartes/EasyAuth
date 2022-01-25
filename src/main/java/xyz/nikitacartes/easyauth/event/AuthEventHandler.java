@@ -84,7 +84,6 @@ public class AuthEventHandler {
         } else {
             playerCache = playerCacheMap.get(uuid);
         }
-
         if (
                 playerCache.isAuthenticated &&
                         playerCache.validUntil >= System.currentTimeMillis() &&

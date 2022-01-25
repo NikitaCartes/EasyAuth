@@ -98,7 +98,8 @@ public class PlayerCache {
             playerCache.lastLocation.yaw = player.getYaw();
             playerCache.lastLocation.pitch = player.getPitch();
 
-            playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);
+            // playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);
+            playerCache.wasInPortal = false;
         }
 
         return playerCache;

@@ -3,6 +3,7 @@
 1) Fix Turkish translation
 2) Mod was trying to create two different folder for DB (`levelDBStore` and `leveldbStore`) [#29](https://github.com/NikitaCartes/EasyAuth/issues/29). Sometimes this resulted in an error [#6](https://github.com/NikitaCartes/EasyAuth/issues/6).
 3) Remove lag spike on first connection of player [#31](https://github.com/NikitaCartes/EasyAuth/issues/31)
+4) Temporarily disabled `hideUnauthenticatedPLayersFromPlayerList` feature
 
 ### 2.0.6, Minecraft 1.18.x
 

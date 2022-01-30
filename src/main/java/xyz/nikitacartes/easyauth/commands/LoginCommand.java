@@ -60,7 +60,7 @@ public class LoginCommand {
             } else if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
                 player.sendMessage(TranslationHelper.getSuccessfullyAuthenticated(), false);
                 ((PlayerAuth) player).setAuthenticated(true);
-                player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
+                // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;
             } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
                 player.sendMessage(TranslationHelper.getRegisterRequired(), false);

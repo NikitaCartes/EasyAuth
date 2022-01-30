@@ -62,7 +62,7 @@ public class RegisterCommand {
             if (playerCache.password.isEmpty()) {
                 ((PlayerAuth) player).setAuthenticated(true);
                 player.sendMessage(TranslationHelper.getRegisterSuccess(), false);
-                player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
+                // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 playerCache.password = hashPassword(pass1.toCharArray());
                 return;
             }

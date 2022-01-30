@@ -26,7 +26,7 @@ public class LogoutCommand {
         ServerPlayerEntity player = serverCommandSource.getPlayer();
 
         if (!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
-            player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
+            // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             ((PlayerAuth) player).setAuthenticated(false);
             player.sendMessage(TranslationHelper.getSuccessfulLogout(), false);
         } else

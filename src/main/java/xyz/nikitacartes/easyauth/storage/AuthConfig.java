@@ -285,6 +285,11 @@ public class AuthConfig {
          * When this parameter is false the translation from `config.json` is used.
          */
         public boolean enableServerSideTranslation = true;
+        /**
+         * How long it takes (seconds) after a player gets kicked
+         * for too many logins for the player to be allowed back in.
+         */
+		public int resetLoginAttemptsTime = 120;
     }
 
     public MainConfig main = new MainConfig();

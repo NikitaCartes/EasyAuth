@@ -1,6 +1,13 @@
 package xyz.nikitacartes.easyauth.event;
 
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.mojang.authlib.GameProfile;
+
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -14,12 +21,6 @@ import net.minecraft.util.math.BlockPos;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
-
 /**
  * This class will take care of actions players try to do,
  * and cancel them if they aren't authenticated
@@ -27,7 +28,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
 public class AuthEventHandler {
 
     public static long lastAcceptedPacket = 0;
-
+    
     /**
      * Player pre-join.
      * Returns text as a reason for disconnect or null to pass
@@ -118,7 +119,7 @@ public class AuthEventHandler {
             return;
         String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache = playerCacheMap.get(uuid);
-
+        
         if (playerCache != null && playerCache.isAuthenticated) {
             playerCache.lastIp = player.getIp();
             playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);

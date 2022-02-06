@@ -85,6 +85,12 @@ public class AuthEventHandler {
         } else {
             playerCache = playerCacheMap.get(uuid);
         }
+        // If the player has too many login attempts, kick them immediately.
+        // TODO: Move this to checkCanPlayerJoinServer?
+        if (playerCache.getLoginTries() >= config.main.maxLoginTries - 1 && config.main.maxLoginTries != -1) {
+            player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
+            return;
+        }
         if (
                 playerCache.isAuthenticated &&
                         playerCache.validUntil >= System.currentTimeMillis() &&
@@ -93,12 +99,6 @@ public class AuthEventHandler {
             // Valid session
             player.setInvulnerable(false);
             player.setInvisible(false);
-            return;
-        }
-        // If the player has too many login attempts, kick them immediately.
-        // TODO: Move this to checkCanPlayerJoinServer?
-        if (playerCache.getLoginTries() >= config.main.maxLoginTries - 1 && config.main.maxLoginTries != -1) {
-            player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
             return;
         }
         ((PlayerAuth) player).setAuthenticated(false);

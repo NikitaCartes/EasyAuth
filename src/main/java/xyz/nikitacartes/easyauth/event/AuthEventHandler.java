@@ -1,7 +1,6 @@
 package xyz.nikitacartes.easyauth.event;
 
 import com.mojang.authlib.GameProfile;
-
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -29,7 +28,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
 public class AuthEventHandler {
 
     public static long lastAcceptedPacket = 0;
-    
+
     /**
      * Player pre-join.
      * Returns text as a reason for disconnect or null to pass
@@ -48,7 +47,7 @@ public class AuthEventHandler {
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(incomingPlayerUsername);
-        
+
         if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && config.experimental.preventAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
@@ -75,7 +74,6 @@ public class AuthEventHandler {
             player.setInvisible(false);
             return;
         }
-        
         // Checking if session is still valid
         String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache;
@@ -105,6 +103,7 @@ public class AuthEventHandler {
         }
         ((PlayerAuth) player).setAuthenticated(false);
         
+        
         // Tries to rescue player from nether portal
         if (config.main.tryPortalRescue && player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL)) {
             BlockPos pos = player.getBlockPos();
@@ -126,7 +125,7 @@ public class AuthEventHandler {
             return;
         String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache = playerCacheMap.get(uuid);
-        
+
         if (playerCache != null && playerCache.isAuthenticated) {
             playerCache.lastIp = player.getIp();
             playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);

@@ -1,11 +1,5 @@
 package xyz.nikitacartes.easyauth.event;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.block.Blocks;
@@ -21,6 +15,12 @@ import net.minecraft.util.math.BlockPos;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.TranslationHelper;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
 
 /**
  * This class will take care of actions players try to do,

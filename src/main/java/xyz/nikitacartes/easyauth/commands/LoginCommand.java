@@ -89,6 +89,9 @@ public class LoginCommand {
             }
             // Kicking the player out
             else if (maxLoginTries == 1) {
+                // Reset their login tries
+                playerCacheMap.get(uuid).loginTries = 0;
+                
                 player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                 return;
             } else if(playerCacheMap.get(uuid).loginTries == maxLoginTries) {

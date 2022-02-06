@@ -94,14 +94,11 @@ public class LoginCommand {
                 
                 player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                 return;
-            } else if(playerCacheMap.get(uuid).loginTries == maxLoginTries) {
-            	player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
-            	
+            } else if (playerCacheMap.get(uuid).loginTries == maxLoginTries) {
             	// Reset their login try counter after the amount of seconds specified in the config.
             	RESET_LOGIN_THREAD.schedule(() -> {
             		playerCacheMap.get(uuid).loginTries = 0;
             	}, config.experimental.resetLoginAttemptsTime, TimeUnit.SECONDS);
-                return;
             }
             // Sending wrong pass message
             player.sendMessage(TranslationHelper.getWrongPassword(), false);

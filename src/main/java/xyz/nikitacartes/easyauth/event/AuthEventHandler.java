@@ -20,6 +20,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 /**
  * This class will take care of actions players try to do,
@@ -74,6 +75,7 @@ public class AuthEventHandler {
             player.setInvisible(false);
             return;
         }
+        
         // Checking if session is still valid
         String uuid = ((PlayerAuth) player).getFakeUuid();
         PlayerCache playerCache;
@@ -95,6 +97,13 @@ public class AuthEventHandler {
             player.setInvisible(false);
             return;
         }
+        
+        // If the player has too many login attempts, kick the player immediately.
+        if (playerCache.loginTries > config.main.maxLoginTries && config.main.maxLoginTries != -1) {
+            player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
+            return;
+        }
+        
         ((PlayerAuth) player).setAuthenticated(false);
 
 

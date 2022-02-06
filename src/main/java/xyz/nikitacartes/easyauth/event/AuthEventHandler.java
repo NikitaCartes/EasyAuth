@@ -97,7 +97,7 @@ public class AuthEventHandler {
         }
         // If the player has too many login attempts, kick them immediately.
         // TODO: Move this to checkCanPlayerJoinServer?
-        if (playerCache.getLoginTries() >= config.main.maxLoginTries - 1 && config.main.maxLoginTries != -1) {
+        if (playerCache.getLoginTries() >= config.main.maxLoginTries && config.main.maxLoginTries != -1) {
             player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
             return;
         }

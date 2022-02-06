@@ -35,8 +35,9 @@ public class PlayerCache {
     public String password = "";
     /**
      * Stores how many times player has tried to log in.
+     * This should only be a max of maxLoginTries - 1.
      */
-    public int loginTries = 0;
+    private int loginTries = 0;
     /**
      * Last recorded IP of player.
      * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayerEntity) sessions}.
@@ -100,6 +101,9 @@ public class PlayerCache {
 
             // playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);
             playerCache.wasInPortal = false;
+            
+            // This only happens on the first login after server reset. Reset login attempts just to be safe.
+            playerCache.resetLoginTries();
         }
 
         return playerCache;
@@ -112,5 +116,16 @@ public class PlayerCache {
     public static boolean isAuthenticated(String uuid) {
         PlayerCache playerCache = playerCacheMap.get(uuid);
         return (playerCache != null && playerCache.isAuthenticated);
+    }
+    
+    // Hide the actual login tries modifications behind synchronized functions for thread safety.
+    public synchronized void incrementLoginTries() {
+        loginTries++;
+    }
+    public synchronized void resetLoginTries() {
+        loginTries = 0;
+    }
+    public synchronized int getLoginTries() {
+    	return loginTries;
     }
 }

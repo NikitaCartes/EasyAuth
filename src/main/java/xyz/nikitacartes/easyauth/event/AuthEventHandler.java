@@ -48,7 +48,7 @@ public class AuthEventHandler {
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(incomingPlayerUsername);
-
+        
         if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && config.experimental.preventAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
@@ -97,16 +97,14 @@ public class AuthEventHandler {
             player.setInvisible(false);
             return;
         }
-        
-        // If the player has too many login attempts, kick the player immediately.
-        if (playerCache.loginTries > config.main.maxLoginTries && config.main.maxLoginTries != -1) {
+        // If the player has too many login attempts, kick them immediately.
+        // TODO: Move this to checkCanPlayerJoinServer?
+        if (playerCache.getLoginTries() >= config.main.maxLoginTries - 1 && config.main.maxLoginTries != -1) {
             player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
             return;
         }
-        
         ((PlayerAuth) player).setAuthenticated(false);
-
-
+        
         // Tries to rescue player from nether portal
         if (config.main.tryPortalRescue && player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL)) {
             BlockPos pos = player.getBlockPos();

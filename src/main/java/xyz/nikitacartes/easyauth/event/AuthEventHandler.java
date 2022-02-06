@@ -102,8 +102,8 @@ public class AuthEventHandler {
             return;
         }
         ((PlayerAuth) player).setAuthenticated(false);
-        
-        
+
+
         // Tries to rescue player from nether portal
         if (config.main.tryPortalRescue && player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL)) {
             BlockPos pos = player.getBlockPos();

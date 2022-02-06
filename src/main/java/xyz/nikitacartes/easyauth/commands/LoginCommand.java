@@ -57,20 +57,16 @@ public class LoginCommand {
             return 0;
         }
         
-        int maxLoginTries = config.main.maxLoginTries;
         // ++ the login tries. Maybe it's more threadsafe here than in the thread pool?
-        if (playerCacheMap.get(uuid).loginTries <= maxLoginTries) {
-            playerCacheMap.get(uuid).loginTries++;
-        }
+        // But if not, you could save the calls to set this back to 0.
+        playerCacheMap.get(uuid).loginTries++;
         
         // Putting rest of the command in different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
+        	int maxLoginTries = config.main.maxLoginTries;
             AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(uuid, pass.toCharArray());
 
-            if (playerCacheMap.get(uuid).loginTries > maxLoginTries && maxLoginTries != -1) {
-                player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
-                return;
-            } else if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
+            if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
                 player.sendMessage(TranslationHelper.getSuccessfullyAuthenticated(), false);
                 ((PlayerAuth) player).setAuthenticated(true);
                 
@@ -89,6 +85,9 @@ public class LoginCommand {
             }
             // Kicking the player out
             else if (maxLoginTries == 1) {
+            	// Reset their login tries
+                playerCacheMap.get(uuid).loginTries = 0;
+                
                 player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                 return;
             } else if(playerCacheMap.get(uuid).loginTries == maxLoginTries) {

@@ -25,7 +25,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
-import static xyz.nikitacartes.easyauth.EasyAuth.RESET_LOGIN_THREAD;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 
 public class EasyAuth implements ModInitializer {

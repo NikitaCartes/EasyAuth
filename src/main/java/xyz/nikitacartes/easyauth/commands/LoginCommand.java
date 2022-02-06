@@ -51,10 +51,9 @@ public class LoginCommand {
             player.sendMessage(TranslationHelper.getAlreadyAuthenticated(), false);
             return 0;
         }
-        
         // Putting rest of the command in different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-        	int maxLoginTries = config.main.maxLoginTries;
+            int maxLoginTries = config.main.maxLoginTries;
             AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(uuid, pass.toCharArray());
 
             if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
@@ -68,7 +67,7 @@ public class LoginCommand {
                 return;
             }
             // Kicking the player out
-            else if (maxLoginTries == 1) {                
+            else if (maxLoginTries == 1) {
                 player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                 return;
             } else if (playerCacheMap.get(uuid).getLoginTries() >= maxLoginTries - 1) {

@@ -70,7 +70,7 @@ public class LoginCommand {
             else if (maxLoginTries == 1) {
                 player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                 return;
-            } else if (playerCacheMap.get(uuid).getLoginTries() >= maxLoginTries - 1) {
+            } else if (playerCacheMap.get(uuid).getLoginTries() >= maxLoginTries - 1 && maxLoginTries != -1) {
             	player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
             	
             	// Reset their login try counter after the amount of seconds specified in the config.

@@ -13,7 +13,6 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
-import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,12 +55,31 @@ public class AuthEventHandler {
                             config.lang.playerAlreadyOnline, onlinePlayer.getName().asString()
                     )
             );
-        } else if (!matcher.matches()) {
+        }
+        if (!matcher.matches()) {
             return new LiteralText(
                     String.format(
                             config.lang.disallowedUsername, regex
                     )
             );
+        }
+        // If the player has too many login attempts, kick them immediately.
+        // If uuid is null, is cracked. Code stolen from ServerPlayerEntityMixin
+        // Do online accounts send UUID when connecting to a cracked server?
+        // TODO: fully replicate getFakeUuid, especially checking for mojand cache.
+        String id;
+        try {
+        	id = profile.getId().toString();
+        } catch (NullPointerException e) {
+        	id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername).toString();
+        }
+        
+        if (
+        	config.main.maxLoginTries != -1 &&
+        	playerCacheMap.containsKey(id) &&
+        	playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries
+        ) {
+            return new LiteralText(config.lang.loginTriesExceeded);
         }
         return null;
     }
@@ -93,12 +111,6 @@ public class AuthEventHandler {
             // Valid session
             player.setInvulnerable(false);
             player.setInvisible(false);
-            return;
-        }
-        // If the player has too many login attempts, kick them immediately.
-        // TODO: Move this to checkCanPlayerJoinServer?
-        if (playerCache.getLoginTries() >= config.main.maxLoginTries && config.main.maxLoginTries != -1) {
-            player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
             return;
         }
         ((PlayerAuth) player).setAuthenticated(false);

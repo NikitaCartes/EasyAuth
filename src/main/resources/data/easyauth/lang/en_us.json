@@ -5,7 +5,7 @@
   "text.easyauth.matchPassword": "§6Passwords must match!",
   "text.easyauth.passwordUpdated": "§aYour password was updated successfully!",
   "text.easyauth.loginRequired": "§cYou are not authenticated!\n§6Use /login, /l to authenticate!",
-  "text.easyauth.loginTriesExceeded": "§4Too many login tries. Please wait a few minutes and try again.",
+  "text.easyauth.loginTriesExceeded": "§4Too many login tries.",
   "text.easyauth.globalPasswordSet": "§aGlobal password was successfully set!",
   "text.easyauth.cannotChangePassword": "§cYou cannot change password!",
   "text.easyauth.cannotUnregister": "§cYou cannot unregister this account!",

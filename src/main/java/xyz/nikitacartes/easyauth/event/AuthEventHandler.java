@@ -18,7 +18,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
 import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
 
 /**
  * This class will take care of actions players try to do,
@@ -64,20 +66,27 @@ public class AuthEventHandler {
             );
         }
         // If the player has too many login attempts, kick them immediately.
-        // If uuid is null, is cracked. Code stolen from ServerPlayerEntityMixin
-        // Do online accounts send UUID when connecting to a cracked server?
-        // TODO: fully replicate getFakeUuid, especially checking for mojand cache.
+        // Code stolen from ServerPlayerEntityMixin
         String id;
-        try {
-        	id = profile.getId().toString();
-        } catch (NullPointerException e) {
+        if (!config.experimental.forcedOfflineUuids &&
+        		Boolean.parseBoolean(serverProp.getProperty("online-mode")) &&
+        		mojangAccountNamesCache.contains(incomingPlayerUsername.toLowerCase())
+        ) {
+        	try {
+        		id = profile.getId().toString();
+        	} catch (NullPointerException e) {
+        		// They probably are a cracked player joining with the same name
+        		// as a premium player. Is this code necessary?
+        		id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername).toString();
+        	}
+        } else {
         	id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername).toString();
         }
         
         if (
         	config.main.maxLoginTries != -1 &&
-        	playerCacheMap.containsKey(id) &&
-        	playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries
+        		playerCacheMap.containsKey(id) &&
+        		playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries
         ) {
             return new LiteralText(config.lang.loginTriesExceeded);
         }

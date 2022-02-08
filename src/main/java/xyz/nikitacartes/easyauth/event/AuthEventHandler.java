@@ -13,13 +13,14 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
-import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
 import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
 
 /**
  * This class will take care of actions players try to do,
@@ -56,12 +57,38 @@ public class AuthEventHandler {
                             config.lang.playerAlreadyOnline, onlinePlayer.getName().asString()
                     )
             );
-        } else if (!matcher.matches()) {
+        }
+        if (!matcher.matches()) {
             return new LiteralText(
                     String.format(
                             config.lang.disallowedUsername, regex
                     )
             );
+        }
+        // If the player has too many login attempts, kick them immediately.
+        // Code stolen from ServerPlayerEntityMixin
+        String id;
+        if (!config.experimental.forcedOfflineUuids &&
+        		Boolean.parseBoolean(serverProp.getProperty("online-mode")) &&
+        		mojangAccountNamesCache.contains(incomingPlayerUsername.toLowerCase())
+        ) {
+        	try {
+        		id = profile.getId().toString();
+        	} catch (NullPointerException e) {
+        		// They probably are a cracked player joining with the same name
+        		// as a premium player. Is this code necessary?
+        		id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername).toString();
+        	}
+        } else {
+        	id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername).toString();
+        }
+        
+        if (
+        	config.main.maxLoginTries != -1 &&
+        		playerCacheMap.containsKey(id) &&
+        		playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries
+        ) {
+            return new LiteralText(config.lang.loginTriesExceeded);
         }
         return null;
     }
@@ -93,12 +120,6 @@ public class AuthEventHandler {
             // Valid session
             player.setInvulnerable(false);
             player.setInvisible(false);
-            return;
-        }
-        // If the player has too many login attempts, kick them immediately.
-        // TODO: Move this to checkCanPlayerJoinServer?
-        if (playerCache.getLoginTries() >= config.main.maxLoginTries && config.main.maxLoginTries != -1) {
-            player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
             return;
         }
         ((PlayerAuth) player).setAuthenticated(false);

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
@@ -12,9 +11,7 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
 import java.util.Objects;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.DB;
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 /**
@@ -100,7 +97,7 @@ public class PlayerCache {
 
             // playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);
             playerCache.wasInPortal = false;
-            
+
             // This only happens on the first login after server reset. Reset login attempts just to be safe.
             playerCache.resetLoginTries();
         }
@@ -116,15 +113,17 @@ public class PlayerCache {
         PlayerCache playerCache = playerCacheMap.get(uuid);
         return (playerCache != null && playerCache.isAuthenticated);
     }
-    
+
     // Hide the actual login tries modifications behind synchronized functions for thread safety.
     public synchronized void incrementLoginTries() {
         loginTries++;
     }
+
     public synchronized void resetLoginTries() {
         loginTries = 0;
     }
+
     public synchronized int getLoginTries() {
-    	return loginTries;
+        return loginTries;
     }
 }

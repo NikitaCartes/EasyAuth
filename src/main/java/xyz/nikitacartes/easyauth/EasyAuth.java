@@ -83,7 +83,7 @@ public class EasyAuth implements ModInitializer {
             throw new RuntimeException("[EasyAuth] Error creating directory!");
         // Loading config
         config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
-        // Allow the thread to shutdown properly when server is closed by canceling every scheduled task.
+        // Allow the thread to shut down properly when server is closed by canceling every scheduled task.
         RESET_LOGIN_THREAD.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         // Connecting to db
         DB.openConnection();

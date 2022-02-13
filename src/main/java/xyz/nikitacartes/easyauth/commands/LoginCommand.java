@@ -58,8 +58,11 @@ public class LoginCommand {
             int maxLoginTries = config.main.maxLoginTries;
             AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(uuid, pass.toCharArray());
 
-            // If there are processing commands after the player is kicked, potentially...
+            // That player should be already kicked
             if (playerCache.getLoginTries() >= maxLoginTries && maxLoginTries != -1) {
+                if (!player.isDisconnected()) {
+                    player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
+                }
                 return;
             } else if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
                 player.sendMessage(TranslationHelper.getSuccessfullyAuthenticated(), false);
@@ -70,12 +73,10 @@ public class LoginCommand {
             } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
                 player.sendMessage(TranslationHelper.getRegisterRequired(), false);
                 return;
-            }
-            // Kicking the player out
-            else if (maxLoginTries == 1) {
+            } else if (maxLoginTries == 1) {
                 player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                 return;
-            } else if (playerCache.getLoginTries() == maxLoginTries - 1 && maxLoginTries != -1) {
+            } else if (playerCache.getLoginTries() == maxLoginTries - 1 && maxLoginTries != -1) { // Player exceeded maxLoginTries
                 player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
                 playerCache.incrementLoginTries();
 

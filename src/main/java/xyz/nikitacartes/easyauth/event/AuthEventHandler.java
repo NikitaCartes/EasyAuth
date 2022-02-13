@@ -54,8 +54,7 @@ public class AuthEventHandler {
                             config.lang.playerAlreadyOnline, onlinePlayer.getName().asString()
                     )
             );
-        }
-        if (!matcher.matches()) {
+        } else if (!matcher.matches()) {
             return new LiteralText(
                     String.format(
                             config.lang.disallowedUsername, regex
@@ -63,27 +62,11 @@ public class AuthEventHandler {
             );
         }
         // If the player has too many login attempts, kick them immediately.
-        // Code stolen from ServerPlayerEntityMixin
-        String id;
-        if (!config.experimental.forcedOfflineUuids &&
-                Boolean.parseBoolean(serverProp.getProperty("online-mode")) &&
-                mojangAccountNamesCache.contains(incomingPlayerUsername.toLowerCase())
-        ) {
-            try {
-                id = profile.getId().toString();
-            } catch (NullPointerException e) {
-                // They probably are an offline player joining with the same name
-                // as a premium player. Is this code necessary?
-                id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername).toString();
-            }
-        } else {
-            id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername).toString();
-        }
-
-        if (
-                config.main.maxLoginTries != -1 &&
-                        playerCacheMap.containsKey(id) &&
-                        playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries
+        // For Mojang account we get offline uuid too.
+        String id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername.toLowerCase()).toString();
+        if (config.main.maxLoginTries != -1 &&
+                playerCacheMap.containsKey(id) &&
+                playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries
         ) {
             return new LiteralText(config.lang.loginTriesExceeded);
         }

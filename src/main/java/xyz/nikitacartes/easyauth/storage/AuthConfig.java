@@ -131,6 +131,12 @@ public class AuthConfig {
          * Leave this as-is if you are using LevelDB.
          */
         public String MongoDBDatabase = "EasyAuthPlayerData";
+
+        public boolean useMySQL = false;
+        public String MySQLConnectionString = "jdbc:mysql://localhost:3306/test";
+        public String MySQLUser = "root";
+        public String MySQLPassword = "password";
+
         /**
          * Whether players who have a valid session should skip the authentication process.
          * You have to set online-mode to true in server.properties!

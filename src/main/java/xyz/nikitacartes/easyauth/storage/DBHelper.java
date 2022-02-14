@@ -2,6 +2,7 @@ package xyz.nikitacartes.easyauth.storage;
 
 import xyz.nikitacartes.easyauth.storage.database.LevelDB;
 import xyz.nikitacartes.easyauth.storage.database.MongoDB;
+import xyz.nikitacartes.easyauth.storage.database.MySQL;
 
 import java.util.HashMap;
 
@@ -16,6 +17,8 @@ public class DBHelper {
     public void openConnection() {
         if (config.main.useMongoDB)
             MongoDB.initialize();
+        if (config.main.useMySQL)
+            MySQL.initialize();
         else
             LevelDB.initialize();
     }
@@ -24,7 +27,7 @@ public class DBHelper {
      * Closes database connection.
      */
     public void close() {
-        if (config.main.useMongoDB && MongoDB.close() || LevelDB.close())
+        if (config.main.useMongoDB && MongoDB.close() || config.main.useMySQL && MySQL.close() || LevelDB.close())
             logInfo("Database connection closed successfully.");
     }
 
@@ -34,7 +37,7 @@ public class DBHelper {
      * @return false if connection is open, otherwise false
      */
     public boolean isClosed() {
-        return config.main.useMongoDB ? MongoDB.isClosed() : LevelDB.isClosed();
+        return config.main.useMongoDB ? MongoDB.isClosed() : config.main.useMySQL ? MySQL.isClosed() : LevelDB.isClosed();
     }
 
 
@@ -49,6 +52,8 @@ public class DBHelper {
         if (config.main.useMongoDB)
             //return MongoDB.registerUser(uuid, data);
             System.out.println("Not implemented yet.");
+        if (config.main.useMySQL)
+            return MySQL.registerUser(uuid, data);
         return LevelDB.registerUser(uuid, data);
     }
 
@@ -59,7 +64,7 @@ public class DBHelper {
      * @return true if registered, otherwise false
      */
     public boolean isUserRegistered(String uuid) {
-        return config.main.useMongoDB ? MongoDB.isUserRegistered(uuid) : LevelDB.isUserRegistered(uuid);
+        return config.main.useMongoDB ? MongoDB.isUserRegistered(uuid) : config.main.useMySQL ? MySQL.isUserRegistered(uuid) : LevelDB.isUserRegistered(uuid);
     }
 
     /**
@@ -70,6 +75,8 @@ public class DBHelper {
     public void deleteUserData(String uuid) {
         if (config.main.useMongoDB)
             MongoDB.deleteUserData(uuid);
+        if (config.main.useMySQL)
+            MySQL.deleteUserData(uuid);
         else
             LevelDB.deleteUserData(uuid);
     }
@@ -84,6 +91,8 @@ public class DBHelper {
         if (config.main.useMongoDB)
             //MongoDB.updateUserData(uuid, data);
             System.out.println("Not implemented yet.");
+        if (config.main.useMySQL)
+            MySQL.updateUserData(uuid, data);
         else
             LevelDB.updateUserData(uuid, data);
     }
@@ -95,13 +104,15 @@ public class DBHelper {
      * @return data as string if player has it, otherwise empty string.
      */
     public String getUserData(String uuid) {
-        return config.main.useMongoDB ? MongoDB.getUserData(uuid) : LevelDB.getUserData(uuid);
+        return config.main.useMongoDB ? MongoDB.getUserData(uuid) : config.main.useMySQL ? MySQL.getUserData(uuid) : LevelDB.getUserData(uuid);
     }
 
     public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         // Saving player data.
         if (config.main.useMongoDB)
             MongoDB.saveFromCache(playerCacheMap);
+        if (config.main.useMySQL)
+            MySQL.saveFromCache(playerCacheMap);
         else
             LevelDB.saveFromCache(playerCacheMap);
     }

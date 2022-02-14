@@ -133,9 +133,8 @@ public class AuthConfig {
         public String MongoDBDatabase = "EasyAuthPlayerData";
 
         public boolean useMySQL = false;
-        public String MySQLConnectionString = "jdbc:mysql://localhost:3306/test";
-        public String MySQLUser = "root";
-        public String MySQLPassword = "password";
+        public String MySQLConnectionString = "jdbc:mysql://host:port/db_name?user=username&password=password";
+        public String MySQLTableName = "auth";
 
         /**
          * Whether players who have a valid session should skip the authentication process.

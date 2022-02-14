@@ -4,6 +4,7 @@ import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 
@@ -19,8 +20,9 @@ public class MySQL {
      */
     public static void initialize() {
         try {
-            MySQLConnection = DriverManager.getConnection(config.main.MySQLConnectionString, config.main.MySQLUser, config.main.MySQLPassword);
-        } catch (SQLException e) {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            MySQLConnection = DriverManager.getConnection(config.main.MySQLConnectionString);
+        } catch (SQLException | ClassNotFoundException e) {
             logError(e.getMessage());
         }
     }
@@ -68,7 +70,7 @@ public class MySQL {
     public static boolean registerUser(String uuid, String data) {
         try {
             if (!isUserRegistered(uuid)) {
-                MySQLConnection.createStatement().executeUpdate("INSERT INTO mysql (uuid, data) VALUES (" + uuid + ", " + data + ")");
+                MySQLConnection.createStatement().executeUpdate("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES ('" + uuid + "', '" + data + "')");
                 return true;
             }
         } catch (SQLException e) {
@@ -86,7 +88,7 @@ public class MySQL {
      */
     public static boolean isUserRegistered(String uuid) {
         try {
-            return MySQLConnection.createStatement().executeQuery("SELECT * FROM mysql WHERE uuid = " + uuid).next();
+            return MySQLConnection.createStatement().executeQuery("SELECT * FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'").next();
         } catch (SQLException e) {
             logError(e.getMessage());
         }
@@ -101,7 +103,7 @@ public class MySQL {
      */
     public static void deleteUserData(String uuid) {
         try {
-            MySQLConnection.createStatement().executeUpdate("DELETE FROM mysql WHERE uuid = " + uuid);
+            MySQLConnection.createStatement().executeUpdate("DELETE FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'");
         } catch (SQLException e) {
             logError(e.getMessage());
         }
@@ -116,7 +118,7 @@ public class MySQL {
     @Deprecated
     public static void updateUserData(String uuid, String data) {
         try {
-            MySQLConnection.createStatement().executeUpdate("UPDATE mysql SET data = " + data + " WHERE uuid = " + uuid);
+            MySQLConnection.createStatement().executeUpdate("UPDATE " + config.main.MySQLTableName + " SET data = '" + data + "' WHERE uuid = '" + uuid + "'");
         } catch (SQLException e) {
             logError(e.getMessage());
         }
@@ -130,8 +132,11 @@ public class MySQL {
      */
     public static String getUserData(String uuid) {
         try {
-            if (isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
-                return MySQLConnection.createStatement().executeQuery("SELECT data FROM mysql WHERE uuid = " + uuid).getString(1).substring(5);
+            if (isUserRegistered(uuid)) { // Gets password from db and removes "data:" prefix from it
+                ResultSet query = MySQLConnection.createStatement().executeQuery("SELECT data FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'");
+                query.next();
+                return query.getString(3);
+            }
         } catch (SQLException e) {
             logError("Error getting data: " + e.getMessage());
         }
@@ -143,7 +148,11 @@ public class MySQL {
         playerCacheMap.forEach((uuid, playerCache) -> {
             String data = playerCache.toJson();
             try {
-                MySQLConnection.createStatement().executeUpdate("UPDATE mysql SET data = " + data + " WHERE uuid = " + uuid);
+                if (MySQLConnection.createStatement().executeQuery("SELECT * FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'").next()) {
+                    MySQLConnection.createStatement().executeUpdate("UPDATE " + config.main.MySQLTableName + " SET data = '" + data + "' WHERE uuid = '" + uuid + "'");
+                } else {
+                    MySQLConnection.createStatement().executeUpdate("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES ('" + uuid + "', '" + data + "')");
+                }
             } catch (SQLException e) {
                 logError("Error saving player data! " + e.getMessage());
             }

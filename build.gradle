@@ -55,9 +55,11 @@ dependencies {
     implementation(include("org.mongodb:mongodb-driver-core:${mongodb_version}"))
     implementation(include("org.mongodb:bson:${mongodb_version}"))
 
+    // MySQL driver
+    implementation "mysql:mysql-connector-java:${mysql_version}"
+
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"
-
 }
 
 tasks.withType(JavaCompile).configureEach {

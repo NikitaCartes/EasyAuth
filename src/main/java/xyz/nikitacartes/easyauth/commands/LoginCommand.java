@@ -11,8 +11,6 @@ import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
-import java.util.concurrent.TimeUnit;
-
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -77,11 +75,11 @@ public class LoginCommand {
                 player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                 return;
             } else if (playerCache.getLoginTries() == maxLoginTries - 1 && maxLoginTries != -1) { // Player exceeded maxLoginTries
-                player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
                 playerCache.incrementLoginTries();
-
-                // Reset their login try counter after the amount of seconds specified in the config.
-                RESET_LOGIN_THREAD.schedule(playerCache::resetLoginTries, config.experimental.resetLoginAttemptsTime, TimeUnit.SECONDS);
+                player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
+                
+                // The AuthEventHandler will automatically reset if they log in later.
+                playerCache.lastKicked = System.currentTimeMillis();
                 return;
             }
             // Sending wrong pass message

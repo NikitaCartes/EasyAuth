@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
@@ -34,11 +33,6 @@ public class EasyAuth implements ModInitializer {
     public static DBHelper DB = new DBHelper();
 
     public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
-
-    /**
-     * Used to reset login attempts with a delay and (in the future) other small tasks.
-     */
-    public static final ScheduledThreadPoolExecutor RESET_LOGIN_THREAD = new ScheduledThreadPoolExecutor(1);
     
     /**
      * HashMap of players that have joined the server.
@@ -83,8 +77,6 @@ public class EasyAuth implements ModInitializer {
             throw new RuntimeException("[EasyAuth] Error creating directory!");
         // Loading config
         config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
-        // Allow the thread to shut down properly when server is closed by canceling every scheduled task.
-        RESET_LOGIN_THREAD.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         // Connecting to db
         DB.openConnection();
     }
@@ -106,7 +98,6 @@ public class EasyAuth implements ModInitializer {
             logError(e.getMessage());
             THREADPOOL.shutdownNow();
         }
-        RESET_LOGIN_THREAD.shutdown();
 
         // Closing DB connection
         DB.close();

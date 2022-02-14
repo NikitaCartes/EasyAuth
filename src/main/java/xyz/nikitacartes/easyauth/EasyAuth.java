@@ -33,7 +33,7 @@ public class EasyAuth implements ModInitializer {
     public static DBHelper DB = new DBHelper();
 
     public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
-    
+
     /**
      * HashMap of players that have joined the server.
      * It's cleared on server stop in order to save some interactions with database during runtime.

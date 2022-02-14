@@ -77,7 +77,7 @@ public class LoginCommand {
             } else if (playerCache.getLoginTries() == maxLoginTries - 1 && maxLoginTries != -1) { // Player exceeded maxLoginTries
                 playerCache.incrementLoginTries();
                 player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
-                
+
                 // The AuthEventHandler will automatically reset if they log in later.
                 playerCache.lastKicked = System.currentTimeMillis();
                 return;

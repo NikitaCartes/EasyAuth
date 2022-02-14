@@ -63,6 +63,7 @@ public class MongoDB {
                                         .append("is_authenticated", playerCache.isAuthenticated)
                                         .append("last_ip", playerCache.lastIp)
                                         .append("valid_until", playerCache.validUntil)
+                                        .append("last_kicked", playerCache.lastKicked)
                         )
                 );
             }

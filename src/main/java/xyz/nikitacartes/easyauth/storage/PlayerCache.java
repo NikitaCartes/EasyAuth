@@ -41,7 +41,7 @@ public class PlayerCache {
      */
     @Expose
     @SerializedName("last_kicked")
-    public long lastKicked;
+    public long lastKicked = 0;
     /**
      * Last recorded IP of player.
      * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayerEntity) sessions}.

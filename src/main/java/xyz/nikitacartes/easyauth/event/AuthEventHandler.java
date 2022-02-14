@@ -17,7 +17,8 @@ import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
 
 /**
  * This class will take care of actions players try to do,
@@ -65,12 +66,12 @@ public class AuthEventHandler {
         // For Mojang account in offline (not mixed) mode we get offline uuid too.
         String id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername.toLowerCase()).toString();
         if (config.main.maxLoginTries != -1 && playerCacheMap.containsKey(id)) {
-        	if (playerCacheMap.get(id).lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
+            if (playerCacheMap.get(id).lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
                 return new LiteralText(config.lang.loginTriesExceeded);
-        	} else if (playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries){
-        		// The timeout at the very least has expired, so no harm in resetting the login tries...
-        		playerCacheMap.get(id).resetLoginTries();
-        	}
+            } else if (playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries) {
+                // The timeout at the very least has expired, so no harm in resetting the login tries...
+                playerCacheMap.get(id).resetLoginTries();
+            }
         }
         return null;
     }

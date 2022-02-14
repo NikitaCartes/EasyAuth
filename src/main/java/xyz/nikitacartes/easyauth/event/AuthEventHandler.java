@@ -66,7 +66,7 @@ public class AuthEventHandler {
         String id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername.toLowerCase()).toString();
         if (config.main.maxLoginTries != -1 && playerCacheMap.containsKey(id)) {
         	if (playerCacheMap.get(id).lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
-                return new LiteralText(config.lang.loginTriesExceeded);
+return new LiteralText(config.lang.loginTriesExceeded);
         	} else if (playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries){
         		// The timeout at the very least has expired, so no harm in resetting the login tries...
         		playerCacheMap.get(id).resetLoginTries();

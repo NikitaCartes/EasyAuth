@@ -49,13 +49,7 @@ public class MySQL {
      * @return false if connection is open, otherwise false
      */
     public static boolean isClosed() {
-        try {
-            return MySQLConnection.isClosed();
-        } catch (SQLException e) {
-            logError(e.getMessage());
-        }
-
-        return true;
+        return MySQLConnection == null;
     }
 
 

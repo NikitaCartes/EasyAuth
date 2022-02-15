@@ -17,7 +17,7 @@ public class DBHelper {
     public void openConnection() {
         if (config.main.useMongoDB)
             MongoDB.initialize();
-        if (config.main.useMySQL)
+        else if (config.main.useMySQL)
             MySQL.initialize();
         else
             LevelDB.initialize();
@@ -52,7 +52,7 @@ public class DBHelper {
         if (config.main.useMongoDB)
             //return MongoDB.registerUser(uuid, data);
             System.out.println("Not implemented yet.");
-        if (config.main.useMySQL)
+        else if (config.main.useMySQL)
             return MySQL.registerUser(uuid, data);
         return LevelDB.registerUser(uuid, data);
     }
@@ -75,7 +75,7 @@ public class DBHelper {
     public void deleteUserData(String uuid) {
         if (config.main.useMongoDB)
             MongoDB.deleteUserData(uuid);
-        if (config.main.useMySQL)
+        else if (config.main.useMySQL)
             MySQL.deleteUserData(uuid);
         else
             LevelDB.deleteUserData(uuid);
@@ -89,9 +89,8 @@ public class DBHelper {
      */
     public void updateUserData(String uuid, String data) {
         if (config.main.useMongoDB)
-            //MongoDB.updateUserData(uuid, data);
             System.out.println("Not implemented yet.");
-        if (config.main.useMySQL)
+        else if (config.main.useMySQL)
             MySQL.updateUserData(uuid, data);
         else
             LevelDB.updateUserData(uuid, data);
@@ -111,7 +110,7 @@ public class DBHelper {
         // Saving player data.
         if (config.main.useMongoDB)
             MongoDB.saveFromCache(playerCacheMap);
-        if (config.main.useMySQL)
+        else if (config.main.useMySQL)
             MySQL.saveFromCache(playerCacheMap);
         else
             LevelDB.saveFromCache(playerCacheMap);

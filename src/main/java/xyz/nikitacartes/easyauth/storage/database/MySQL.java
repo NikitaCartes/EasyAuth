@@ -32,7 +32,7 @@ public class MySQL {
      */
     public static boolean close() {
         try {
-            if (MySQLConnection.isClosed()) {
+            if (!MySQLConnection.isClosed()) {
                 MySQLConnection.close();
                 return true;
             }

@@ -135,7 +135,7 @@ public class MySQL {
             if (isUserRegistered(uuid)) { // Gets password from db and removes "data:" prefix from it
                 ResultSet query = MySQLConnection.createStatement().executeQuery("SELECT data FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'");
                 query.next();
-                return query.getString(3);
+                return query.getString(1);
             }
         } catch (SQLException e) {
             logError("Error getting data: " + e.getMessage());

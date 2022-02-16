@@ -62,6 +62,17 @@ public class AuthEventHandler {
                     )
             );
         }
+        // If the player has too many login attempts, kick them immediately.
+        // For Mojang account in offline (not mixed) mode we get offline uuid too.
+        String id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername.toLowerCase()).toString();
+        if (config.main.maxLoginTries != -1 && playerCacheMap.containsKey(id)) {
+            if (playerCacheMap.get(id).lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
+                return new LiteralText(config.lang.loginTriesExceeded);
+            } else if (playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries) {
+                // The timeout at the very least has expired, so no harm in resetting the login tries...
+                playerCacheMap.get(id).resetLoginTries();
+            }
+        }
         return null;
     }
 

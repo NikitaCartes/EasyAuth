@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.block.Blocks;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
@@ -12,9 +11,7 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
 import java.util.Objects;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.DB;
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 /**
@@ -35,8 +32,16 @@ public class PlayerCache {
     public String password = "";
     /**
      * Stores how many times player has tried to log in.
+     * Cleared on restart.
      */
-    public int loginTries = 0;
+    private int loginTries = 0;
+    /**
+     * Stores the last time a player was kicked for too many logins.
+     * Persists across restarts.
+     */
+    @Expose
+    @SerializedName("last_kicked")
+    public long lastKicked = 0;
     /**
      * Last recorded IP of player.
      * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayerEntity) sessions}.
@@ -112,5 +117,18 @@ public class PlayerCache {
     public static boolean isAuthenticated(String uuid) {
         PlayerCache playerCache = playerCacheMap.get(uuid);
         return (playerCache != null && playerCache.isAuthenticated);
+    }
+
+    // Hide the actual login tries modifications behind synchronized functions for thread safety.
+    public synchronized void incrementLoginTries() {
+        loginTries++;
+    }
+
+    public synchronized void resetLoginTries() {
+        loginTries = 0;
+    }
+
+    public synchronized int getLoginTries() {
+        return loginTries;
     }
 }

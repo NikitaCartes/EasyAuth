@@ -5,7 +5,7 @@
   "text.easyauth.matchPassword": "§6Пароли должны совпадать!",
   "text.easyauth.passwordUpdated": "§aВаш пароль был успешно обновлен!",
   "text.easyauth.loginRequired": "§cВы не авторизованы!\n§6Используйте /login, /l для входа!",
-  "text.easyauth.loginTriesExceeded": "§4Слишком много попыток.",
+  "text.easyauth.loginTriesExceeded": "§4Слишком много попыток. Попробуйте позже.",
   "text.easyauth.globalPasswordSet": "§aГлобальный пароль был успешно установлен!",
   "text.easyauth.cannotChangePassword": "§cВы не можете сменить пароль!",
   "text.easyauth.cannotUnregister": "§cВы не можете удалить этот аккаунт!",

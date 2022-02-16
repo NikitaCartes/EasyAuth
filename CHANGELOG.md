@@ -1,3 +1,9 @@
+### 2.2.0, Minecraft 1.18.x
+
+1) Fix many real and potential issues with login attempts, thanks to @were491
+2) New option `resetLoginAttemptsTime`  
+   * How long it takes (seconds) after a player gets kicked for too many logins for the player to be allowed back in
+
 ### 2.1.0, Minecraft 1.18.x
 
 1) Fix Turkish translation

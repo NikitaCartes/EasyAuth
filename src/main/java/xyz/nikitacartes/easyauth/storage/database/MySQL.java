@@ -143,9 +143,9 @@ public class MySQL {
             String data = playerCache.toJson();
             try {
                 if (MySQLConnection.createStatement().executeQuery("SELECT * FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'").next()) {
-                    MySQLConnection.createStatement().executeUpdate("UPDATE " + config.main.MySQLTableName + " SET data = '" + data + "' WHERE uuid = '" + uuid + "'");
+                    MySQLConnection.createStatement().executeUpdate("UPDATE " + config.main.MySQLTableName + " SET data = '" + data.replace("\\", "\\\\") + "' WHERE uuid = '" + uuid + "'");
                 } else {
-                    MySQLConnection.createStatement().executeUpdate("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES ('" + uuid + "', '" + data + "')");
+                    MySQLConnection.createStatement().executeUpdate("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES ('" + uuid + "', '" + data.replace("\\", "\\\\") + "')");
                 }
             } catch (SQLException e) {
                 logError("Error saving player data! " + e.getMessage());

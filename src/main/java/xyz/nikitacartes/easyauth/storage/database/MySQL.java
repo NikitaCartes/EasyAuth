@@ -2,10 +2,7 @@ package xyz.nikitacartes.easyauth.storage.database;
 
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
@@ -138,18 +135,24 @@ public class MySQL {
     }
 
     public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
-        // Updating player data.
-        playerCacheMap.forEach((uuid, playerCache) -> {
-            String data = playerCache.toJson();
-            try {
-                if (MySQLConnection.createStatement().executeQuery("SELECT * FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'").next()) {
-                    MySQLConnection.createStatement().executeUpdate("UPDATE " + config.main.MySQLTableName + " SET data = '" + data.replace("\\", "\\\\") + "' WHERE uuid = '" + uuid + "'");
-                } else {
-                    MySQLConnection.createStatement().executeUpdate("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES ('" + uuid + "', '" + data.replace("\\", "\\\\") + "')");
+        try {
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = ?");
+            // Updating player data.
+            playerCacheMap.forEach((uuid, playerCache) -> {
+                String data = playerCache.toJson();
+                try {
+                    preparedStatement.setString(1, uuid);
+                    preparedStatement.setString(2, data);
+                    preparedStatement.setString(3, data);
+
+                    preparedStatement.addBatch();
+                } catch (SQLException e) {
+                    logError("Error saving player data! (" + uuid + ") " + e.getMessage());
                 }
-            } catch (SQLException e) {
-                logError("Error saving player data! " + e.getMessage());
-            }
-        });
+            });
+            preparedStatement.executeBatch();
+        } catch (SQLException e) {
+            logError("Error saving players data! " + e.getMessage());
+        }
     }
 }

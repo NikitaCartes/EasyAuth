@@ -5,7 +5,6 @@ import xyz.nikitacartes.easyauth.utils.hashing.HasherBCrypt;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 
 public class AuthHelper {
     /**

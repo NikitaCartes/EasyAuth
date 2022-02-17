@@ -35,6 +35,57 @@ public class AuthConfig {
             .setPrettyPrinting()
             .serializeNulls()
             .create();
+    public MainConfig main = new MainConfig();
+    public MainConfig.WorldSpawn worldSpawn = new MainConfig.WorldSpawn();
+    public LangConfig lang = new LangConfig();
+    public ExperimentalConfig experimental = new ExperimentalConfig();
+
+    /**
+     * Loads EasyAuth's config file.
+     *
+     * @param file file to load config from
+     * @return AuthConfig config object
+     */
+    public static AuthConfig load(File file) {
+        AuthConfig config;
+        if (file.exists()) {
+            try (BufferedReader fileReader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
+            )) {
+                config = gson.fromJson(fileReader, AuthConfig.class);
+                if (!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
+                    if (config.experimental.forcedOfflineUuids) {
+                        logInfo("Server is in offline mode, forcedOfflineUuids option is irrelevant. Setting it to false.");
+                        config.experimental.forcedOfflineUuids = false;
+                    }
+                    if (config.main.premiumAutologin) {
+                        logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
+                        config.main.premiumAutologin = false;
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("[EasyAuth] Problem occurred when trying to load config: ", e);
+            }
+        } else {
+            config = new AuthConfig();
+        }
+        config.save(file);
+
+        return config;
+    }
+
+    /**
+     * Saves the config to the given file.
+     *
+     * @param file file to save config to
+     */
+    public void save(File file) {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+            gson.toJson(this, writer);
+        } catch (IOException e) {
+            logError("Problem occurred when saving config: " + e.getMessage());
+        }
+    }
 
     // If player is not authenticated, following conditions apply
     public static class MainConfig {
@@ -96,46 +147,18 @@ public class AuthConfig {
         public boolean spawnOnJoin = false;
 
         /**
-         * Data for spawn (where deauthenticated players are teleported temporarily).
-         * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Coordinate-Hiding" target="_blank">wiki</a>
-         */
-        public static class WorldSpawn {
-            /**
-             * Dimension id, e.g. "minecraft:overworld"
-             */
-            public String dimension;
-            public double x;
-            public double y;
-            public double z;
-            public float yaw;
-            public float pitch;
-        }
-
-        /**
          * Whether to use MongoDB instead of LevelDB.
          * Note: you need to install MongoDB yourself, as well
          * as create a user (account) that will be used by EasyAuth
          * to manage its database.
          */
-        public boolean useMongoDB = false;
-        /**
-         * Connections String for MongoDB database.
-         *
-         * @see <a href="https://docs.mongodb.com/manual/reference/connection-string/" target="_blank">documentation</a>
-         * Leave this as-is if you are using LevelDB.
-         */
-        public String MongoDBConnectionString = "mongodb://[username:password@]host[:port][/[defaultauthdb][?options]]";
-        /**
-         * Name of the new database in which EasyAuth should
-         * store player data.
-         * Leave this as-is if you are using LevelDB.
-         */
-        public String MongoDBDatabase = "EasyAuthPlayerData";
-
-        public boolean useMySQL = false;
-        public String MySQLConnectionString = "jdbc:mysql://host:port/db_name?user=username&password=password";
-        public String MySQLTableName = "auth";
-
+        public String databaseType = "";
+        public String databaseHost = "";
+        public String databaseUser = "";
+        public String databasePassword = "";
+        public String databaseName = "";
+        public String databaseConnectionOptions = "";
+        public String MySQLTableName = "";
         /**
          * Whether players who have a valid session should skip the authentication process.
          * You have to set online-mode to true in server.properties!
@@ -158,6 +181,23 @@ public class AuthConfig {
          * Hide unauthenticated pLayers from player list
          */
         public boolean hideUnauthenticatedPLayersFromPlayerList = false;
+
+        /**
+         * Data for spawn (where deauthenticated players are teleported temporarily).
+         *
+         * @see <a href="https://github.com/NikitaCartes/EasyAuth/wiki/Coordinate-Hiding" target="_blank">wiki</a>
+         */
+        public static class WorldSpawn {
+            /**
+             * Dimension id, e.g. "minecraft:overworld"
+             */
+            public String dimension;
+            public double x;
+            public double y;
+            public double z;
+            public float yaw;
+            public float pitch;
+        }
 
     }
 
@@ -295,58 +335,5 @@ public class AuthConfig {
          * for too many logins for the player to be allowed back in.
          */
         public long resetLoginAttemptsTime = 120;
-    }
-
-    public MainConfig main = new MainConfig();
-    public MainConfig.WorldSpawn worldSpawn = new MainConfig.WorldSpawn();
-    public LangConfig lang = new LangConfig();
-    public ExperimentalConfig experimental = new ExperimentalConfig();
-
-
-    /**
-     * Loads EasyAuth's config file.
-     *
-     * @param file file to load config from
-     * @return AuthConfig config object
-     */
-    public static AuthConfig load(File file) {
-        AuthConfig config;
-        if (file.exists()) {
-            try (BufferedReader fileReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
-            )) {
-                config = gson.fromJson(fileReader, AuthConfig.class);
-                if (!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
-                    if (config.experimental.forcedOfflineUuids) {
-                        logInfo("Server is in offline mode, forcedOfflineUuids option is irrelevant. Setting it to false.");
-                        config.experimental.forcedOfflineUuids = false;
-                    }
-                    if (config.main.premiumAutologin) {
-                        logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
-                        config.main.premiumAutologin = false;
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("[EasyAuth] Problem occurred when trying to load config: ", e);
-            }
-        } else {
-            config = new AuthConfig();
-        }
-        config.save(file);
-
-        return config;
-    }
-
-    /**
-     * Saves the config to the given file.
-     *
-     * @param file file to save config to
-     */
-    public void save(File file) {
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
-            gson.toJson(this, writer);
-        } catch (IOException e) {
-            logError("Problem occurred when saving config: " + e.getMessage());
-        }
     }
 }

@@ -23,9 +23,9 @@ public class MongoDB {
 
     public static void initialize() {
         mongoClient = MongoClients.create(
-                config.main.MongoDBConnectionString
+                "mongodb://" + config.main.databaseUser + ":" + config.main.databasePassword + "@" + config.main.databaseHost + "/" + config.main.databaseConnectionOptions
         );
-        MongoDatabase database = mongoClient.getDatabase(config.main.MongoDBDatabase);
+        MongoDatabase database = mongoClient.getDatabase(config.main.databaseName);
         collection = database.getCollection("players");
     }
 

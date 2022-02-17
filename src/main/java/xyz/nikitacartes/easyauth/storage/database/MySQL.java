@@ -5,8 +5,8 @@ import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import java.sql.*;
 import java.util.HashMap;
 
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 
 
 public class MySQL {
@@ -18,7 +18,12 @@ public class MySQL {
     public static void initialize() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            MySQLConnection = DriverManager.getConnection(config.main.MySQLConnectionString);
+            MySQLConnection = DriverManager.getConnection("jdbc:mysql://" + config.main.databaseHost + "/" + config.main.databaseName + config.main.databaseConnectionOptions, config.main.databaseUser, config.main.databasePassword);
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
+            preparedStatement.setString(1, config.main.MySQLTableName);
+            if (!preparedStatement.executeQuery().next()) {
+                MySQLConnection.createStatement().executeUpdate("CREATE TABLE `" + config.main.databaseName + "`.`" + config.main.MySQLTableName + "` ( `id` INT NOT NULL AUTO_INCREMENT , `uuid` VARCHAR(36) NOT NULL , `data` JSON NOT NULL , PRIMARY KEY (`id`), UNIQUE (`uuid`)) ENGINE = InnoDB;");
+            }
         } catch (SQLException | ClassNotFoundException e) {
             logError(e.getMessage());
         }
@@ -29,14 +34,13 @@ public class MySQL {
      */
     public static boolean close() {
         try {
-            if (!MySQLConnection.isClosed()) {
+            if (MySQLConnection != null) {
                 MySQLConnection.close();
                 return true;
             }
         } catch (SQLException e) {
             logError(e.getMessage());
         }
-
         return false;
     }
 
@@ -61,13 +65,15 @@ public class MySQL {
     public static boolean registerUser(String uuid, String data) {
         try {
             if (!isUserRegistered(uuid)) {
-                MySQLConnection.createStatement().executeUpdate("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES ('" + uuid + "', '" + data + "')");
+                PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES (?, ?);");
+                preparedStatement.setString(1, uuid);
+                preparedStatement.setString(2, data);
+                preparedStatement.executeUpdate();
                 return true;
             }
         } catch (SQLException e) {
             logError("Register error: " + e.getMessage());
         }
-
         return false;
     }
 
@@ -79,11 +85,12 @@ public class MySQL {
      */
     public static boolean isUserRegistered(String uuid) {
         try {
-            return MySQLConnection.createStatement().executeQuery("SELECT * FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'").next();
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
+            preparedStatement.setString(1, uuid);
+            return preparedStatement.executeQuery().next();
         } catch (SQLException e) {
             logError(e.getMessage());
         }
-
         return false;
     }
 
@@ -94,7 +101,9 @@ public class MySQL {
      */
     public static void deleteUserData(String uuid) {
         try {
-            MySQLConnection.createStatement().executeUpdate("DELETE FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'");
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("DELETE FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
+            preparedStatement.setString(1, uuid);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             logError(e.getMessage());
         }
@@ -109,7 +118,10 @@ public class MySQL {
     @Deprecated
     public static void updateUserData(String uuid, String data) {
         try {
-            MySQLConnection.createStatement().executeUpdate("UPDATE " + config.main.MySQLTableName + " SET data = '" + data + "' WHERE uuid = '" + uuid + "'");
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("UPDATE " + config.main.MySQLTableName + " SET data = ? WHERE uuid = ?;");
+            preparedStatement.setString(1, data);
+            preparedStatement.setString(1, uuid);
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             logError(e.getMessage());
         }
@@ -123,8 +135,10 @@ public class MySQL {
      */
     public static String getUserData(String uuid) {
         try {
-            if (isUserRegistered(uuid)) { // Gets password from db and removes "data:" prefix from it
-                ResultSet query = MySQLConnection.createStatement().executeQuery("SELECT data FROM " + config.main.MySQLTableName + " WHERE uuid = '" + uuid + "'");
+            if (isUserRegistered(uuid)) {
+                PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT data FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
+                preparedStatement.setString(1, uuid);
+                ResultSet query = preparedStatement.executeQuery();
                 query.next();
                 return query.getString(1);
             }
@@ -136,7 +150,7 @@ public class MySQL {
 
     public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
         try {
-            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = ?");
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = ?;");
             // Updating player data.
             playerCacheMap.forEach((uuid, playerCache) -> {
                 String data = playerCache.toJson();

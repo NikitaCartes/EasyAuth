@@ -15,10 +15,10 @@ public class DBHelper {
      * Connects to the DB.
      */
     public void openConnection() {
-        if (config.main.useMongoDB)
-            MongoDB.initialize();
-        else if (config.main.useMySQL)
+        if (config.main.databaseType.equals("mysql"))
             MySQL.initialize();
+        else if (config.main.databaseType.equals("mongodb"))
+            MongoDB.initialize();
         else
             LevelDB.initialize();
     }
@@ -27,7 +27,7 @@ public class DBHelper {
      * Closes database connection.
      */
     public void close() {
-        if (config.main.useMongoDB && MongoDB.close() || config.main.useMySQL && MySQL.close() || LevelDB.close())
+        if (config.main.databaseType.equals("mysql") && MySQL.close() || config.main.databaseType.equals("mongodb") && MongoDB.close() || LevelDB.close())
             logInfo("Database connection closed successfully.");
     }
 
@@ -37,7 +37,7 @@ public class DBHelper {
      * @return false if connection is open, otherwise false
      */
     public boolean isClosed() {
-        return config.main.useMongoDB ? MongoDB.isClosed() : config.main.useMySQL ? MySQL.isClosed() : LevelDB.isClosed();
+        return config.main.databaseType.equals("mysql") ? MySQL.isClosed() : config.main.databaseType.equals("mongodb") ? MongoDB.isClosed() : LevelDB.isClosed();
     }
 
 
@@ -49,11 +49,10 @@ public class DBHelper {
      * @return true if operation was successful, otherwise false
      */
     public boolean registerUser(String uuid, String data) {
-        if (config.main.useMongoDB)
-            //return MongoDB.registerUser(uuid, data);
-            System.out.println("Not implemented yet.");
-        else if (config.main.useMySQL)
+        if (config.main.databaseType.equals("mysql"))
             return MySQL.registerUser(uuid, data);
+        else if (config.main.databaseType.equals("mongodb"))
+            System.out.println("Not implemented yet.");
         return LevelDB.registerUser(uuid, data);
     }
 
@@ -64,7 +63,7 @@ public class DBHelper {
      * @return true if registered, otherwise false
      */
     public boolean isUserRegistered(String uuid) {
-        return config.main.useMongoDB ? MongoDB.isUserRegistered(uuid) : config.main.useMySQL ? MySQL.isUserRegistered(uuid) : LevelDB.isUserRegistered(uuid);
+        return config.main.databaseType.equals("mysql") ? MySQL.isUserRegistered(uuid) : config.main.databaseType.equals("mongodb") ? MongoDB.isUserRegistered(uuid) : LevelDB.isUserRegistered(uuid);
     }
 
     /**
@@ -73,10 +72,10 @@ public class DBHelper {
      * @param uuid uuid of player to delete data for
      */
     public void deleteUserData(String uuid) {
-        if (config.main.useMongoDB)
-            MongoDB.deleteUserData(uuid);
-        else if (config.main.useMySQL)
+        if (config.main.databaseType.equals("mysql"))
             MySQL.deleteUserData(uuid);
+        else if (config.main.databaseType.equals("mongodb"))
+            MongoDB.deleteUserData(uuid);
         else
             LevelDB.deleteUserData(uuid);
     }
@@ -88,10 +87,10 @@ public class DBHelper {
      * @param data data to put inside database
      */
     public void updateUserData(String uuid, String data) {
-        if (config.main.useMongoDB)
-            System.out.println("Not implemented yet.");
-        else if (config.main.useMySQL)
+        if (config.main.databaseType.equals("mysql"))
             MySQL.updateUserData(uuid, data);
+        else if (config.main.databaseType.equals("mongodb"))
+            System.out.println("Not implemented yet.");
         else
             LevelDB.updateUserData(uuid, data);
     }
@@ -103,15 +102,15 @@ public class DBHelper {
      * @return data as string if player has it, otherwise empty string.
      */
     public String getUserData(String uuid) {
-        return config.main.useMongoDB ? MongoDB.getUserData(uuid) : config.main.useMySQL ? MySQL.getUserData(uuid) : LevelDB.getUserData(uuid);
+        return config.main.databaseType.equals("mysql") ? MySQL.getUserData(uuid) : config.main.databaseType.equals("mongodb") ? MongoDB.getUserData(uuid) : LevelDB.getUserData(uuid);
     }
 
     public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         // Saving player data.
-        if (config.main.useMongoDB)
-            MongoDB.saveFromCache(playerCacheMap);
-        else if (config.main.useMySQL)
+        if (config.main.databaseType.equals("mysql"))
             MySQL.saveFromCache(playerCacheMap);
+        else if (config.main.databaseType.equals("mongodb"))
+            MongoDB.saveFromCache(playerCacheMap);
         else
             LevelDB.saveFromCache(playerCacheMap);
     }

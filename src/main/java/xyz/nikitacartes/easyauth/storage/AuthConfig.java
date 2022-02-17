@@ -147,18 +147,36 @@ public class AuthConfig {
         public boolean spawnOnJoin = false;
 
         /**
-         * Whether to use MongoDB instead of LevelDB.
-         * Note: you need to install MongoDB yourself, as well
-         * as create a user (account) that will be used by EasyAuth
-         * to manage its database.
+         * Database type. Can be "mysql" or "mongodb". LevelDB is set by default.
          */
         public String databaseType = "";
+        /**
+         * Database host. IP:PORT.
+         */
         public String databaseHost = "";
-        public String databaseUser = "";
+        /**
+         * Database username.
+         */
+        public String databaseUser = "root";
+        /**
+         * Database user password.
+         */
         public String databasePassword = "";
+        /**
+         * Database name.
+         */
         public String databaseName = "";
-        public String databaseConnectionOptions = "";
-        public String MySQLTableName = "";
+        /**
+         * Database connection options.
+         *
+         * @see <a href="https://dev.mysql.com/doc/dev/mysqlsh-api-python/8.0/connection_options.html" target="_blank">connection options</a>
+         */
+        public String databaseConnectionOptions = "?";
+        /**
+         * MySQL table name. Only works if databaseType = "mysql".
+         */
+        public String MySQLTableName = "easyauth";
+
         /**
          * Whether players who have a valid session should skip the authentication process.
          * You have to set online-mode to true in server.properties!

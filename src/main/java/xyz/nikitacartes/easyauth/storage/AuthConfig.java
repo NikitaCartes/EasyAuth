@@ -153,7 +153,7 @@ public class AuthConfig {
         /**
          * MySQL connection string.
          */
-        public String MySQLConnectionString = "jdbc:mysql://host:port/database?options";
+        public String MySQLConnectionString = "jdbc:mysql://host:port/database?user=root&password=1234";
         /**
          * MySQL database name.
          */

@@ -25,17 +25,9 @@ public class MongoDB {
 
     public static void initialize() {
         mongoClient = MongoClients.create(
-                URLEncoder.encode(
-                        // mongodb://username:password@host:port/?options
-                        String.format("mongodb://%s:%s@%s/%s",
-                                config.main.databaseUser,
-                                config.main.databasePassword,
-                                config.main.databaseHost,
-                                config.main.databaseConnectionOptions),
-                        StandardCharsets.UTF_8
-                )
+                URLEncoder.encode(config.main.MongoDBConnectionString, StandardCharsets.UTF_8)
         );
-        MongoDatabase database = mongoClient.getDatabase(config.main.databaseName);
+        MongoDatabase database = mongoClient.getDatabase(config.main.MongoDBDatabase);
         collection = database.getCollection("players");
     }
 

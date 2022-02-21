@@ -21,19 +21,12 @@ public class MySQL {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             MySQLConnection = DriverManager.getConnection(
-                    URLEncoder.encode(
-                            // jdbc:mysql://host:port/database?options
-                            String.format("jdbc:mysql://%s/%s%s",
-                                    config.main.databaseHost,
-                                    config.main.databaseName,
-                                    config.main.databaseConnectionOptions),
-                            StandardCharsets.UTF_8
-                    )
+                    URLEncoder.encode(config.main.MySQLConnectionString, StandardCharsets.UTF_8)
             );
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
             preparedStatement.setString(1, config.main.MySQLTableName);
             if (!preparedStatement.executeQuery().next()) {
-                MySQLConnection.createStatement().executeUpdate("CREATE TABLE `" + config.main.databaseName + "`.`" + config.main.MySQLTableName + "` ( `id` INT NOT NULL AUTO_INCREMENT , `uuid` VARCHAR(36) NOT NULL , `data` JSON NOT NULL , PRIMARY KEY (`id`), UNIQUE (`uuid`)) ENGINE = InnoDB;");
+                MySQLConnection.createStatement().executeUpdate("CREATE TABLE `" + config.main.MySQLDatabase + "`.`" + config.main.MySQLTableName + "` ( `id` INT NOT NULL AUTO_INCREMENT , `uuid` VARCHAR(36) NOT NULL , `data` JSON NOT NULL , PRIMARY KEY (`id`), UNIQUE (`uuid`)) ENGINE = InnoDB;");
             }
         } catch (SQLException | ClassNotFoundException e) {
             logError(e.getMessage());

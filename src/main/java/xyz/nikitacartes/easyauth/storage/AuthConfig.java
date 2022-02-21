@@ -151,31 +151,25 @@ public class AuthConfig {
          */
         public String databaseType = "";
         /**
-         * Database host. IP:PORT.
+         * MySQL connection string.
          */
-        public String databaseHost = "";
+        public String MySQLConnectionString = "127.0.0.1:3306";
         /**
-         * Database username.
+         * MySQL database name.
          */
-        public String databaseUser = "root";
+        public String MySQLDatabase = "easyauth";
         /**
-         * Database user password.
-         */
-        public String databasePassword = "";
-        /**
-         * Database name.
-         */
-        public String databaseName = "";
-        /**
-         * Database connection options.
-         *
-         * @see <a href="https://dev.mysql.com/doc/dev/mysqlsh-api-python/8.0/connection_options.html" target="_blank">connection options</a>
-         */
-        public String databaseConnectionOptions = "?";
-        /**
-         * MySQL table name. Only works if databaseType = "mysql".
+         * MySQL table name.
          */
         public String MySQLTableName = "easyauth";
+        /**
+         * MongoDB connection string.
+         */
+        public String MongoDBConnectionString = "mongodb://username:password@host:port/?options";
+        /**
+         * MongoDB database name.
+         */
+        public String MongoDBDatabase = "easyauth";
 
         /**
          * Whether players who have a valid session should skip the authentication process.

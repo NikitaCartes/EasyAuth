@@ -2,6 +2,8 @@ package xyz.nikitacartes.easyauth.storage.database;
 
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.HashMap;
 
@@ -18,7 +20,16 @@ public class MySQL {
     public static void initialize() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            MySQLConnection = DriverManager.getConnection("jdbc:mysql://" + config.main.databaseHost + "/" + config.main.databaseName + config.main.databaseConnectionOptions, config.main.databaseUser, config.main.databasePassword);
+            MySQLConnection = DriverManager.getConnection(
+                    URLEncoder.encode(
+                            // jdbc:mysql://host:port/database?options
+                            String.format("jdbc:mysql://%s/%s%s",
+                                    config.main.databaseHost,
+                                    config.main.databaseName,
+                                    config.main.databaseConnectionOptions),
+                            StandardCharsets.UTF_8
+                    )
+            );
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
             preparedStatement.setString(1, config.main.MySQLTableName);
             if (!preparedStatement.executeQuery().next()) {

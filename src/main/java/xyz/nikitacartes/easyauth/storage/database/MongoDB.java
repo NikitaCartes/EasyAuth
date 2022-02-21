@@ -10,6 +10,8 @@ import com.mongodb.client.model.ReplaceOneModel;
 import org.bson.Document;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +25,15 @@ public class MongoDB {
 
     public static void initialize() {
         mongoClient = MongoClients.create(
-                "mongodb://" + config.main.databaseUser + ":" + config.main.databasePassword + "@" + config.main.databaseHost + "/" + config.main.databaseConnectionOptions
+                URLEncoder.encode(
+                        // mongodb://username:password@host:port/?options
+                        String.format("mongodb://%s:%s@%s/%s",
+                                config.main.databaseUser,
+                                config.main.databasePassword,
+                                config.main.databaseHost,
+                                config.main.databaseConnectionOptions),
+                        StandardCharsets.UTF_8
+                )
         );
         MongoDatabase database = mongoClient.getDatabase(config.main.databaseName);
         collection = database.getCollection("players");

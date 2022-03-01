@@ -1,4 +1,4 @@
-### 2.2.2, Minecraft 1.17, 1.17.1, Minecraft 1.18.x
+### 2.2.2, Minecraft 1.17, 1.17.1, Minecraft 1.18[.1], Minecraft 1.18.2
 
 1) Fix many real and potential issues with login attempts, thanks to @were491
 2) New option `resetLoginAttemptsTime`  

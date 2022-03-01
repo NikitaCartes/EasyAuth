@@ -22,6 +22,7 @@ import java.io.IOException;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logWarn;
 
 @Mixin(WorldSaveHandler.class)
 public class WorldSaveHandlerMixin {
@@ -32,10 +33,6 @@ public class WorldSaveHandlerMixin {
 
     @Unique
     private boolean fileExists;
-
-    @Final
-    @Shadow
-    private static Logger LOGGER;
 
     /**
      * Saves whether player save file exists.
@@ -83,7 +80,7 @@ public class WorldSaveHandlerMixin {
                 try {
                     compoundTag = NbtIo.readCompressed(new FileInputStream(file));
                 } catch (IOException e) {
-                    LOGGER.warn("Failed to load player data for {}", playername);
+                    logWarn("Failed to load player data for " + playername);
                 }
         } else if (config.experimental.debugMode)
             logInfo("Not migrating " +

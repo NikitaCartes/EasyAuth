@@ -1,10 +1,10 @@
 package xyz.nikitacartes.easyauth.mixin;
 
+import eu.pb4.placeholders.TextParser;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -117,13 +117,13 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
             if (config.experimental.enableServerSideTranslation) {
                 return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.registerRequired"));
             } else {
-                return new LiteralText(config.lang.notAuthenticated + "\n" + config.lang.registerRequired);
+                return TextParser.parse(config.lang.notAuthenticated + "\n" + config.lang.registerRequired);
             }
         } else {
             if (config.experimental.enableServerSideTranslation) {
                 return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.loginRequired"));
             } else {
-                return new LiteralText(config.lang.notAuthenticated + "\n" + config.lang.loginRequired);
+                return TextParser.parse(config.lang.notAuthenticated + "\n" + config.lang.loginRequired);
             }
         }
 

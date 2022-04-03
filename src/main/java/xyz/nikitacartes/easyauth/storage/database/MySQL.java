@@ -8,21 +8,19 @@ import java.sql.*;
 import java.util.HashMap;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 
-public class MySQL {
-    private static Connection MySQLConnection;
+public class MySQL implements DbApi {
+    private Connection MySQLConnection;
 
     /**
      * Connects to the MySQL.
      */
-    public static void initialize() {
+    public MySQL() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            MySQLConnection = DriverManager.getConnection(
-                    URLEncoder.encode(config.main.MySQLConnectionString, StandardCharsets.UTF_8)
-            );
+            MySQLConnection = DriverManager.getConnection(URLEncoder.encode(config.main.MySQLConnectionString, StandardCharsets.UTF_8));
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
             preparedStatement.setString(1, config.main.MySQLTableName);
             if (!preparedStatement.executeQuery().next()) {
@@ -36,24 +34,24 @@ public class MySQL {
     /**
      * Closes database connection.
      */
-    public static boolean close() {
+    public void close() {
         try {
             if (MySQLConnection != null) {
                 MySQLConnection.close();
-                return true;
+                logInfo("Database connection closed successfully.");
             }
         } catch (SQLException e) {
             logError(e.getMessage());
         }
-        return false;
+        logWarn("Database connection not closed");
     }
 
     /**
-     * Tells whether DB connection is closed.
+     * Tells whether DbApi connection is closed.
      *
      * @return false if connection is open, otherwise false
      */
-    public static boolean isClosed() {
+    public boolean isClosed() {
         return MySQLConnection == null;
     }
 
@@ -66,7 +64,7 @@ public class MySQL {
      * @return true if operation was successful, otherwise false
      */
     @Deprecated
-    public static boolean registerUser(String uuid, String data) {
+    public boolean registerUser(String uuid, String data) {
         try {
             if (!isUserRegistered(uuid)) {
                 PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES (?, ?);");
@@ -87,7 +85,7 @@ public class MySQL {
      * @param uuid player's uuid
      * @return true if registered, otherwise false
      */
-    public static boolean isUserRegistered(String uuid) {
+    public boolean isUserRegistered(String uuid) {
         try {
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
             preparedStatement.setString(1, uuid);
@@ -103,7 +101,7 @@ public class MySQL {
      *
      * @param uuid uuid of player to delete data for
      */
-    public static void deleteUserData(String uuid) {
+    public void deleteUserData(String uuid) {
         try {
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("DELETE FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
             preparedStatement.setString(1, uuid);
@@ -120,7 +118,7 @@ public class MySQL {
      * @param data data to put inside database
      */
     @Deprecated
-    public static void updateUserData(String uuid, String data) {
+    public void updateUserData(String uuid, String data) {
         try {
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("UPDATE " + config.main.MySQLTableName + " SET data = ? WHERE uuid = ?;");
             preparedStatement.setString(1, data);
@@ -132,12 +130,12 @@ public class MySQL {
     }
 
     /**
-     * Gets the hashed password from DB.
+     * Gets the hashed password from DbApi.
      *
      * @param uuid uuid of the player to get data for.
      * @return data as string if player has it, otherwise empty string.
      */
-    public static String getUserData(String uuid) {
+    public String getUserData(String uuid) {
         try {
             if (isUserRegistered(uuid)) {
                 PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT data FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
@@ -152,7 +150,7 @@ public class MySQL {
         return "";
     }
 
-    public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
+    public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         try {
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = ?;");
             // Updating player data.

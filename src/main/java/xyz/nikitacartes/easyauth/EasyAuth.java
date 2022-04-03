@@ -9,8 +9,11 @@ import net.minecraft.server.MinecraftServer;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
-import xyz.nikitacartes.easyauth.storage.DBHelper;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
+import xyz.nikitacartes.easyauth.storage.database.DbApi;
+import xyz.nikitacartes.easyauth.storage.database.LevelDB;
+import xyz.nikitacartes.easyauth.storage.database.MongoDB;
+import xyz.nikitacartes.easyauth.storage.database.MySQL;
 
 import java.io.File;
 import java.io.FileReader;
@@ -30,7 +33,7 @@ public class EasyAuth implements ModInitializer {
     public static final String MOD_ID = "easyauth";
 
 
-    public static DBHelper DB = new DBHelper();
+    public static DbApi DB;
 
     public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
 
@@ -62,8 +65,6 @@ public class EasyAuth implements ModInitializer {
     public static void init(Path gameDir) {
         gameDirectory = gameDir;
         logInfo("EasyAuth mod by samo_lego, NikitaCartes.");
-        // The support on discord was great! I really appreciate your help.
-        // logInfo("This mod wouldn't exist without the awesome Fabric Community. TYSM guys!");
 
         try {
             serverProp.load(new FileReader(gameDirectory + "/server.properties"));
@@ -78,7 +79,12 @@ public class EasyAuth implements ModInitializer {
         // Loading config
         config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
         // Connecting to db
-        DB.openConnection();
+        if (config.main.databaseType.equals("mysql"))
+            DB = new MySQL();
+        else if (config.main.databaseType.equals("mongodb"))
+            DB = new MongoDB();
+        else
+            DB = new LevelDB();
     }
 
     /**
@@ -99,7 +105,7 @@ public class EasyAuth implements ModInitializer {
             THREADPOOL.shutdownNow();
         }
 
-        // Closing DB connection
+        // Closing DbApi connection
         DB.close();
     }
 

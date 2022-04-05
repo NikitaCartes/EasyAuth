@@ -13,17 +13,17 @@ import java.util.HashMap;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 
-public class LevelDB {
-    private static DB levelDBStore;
+public class LevelDB implements DbApi {
+    private DB levelDBStore;
 
     /**
      * Connects to the LevelDB.
      */
-    public static void initialize() {
+    public LevelDB() {
         Options options = new Options();
         try {
             levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + (config.experimental.useSimpleAuthDatabase ? "SimpleAuth" : "EasyAuth") + "/levelDBStore"), options);
@@ -35,24 +35,24 @@ public class LevelDB {
     /**
      * Closes database connection.
      */
-    public static boolean close() {
+    public void close() {
         if (levelDBStore != null) {
             try {
                 levelDBStore.close();
-                return true;
+                logInfo("Database connection closed successfully.");
             } catch (Error | IOException e) {
                 logError(e.getMessage());
             }
         }
-        return false;
+        logWarn("Database connection not closed");
     }
 
     /**
-     * Tells whether DB connection is closed.
+     * Tells whether DbApi connection is closed.
      *
      * @return false if connection is open, otherwise false
      */
-    public static boolean isClosed() {
+    public boolean isClosed() {
         return levelDBStore == null;
     }
 
@@ -65,7 +65,7 @@ public class LevelDB {
      * @return true if operation was successful, otherwise false
      */
     @Deprecated
-    public static boolean registerUser(String uuid, String data) {
+    public boolean registerUser(String uuid, String data) {
         try {
             if (!isUserRegistered(uuid)) {
                 levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
@@ -84,7 +84,7 @@ public class LevelDB {
      * @param uuid player's uuid
      * @return true if registered, otherwise false
      */
-    public static boolean isUserRegistered(String uuid) {
+    public boolean isUserRegistered(String uuid) {
         try {
             return levelDBStore.get(bytes("UUID:" + uuid)) != null;
         } catch (DBException e) {
@@ -98,7 +98,7 @@ public class LevelDB {
      *
      * @param uuid uuid of player to delete data for
      */
-    public static void deleteUserData(String uuid) {
+    public void deleteUserData(String uuid) {
         try {
             levelDBStore.delete(bytes("UUID:" + uuid));
         } catch (Error e) {
@@ -113,7 +113,7 @@ public class LevelDB {
      * @param data data to put inside database
      */
     @Deprecated
-    public static void updateUserData(String uuid, String data) {
+    public void updateUserData(String uuid, String data) {
         try {
             levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
         } catch (Error e) {
@@ -122,12 +122,12 @@ public class LevelDB {
     }
 
     /**
-     * Gets the hashed password from DB.
+     * Gets the hashed password from DbApi.
      *
      * @param uuid uuid of the player to get data for.
      * @return data as string if player has it, otherwise empty string.
      */
-    public static String getUserData(String uuid) {
+    public String getUserData(String uuid) {
         try {
             if (isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);
@@ -137,7 +137,7 @@ public class LevelDB {
         return "";
     }
 
-    public static void saveFromCache(HashMap<String, PlayerCache> playerCacheMap) {
+    public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         WriteBatch batch = levelDBStore.createWriteBatch();
         // Updating player data.
         playerCacheMap.forEach((uuid, playerCache) -> {

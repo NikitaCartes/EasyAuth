@@ -29,7 +29,7 @@ dependencies {
     modImplementation(include("fr.catcore:server-translations-api:${project.server_translations_version}+${project.server_translations_branch}"))
 
     // Permissions
-    modImplementation include("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}")
+    modImplementation(include("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}"))
 
     // Mods
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -56,7 +56,7 @@ dependencies {
     implementation(include("org.mongodb:bson:${mongodb_version}"))
 
     // MySQL driver
-    implementation "mysql:mysql-connector-java:${mysql_version}"
+    implementation(include("mysql:mysql-connector-java:${mysql_version}"))
 
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"

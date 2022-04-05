@@ -1,10 +1,10 @@
 package xyz.nikitacartes.easyauth.utils;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 
 public class EasyLogger {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public static void logError(String error) {
         LOGGER.error("[EasyAuth] " + error);
@@ -12,6 +12,10 @@ public class EasyLogger {
 
     public static void logInfo(String info) {
         LOGGER.info("[EasyAuth] " + info);
+    }
+
+    public static void logWarn(String info) {
+        LOGGER.warn("[EasyAuth] " + info);
     }
 
 }

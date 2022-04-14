@@ -20,7 +20,7 @@ public class MySQL implements DbApi {
     public MySQL() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            MySQLConnection = DriverManager.getConnection(URLEncoder.encode(config.main.MySQLConnectionString, StandardCharsets.UTF_8));
+            MySQLConnection = DriverManager.getConnection("jdbc:mysql://" + config.main.MySQLHost + "/" + config.main.MySQLDatabase, config.main.MySQLUser, config.main.MySQLPassword);
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
             preparedStatement.setString(1, config.main.MySQLTableName);
             if (!preparedStatement.executeQuery().next()) {

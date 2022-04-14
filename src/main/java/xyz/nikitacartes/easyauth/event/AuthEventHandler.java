@@ -1,13 +1,14 @@
 package xyz.nikitacartes.easyauth.event;
 
 import com.mojang.authlib.GameProfile;
+import eu.pb4.placeholders.TextParser;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -36,7 +37,7 @@ public class AuthEventHandler {
      * @param manager PlayerManager
      * @return Text if player should be disconnected
      */
-    public static LiteralText checkCanPlayerJoinServer(GameProfile profile, PlayerManager manager) {
+    public static Text checkCanPlayerJoinServer(GameProfile profile, PlayerManager manager) {
         // Getting the player
         String incomingPlayerUsername = profile.getName();
         PlayerEntity onlinePlayer = manager.getPlayer(incomingPlayerUsername);
@@ -50,13 +51,13 @@ public class AuthEventHandler {
         if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && config.experimental.preventAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
-            return new LiteralText(
+            return TextParser.parse(
                     String.format(
                             config.lang.playerAlreadyOnline, onlinePlayer.getName().asString()
                     )
             );
         } else if (!matcher.matches()) {
-            return new LiteralText(
+            return TextParser.parse(
                     String.format(
                             config.lang.disallowedUsername, regex
                     )
@@ -67,7 +68,7 @@ public class AuthEventHandler {
         String id = PlayerEntity.getOfflinePlayerUuid(incomingPlayerUsername.toLowerCase()).toString();
         if (config.main.maxLoginTries != -1 && playerCacheMap.containsKey(id)) {
             if (playerCacheMap.get(id).lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
-                return new LiteralText(config.lang.loginTriesExceeded);
+                return TextParser.parse(config.lang.loginTriesExceeded);
             } else if (playerCacheMap.get(id).getLoginTries() >= config.main.maxLoginTries) {
                 // The timeout at the very least has expired, so no harm in resetting the login tries...
                 playerCacheMap.get(id).resetLoginTries();

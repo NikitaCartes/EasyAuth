@@ -42,8 +42,8 @@ public class MySQL implements DbApi {
             }
         } catch (SQLException e) {
             logError(e.getMessage());
+            logWarn("Database connection not closed");
         }
-        logWarn("Database connection not closed");
     }
 
     /**

@@ -6,7 +6,6 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.ServerStatHandler;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
@@ -41,7 +40,7 @@ public abstract class PlayerManagerMixin {
         // Getting the player that is trying to join the server
         PlayerManager manager = (PlayerManager) (Object) this;
 
-        LiteralText returnText = AuthEventHandler.checkCanPlayerJoinServer(profile, manager);
+        Text returnText = AuthEventHandler.checkCanPlayerJoinServer(profile, manager);
 
         if (returnText != null) {
             // Canceling player joining with the returnText message

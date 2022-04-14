@@ -46,7 +46,7 @@ public interface PlayerAuth {
      * Gets the text which tells the player
      * to login or register, depending on account status.
      *
-     * @return LiteralText with appropriate string (login or register)
+     * @return Text with appropriate string (login or register)
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
     Text getAuthMessage();

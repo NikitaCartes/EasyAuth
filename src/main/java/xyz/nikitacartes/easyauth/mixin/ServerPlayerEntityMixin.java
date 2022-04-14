@@ -108,7 +108,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * Gets the text which tells the player
      * to login or register, depending on account status.
      *
-     * @return LiteralText with appropriate string (login or register)
+     * @return Text with appropriate string (login or register)
      */
     @Override
     public Text getAuthMessage() {

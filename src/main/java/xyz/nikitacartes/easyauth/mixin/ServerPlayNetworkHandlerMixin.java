@@ -1,9 +1,10 @@
 package xyz.nikitacartes.easyauth.mixin;
 
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.server.filter.TextStream;
+import net.minecraft.server.filter.FilteredMessage;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
@@ -22,16 +23,16 @@ public abstract class ServerPlayNetworkHandlerMixin {
     public ServerPlayerEntity player;
 
     @Inject(
-            method = "handleMessage(Lnet/minecraft/server/filter/TextStream$Message;)V",
+            method = "handleMessage(Lnet/minecraft/network/packet/c2s/play/ChatMessageC2SPacket;Lnet/minecraft/server/filter/FilteredMessage;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/ServerPlayerEntity;updateLastActionTime()V",
+                    target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;checkChatEnabled()Z",
                     shift = At.Shift.AFTER
             ),
             cancellable = true
     )
-    private void onPlayerChat(TextStream.Message message, CallbackInfo ci) {
-        ActionResult result = AuthEventHandler.onPlayerChat(this.player, message.getFiltered());
+    private void onPlayerChat(ChatMessageC2SPacket chatMessageC2SPacket, FilteredMessage<String> message, CallbackInfo ci) {
+        ActionResult result = AuthEventHandler.onPlayerChat(this.player, message.filtered());
         if (result == ActionResult.FAIL) {
             ci.cancel();
         }

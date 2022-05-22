@@ -3,6 +3,7 @@ package xyz.nikitacartes.easyauth.mixin;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import net.minecraft.world.WorldSaveHandler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -74,7 +75,7 @@ public class WorldSaveHandlerMixin {
         if (config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
             if (config.experimental.debugMode)
                 logInfo("Migrating data for " + playername);
-            File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
+            File file = new File(this.playerDataDir, DynamicSerializableUuid.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
             if (file.exists() && file.isFile())
                 try {
                     compoundTag = NbtIo.readCompressed(new FileInputStream(file));

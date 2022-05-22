@@ -1,7 +1,7 @@
 package xyz.nikitacartes.easyauth;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.loader.api.FabricLoader;
@@ -124,7 +124,7 @@ public class EasyAuth implements ModInitializer {
         EasyAuth.init(FabricLoader.getInstance().getGameDir());
 
         // Registering the commands
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
             RegisterCommand.registerCommand(dispatcher);
             LoginCommand.registerCommand(dispatcher);
             LogoutCommand.registerCommand(dispatcher);

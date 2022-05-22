@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
@@ -311,7 +312,7 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        UUID uuid = PlayerEntity.getOfflinePlayerUuid(player.toLowerCase(Locale.ROOT));
+        UUID uuid = DynamicSerializableUuid.getOfflinePlayerUuid(player.toLowerCase(Locale.ROOT));
 
         if (sender != null) {
             ((PlayerEntity) sender).sendMessage(
@@ -334,7 +335,7 @@ public class AuthCommand {
             if (sender != null) {
                 ((PlayerEntity) sender).sendMessage(TranslationHelper.getRegisteredPlayers(false), false);
             } else {
-                logInfo(TranslationHelper.getRegisteredPlayers(true).asString());
+                logInfo(TranslationHelper.getRegisteredPlayers(true).getContent().toString());
             }
         });
         return 1;

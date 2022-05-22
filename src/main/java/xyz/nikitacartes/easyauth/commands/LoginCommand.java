@@ -35,7 +35,7 @@ public class LoginCommand {
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    ctx.getSource().getPlayer().sendMessage(TranslationHelper.getEnterPassword(), false);
+                    ctx.getSource().getPlayerOrThrow().sendMessage(TranslationHelper.getEnterPassword(), false);
                     return 0;
                 }));
     }
@@ -43,7 +43,7 @@ public class LoginCommand {
     // Method called for checking the password
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
-        ServerPlayerEntity player = source.getPlayer();
+        ServerPlayerEntity player = source.getPlayerOrThrow();
         String uuid = ((PlayerAuth) player).getFakeUuid();
         if (((PlayerAuth) player).isAuthenticated()) {
             player.sendMessage(TranslationHelper.getAlreadyAuthenticated(), false);

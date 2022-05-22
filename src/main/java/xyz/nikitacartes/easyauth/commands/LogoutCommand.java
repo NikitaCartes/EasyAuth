@@ -23,7 +23,7 @@ public class LogoutCommand {
     }
 
     private static int logout(ServerCommandSource serverCommandSource) throws CommandSyntaxException {
-        ServerPlayerEntity player = serverCommandSource.getPlayer();
+        ServerPlayerEntity player = serverCommandSource.getPlayerOrThrow();
 
         if (!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));

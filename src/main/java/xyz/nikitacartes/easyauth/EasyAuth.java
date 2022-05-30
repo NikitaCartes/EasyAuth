@@ -79,9 +79,9 @@ public class EasyAuth implements ModInitializer {
         // Loading config
         config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
         // Connecting to db
-        if (config.main.databaseType.equals("mysql"))
+        if (config.main.databaseType.equalsIgnoreCase("mysql"))
             DB = new MySQL();
-        else if (config.main.databaseType.equals("mongodb"))
+        else if (config.main.databaseType.equalsIgnoreCase("mongodb"))
             DB = new MongoDB();
         else
             DB = new LevelDB();

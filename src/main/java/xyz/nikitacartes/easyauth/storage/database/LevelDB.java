@@ -24,6 +24,9 @@ public class LevelDB implements DbApi {
      * Connects to the LevelDB.
      */
     public LevelDB() {
+        if (config.experimental.debugMode) {
+            logInfo("You are using LevelDB");
+        }
         Options options = new Options();
         try {
             levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + (config.experimental.useSimpleAuthDatabase ? "SimpleAuth" : "EasyAuth") + "/levelDBStore"), options);

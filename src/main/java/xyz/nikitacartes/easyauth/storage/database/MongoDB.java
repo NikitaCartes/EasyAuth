@@ -26,6 +26,9 @@ public class MongoDB implements DbApi {
     private final MongoClient mongoClient;
 
     public MongoDB() {
+        if (config.experimental.debugMode) {
+            logInfo("You are using Mongo DB");
+        }
         mongoClient = MongoClients.create(URLEncoder.encode(config.main.MongoDBConnectionString, StandardCharsets.UTF_8));
         MongoDatabase database = mongoClient.getDatabase(config.main.MongoDBDatabase);
         collection = database.getCollection("players");

@@ -18,6 +18,9 @@ public class MySQL implements DbApi {
      * Connects to the MySQL.
      */
     public MySQL() {
+        if (config.experimental.debugMode) {
+            logInfo("You are using MySQL DB");
+        }
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             MySQLConnection = DriverManager.getConnection("jdbc:mysql://" + config.main.MySQLHost + "/" + config.main.MySQLDatabase, config.main.MySQLUser, config.main.MySQLPassword);

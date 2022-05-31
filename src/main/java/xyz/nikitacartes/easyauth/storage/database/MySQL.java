@@ -31,6 +31,7 @@ public class MySQL implements DbApi {
             }
         } catch (SQLException | ClassNotFoundException e) {
             logError(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -45,6 +46,7 @@ public class MySQL implements DbApi {
             }
         } catch (SQLException e) {
             logError(e.getMessage());
+            e.printStackTrace();
             logWarn("Database connection not closed");
         }
     }
@@ -78,6 +80,7 @@ public class MySQL implements DbApi {
             }
         } catch (SQLException e) {
             logError("Register error: " + e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }
@@ -95,6 +98,7 @@ public class MySQL implements DbApi {
             return preparedStatement.executeQuery().next();
         } catch (SQLException e) {
             logError(e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }
@@ -111,6 +115,7 @@ public class MySQL implements DbApi {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             logError(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -129,6 +134,7 @@ public class MySQL implements DbApi {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             logError(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -149,6 +155,7 @@ public class MySQL implements DbApi {
             }
         } catch (SQLException e) {
             logError("Error getting data: " + e.getMessage());
+            e.printStackTrace();
         }
         return "";
     }
@@ -167,11 +174,13 @@ public class MySQL implements DbApi {
                     preparedStatement.addBatch();
                 } catch (SQLException e) {
                     logError("Error saving player data! (" + uuid + ") " + e.getMessage());
+                    e.printStackTrace();
                 }
             });
             preparedStatement.executeBatch();
         } catch (SQLException e) {
             logError("Error saving players data! " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

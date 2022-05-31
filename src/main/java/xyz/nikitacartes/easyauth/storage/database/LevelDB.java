@@ -32,6 +32,7 @@ public class LevelDB implements DbApi {
             levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + (config.experimental.useSimpleAuthDatabase ? "SimpleAuth" : "EasyAuth") + "/levelDBStore"), options);
         } catch (IOException e) {
             logError(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -45,6 +46,7 @@ public class LevelDB implements DbApi {
                 logInfo("Database connection closed successfully.");
             } catch (Error | IOException e) {
                 logError(e.getMessage());
+                e.printStackTrace();
             }
         }
         logWarn("Database connection not closed");
@@ -77,6 +79,7 @@ public class LevelDB implements DbApi {
             return false;
         } catch (Error e) {
             logError("Register error: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -92,6 +95,7 @@ public class LevelDB implements DbApi {
             return levelDBStore.get(bytes("UUID:" + uuid)) != null;
         } catch (DBException e) {
             logError(e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }
@@ -106,6 +110,7 @@ public class LevelDB implements DbApi {
             levelDBStore.delete(bytes("UUID:" + uuid));
         } catch (Error e) {
             logError(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -121,6 +126,7 @@ public class LevelDB implements DbApi {
             levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
         } catch (Error e) {
             logError(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -136,6 +142,7 @@ public class LevelDB implements DbApi {
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);
         } catch (Error e) {
             logError("Error getting data: " + e.getMessage());
+            e.printStackTrace();
         }
         return "";
     }
@@ -153,6 +160,7 @@ public class LevelDB implements DbApi {
             batch.close();
         } catch (IOException e) {
             logError("Error saving player data! " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

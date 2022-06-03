@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.CarpetHelper;
+import xyz.nikitacartes.easyauth.utils.FakePlayerApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
@@ -137,7 +138,9 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      */
     @Override
     public boolean canSkipAuth() {
-        return (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(this.player)) || (isUsingMojangAccount() && config.main.premiumAutologin);
+        return (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(this.player)) ||
+                (FabricLoader.getInstance().isModLoaded("fake-player-api") && FakePlayerApiHelper.isPlayerFake(this.player)) ||
+                (isUsingMojangAccount() && config.main.premiumAutologin);
     }
 
     /**

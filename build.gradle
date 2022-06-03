@@ -4,9 +4,10 @@ plugins {
 
 repositories {
     maven { name "Carpet"; url "https://masa.dy.fi/maven" }
-    maven { name "Translation"; url "https://maven.nucleoid.xyz/" }
+    maven { name "Translation"; url "https://maven.nucleoid.xyz" }
     maven { name "Jitpack"; url "https://jitpack.io" }
-    maven { name "Permission"; url "https://oss.sonatype.org/content/repositories/snapshots"}
+    maven { name "Permission"; url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { name "Fake Player Api"; url "https://maven.cafeteria.dev" }
     mavenLocal()
 }
 
@@ -35,6 +36,7 @@ dependencies {
     // Mods
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
+    modImplementation "dev.cafeteria:fake-player-api:${project.fake_player_api_version}"
     modImplementation "com.github.astei:lazydfu:${lazydfu_version}"
 
     // Password hashing

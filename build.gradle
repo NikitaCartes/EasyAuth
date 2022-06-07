@@ -34,6 +34,9 @@ dependencies {
     // Permissions
     modImplementation(include("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}"))
 
+    // Placeholder API
+    modImplementation include("eu.pb4:placeholder-api:1.1.3+1.17.1")
+
     // Mods
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
@@ -66,8 +69,6 @@ dependencies {
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"
 
-    // Placeholder API
-    modImplementation include("eu.pb4:placeholder-api:1.1.3+1.17.1")
 }
 
 tasks.withType(JavaCompile).configureEach {

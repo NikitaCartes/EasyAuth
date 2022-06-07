@@ -1,3 +1,10 @@
+### 3.0.0 Minecraft 1.18.2, Minecraft 1.19
+
+1) Fix MySQL support
+2) Add placeholder api support, thanks to @Nikijaz
+3) Fix crash if Fake Players join
+4) Fix softlock while log in inside a portal
+
 ### 2.2.2, Minecraft 1.17, 1.17.1, Minecraft 1.18[.1], Minecraft 1.18.2
 
 1) Fix many real and potential issues with login attempts, thanks to @were491

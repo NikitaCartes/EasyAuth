@@ -1,7 +1,6 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import eu.pb4.placeholders.TextParser;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -23,11 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
-import xyz.nikitacartes.easyauth.utils.CarpetHelper;
-import xyz.nikitacartes.easyauth.utils.FakePlayerApiHelper;
-import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
-import xyz.nikitacartes.easyauth.utils.PlayerAuth;
-import xyz.nikitacartes.easyauth.utils.TranslationHelper;
+import xyz.nikitacartes.easyauth.utils.*;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
@@ -139,9 +134,10 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      */
     @Override
     public boolean canSkipAuth() {
-        return (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(this.player)) ||
-                (FabricLoader.getInstance().isModLoaded("fake-player-api") && FakePlayerApiHelper.isPlayerFake(this.player)) ||
-                (isUsingMojangAccount() && config.main.premiumAutologin) || (FabricLoader.getInstance().isModLoaded("floodgate") && FloodgateApiHelper.isFloodgatePlayer(this.player) && config.main.floodgateAutologin);
+        return (config.experimental.carpetLoaded && CarpetHelper.isPlayerFake(this.player)) ||
+                (config.experimental.fakePlayerApiLoaded && FakePlayerApiHelper.isPlayerFake(this.player)) ||
+                (config.main.floodgateAutologin && config.experimental.floodgateLoaded && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
+                (isUsingMojangAccount() && config.main.premiumAutologin);
     }
 
     /**

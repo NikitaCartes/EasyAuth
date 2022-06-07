@@ -26,8 +26,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 public class EasyAuth implements ModInitializer {
     public static final String MOD_ID = "easyauth";
@@ -79,12 +79,22 @@ public class EasyAuth implements ModInitializer {
         // Loading config
         config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
         // Connecting to db
-        if (config.main.databaseType.equalsIgnoreCase("mysql"))
+        if (config.main.databaseType.equalsIgnoreCase("mysql")) {
             DB = new MySQL();
-        else if (config.main.databaseType.equalsIgnoreCase("mongodb"))
+        } else if (config.main.databaseType.equalsIgnoreCase("mongodb")) {
             DB = new MongoDB();
-        else
+        } else {
             DB = new LevelDB();
+        }
+        if (FabricLoader.getInstance().isModLoaded("carpet")) {
+            config.experimental.carpetLoaded = true;
+        }
+        if (FabricLoader.getInstance().isModLoaded("fake-player-api")) {
+            config.experimental.fakePlayerApiLoaded = true;
+        }
+        if (FabricLoader.getInstance().isModLoaded("floodgate")) {
+            config.experimental.floodgateLoaded = true;
+        }
     }
 
     /**

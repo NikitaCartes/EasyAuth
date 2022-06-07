@@ -70,7 +70,9 @@ public class AuthConfig {
             config = new AuthConfig();
         }
         config.save(file);
-
+        config.experimental.carpetLoaded = false;
+        config.experimental.fakePlayerApiLoaded = false;
+        config.experimental.floodgateLoaded = false;
         return config;
     }
 
@@ -360,5 +362,11 @@ public class AuthConfig {
          * for too many logins for the player to be allowed back in.
          */
         public long resetLoginAttemptsTime = 120;
+        /**
+         * Temporary rules
+         */
+        public boolean carpetLoaded = false;
+        public boolean fakePlayerApiLoaded = false;
+        public boolean floodgateLoaded = false;
     }
 }

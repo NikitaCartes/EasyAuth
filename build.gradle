@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "0.11-SNAPSHOT"
+    id "fabric-loom" version "0.12-SNAPSHOT"
 }
 
 repositories {
@@ -8,6 +8,7 @@ repositories {
     maven { name "Jitpack"; url "https://jitpack.io" }
     maven { name "Permission"; url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { name "Fake Player Api"; url "https://maven.cafeteria.dev" }
+    maven { name "Floodgate Api"; url "https://repo.opencollab.dev/maven-snapshots" }
     mavenLocal()
 }
 
@@ -38,6 +39,7 @@ dependencies {
     modImplementation "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
     modImplementation "dev.cafeteria:fake-player-api:${project.fake_player_api_version}"
     modImplementation "com.github.astei:lazydfu:${lazydfu_version}"
+    modImplementation "org.geysermc.floodgate:api:${floodgate_api_version}"
 
     // Password hashing
     // Argon2

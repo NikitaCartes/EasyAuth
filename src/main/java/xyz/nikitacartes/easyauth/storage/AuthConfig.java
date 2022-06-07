@@ -189,6 +189,11 @@ public class AuthConfig {
          */
         public boolean premiumAutologin = false;
         /**
+         * Whether bedrock players should skip the authentication process.
+         * You have to set online-mode to true in server.properties!
+         */
+        public boolean floodgateAutologin = false;
+        /**
          * Contains a list of lower case (!) player names
          * that should always be treated as offline.
          * <p>

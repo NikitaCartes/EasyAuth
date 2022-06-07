@@ -25,6 +25,7 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.CarpetHelper;
 import xyz.nikitacartes.easyauth.utils.FakePlayerApiHelper;
+import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
@@ -140,7 +141,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     public boolean canSkipAuth() {
         return (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(this.player)) ||
                 (FabricLoader.getInstance().isModLoaded("fake-player-api") && FakePlayerApiHelper.isPlayerFake(this.player)) ||
-                (isUsingMojangAccount() && config.main.premiumAutologin);
+                (isUsingMojangAccount() && config.main.premiumAutologin) || (FabricLoader.getInstance().isModLoaded("floodgate") && FloodgateApiHelper.isFloodgatePlayer(this.player) && config.main.floodgateAutologin);
     }
 
     /**

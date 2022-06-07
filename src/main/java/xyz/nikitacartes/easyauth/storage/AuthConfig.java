@@ -20,6 +20,7 @@ package xyz.nikitacartes.easyauth.storage;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -62,6 +63,9 @@ public class AuthConfig {
                         logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
                         config.main.premiumAutologin = false;
                     }
+                }
+                if (config.experimental.enableServerSideTranslation && !FabricLoader.getInstance().isModLoaded("server_translations_api")) {
+                    config.experimental.enableServerSideTranslation = false;
                 }
             } catch (IOException e) {
                 throw new RuntimeException("[EasyAuth] Problem occurred when trying to load config: ", e);

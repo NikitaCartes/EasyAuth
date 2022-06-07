@@ -35,7 +35,7 @@ dependencies {
     modImplementation(include("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}"))
 
     // Placeholder API
-    modImplementation include("eu.pb4:placeholder-api:1.1.3+1.17.1")
+    modImplementation include("eu.pb4:placeholder-api:${project.placeholder_api_version}+${project.placeholder_api_branch}")
 
     // Mods
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

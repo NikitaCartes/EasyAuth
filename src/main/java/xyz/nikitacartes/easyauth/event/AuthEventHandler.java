@@ -12,6 +12,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
@@ -110,18 +111,20 @@ public class AuthEventHandler {
 
 
         // Tries to rescue player from nether portal
-        if (config.main.tryPortalRescue && player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL)) {
+        if (config.main.tryPortalRescue) {
             BlockPos pos = player.getBlockPos();
+            if (player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL) || ((pos = playerInPortal(player)) != null)) {
 
-            // Teleporting player to the middle of the block
-            player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+                // Teleporting player to the middle of the block
+                player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 
-            // Faking portal blocks to be air
-            BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket(pos, Blocks.AIR.getDefaultState());
-            player.networkHandler.sendPacket(feetPacket);
+                // Faking portal blocks to be air
+                BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket(pos, Blocks.AIR.getDefaultState());
+                player.networkHandler.sendPacket(feetPacket);
 
-            BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket(pos.up(), Blocks.AIR.getDefaultState());
-            player.networkHandler.sendPacket(headPacket);
+                BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket(pos.up(), Blocks.AIR.getDefaultState());
+                player.networkHandler.sendPacket(headPacket);
+            }
         }
     }
 
@@ -244,5 +247,21 @@ public class AuthEventHandler {
         }
 
         return ActionResult.PASS;
+    }
+
+    private static BlockPos playerInPortal(ServerPlayerEntity player) {
+        Box playerBox = player.getBoundingBox();
+        BlockPos minBlockPos = new BlockPos(playerBox.minX, playerBox.minY, playerBox.minZ);
+        BlockPos maxBlockPos = new BlockPos(playerBox.maxX, playerBox.maxY, playerBox.maxZ);
+        for (int x = minBlockPos.getX(); x <= maxBlockPos.getX(); x++) {
+            for (int y = minBlockPos.getY(); y <= maxBlockPos.getY(); y++) {
+                for (int z = minBlockPos.getZ(); z <= maxBlockPos.getZ(); z++) {
+                    if (player.getWorld().getBlockState(new BlockPos(x, y, z)).getBlock().equals(Blocks.NETHER_PORTAL)) {
+                        return new BlockPos(x, y, z);
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

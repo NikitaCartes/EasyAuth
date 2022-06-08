@@ -4,6 +4,7 @@
 2) Add placeholder api support, thanks to @Nikijaz
 3) Fix crash if Fake Players join
 4) Fix softlock while log in inside a portal
+5) Add support for Floodgate players, thanks to @dmunozv04
 
 ### 2.2.2, Minecraft 1.17, 1.17.1, Minecraft 1.18[.1], Minecraft 1.18.2
 

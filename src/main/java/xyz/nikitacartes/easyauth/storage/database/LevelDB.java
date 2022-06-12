@@ -47,9 +47,9 @@ public class LevelDB implements DbApi {
             } catch (Error | IOException e) {
                 logError(e.getMessage());
                 e.printStackTrace();
+                logWarn("Database connection not closed");
             }
         }
-        logWarn("Database connection not closed");
     }
 
     /**

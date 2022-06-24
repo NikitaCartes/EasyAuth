@@ -10,7 +10,8 @@
     "ServerPlayNetworkHandlerMixin",
     "SlotMixin",
     "WorldSaveHandlerMixin",
-    "ServerStatHandlerAccessor"
+    "ServerStatHandlerAccessor",
+    "CommandManagerMixin"
   ],
   "minVersion": "0.8",
   "injectors": {

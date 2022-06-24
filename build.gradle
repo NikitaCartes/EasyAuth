@@ -41,8 +41,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
     modImplementation "dev.cafeteria:fake-player-api:${project.fake_player_api_version}"
-    modImplementation "com.github.astei:lazydfu:${lazydfu_version}"
     modImplementation "org.geysermc.floodgate:api:${floodgate_api_version}"
+
+    modImplementation "com.github.astei:lazydfu:${lazydfu_version}"
 
     // Password hashing
     // Argon2

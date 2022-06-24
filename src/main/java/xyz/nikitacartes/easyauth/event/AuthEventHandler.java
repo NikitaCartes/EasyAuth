@@ -149,16 +149,25 @@ public class AuthEventHandler {
         }
     }
 
-    // Player chatting
-    public static ActionResult onPlayerChat(ServerPlayerEntity player, String message) {
+    // Player execute command
+    public static ActionResult onPlayerCommand(ServerPlayerEntity player, String command) {
         // Getting the message to then be able to check it
-        if (
-                !((PlayerAuth) player).isAuthenticated() &&
-                        !message.startsWith("/login") &&
-                        !(message.startsWith("/l") && config.experimental.enableAliases) &&
-                        !message.startsWith("/register") &&
-                        (!config.experimental.allowChat || message.startsWith("/"))
-        ) {
+        if (player == null) {
+            return ActionResult.PASS;
+        }
+        if (command.startsWith("login") || command.startsWith("register") || command.startsWith("l")) {
+            return ActionResult.PASS;
+        }
+        if (!((PlayerAuth) player).isAuthenticated()) {
+            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
+            return ActionResult.FAIL;
+        }
+        return ActionResult.PASS;
+    }
+
+    // Player chatting
+    public static ActionResult onPlayerChat(ServerPlayerEntity player) {
+        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowChat) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }

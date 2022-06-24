@@ -32,7 +32,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
             cancellable = true
     )
     private void onPlayerChat(ChatMessageC2SPacket chatMessageC2SPacket, FilteredMessage<String> message, CallbackInfo ci) {
-        ActionResult result = AuthEventHandler.onPlayerChat(this.player, message.filtered());
+        ActionResult result = AuthEventHandler.onPlayerChat(this.player);
         if (result == ActionResult.FAIL) {
             ci.cancel();
         }

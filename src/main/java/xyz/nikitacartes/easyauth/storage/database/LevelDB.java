@@ -24,6 +24,9 @@ public class LevelDB implements DbApi {
      * Connects to the LevelDB.
      */
     public LevelDB() {
+        File file = new File(EasyAuth.gameDirectory + "/mods/EasyAuth/levelDBStore");
+        if (!file.exists() && !file.mkdirs())
+            throw new RuntimeException("[EasyAuth] Error creating LevelDB directory!");
         if (config.experimental.debugMode) {
             logInfo("You are using LevelDB");
         }

@@ -43,8 +43,6 @@ dependencies {
     modImplementation "dev.cafeteria:fake-player-api:${project.fake_player_api_version}"
     modImplementation "org.geysermc.floodgate:api:${floodgate_api_version}"
 
-    modImplementation "com.github.astei:lazydfu:${lazydfu_version}"
-
     // Password hashing
     // Argon2
     implementation(include("de.mkammerer:argon2-jvm:${argon2_version}"))

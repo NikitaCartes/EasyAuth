@@ -1,5 +1,6 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
 import java.net.URLEncoder;
@@ -22,12 +23,27 @@ public class MySQL implements DbApi {
             logInfo("You are using MySQL DB");
         }
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            MySQLConnection = DriverManager.getConnection("jdbc:mysql://" + config.main.MySQLHost + "/" + config.main.MySQLDatabase, config.main.MySQLUser, config.main.MySQLPassword);
-            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
-            preparedStatement.setString(1, config.main.MySQLTableName);
-            if (!preparedStatement.executeQuery().next()) {
-                MySQLConnection.createStatement().executeUpdate("CREATE TABLE `" + config.main.MySQLDatabase + "`.`" + config.main.MySQLTableName + "` ( `id` INT NOT NULL AUTO_INCREMENT , `uuid` VARCHAR(36) NOT NULL , `data` JSON NOT NULL , PRIMARY KEY (`id`), UNIQUE (`uuid`)) ENGINE = InnoDB;");
+            connect();
+        } catch (SQLException | ClassNotFoundException e) {
+            logError(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void connect() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        MySQLConnection = DriverManager.getConnection("jdbc:mysql://" + config.main.MySQLHost + "/" + config.main.MySQLDatabase + "?autoReconnect=true", config.main.MySQLUser, config.main.MySQLPassword);
+        PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
+        preparedStatement.setString(1, config.main.MySQLTableName);
+        if (!preparedStatement.executeQuery().next()) {
+            MySQLConnection.createStatement().executeUpdate("CREATE TABLE `" + config.main.MySQLDatabase + "`.`" + config.main.MySQLTableName + "` ( `id` INT NOT NULL AUTO_INCREMENT , `uuid` VARCHAR(36) NOT NULL , `data` JSON NOT NULL , PRIMARY KEY (`id`), UNIQUE (`uuid`)) ENGINE = InnoDB;");
+        }
+    }
+
+    private void reConnect() {
+        try {
+            if(!MySQLConnection.isValid(0)) {
+                connect();
             }
         } catch (SQLException | ClassNotFoundException e) {
             logError(e.getMessage());
@@ -44,7 +60,11 @@ public class MySQL implements DbApi {
                 MySQLConnection.close();
                 logInfo("Database connection closed successfully.");
             }
-        } catch (SQLException e) {
+        } catch (CommunicationsException e) {
+            logError(e.getMessage());
+            logWarn("Can't connect to database while closing");
+        }
+        catch (SQLException e) {
             logError(e.getMessage());
             e.printStackTrace();
             logWarn("Database connection not closed");
@@ -57,7 +77,13 @@ public class MySQL implements DbApi {
      * @return false if connection is open, otherwise false
      */
     public boolean isClosed() {
-        return MySQLConnection == null;
+        try {
+            return MySQLConnection == null || MySQLConnection.isValid(0);
+        } catch (SQLException e) {
+            logError(e.getMessage());
+            e.printStackTrace();
+            return true;
+        }
     }
 
 
@@ -71,6 +97,7 @@ public class MySQL implements DbApi {
     @Deprecated
     public boolean registerUser(String uuid, String data) {
         try {
+            reConnect();
             if (!isUserRegistered(uuid)) {
                 PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES (?, ?);");
                 preparedStatement.setString(1, uuid);
@@ -93,6 +120,7 @@ public class MySQL implements DbApi {
      */
     public boolean isUserRegistered(String uuid) {
         try {
+            reConnect();
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
             preparedStatement.setString(1, uuid);
             return preparedStatement.executeQuery().next();
@@ -110,6 +138,7 @@ public class MySQL implements DbApi {
      */
     public void deleteUserData(String uuid) {
         try {
+            reConnect();
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("DELETE FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
             preparedStatement.setString(1, uuid);
             preparedStatement.executeUpdate();
@@ -128,6 +157,7 @@ public class MySQL implements DbApi {
     @Deprecated
     public void updateUserData(String uuid, String data) {
         try {
+            reConnect();
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("UPDATE " + config.main.MySQLTableName + " SET data = ? WHERE uuid = ?;");
             preparedStatement.setString(1, data);
             preparedStatement.setString(1, uuid);
@@ -146,6 +176,7 @@ public class MySQL implements DbApi {
      */
     public String getUserData(String uuid) {
         try {
+            reConnect();
             if (isUserRegistered(uuid)) {
                 PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT data FROM " + config.main.MySQLTableName + " WHERE uuid = ?;");
                 preparedStatement.setString(1, uuid);
@@ -162,6 +193,7 @@ public class MySQL implements DbApi {
 
     public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         try {
+            reConnect();
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.main.MySQLTableName + " (uuid, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = ?;");
             // Updating player data.
             playerCacheMap.forEach((uuid, playerCache) -> {

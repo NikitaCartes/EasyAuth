@@ -154,7 +154,9 @@ public class AuthEventHandler {
         if (player == null) {
             return ActionResult.PASS;
         }
-        if (command.startsWith("login") || command.startsWith("register") || command.startsWith("l")) {
+        if (command.startsWith("login")
+                || command.startsWith("register")
+                || (config.experimental.enableAliases && command.startsWith("l"))) {
             return ActionResult.PASS;
         }
         if (!((PlayerAuth) player).isAuthenticated()) {

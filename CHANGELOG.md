@@ -6,9 +6,10 @@
 4) Fix softlock while log in inside a portal
 5) Add support for Floodgate players, thanks to @dmunozv04
 6) Probably fix missing server side translation [#36](https://github.com/NikitaCartes/EasyAuth/issues/36) with updating server translation
-7) Fix using command before login [#52](https://github.com/NikitaCartes/EasyAuth/issues/52), thanks to @were491
+7) Fix using command before login [#52](https://github.com/NikitaCartes/EasyAuth/issues/52), [#56](https://github.com/NikitaCartes/EasyAuth/issues/56), thanks to @were491
 8) Quick fix for MongoDB connection string
 9) Update Czech translation
+10) Improve kicking if number of login attempts exceeded
 
 ### 2.2.2, Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2
 

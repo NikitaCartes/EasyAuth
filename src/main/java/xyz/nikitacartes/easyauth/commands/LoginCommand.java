@@ -11,6 +11,8 @@ import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -54,38 +56,36 @@ public class LoginCommand {
             PlayerCache playerCache = playerCacheMap.get(uuid);
 
             int maxLoginTries = config.main.maxLoginTries;
+            AtomicInteger curLoginTries = playerCache.loginTries;
             AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(uuid, pass.toCharArray());
 
-            // That player should be already kicked
-            if (playerCache.getLoginTries() >= maxLoginTries && maxLoginTries != -1) {
-                if (!player.isDisconnected()) {
-                    player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
+            if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
+                // Check their kick timeout to avoid giving away information if they're already supposed to be kicked.
+                if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
+                    player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
+                    return;
                 }
-                return;
-            } else if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
                 player.sendMessage(TranslationHelper.getSuccessfullyAuthenticated(), false);
                 ((PlayerAuth) player).setAuthenticated(true);
-                playerCache.resetLoginTries();
+                curLoginTries.set(0);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;
             } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
                 player.sendMessage(TranslationHelper.getRegisterRequired(), false);
                 return;
-            } else if (maxLoginTries == 1) {
-                player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
-                return;
-            } else if (playerCache.getLoginTries() == maxLoginTries - 1 && maxLoginTries != -1) { // Player exceeded maxLoginTries
-                playerCache.incrementLoginTries();
-                player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
-
-                // The AuthEventHandler will automatically reset if they log in later.
+            } else if (curLoginTries.incrementAndGet() == maxLoginTries && maxLoginTries != -1) { // Player exceeded maxLoginTries
+                // Send the player a different error message if the max login tries is 1.
+                if (maxLoginTries == 1) {
+                    player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
+                } else {
+                    player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
+                }
                 playerCache.lastKicked = System.currentTimeMillis();
+                curLoginTries.set(0);
                 return;
             }
             // Sending wrong pass message
             player.sendMessage(TranslationHelper.getWrongPassword(), false);
-            // Increment (failed) login tries. Hopefully this is more thread-safe.
-            playerCache.incrementLoginTries();
         });
         return 0;
     }

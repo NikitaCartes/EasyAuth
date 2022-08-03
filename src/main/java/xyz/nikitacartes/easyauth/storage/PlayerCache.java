@@ -10,6 +10,7 @@ import net.minecraft.util.math.Vec3d;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
@@ -31,13 +32,14 @@ public class PlayerCache {
     @Expose
     public String password = "";
     /**
-     * Stores how many times player has tried to log in.
-     * Cleared on restart.
+     * Stores how many times the player has tried to log in.
+     * Cleared on every successful login and every time the player is kicked for too many incorrect logins.
      */
-    private int loginTries = 0;
+    @Expose
+    @SerializedName("login_tries")
+    public AtomicInteger loginTries = new AtomicInteger();
     /**
-     * Stores the last time a player was kicked for too many logins.
-     * Persists across restarts.
+     * Stores the last time a player was kicked for too many logins (unix ms).
      */
     @Expose
     @SerializedName("last_kicked")
@@ -59,6 +61,8 @@ public class PlayerCache {
     /**
      * Player stats before de-authentication.
      */
+    @Expose
+    @SerializedName("was_in_portal")
     public boolean wasInPortal = false;
 
     /**
@@ -117,18 +121,5 @@ public class PlayerCache {
     public static boolean isAuthenticated(String uuid) {
         PlayerCache playerCache = playerCacheMap.get(uuid);
         return (playerCache != null && playerCache.isAuthenticated);
-    }
-
-    // Hide the actual login tries modifications behind synchronized functions for thread safety.
-    public synchronized void incrementLoginTries() {
-        loginTries++;
-    }
-
-    public synchronized void resetLoginTries() {
-        loginTries = 0;
-    }
-
-    public synchronized int getLoginTries() {
-        return loginTries;
     }
 }

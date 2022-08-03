@@ -239,7 +239,7 @@ public class AuthConfig {
         public String matchPassword = "§6Passwords must match!";
         public String passwordUpdated = "§aYour password was updated successfully!";
         public String loginRequired = "§cYou are not authenticated!\n§6Use /login, /l to authenticate!";
-        public String loginTriesExceeded = "§4Too many login tries. Please wait a few minutes and try again.";
+        public String loginTriesExceeded = "§4Too many login tries. Please wait a few minutes and try again."; // Todo: add how much time to wait
         public String globalPasswordSet = "§aGlobal password was successfully set!";
         public String cannotChangePassword = "§cYou cannot change password!";
         public String cannotUnregister = "§cYou cannot unregister this account!";

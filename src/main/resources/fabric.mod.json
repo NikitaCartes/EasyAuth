@@ -25,9 +25,9 @@
     "easyauth.mixins.json"
   ],
   "depends": {
-    "fabric": "*",
+    "fabric": ">=0.42.0+1.17",
     "fabricloader": "*",
-    "minecraft":">=1.18- <1.18.2"
+    "minecraft":">=1.17.1- <1.18"
   },
   "suggests": {
     "fabric-permissions-api-v0": "*"

@@ -11,7 +11,7 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 @Mixin(MinecraftServer.class)
 public class MinecraftServerMixin {
-    @Inject(method = "saveAll(ZZZ)Z", at = @At("HEAD"))
+    @Inject(method = "save(ZZZ)Z", at = @At("HEAD"))
     private void checkCanUseCommands(boolean suppressLogs, boolean flush, boolean force, CallbackInfoReturnable<Boolean> cir) {
         THREADPOOL.submit(() -> {
             LogDebug("Saving database");

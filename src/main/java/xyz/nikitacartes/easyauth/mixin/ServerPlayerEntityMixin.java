@@ -6,12 +6,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+
+import xyz.nikitacartes.easyauth.storage.PlayerCache;
+import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -209,13 +211,4 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
         }
     }
 
-    // Player item dropping
-    @Inject(method = "dropSelectedItem(Z)Z", at = @At("HEAD"), cancellable = true)
-    private void dropSelectedItem(boolean dropEntireStack, CallbackInfoReturnable<Boolean> cir) {
-        ActionResult result = AuthEventHandler.onDropItem(player);
-
-        if (result == ActionResult.FAIL) {
-            cir.setReturnValue(false);
-        }
-    }
 }

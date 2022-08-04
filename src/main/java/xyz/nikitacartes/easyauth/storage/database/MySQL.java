@@ -42,7 +42,9 @@ public class MySQL implements DbApi {
 
     private void reConnect() {
         try {
-            if(!MySQLConnection.isValid(0)) {
+            if (MySQLConnection == null) {
+                logWarn("MySQL DB already closed or hasn't been open yet");
+            } else if(!MySQLConnection.isValid(0)) {
                 connect();
             }
         } catch (SQLException | ClassNotFoundException e) {
@@ -77,13 +79,7 @@ public class MySQL implements DbApi {
      * @return false if connection is open, otherwise false
      */
     public boolean isClosed() {
-        try {
-            return MySQLConnection == null || MySQLConnection.isValid(0);
-        } catch (SQLException e) {
-            logError(e.getMessage());
-            e.printStackTrace();
-            return true;
-        }
+        return MySQLConnection == null;
     }
 
 
@@ -210,7 +206,7 @@ public class MySQL implements DbApi {
                 }
             });
             preparedStatement.executeBatch();
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             logError("Error saving players data! " + e.getMessage());
             e.printStackTrace();
         }

@@ -10,6 +10,7 @@
 8) Quick fix for MongoDB connection string
 9) Update Czech translation
 10) Improve kicking if number of login attempts exceeded
+11) Save EasyAuth's database on `save-all` command
 
 ### 2.2.2, Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2
 

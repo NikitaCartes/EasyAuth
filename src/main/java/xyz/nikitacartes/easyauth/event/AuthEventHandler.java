@@ -112,17 +112,16 @@ public class AuthEventHandler {
         // Tries to rescue player from nether portal
         if (config.main.tryPortalRescue) {
             BlockPos pos = player.getBlockPos();
-            if (player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL) || ((pos = playerInPortal(player)) != null)) {
-
-                // Teleporting player to the middle of the block
-                player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-
+            player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+            if (player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL) || player.getWorld().getBlockState(player.getBlockPos().up()).getBlock().equals(Blocks.NETHER_PORTAL)) {
                 // Faking portal blocks to be air
                 BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket(pos, Blocks.AIR.getDefaultState());
                 player.networkHandler.sendPacket(feetPacket);
 
                 BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket(pos.up(), Blocks.AIR.getDefaultState());
                 player.networkHandler.sendPacket(headPacket);
+
+                playerCache.wasInPortal = true;
             }
         }
     }
@@ -135,7 +134,6 @@ public class AuthEventHandler {
 
         if (playerCache != null && playerCache.isAuthenticated) {
             playerCache.lastIp = player.getIp();
-            playerCache.wasInPortal = player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL);
 
             // Setting the session expire time
             if (config.main.sessionTimeoutTime != -1)
@@ -154,9 +152,9 @@ public class AuthEventHandler {
         if (player == null) {
             return ActionResult.PASS;
         }
-        if (command.startsWith("login")
-                || command.startsWith("register")
-                || (config.experimental.enableAliases && command.startsWith("l"))) {
+        if (command.startsWith("login ")
+                || command.startsWith("register ")
+                || (config.experimental.enableAliases && command.startsWith("l "))) {
             return ActionResult.PASS;
         }
         if (!((PlayerAuth) player).isAuthenticated()) {
@@ -259,19 +257,4 @@ public class AuthEventHandler {
         return ActionResult.PASS;
     }
 
-    private static BlockPos playerInPortal(ServerPlayerEntity player) {
-        Box playerBox = player.getBoundingBox();
-        BlockPos minBlockPos = new BlockPos(playerBox.minX, playerBox.minY, playerBox.minZ);
-        BlockPos maxBlockPos = new BlockPos(playerBox.maxX, playerBox.maxY, playerBox.maxZ);
-        for (int x = minBlockPos.getX(); x <= maxBlockPos.getX(); x++) {
-            for (int y = minBlockPos.getY(); y <= maxBlockPos.getY(); y++) {
-                for (int z = minBlockPos.getZ(); z <= maxBlockPos.getZ(); z++) {
-                    if (player.getWorld().getBlockState(new BlockPos(x, y, z)).getBlock().equals(Blocks.NETHER_PORTAL)) {
-                        return new BlockPos(x, y, z);
-                    }
-                }
-            }
-        }
-        return null;
-    }
 }

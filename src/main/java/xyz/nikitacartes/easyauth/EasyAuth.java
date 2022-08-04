@@ -139,7 +139,15 @@ public class EasyAuth implements ModInitializer {
         AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
         UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
         ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(null));
+        ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
+    }
+
+    private void onStartServer(MinecraftServer server) {
+        if (DB.isClosed()) {
+            logError("Can't connect to database. Stopping server");
+            server.stop(false);
+        }
     }
 
     private void onStopServer(MinecraftServer server) {

@@ -24,7 +24,6 @@ public abstract class SlotMixin {
             player.networkHandler.sendPacket(
                     new ScreenHandlerSlotUpdateS2CPacket(
                             -2,
-                            0,
                             player.getInventory().selectedSlot,
                             player.getInventory().getStack(player.getInventory().selectedSlot))
             );

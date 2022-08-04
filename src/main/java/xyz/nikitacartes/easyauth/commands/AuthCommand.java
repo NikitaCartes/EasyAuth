@@ -256,7 +256,7 @@ public class AuthCommand {
             DB.deleteUserData(username);
         });
 
-        ServerPlayerEntity playerEntity = source.getServer().getPlayerManager().getPlayer(username);
+        ServerPlayerEntity playerEntity = source.getMinecraftServer().getPlayerManager().getPlayer(username);
         if (playerEntity != null) {
             ((PlayerAuth) playerEntity).easyAuth$setPlayerEntryV1(new PlayerEntryV1(username));
             playerEntity.networkHandler.disconnect(langConfig.userdataDeleted.get());

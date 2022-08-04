@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "CommandManagerMixin",
+    "MixinPlayerEntity",
     "PlayerAdvancementTrackerMixin",
     "PlayerManagerMixin",
     "WorldSaveHandlerMixin",

@@ -21,11 +21,13 @@ package xyz.nikitacartes.easyauth.storage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
@@ -67,6 +69,7 @@ public class AuthConfig {
                 if (config.experimental.enableServerSideTranslation && !FabricLoader.getInstance().isModLoaded("server_translations_api")) {
                     config.experimental.enableServerSideTranslation = false;
                 }
+                AuthEventHandler.usernamePattern = Pattern.compile(config.main.usernameRegex);
             } catch (IOException e) {
                 throw new RuntimeException("[EasyAuth] Problem occurred when trying to load config: ", e);
             }

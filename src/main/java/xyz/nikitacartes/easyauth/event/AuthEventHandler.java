@@ -10,12 +10,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
-import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +28,7 @@ public class AuthEventHandler {
 
     public static long lastAcceptedPacket = 0;
 
+    public static Pattern usernamePattern;
     /**
      * Player pre-join.
      * Returns text as a reason for disconnect or null to pass
@@ -40,15 +38,13 @@ public class AuthEventHandler {
      * @return Text if player should be disconnected
      */
     public static Text checkCanPlayerJoinServer(GameProfile profile, PlayerManager manager) {
-        // Getting the player
+        // Getting the player. By this point, the player's game profile has been authenticated so the UUID is legitimate.
         String incomingPlayerUsername = profile.getName();
+        String incomingPlayerUuid = profile.getId().toString();
         PlayerEntity onlinePlayer = manager.getPlayer(incomingPlayerUsername);
 
-        // Checking if player username is valid
-        String regex = config.main.usernameRegex;
-
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(incomingPlayerUsername);
+        // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
+        Matcher matcher = usernamePattern.matcher(incomingPlayerUsername);
 
         if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && config.experimental.preventAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
@@ -61,17 +57,18 @@ public class AuthEventHandler {
         } else if (!matcher.matches()) {
             return Text.of(
                     String.format(
-                            config.lang.disallowedUsername, regex
+                            config.lang.disallowedUsername, config.main.usernameRegex
                     )
             );
         }
+        // If the player has too many login attempts, kick them immediately.
         if (config.main.maxLoginTries != -1) {
-            // If the player has too many login attempts, kick them immediately.
-            // For Mojang account in offline (not mixed) mode we get offline uuid too.
-            String offlineUuid = DynamicSerializableUuid.getOfflinePlayerUuid(incomingPlayerUsername.toLowerCase()).toString();
-            if (playerCacheMap.containsKey(offlineUuid) &&
-                    playerCacheMap.get(offlineUuid).lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
-                return TranslationHelper.getLoginTriesExceeded();
+            // We won't load the player cache *into the map* if it is not already present (first join since restart)
+            // because loading the player cache with a null player prevents the last location from being set.
+            PlayerCache playerCache = playerCacheMap.containsKey(incomingPlayerUuid) ?
+                    playerCacheMap.get(incomingPlayerUuid) : PlayerCache.fromJson(null, incomingPlayerUuid);
+            if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
+                return Text.of(config.lang.loginTriesExceeded);
             }
         }
         return null;

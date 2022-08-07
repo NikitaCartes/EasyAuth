@@ -33,7 +33,7 @@ public class EasyAuth implements ModInitializer {
     public static final String MOD_ID = "easyauth";
 
 
-    public static DbApi DB;
+    public static DbApi DB = null;
 
     public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
 
@@ -78,23 +78,6 @@ public class EasyAuth implements ModInitializer {
             throw new RuntimeException("[EasyAuth] Error creating directory!");
         // Loading config
         config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
-        // Connecting to db
-        if (config.main.databaseType.equalsIgnoreCase("mysql")) {
-            DB = new MySQL();
-        } else if (config.main.databaseType.equalsIgnoreCase("mongodb")) {
-            DB = new MongoDB();
-        } else {
-            DB = new LevelDB();
-        }
-        if (FabricLoader.getInstance().isModLoaded("carpet")) {
-            config.experimental.carpetLoaded = true;
-        }
-        if (FabricLoader.getInstance().isModLoaded("fake-player-api")) {
-            config.experimental.fakePlayerApiLoaded = true;
-        }
-        if (FabricLoader.getInstance().isModLoaded("floodgate")) {
-            config.experimental.floodgateLoaded = true;
-        }
     }
 
     /**

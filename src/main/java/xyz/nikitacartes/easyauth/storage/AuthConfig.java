@@ -22,6 +22,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.storage.database.LevelDB;
+import xyz.nikitacartes.easyauth.storage.database.MongoDB;
+import xyz.nikitacartes.easyauth.storage.database.MySQL;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +33,7 @@ import java.util.Collections;
 import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
+import static xyz.nikitacartes.easyauth.EasyAuth.DB;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
@@ -76,10 +80,27 @@ public class AuthConfig {
         } else {
             config = new AuthConfig();
         }
+        if (FabricLoader.getInstance().isModLoaded("carpet")) {
+            config.experimental.carpetLoaded = true;
+        }
+        if (FabricLoader.getInstance().isModLoaded("fake-player-api")) {
+            config.experimental.fakePlayerApiLoaded = true;
+        }
+        if (FabricLoader.getInstance().isModLoaded("floodgate")) {
+            config.experimental.floodgateLoaded = true;
+        }
         config.save(file);
-        config.experimental.carpetLoaded = false;
-        config.experimental.fakePlayerApiLoaded = false;
-        config.experimental.floodgateLoaded = false;
+        if (DB != null && !DB.isClosed()) {
+            DB.close();
+        }
+        // Connecting to db
+        if (config.main.databaseType.equalsIgnoreCase("mysql")) {
+            DB = new MySQL();
+        } else if (config.main.databaseType.equalsIgnoreCase("mongodb")) {
+            DB = new MongoDB();
+        } else {
+            DB = new LevelDB();
+        }
         return config;
     }
 

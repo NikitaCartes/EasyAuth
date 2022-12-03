@@ -27,7 +27,7 @@
   "text.easyauth.playerAlreadyOnline": "§c玩家‘%s’已经在线！",
   "text.easyauth.worldSpawnSet": "§a重生点已设置。",
   "text.easyauth.corruptedPlayerData": "§c你的用户数据似乎已经损坏。请联系管理员。",
-  "text.easyauth.userNotRegistered": "§c该玩家未注册！"
+  "text.easyauth.userNotRegistered": "§c该玩家未注册！",
   "text.easyauth.cannotLogout": "§c你不能注销！",
   "text.easyauth.offlineUuid": "玩家%s的离线UUID是（点击以复制）\n",
   "text.easyauth.registeredPlayers": "已注册玩家列表：",

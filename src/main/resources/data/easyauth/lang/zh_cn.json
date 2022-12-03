@@ -23,7 +23,7 @@
   "text.easyauth.configurationReloaded": "§a配置文件成功重载。",
   "text.easyauth.maxPasswordChars": "§6密码不得超过%d字！",
   "text.easyauth.minPasswordChars": "§6密码至少需要%d字！",
-  "text.easyauth.disallowedUsername": "§6用户名称无效！可用的正则表达式: %s",
+  "text.easyauth.disallowedUsername": "§6用户名称无效！可用的正则表达式：%s",
   "text.easyauth.playerAlreadyOnline": "§c玩家‘%s’已经在线！",
   "text.easyauth.worldSpawnSet": "§a重生点已设置。",
   "text.easyauth.corruptedPlayerData": "§c你的用户数据似乎已经损坏。请联系管理员。",

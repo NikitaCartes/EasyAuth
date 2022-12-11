@@ -6,6 +6,7 @@
     "CommandManagerMixin",
     "SaveAllCommandMixin",
     "PlayerAdvancementTrackerMixin",
+    "PlayerListS2CPacketMixin",
     "PlayerManagerMixin",
     "ServerLoginNetworkHandlerMixin",
     "ServerPlayerEntityMixin",

@@ -1,16 +1,14 @@
 package xyz.nikitacartes.easyauth.mixin;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,7 +56,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
 
             // Teleports player to spawn
             player.teleport(
-                    server.getWorld(RegistryKey.of(Registry.WORLD_KEY, new Identifier(config.worldSpawn.dimension))),
+                    server.getWorld(RegistryKey.of(RegistryKeys.WORLD, new Identifier(config.worldSpawn.dimension))),
                     config.worldSpawn.x,
                     config.worldSpawn.y,
                     config.worldSpawn.z,
@@ -97,7 +95,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
             ExAmple if Example is already taken.
         */
         String playername = player.getGameProfile().getName().toLowerCase();
-        return DynamicSerializableUuid.getOfflinePlayerUuid(playername).toString();
+        return Uuids.getOfflinePlayerUuid(playername).toString();
 
     }
 

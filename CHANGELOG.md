@@ -1,4 +1,4 @@
-### 3.0.0 Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2, 1.19, 1.19.1
+### 3.0.0 Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2, 1.19, 1.19.1-1.19.2, 1.19.3
 
 1) Fix MySQL support
 2) Add placeholder api support, thanks to @Nikijaz
@@ -12,6 +12,8 @@
 10) Improve kicking if number of login attempts exceeded
 11) Save EasyAuth's database on `save-all` command
 12) Reconnect to DB with `auth reload`
+13) Fix `hideUnauthenticatedPLayersFromPlayerList`, thanks to @Wereii
+14) Update Simplified Chinese Localization, thanks to @GodGun968
 
 ### 2.2.2, Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2
 

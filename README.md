@@ -18,11 +18,13 @@ See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 * Thanks to @were491 for improvement in login system
 * Thanks to @Nikijaz for implementing MySQL database support
 * Thanks to @@dmunozv04 for Floodgate support
+* Thanks to @dmunozv04 for Floodgate support
+* Thanks to @Wereii for 1.19.3 support
 
 Thank you so much for those who have already helped with translation of the mod!
 
 * @alphatoasterous (Russian)
-* @Neubulae (Chinese)
+* @Neubulae, @GodGun968 (Chinese)
 * @Zailer43 (Spanish)
 * @Kljunas2 (Slovene)
 * @Bendimester23 (Hungarian)

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Extra logging related to initialization of Log4j.
+ Set to debug or trace if log4j initialization is failing. -->
+<Configuration status="warn">
+    <Loggers>
+        <Logger level="warn" name="net.fabricmc.loader.api.FabricLoader"/>
+        <Logger level="debug" name="xyz.nikitacartes.easyauth"/>
+    </Loggers>
+</Configuration>

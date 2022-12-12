@@ -21,12 +21,22 @@ targetCompatibility = JavaVersion.VERSION_17
 loom {
     accessWidenerPath = file("src/main/resources/easyauth.accesswidener")
     serverOnlyMinecraftJar()
+    log4jConfigs.from(file("log4j.xml"))
+}
+
+configurations {
+    // Utility for forcing classpath order because of floodgate containing it's own org.objectweb.asm
+    priority
+    sourceSets.main.compileClasspath = configurations.priority + sourceSets.main.compileClasspath
 }
 
 dependencies {
     // Fabric
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+
+    // floodgate includes it's own `org.objectweb.asm` which gets loaded before `org.ow2.asm:asm:9.3` required by yarn/net.fabricmc:fabric-loader
+    priority "org.ow2.asm:asm:9.3"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
@@ -73,11 +83,14 @@ dependencies {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 17
+    it.options.release.set(17)
 }
 
 java {
     withSourcesJar()
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 jar {

@@ -5,10 +5,15 @@ plugins {
 repositories {
     maven { name "Carpet"; url "https://masa.dy.fi/maven" }
     maven { name "Translation"; url "https://maven.nucleoid.xyz" }
-    maven { name "Jitpack"; url "https://jitpack.io" }
     maven { name "Permission"; url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { name "Fake Player Api"; url "https://maven.cafeteria.dev/releases" }
-    maven { name "Floodgate Api"; url "https://repo.opencollab.dev/maven-snapshots" }
+    maven { name "Floodgate Api"; url "https://repo.opencollab.dev/main" }
+    exclusiveContent {
+        forRepository {
+            maven { name "Modrinth"; url "https://api.modrinth.com/maven" }
+        }
+        filter {includeGroup "maven.modrinth" }
+    }
     mavenLocal()
 }
 
@@ -53,6 +58,7 @@ dependencies {
     modImplementation "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
     modImplementation "dev.cafeteria:fake-player-api:${project.fake_player_api_version}"
     modImplementation "org.geysermc.floodgate:api:${floodgate_api_version}"
+    modApi "maven.modrinth:cc-restitched:${project.cc_version}"
 
     // Password hashing
     // Argon2

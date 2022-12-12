@@ -90,6 +90,9 @@ public class AuthConfig {
         if (FabricLoader.getInstance().isModLoaded("floodgate")) {
             config.experimental.floodgateLoaded = true;
         }
+        if (FabricLoader.getInstance().isModLoaded("computercraft")) {
+            config.experimental.ccRestitchedLoaded = true;
+        }
         config.save(file);
         if (DB != null && !DB.isClosed()) {
             DB.close();
@@ -397,5 +400,6 @@ public class AuthConfig {
         public boolean carpetLoaded = false;
         public boolean fakePlayerApiLoaded = false;
         public boolean floodgateLoaded = false;
+        public boolean ccRestitchedLoaded = false;
     }
 }

@@ -1,6 +1,7 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.util.dynamic.DynamicSerializableUuid;
@@ -51,28 +52,27 @@ public abstract class ServerLoginNetworkHandlerMixin {
     @Inject(
             method = "onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V",
             at = @At(
-                    value = "NEW",
-                    target = "com/mojang/authlib/GameProfile",
-                    shift = At.Shift.AFTER,
-                    remap = false
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;getProfile()Lcom/mojang/authlib/GameProfile;",
+                    shift = At.Shift.AFTER
             ),
             cancellable = true
     )
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
         if (config.main.premiumAutologin) {
             try {
-                String playername = (new GameProfile(null, packet.name())).getName().toLowerCase();
+                String playername = packet.getProfile().getName().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
                 if (mojangAccountNamesCache.contains(playername) || config.experimental.verifiedOnlinePlayer.contains(playername)) {
                     mojangAccountNamesCache.add(playername);
                     return;
                 }
-                if ((playerCacheMap.containsKey(DynamicSerializableUuid.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername))) {
+                if ((playerCacheMap.containsKey(PlayerEntity.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername))) {
                     // Player definitely doesn't have a mojang account
                     state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
-                    this.profile = new GameProfile(null, packet.name());
+                    this.profile = packet.getProfile();
                     ci.cancel();
                 } else {
                     // Checking account status from API
@@ -97,7 +97,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         httpsURLConnection.disconnect();
                         state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
-                        this.profile = new GameProfile(null, packet.name());
+                        this.profile = packet.getProfile();
                         ci.cancel();
                     }
                 }

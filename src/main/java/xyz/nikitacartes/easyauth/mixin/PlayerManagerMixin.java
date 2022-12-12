@@ -7,7 +7,6 @@ import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.text.Text;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,7 +60,7 @@ public abstract class PlayerManagerMixin {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
         if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
             String playername = player.getGameProfile().getName();
-            File offlineFile = new File(onlineFile.getParent(), DynamicSerializableUuid.getOfflinePlayerUuid(playername) + ".json");
+            File offlineFile = new File(onlineFile.getParent(), PlayerEntity.getOfflinePlayerUuid(playername) + ".json");
             offlineFile.renameTo(onlineFile);
 
             ((ServerStatHandlerAccessor) serverStatHandler).setFile(onlineFile);

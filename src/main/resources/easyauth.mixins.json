@@ -3,11 +3,10 @@
   "package": "xyz.nikitacartes.easyauth.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "CommandManagerMixin",
-    "MinecraftServerMixin",
-    "SaveAllCommandMixin",
     "PlayerAdvancementTrackerMixin",
     "PlayerManagerMixin",
+    "MinecraftServerMixin",
+    "SaveAllCommandMixin",
     "ServerLoginNetworkHandlerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",

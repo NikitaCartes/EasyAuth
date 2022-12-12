@@ -1,9 +1,9 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import net.minecraft.advancement.PlayerAdvancementTracker;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,7 +33,7 @@ public class PlayerAdvancementTrackerMixin {
         if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.advancementFile.isFile()) {
             // Migrate
             String playername = owner.getGameProfile().getName();
-            this.advancementFile = new File(this.advancementFile.getParent(), DynamicSerializableUuid.getOfflinePlayerUuid(playername) + ".json");
+            this.advancementFile = new File(this.advancementFile.getParent(), PlayerEntity.getOfflinePlayerUuid(playername) + ".json");
         }
     }
 

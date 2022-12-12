@@ -3,6 +3,7 @@ package xyz.nikitacartes.easyauth.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
@@ -29,14 +30,14 @@ public class RegisterCommand {
                                 .executes(ctx -> register(ctx.getSource(), getString(ctx, "password"), getString(ctx, "passwordAgain")))
                         ))
                 .executes(ctx -> {
-                    ctx.getSource().getPlayerOrThrow().sendMessage(TranslationHelper.getEnterPassword(), false);
+                    ctx.getSource().getPlayer().sendMessage(TranslationHelper.getEnterPassword(), false);
                     return 0;
                 }));
     }
 
     // Method called for hashing the password & writing to DB
     private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
         if (config.main.enableGlobalPassword) {
             player.sendMessage(TranslationHelper.getLoginRequired(), false);
             return 0;

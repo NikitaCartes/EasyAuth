@@ -24,7 +24,7 @@ public class AccountCommand {
                 .then(literal("unregister")
                         .requires(Permissions.require("easyauth.commands.account.unregister", true))
                         .executes(ctx -> {
-                            ctx.getSource().getPlayerOrThrow().sendMessage(
+                            ctx.getSource().getPlayer().sendMessage(
                                     TranslationHelper.getEnterPassword(),
                                     false
                             );
@@ -42,7 +42,7 @@ public class AccountCommand {
                         .requires(Permissions.require("easyauth.commands.account.changePassword", true))
                         .then(argument("old password", string())
                                 .executes(ctx -> {
-                                    ctx.getSource().getPlayerOrThrow().sendMessage(
+                                    ctx.getSource().getPlayer().sendMessage(
                                             TranslationHelper.getEnterNewPassword(),
                                             false);
                                     return 1;
@@ -63,7 +63,7 @@ public class AccountCommand {
     // Method called for checking the password and then removing user's account from db
     private static int unregister(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
 
         if (config.main.enableGlobalPassword) {
             player.sendMessage(
@@ -95,7 +95,7 @@ public class AccountCommand {
     // Method called for checking the password and then changing it
     private static int changePassword(ServerCommandSource source, String oldPass, String newPass) throws CommandSyntaxException {
         // Getting the player who send the command
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
 
         if (config.main.enableGlobalPassword) {
             player.sendMessage(

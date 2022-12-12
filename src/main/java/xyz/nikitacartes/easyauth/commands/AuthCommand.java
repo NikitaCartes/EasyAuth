@@ -321,7 +321,7 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
-        UUID uuid = DynamicSerializableUuid.getOfflinePlayerUuid(player.toLowerCase(Locale.ROOT));
+        UUID uuid = PlayerEntity.getOfflinePlayerUuid(player.toLowerCase(Locale.ROOT));
 
         if (sender != null) {
             ((PlayerEntity) sender).sendMessage(
@@ -344,7 +344,7 @@ public class AuthCommand {
             if (sender != null) {
                 ((PlayerEntity) sender).sendMessage(TranslationHelper.getRegisteredPlayers(false), false);
             } else {
-                LogInfo(TranslationHelper.getRegisteredPlayers(true).getContent().toString());
+                LogInfo(TranslationHelper.getRegisteredPlayers(true).asString());
             }
         });
         return 1;

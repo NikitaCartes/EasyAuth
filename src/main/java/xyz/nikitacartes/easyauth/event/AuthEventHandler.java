@@ -1,6 +1,7 @@
 package xyz.nikitacartes.easyauth.event;
 
 import com.mojang.authlib.GameProfile;
+import eu.pb4.placeholders.TextParser;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -58,13 +59,13 @@ public class AuthEventHandler {
         if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && config.experimental.preventAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
-            return Text.of(
+            return TextParser.parse(
                     String.format(
-                            config.lang.playerAlreadyOnline, onlinePlayer.getName().getContent()
+                            config.lang.playerAlreadyOnline, onlinePlayer.getName().asString()
                     )
             );
         } else if (!(matcher.matches() || (config.experimental.floodgateLoaded && config.experimental.floodgateBypassUsernameRegex && FloodgateApiHelper.isFloodgatePlayer(profile.getId())))) {
-            return Text.of(
+            return TextParser.parse(
                     String.format(
                             config.lang.disallowedUsername, config.main.usernameRegex
                     )
@@ -152,27 +153,16 @@ public class AuthEventHandler {
         }
     }
 
-    // Player execute command
-    public static ActionResult onPlayerCommand(ServerPlayerEntity player, String command) {
-        // Getting the message to then be able to check it
-        if (player == null) {
-            return ActionResult.PASS;
-        }
-        if (command.startsWith("login ")
-                || command.startsWith("register ")
-                || (config.experimental.enableAliases && command.startsWith("l "))) {
-            return ActionResult.PASS;
-        }
-        if (!((PlayerAuth) player).isAuthenticated()) {
-            player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
-            return ActionResult.FAIL;
-        }
-        return ActionResult.PASS;
-    }
-
     // Player chatting
-    public static ActionResult onPlayerChat(ServerPlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowChat) {
+    public static ActionResult onPlayerChat(ServerPlayerEntity player, String message) {
+        // Getting the message to then be able to check it
+        if (
+                !((PlayerAuth) player).isAuthenticated() &&
+                        !message.startsWith("/login ") &&
+                        !(message.startsWith("/l ") && config.experimental.enableAliases) &&
+                        !message.startsWith("/register ") &&
+                        (!config.experimental.allowChat || message.startsWith("/"))
+        ) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }

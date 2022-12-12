@@ -1,13 +1,13 @@
 package xyz.nikitacartes.easyauth.mixin;
 
-import net.fabricmc.loader.api.FabricLoader;
+import eu.pb4.placeholders.TextParser;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
@@ -46,7 +46,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     @Override
     public void hidePosition(boolean hide) {
         PlayerCache cache = playerCacheMap.get(this.getFakeUuid());
-        LogDebug(String.format("Teleporting player %s to %s", player.getName().getContent(), hide ? "spawn." : "position."));
+        LogDebug(String.format("Teleporting player %s to %s", player.getName().asString(), hide ? "spawn." : "position."));
         if (hide) {
             // Saving position
             cache.lastLocation.dimension = player.getWorld();
@@ -95,7 +95,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
             ExAmple if Example is already taken.
         */
         String playername = player.getGameProfile().getName().toLowerCase();
-        return DynamicSerializableUuid.getOfflinePlayerUuid(playername).toString();
+        return PlayerEntity.getOfflinePlayerUuid(playername).toString();
 
     }
 
@@ -110,15 +110,15 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
         if (!config.main.enableGlobalPassword && cache.password.isEmpty()) {
             if (config.experimental.enableServerSideTranslation) {
-                return Text.translatable("text.easyauth.notAuthenticated").append("\n").append(Text.translatable("text.easyauth.registerRequired"));
+                return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.registerRequired"));
             } else {
-                return Text.of(config.lang.notAuthenticated + "\n" + config.lang.registerRequired);
+                return TextParser.parse(config.lang.notAuthenticated + "\n" + config.lang.registerRequired);
             }
         } else {
             if (config.experimental.enableServerSideTranslation) {
-                return Text.translatable("text.easyauth.notAuthenticated").append("\n").append(Text.translatable("text.easyauth.loginRequired"));
+                return new TranslatableText("text.easyauth.notAuthenticated").append("\n").append(new TranslatableText("text.easyauth.loginRequired"));
             } else {
-                return Text.of(config.lang.notAuthenticated + "\n" + config.lang.loginRequired);
+                return TextParser.parse(config.lang.notAuthenticated + "\n" + config.lang.loginRequired);
             }
         }
 

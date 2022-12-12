@@ -1,6 +1,5 @@
 package xyz.nikitacartes.easyauth.mixin;
 
-import com.mojang.brigadier.ParseResults;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.ActionResult;
@@ -14,11 +13,11 @@ import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 
 @Mixin(CommandManager.class)
 public class CommandManagerMixin {
-    @Inject(method = "execute(Lcom/mojang/brigadier/ParseResults;Ljava/lang/String;)I", at = @At("HEAD"), cancellable = true)
-    private void checkCanUseCommands(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfoReturnable<Integer> cir) {
-        ActionResult result = AuthEventHandler.onPlayerCommand(parseResults.getContext().getSource().getPlayer(), command);
+    @Inject(method = "execute(Lnet/minecraft/server/command/ServerCommandSource;Ljava/lang/String;)I", at = @At("HEAD"), cancellable = true)
+    private void checkCanUseCommands(ServerCommandSource source, String command, CallbackInfoReturnable<Integer> cir) {
+        ActionResult result = AuthEventHandler.onPlayerCommand(source.getPlayer(), command);
         if (result == ActionResult.FAIL) {
-            langConfig.loginRequired.send(parseResults.getContext().getSource());
+            langConfig.loginRequired.send(source.getPlayer());
             cir.setReturnValue(1);
         }
     }

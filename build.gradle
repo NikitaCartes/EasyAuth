@@ -12,7 +12,7 @@ repositories {
     mavenLocal()
 }
 
-archivesBaseName = "${project.mod_id}_mc${project.minecraft_version}"
+archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
 version = "${project.mod_version}"
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -20,7 +20,6 @@ targetCompatibility = JavaVersion.VERSION_17
 
 loom {
     accessWidenerPath = file("src/main/resources/easyauth.accesswidener")
-    log4jConfigs.from(file("log4j.xml"))
     serverOnlyMinecraftJar()
 }
 

@@ -24,10 +24,9 @@
     "easyauth.mixins.json"
   ],
   "depends": {
-    "fabric-api": "*",
-    "fabricloader": ">=0.14.11",
-    "minecraft": "~1.19.3",
-    "java": ">=17"
+    "fabric": "*",
+    "fabricloader": ">=0.12.0",
+    "minecraft": "1.19.x"
   },
   "suggests": {
     "flamingo": "*",

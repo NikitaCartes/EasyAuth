@@ -102,11 +102,11 @@ modrinth {
     token.set(System.getenv("MODRINTH_TOKEN"))
     projectId.set("aZj58GfX")
     versionNumber.set("${project.version}")
-    versionName = "[1.19.3] ${project.version}"
+    versionName = "[1.19.1, 1.19.2] ${project.version}"
     versionType = "beta"
     changelog.set("Release notes and Changelog: \nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}")
     uploadFile = remapJar
-    gameVersions.addAll("1.19.3")
+    gameVersions.addAll("1.19.1", "1.19.2")
     loaders = ["fabric", "quilt"]
     dependencies {
         required.project("P7dR8mSH") // Fabric API
@@ -129,10 +129,11 @@ curseforge {
         addGameVersion("Java 18")
         addGameVersion("Java 17")
 
-        addGameVersion("1.19.3")
+        addGameVersion("1.19.1")
+        addGameVersion("1.19.2")
 
         mainArtifact(remapJar) {
-            displayName = "[1.19.3] ${project.version}"
+            displayName = "[1.19.1, 1.19.2] ${project.version}"
             relations {
                 requiredDependency("fabric-api")
                 embeddedLibrary 'server-translation-api'

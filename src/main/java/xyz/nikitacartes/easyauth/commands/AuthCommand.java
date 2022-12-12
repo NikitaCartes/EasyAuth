@@ -14,6 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
+import xyz.nikitacartes.easyauth.storage.database.DBApiException;
+import xyz.nikitacartes.easyauth.storage.database.LevelDB;
+import xyz.nikitacartes.easyauth.storage.database.MongoDB;
+import xyz.nikitacartes.easyauth.storage.database.MySQL;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
@@ -145,6 +149,12 @@ public class AuthCommand {
      */
     public static int reloadConfig(Entity sender) {
         config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
+
+        try {
+            DB.connect();
+        } catch (DBApiException e) {
+            LOGGER.error("onInitialize error: ", e);
+        }
 
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getConfigurationReloaded(), false);

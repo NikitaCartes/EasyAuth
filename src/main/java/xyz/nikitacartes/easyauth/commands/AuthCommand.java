@@ -2,6 +2,7 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.DimensionArgumentType;
@@ -9,10 +10,7 @@ import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import xyz.nikitacartes.easyauth.EasyAuth;
@@ -326,14 +324,18 @@ public class AuthCommand {
                         return;
                     }
                     i.getAndIncrement();
-                    message.append(Text.translatable(username)
+                    message.append(new TranslatableText(username)
                             .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, username)))
                             .formatted(Formatting.YELLOW))
                             .append(", ");
                 });
-                ServerPlayerEntity player = source.getPlayer();
+                ServerPlayerEntity player = null;
+                try {
+                    player = source.getPlayer();
+                } catch (CommandSyntaxException ignored) {
+                }
                 if (player != null) {
-                    player.sendMessage(message);
+                    player.sendMessage(message, false);
                 } else {
                     LogInfo(message.getString());
                 }
@@ -393,9 +395,13 @@ public class AuthCommand {
                 return;
             }
             // Send player information to the source
-            ServerPlayerEntity player = source.getPlayer();
+            ServerPlayerEntity player = null;
+            try {
+                player = source.getPlayer();
+            } catch (CommandSyntaxException ignored) {
+            }
             if (player != null) {
-                player.sendMessage(Text.literal("Player Info: " + playerData.toJson()));
+                player.sendMessage(Text.of("Player Info: " + playerData.toJson()), false);
             } else {
                 LogInfo("Player Info: " + playerData.toJson());
             }

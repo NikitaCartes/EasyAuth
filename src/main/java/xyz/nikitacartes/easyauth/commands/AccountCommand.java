@@ -78,7 +78,7 @@ public class AccountCommand {
     // Method called for checking the password and then removing user's account from db
     private static int unregister(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
@@ -115,7 +115,7 @@ public class AccountCommand {
     // Method called for checking the password and then changing it
     private static int changePassword(ServerCommandSource source, String oldPass, String newPass) throws CommandSyntaxException {
         // Getting the player who send the command
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
@@ -154,7 +154,7 @@ public class AccountCommand {
      * @return 0
      */
     private static int markAsOnline(ServerCommandSource source, String password) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         THREADPOOL.submit(() -> {

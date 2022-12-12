@@ -4,7 +4,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.Strings;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
@@ -13,7 +12,7 @@ public class EasyLogger {
     private static final Logger logger = LogManager.getLogger("EasyAuth");
 
     static void log(Level level, String message) {
-        logger.atLevel(level).log(Strings.concat("[EasyAuth]: ", message));
+        logger.atLevel(level).log("[EasyAuth]: " + message);
     }
 
     static void log(Level level, String message, Throwable e) {

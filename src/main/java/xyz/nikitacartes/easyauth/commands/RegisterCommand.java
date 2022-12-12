@@ -70,7 +70,7 @@ public class RegisterCommand {
     }
 
     private static int register(ServerCommandSource source, String globalPassword, String pass1, String pass2) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
@@ -97,7 +97,7 @@ public class RegisterCommand {
 
     // Method called for hashing the password & writing to DB
     private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayerEntity player = source.getPlayer();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {

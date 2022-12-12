@@ -1,9 +1,11 @@
 package xyz.nikitacartes.easyauth.config;
 
 import com.google.common.io.Resources;
-import net.minecraft.server.command.CommandOutput;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.apache.commons.text.StringSubstitutor;
@@ -15,7 +17,6 @@ import java.util.Map;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static net.minecraft.text.Text.translatable;
 import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
@@ -149,40 +150,58 @@ public class LangConfigV1 extends ConfigTemplate {
 
         public void send(ServerCommandSource commandOutput) {
             if (enabled && commandOutput != null) {
-                ServerPlayerEntity player = commandOutput.getPlayer();
+                ServerPlayerEntity player = null;
+                try {
+                    player = commandOutput.getPlayer();
+                } catch (CommandSyntaxException ignored) {
+                }
                 if (player != null) {
                     if (langConfig.enableServerSideTranslation && serverSide) {
-                        player.sendMessage(translatable(key));
+                        player.sendMessage(new net.minecraft.text.TranslatableText(key), false);
                     } else {
-                        player.sendMessage(Text.literal(fallback));
+                        player.sendMessage(Text.of(fallback), false);
                     }
                 } else {
-                    LogInfo(translatable(fallback).getString());
+                    LogInfo(new net.minecraft.text.TranslatableText(fallback).getString());
                 }
             }
         }
 
-        public <T extends CommandOutput> void send(T commandOutput) {
+        public void send(ServerPlayerEntity commandOutput) {
             if (enabled && commandOutput != null) {
                 if (langConfig.enableServerSideTranslation && serverSide) {
-                    commandOutput.sendMessage(translatable(key));
+                    commandOutput.sendMessage(new net.minecraft.text.TranslatableText(key), false);
                 } else {
-                    commandOutput.sendMessage(Text.literal(fallback));
+                    commandOutput.sendMessage(Text.of(fallback), false);
+                }
+            }
+        }
+
+        public void send(MinecraftServer commandOutput) {
+            if (enabled && commandOutput != null) {
+                if (langConfig.enableServerSideTranslation && serverSide) {
+                    commandOutput.sendSystemMessage(new net.minecraft.text.TranslatableText(key), null);
+                } else {
+                    commandOutput.sendSystemMessage(Text.of(fallback), null);
                 }
             }
         }
 
         public void send(ServerCommandSource commandOutput, Object... args) {
             if (enabled && commandOutput != null) {
-                ServerPlayerEntity player = commandOutput.getPlayer();
+                ServerPlayerEntity player = null;
+                try {
+                    player = commandOutput.getPlayer();
+                } catch (CommandSyntaxException ignored) {
+                }
                 if (player != null) {
                     if (langConfig.enableServerSideTranslation && serverSide) {
-                        player.sendMessage(translatable(key, args));
+                        player.sendMessage(new net.minecraft.text.TranslatableText(key, args), false);
                     } else {
-                        player.sendMessage(translatable(fallback, args));
+                        player.sendMessage(new net.minecraft.text.TranslatableText(fallback, args), false);
                     }
                 } else {
-                    LogInfo(translatable(fallback, args).getString());
+                    LogInfo(new net.minecraft.text.TranslatableText(fallback, args).getString());
                 }
             }
         }
@@ -190,24 +209,24 @@ public class LangConfigV1 extends ConfigTemplate {
         public MutableText get() {
             if (enabled) {
                 if (langConfig.enableServerSideTranslation && serverSide) {
-                    return translatable(key);
+                    return new net.minecraft.text.TranslatableText(key);
                 } else {
-                    return Text.literal(fallback);
+                    return new LiteralText(fallback);
                 }
             } else {
-                return Text.literal("");
+                return new LiteralText("");
             }
         }
 
         public MutableText get(Object... args) {
             if (enabled) {
                 if (langConfig.enableServerSideTranslation && serverSide) {
-                    return translatable(key, args);
+                    return new net.minecraft.text.TranslatableText(key, args);
                 } else {
-                    return translatable(fallback, args);
+                    return new net.minecraft.text.TranslatableText(fallback, args);
                 }
             } else {
-                return Text.literal("");
+                return new LiteralText("");
             }
         }
     }

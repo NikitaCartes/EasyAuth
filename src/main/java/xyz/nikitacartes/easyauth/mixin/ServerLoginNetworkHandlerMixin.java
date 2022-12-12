@@ -51,15 +51,14 @@ public abstract class ServerLoginNetworkHandlerMixin {
     @Inject(
             method = "onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V",
             at = @At(
-                    value = "NEW",
-                    target = "com/mojang/authlib/GameProfile",
-                    shift = At.Shift.AFTER,
-                    remap = false
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;getProfile()Lcom/mojang/authlib/GameProfile;",
+                    shift = At.Shift.AFTER
             ),
             cancellable = true
     )
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
-        String username = packet.name();
+        String username = packet.getProfile().getName();
 
         PlayerEntryV1 playerData = PlayersCache.getOrRegister(username);
 
@@ -71,7 +70,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     LogDebug("Player " + username + " is forced to be offline");
                     state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
-                    this.profile = new GameProfile(null, packet.name());
+                    this.profile = new GameProfile(null, username);
                     ci.cancel();
                     return;
                 }
@@ -86,7 +85,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
                     playerData.update();
 
-                    this.profile = new GameProfile(null, packet.name());
+                    this.profile = packet.getProfile();
                     ci.cancel();
                 } else {
                     // Checking account status from API
@@ -115,7 +114,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
                         playerData.update();
 
-                        this.profile = new GameProfile(null, packet.name());
+                        this.profile = packet.getProfile();
                         ci.cancel();
                     }
                 }

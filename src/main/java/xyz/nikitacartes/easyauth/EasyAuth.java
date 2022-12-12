@@ -1,7 +1,7 @@
 package xyz.nikitacartes.easyauth;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
@@ -53,10 +53,6 @@ public class EasyAuth implements ModInitializer {
 
         try {
             serverProp.load(new FileReader(gameDirectory + "/server.properties"));
-            if (Boolean.parseBoolean(serverProp.getProperty("enforce-secure-profile"))) {
-                LogWarn("Disable enforce-secure-profile to allow offline players to join the server");
-                LogWarn("For more info, see https://github.com/NikitaCartes/EasyAuth/issues/68");
-            }
         } catch (IOException e) {
             LogError("Error while reading server properties: ", e);
         }
@@ -85,7 +81,7 @@ public class EasyAuth implements ModInitializer {
         }
 
         // Registering the commands
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             RegisterCommand.registerCommand(dispatcher);
             LoginCommand.registerCommand(dispatcher);
             LogoutCommand.registerCommand(dispatcher);

@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import net.minecraft.world.WorldSaveHandler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,7 +47,7 @@ public class WorldSaveHandlerMixin {
             PlayerAuth playerAuth = (PlayerAuth) player;
             if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && playerAuth.easyAuth$isUsingMojangAccount()) {
                 LogDebug(String.format("Migrating data for %s", playername));
-                File file = new File(this.playerDataDir, DynamicSerializableUuid.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
+                File file = new File(this.playerDataDir, PlayerEntity.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
                 if (file.exists() && file.isFile()) {
                     try {
                         cir.setReturnValue(NbtIo.readCompressed(file));

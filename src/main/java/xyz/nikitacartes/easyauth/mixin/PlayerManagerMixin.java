@@ -15,7 +15,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -170,7 +169,7 @@ public abstract class PlayerManagerMixin {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
         if (server.isOnlineMode() && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) player).easyAuth$isUsingMojangAccount() && !onlineFile.exists()) {
             String playername = player.getGameProfile().getName();
-            File offlineFile = new File(onlineFile.getParent(), DynamicSerializableUuid.getOfflinePlayerUuid(playername) + ".json");
+            File offlineFile = new File(onlineFile.getParent(), PlayerEntity.getOfflinePlayerUuid(playername) + ".json");
             if (!offlineFile.renameTo(onlineFile)) {
                 LogWarn("Failed to migrate offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
             } else {

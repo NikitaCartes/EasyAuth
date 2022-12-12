@@ -186,10 +186,10 @@ public class AuthEventHandler {
         if (player == null) {
             return ActionResult.PASS;
         }
-        if (command.startsWith("login ")
-                || command.startsWith("register ")
-                || (extendedConfig.aliases.login && command.startsWith("l "))
-                || (extendedConfig.aliases.register && command.startsWith("reg "))) {
+        if (command.startsWith("/login ")
+                || command.startsWith("/register ")
+                || (extendedConfig.aliases.login && command.startsWith("/l "))
+                || (extendedConfig.aliases.register && command.startsWith("/reg "))) {
             return ActionResult.PASS;
         }
         if (!((PlayerAuth) player).easyAuth$isAuthenticated()) {
@@ -207,11 +207,39 @@ public class AuthEventHandler {
     }
 
     // Player chatting
-    public static ActionResult onPlayerChat(ServerPlayerEntity player) {
-        if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowChat) {
+    public static ActionResult onPlayerChat(ServerPlayerEntity player, String message) {
+        // Getting the message to then be able to check it
+        if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return ActionResult.PASS;
+        }
+
+        if (extendedConfig.allowCommands) {
+            return ActionResult.PASS;
+        }
+
+        if (message.startsWith("/login ")
+                || message.startsWith("/register ")
+                || (extendedConfig.aliases.login && message.startsWith("/l "))
+                || (extendedConfig.aliases.register && message.startsWith("/reg "))) {
+            return ActionResult.PASS;
+        }
+
+        if (extendedConfig.allowChat && !message.startsWith("/")) {
+            return ActionResult.PASS;
+        }
+
+        if (!((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            for (String allowedCommand : extendedConfig.allowedCommands) {
+                if (message.startsWith(allowedCommand)) {
+                    LogDebug("Player " + player.getName().getString() + " executed command " + message + " without being authenticated.");
+                    return ActionResult.PASS;
+                }
+            }
+            LogDebug("Player " + player.getName().getString() + " tried to execute command " + message + " without being authenticated.");
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
+
         return ActionResult.PASS;
     }
 

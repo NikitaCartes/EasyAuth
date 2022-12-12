@@ -5,7 +5,10 @@ import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import java.util.HashMap;
 
 public interface DbApi {
-
+    /**
+     * Opens database connection.
+     */
+    void connect() throws DBApiException;
 
     /**
      * Closes database connection.

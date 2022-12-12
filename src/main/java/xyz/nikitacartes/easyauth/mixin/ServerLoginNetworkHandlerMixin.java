@@ -4,11 +4,14 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.util.Uuids;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import xyz.nikitacartes.easyauth.storage.database.MongoDB;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -18,10 +21,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerLoginNetworkHandlerMixin.class);
 
     @Shadow
     GameProfile profile;
@@ -95,7 +98,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     }
                 }
             } catch (IOException e) {
-                logError(e.getMessage());
+                LOGGER.error("checkPremium error", e);
             }
         }
     }

@@ -5,6 +5,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.util.Uuids;
 import net.minecraft.world.WorldSaveHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,11 +23,10 @@ import java.io.IOException;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logWarn;
 
 @Mixin(WorldSaveHandler.class)
 public class WorldSaveHandlerMixin {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorldSaveHandlerMixin.class);
 
     @Final
     @Shadow
@@ -73,23 +74,19 @@ public class WorldSaveHandlerMixin {
         // Checking for offline player data only if online doesn't exist yet
         String playername = player.getGameProfile().getName().toLowerCase();
         if (config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
-            if (config.experimental.debugMode)
-                logInfo("Migrating data for " + playername);
+            LOGGER.debug("Migrating data for {}", playername);
             File file = new File(this.playerDataDir, Uuids.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
             if (file.exists() && file.isFile())
                 try {
                     compoundTag = NbtIo.readCompressed(new FileInputStream(file));
                 } catch (IOException e) {
-                    logWarn("Failed to load player data for " + playername);
+                    LOGGER.warn("Failed to load player data for: {}", playername);
                 }
-        } else if (config.experimental.debugMode)
-            logInfo("Not migrating " +
-                    playername +
-                    ", as premium status is: " +
-                    mojangAccountNamesCache.contains(playername) +
-                    " and data file is " + (this.fileExists ? "" : "not") +
-                    " present."
-            );
+        } else {
+            LOGGER.debug(
+                    "Not migrating {}, as premium status is '{}' and data file is {} present.",
+                    playername, mojangAccountNamesCache.contains(playername), this.fileExists ? "" : "not");
+        }
         return compoundTag;
     }
 }

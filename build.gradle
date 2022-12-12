@@ -12,7 +12,7 @@ repositories {
     mavenLocal()
 }
 
-archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
+archivesBaseName = "${project.mod_id}_mc${project.minecraft_version}"
 version = "${project.mod_version}"
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -20,6 +20,8 @@ targetCompatibility = JavaVersion.VERSION_17
 
 loom {
     accessWidenerPath = file("src/main/resources/easyauth.accesswidener")
+    log4jConfigs.from(file("log4j.xml"))
+    serverOnlyMinecraftJar()
 }
 
 dependencies {
@@ -30,13 +32,13 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Translations
-    modImplementation(include("fr.catcore:server-translations-api:${project.server_translations_version}+${project.server_translations_branch}"))
+    include modImplementation("fr.catcore:server-translations-api:${project.server_translations_version}+${project.server_translations_branch}")
 
     // Permissions
-    modImplementation(include("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}"))
+    include modImplementation("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}")
 
     // Placeholder API
-    modImplementation include("eu.pb4:placeholder-api:${project.placeholder_api_version}+${project.placeholder_api_branch}")
+    include modImplementation("eu.pb4:placeholder-api:${project.placeholder_api_version}+${project.placeholder_api_branch}")
 
     // Mods
     modImplementation "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
@@ -45,25 +47,25 @@ dependencies {
 
     // Password hashing
     // Argon2
-    implementation(include("de.mkammerer:argon2-jvm:${argon2_version}"))
-    implementation(include("de.mkammerer:argon2-jvm-nolibs:${argon2_version}"))
+    include implementation("de.mkammerer:argon2-jvm:${argon2_version}")
+    include implementation("de.mkammerer:argon2-jvm-nolibs:${argon2_version}")
 
     // BCrypt
-    implementation(include("at.favre.lib:bcrypt:${bcrypt_version}"))
-    implementation(include("at.favre.lib:bytes:${bytes_version}"))
+    include implementation("at.favre.lib:bcrypt:${bcrypt_version}")
+    include implementation("at.favre.lib:bytes:${bytes_version}")
 
     // Storage
     // LevelDB database
-    implementation(include("org.iq80.leveldb:leveldb:${leveldb_version}"))
-    implementation(include("org.iq80.leveldb:leveldb-api:${leveldb_version}"))
+    include implementation("org.iq80.leveldb:leveldb:${leveldb_version}")
+    include implementation("org.iq80.leveldb:leveldb-api:${leveldb_version}")
 
     // MongoDB driver
-    implementation(include("org.mongodb:mongodb-driver-sync:${mongodb_version}"))
-    implementation(include("org.mongodb:mongodb-driver-core:${mongodb_version}"))
-    implementation(include("org.mongodb:bson:${mongodb_version}"))
+    include implementation("org.mongodb:mongodb-driver-sync:${mongodb_version}")
+    include implementation("org.mongodb:mongodb-driver-core:${mongodb_version}")
+    include implementation("org.mongodb:bson:${mongodb_version}")
 
     // MySQL driver
-    implementation(include("mysql:mysql-connector-java:${mysql_version}"))
+    include implementation ("mysql:mysql-connector-java:${mysql_version}")
 
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"

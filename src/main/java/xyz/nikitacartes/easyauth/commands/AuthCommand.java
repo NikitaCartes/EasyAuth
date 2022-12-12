@@ -10,6 +10,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
@@ -23,9 +25,9 @@ import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 public class AuthCommand {
+     private static final Logger LOGGER = LoggerFactory.getLogger("EasyAuth");
 
     /**
      * Registers the "/auth" command
@@ -147,7 +149,7 @@ public class AuthCommand {
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getConfigurationReloaded(), false);
         else
-            logInfo(config.lang.configurationReloaded);
+            LOGGER.info(config.lang.configurationReloaded);
         return 1;
     }
 
@@ -172,7 +174,7 @@ public class AuthCommand {
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getGlobalPasswordSet(), false);
         else
-            logInfo(config.lang.globalPasswordSet);
+            LOGGER.info(config.lang.globalPasswordSet);
         return 1;
     }
 
@@ -207,7 +209,7 @@ public class AuthCommand {
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getWorldSpawnSet(), false);
         else
-            logInfo(config.lang.worldSpawnSet);
+            LOGGER.info(config.lang.worldSpawnSet);
         return 1;
     }
 
@@ -228,7 +230,7 @@ public class AuthCommand {
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataDeleted(), false);
         else
-            logInfo(config.lang.userdataDeleted);
+            LOGGER.info(config.lang.userdataDeleted);
         return 1; // Success
     }
 
@@ -258,7 +260,7 @@ public class AuthCommand {
             if (sender != null)
                 ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataUpdated(), false);
             else
-                logInfo(config.lang.userdataUpdated);
+                LOGGER.info(config.lang.userdataUpdated);
         });
         return 0;
     }
@@ -288,7 +290,7 @@ public class AuthCommand {
                 if (sender != null)
                     ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserNotRegistered(), false);
                 else
-                    logInfo(config.lang.userNotRegistered);
+                    LOGGER.info(config.lang.userNotRegistered);
                 return;
             }
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
@@ -296,7 +298,7 @@ public class AuthCommand {
             if (sender != null)
                 ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataUpdated(), false);
             else
-                logInfo(config.lang.userdataUpdated);
+                LOGGER.info(config.lang.userdataUpdated);
         });
         return 0;
     }
@@ -318,7 +320,7 @@ public class AuthCommand {
             ((PlayerEntity) sender).sendMessage(
                     TranslationHelper.getOfflineUuid(player, uuid), false);
         } else
-            logInfo(String.format(config.lang.offlineUuid, player, uuid));
+            LOGGER.info(String.format(config.lang.offlineUuid, player, uuid));
         return 1;
     }
 
@@ -335,7 +337,7 @@ public class AuthCommand {
             if (sender != null) {
                 ((PlayerEntity) sender).sendMessage(TranslationHelper.getRegisteredPlayers(false), false);
             } else {
-                logInfo(TranslationHelper.getRegisteredPlayers(true).getContent().toString());
+                LOGGER.info(TranslationHelper.getRegisteredPlayers(true).getContent().toString());
             }
         });
         return 1;
@@ -361,7 +363,7 @@ public class AuthCommand {
         if (sender != null) {
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getAddToForcedOffline(), false);
         } else
-            logInfo(config.lang.addToForcedOffline);
+            LOGGER.info(config.lang.addToForcedOffline);
         return 1;
     }
 

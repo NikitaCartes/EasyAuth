@@ -21,6 +21,8 @@ package xyz.nikitacartes.easyauth.storage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.database.LevelDB;
 import xyz.nikitacartes.easyauth.storage.database.MongoDB;
@@ -34,10 +36,9 @@ import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
 import static xyz.nikitacartes.easyauth.EasyAuth.DB;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
 
 public class AuthConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthConfig.class);
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .serializeNulls()
@@ -62,11 +63,11 @@ public class AuthConfig {
                 config = gson.fromJson(fileReader, AuthConfig.class);
                 if (!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
                     if (config.experimental.forcedOfflineUuids) {
-                        logInfo("Server is in offline mode, forcedOfflineUuids option is irrelevant. Setting it to false.");
+                        LOGGER.info("Server is in offline mode, forcedOfflineUuids option is irrelevant. Setting it to false.");
                         config.experimental.forcedOfflineUuids = false;
                     }
                     if (config.main.premiumAutologin) {
-                        logError("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
+                        LOGGER.info("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
                         config.main.premiumAutologin = false;
                     }
                 }
@@ -95,11 +96,11 @@ public class AuthConfig {
         }
         // Connecting to db
         if (config.main.databaseType.equalsIgnoreCase("mysql")) {
-            DB = new MySQL();
+            DB = new MySQL(config);
         } else if (config.main.databaseType.equalsIgnoreCase("mongodb")) {
-            DB = new MongoDB();
+            DB = new MongoDB(config);
         } else {
-            DB = new LevelDB();
+            DB = new LevelDB(config);
         }
         return config;
     }
@@ -113,7 +114,7 @@ public class AuthConfig {
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             gson.toJson(this, writer);
         } catch (IOException e) {
-            logError("Problem occurred when saving config: " + e.getMessage());
+            LOGGER.error("Problem occurred when saving config", e);
         }
     }
 

@@ -1,55 +1,67 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.HashMap;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
-
 
 public class MySQL implements DbApi {
+    private static final Logger LOGGER = LoggerFactory.getLogger("MySQL");
+
+    private final AuthConfig config;
     private Connection MySQLConnection;
 
     /**
      * Connects to the MySQL.
      */
-    public MySQL() {
+    public MySQL(AuthConfig config) {
         if (config.experimental.debugMode) {
-            logInfo("You are using MySQL DB");
+            LOGGER.info("You are using MySQL DB");
         }
-        try {
-            connect();
-        } catch (SQLException | ClassNotFoundException e) {
-            logError(e.getMessage());
-            e.printStackTrace();
-        }
+        this.config = config;
     }
 
-    private void connect() throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        MySQLConnection = DriverManager.getConnection("jdbc:mysql://" + config.main.MySQLHost + "/" + config.main.MySQLDatabase + "?autoReconnect=true", config.main.MySQLUser, config.main.MySQLPassword);
-        PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
-        preparedStatement.setString(1, config.main.MySQLTableName);
-        if (!preparedStatement.executeQuery().next()) {
-            MySQLConnection.createStatement().executeUpdate("CREATE TABLE `" + config.main.MySQLDatabase + "`.`" + config.main.MySQLTableName + "` ( `id` INT NOT NULL AUTO_INCREMENT , `uuid` VARCHAR(36) NOT NULL , `data` JSON NOT NULL , PRIMARY KEY (`id`), UNIQUE (`uuid`)) ENGINE = InnoDB;");
+    public void connect() throws DBApiException {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            String uri = "jdbc:mysql://" + config.main.MySQLHost + "/" + config.main.MySQLDatabase + "?autoReconnect=true";
+            LOGGER.debug("connecting to {}", uri);
+            MySQLConnection = DriverManager.getConnection(uri, config.main.MySQLUser, config.main.MySQLPassword);
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
+            preparedStatement.setString(1, config.main.MySQLTableName);
+            if (!preparedStatement.executeQuery().next()) {
+                MySQLConnection.createStatement().executeUpdate(
+                        String.format("""
+                                        CREATE TABLE `%s`.`%s` (
+                                            `id` INT NOT NULL AUTO_INCREMENT,
+                                            `uuid` VARCHAR(36) NOT NULL,
+                                            `data` JSON NOT NULL,
+                                            PRIMARY KEY (`id`), UNIQUE (`uuid`)
+                                        ) ENGINE = InnoDB;""",
+                                config.main.MySQLDatabase,
+                                config.main.MySQLTableName
+                        )
+                );
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            MySQLConnection = null;
+            throw new DBApiException("Failed setting up mysql DB", e);
         }
     }
 
     private void reConnect() {
         try {
-            if (MySQLConnection == null) {
-                logWarn("MySQL DB already closed or hasn't been open yet");
-            } else if(!MySQLConnection.isValid(0)) {
-                connect();
+            if (MySQLConnection != null && MySQLConnection.isValid(0)) {
+                LOGGER.warn("Reconnecting to a valid MySQL connection?");
             }
-        } catch (SQLException | ClassNotFoundException e) {
-            logError(e.getMessage());
-            e.printStackTrace();
+            connect();
+        } catch (DBApiException | SQLException e) {
+            LOGGER.error("Mysql reconnect failed", e);
         }
     }
 
@@ -60,16 +72,13 @@ public class MySQL implements DbApi {
         try {
             if (MySQLConnection != null) {
                 MySQLConnection.close();
-                logInfo("Database connection closed successfully.");
+                MySQLConnection = null;
+                LOGGER.info("Database connection closed successfully.");
             }
         } catch (CommunicationsException e) {
-            logError(e.getMessage());
-            logWarn("Can't connect to database while closing");
-        }
-        catch (SQLException e) {
-            logError(e.getMessage());
-            e.printStackTrace();
-            logWarn("Database connection not closed");
+            LOGGER.error("Can't connect to database while closing", e);
+        } catch (SQLException e) {
+            LOGGER.error("Database connection not closed", e);
         }
     }
 
@@ -102,8 +111,7 @@ public class MySQL implements DbApi {
                 return true;
             }
         } catch (SQLException e) {
-            logError("Register error: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Register error ", e);
         }
         return false;
     }
@@ -121,8 +129,7 @@ public class MySQL implements DbApi {
             preparedStatement.setString(1, uuid);
             return preparedStatement.executeQuery().next();
         } catch (SQLException e) {
-            logError(e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("isUserRegistered error", e);
         }
         return false;
     }
@@ -139,8 +146,7 @@ public class MySQL implements DbApi {
             preparedStatement.setString(1, uuid);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            logError(e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("deleteUserData error", e);
         }
     }
 
@@ -159,8 +165,7 @@ public class MySQL implements DbApi {
             preparedStatement.setString(1, uuid);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            logError(e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("updateUserData error", e);
         }
     }
 
@@ -181,8 +186,7 @@ public class MySQL implements DbApi {
                 return query.getString(1);
             }
         } catch (SQLException e) {
-            logError("Error getting data: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("getUserData error", e);
         }
         return "";
     }
@@ -201,14 +205,12 @@ public class MySQL implements DbApi {
 
                     preparedStatement.addBatch();
                 } catch (SQLException e) {
-                    logError("Error saving player data! (" + uuid + ") " + e.getMessage());
-                    e.printStackTrace();
+                    LOGGER.atError().setMessage("Error saving player data! {} ").addArgument(uuid).setCause(e).log();
                 }
             });
             preparedStatement.executeBatch();
         } catch (SQLException | NullPointerException e) {
-            logError("Error saving players data! " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Error saving players data", e);
         }
     }
 }

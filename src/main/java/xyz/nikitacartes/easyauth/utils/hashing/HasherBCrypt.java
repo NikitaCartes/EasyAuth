@@ -1,10 +1,11 @@
 package xyz.nikitacartes.easyauth.utils.hashing;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
-
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HasherBCrypt {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HasherBCrypt.class);
 
     /**
      * Verifies password
@@ -17,9 +18,9 @@ public class HasherBCrypt {
         try {
             return BCrypt.verifyer().verify(password, hashed).verified;
         } catch (Error e) {
-            logError("BCrypt password verification error: " + e);
-            return false;
+            LOGGER.error("password verification error", e);
         }
+        return false;
     }
 
     /**
@@ -32,7 +33,7 @@ public class HasherBCrypt {
         try {
             return BCrypt.withDefaults().hashToString(12, password);
         } catch (Error e) {
-            logError("BCrypt password hashing error: " + e);
+            LOGGER.error("password hashing error", e);
         }
         return null;
     }

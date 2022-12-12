@@ -1,19 +1,20 @@
 package xyz.nikitacartes.easyauth;
 
+import com.mysql.cj.log.Log;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
-import xyz.nikitacartes.easyauth.storage.database.DbApi;
-import xyz.nikitacartes.easyauth.storage.database.LevelDB;
-import xyz.nikitacartes.easyauth.storage.database.MongoDB;
-import xyz.nikitacartes.easyauth.storage.database.MySQL;
+import xyz.nikitacartes.easyauth.storage.database.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -26,10 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logError;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.logInfo;
-
 public class EasyAuth implements ModInitializer {
+    private static final Logger LOGGER = LoggerFactory.getLogger("EasyAuth");
     public static final String MOD_ID = "easyauth";
 
 
@@ -64,12 +63,13 @@ public class EasyAuth implements ModInitializer {
 
     public static void init(Path gameDir) {
         gameDirectory = gameDir;
-        logInfo("EasyAuth mod by samo_lego, NikitaCartes.");
+        LOGGER.info("EasyAuth mod by samo_lego, NikitaCartes.");
+        MDC.put("mod", "EasyAuth");
 
         try {
             serverProp.load(new FileReader(gameDirectory + "/server.properties"));
         } catch (IOException e) {
-            logError("Error while reading server properties: " + e.getMessage());
+            LOGGER.error("Error while reading server properties: ", e);
         }
 
         // Creating data directory (database and config files are stored there)
@@ -84,7 +84,7 @@ public class EasyAuth implements ModInitializer {
      * Called on server stop.
      */
     public static void stop() {
-        logInfo("Shutting down EasyAuth.");
+        LOGGER.info("Shutting down EasyAuth.");
         DB.saveAll(playerCacheMap);
 
         // Closing threads
@@ -94,7 +94,7 @@ public class EasyAuth implements ModInitializer {
                 Thread.currentThread().interrupt();
             }
         } catch (InterruptedException e) {
-            logError(e.getMessage());
+            LOGGER.error("Error on stop", e);
             THREADPOOL.shutdownNow();
         }
 
@@ -105,6 +105,11 @@ public class EasyAuth implements ModInitializer {
     @Override
     public void onInitialize() {
         EasyAuth.init(FabricLoader.getInstance().getGameDir());
+        try {
+            DB.connect();
+        } catch (DBApiException e) {
+            LOGGER.error("onInitialize error: ", e);
+        }
 
         // Registering the commands
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
@@ -128,7 +133,7 @@ public class EasyAuth implements ModInitializer {
 
     private void onStartServer(MinecraftServer server) {
         if (DB.isClosed()) {
-            logError("Can't connect to database. Stopping server");
+            LOGGER.error("Couldn't connect to database. Stopping server");
             server.stop(false);
         }
     }

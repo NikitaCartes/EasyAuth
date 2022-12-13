@@ -47,10 +47,10 @@ dependencies {
     include modImplementation("eu.pb4:placeholder-api:${project.placeholder_api_version}+${project.placeholder_api_branch}")
 
     // Mods
-    modImplementation "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
-    modImplementation "dev.cafeteria:fake-player-api:${project.fake_player_api_version}"
-    modImplementation "org.geysermc.floodgate:api:${floodgate_api_version}"
-    modApi "maven.modrinth:cc-restitched:${project.cc_version}"
+    modCompileOnly "carpet:fabric-carpet:${project.carpet_branch}-${project.carpet_core_version}"
+    modCompileOnly "dev.cafeteria:fake-player-api:${project.fake_player_api_version}"
+    modCompileOnly "org.geysermc.floodgate:api:${floodgate_api_version}"
+    modCompileOnly "maven.modrinth:cc-restitched:${project.cc_version}"
 
     // Password hashing
     // Argon2

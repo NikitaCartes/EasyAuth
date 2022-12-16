@@ -10,8 +10,6 @@ import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.world.World;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,11 +23,10 @@ import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.*;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 @Mixin(ServerPlayerEntity.class)
 public class ServerPlayerEntityMixin implements PlayerAuth {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerPlayerEntityMixin.class);
-
     private final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
     @Final
     @Shadow
@@ -47,7 +44,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     @Override
     public void hidePosition(boolean hide) {
         PlayerCache cache = playerCacheMap.get(this.getFakeUuid());
-        LOGGER.debug("Teleporting player {} to {}", player.getName().getContent(), hide ? "spawn." : "position.");
+        LogDebug(String.format("Teleporting player %s to %s", player.getName().getContent(), hide ? "spawn." : "position."));
         if (hide) {
             // Saving position
             cache.lastLocation.dimension = player.getWorld();

@@ -21,8 +21,6 @@ package xyz.nikitacartes.easyauth.storage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.database.LevelDB;
 import xyz.nikitacartes.easyauth.storage.database.MongoDB;
@@ -36,9 +34,10 @@ import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
 import static xyz.nikitacartes.easyauth.EasyAuth.DB;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
 public class AuthConfig {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthConfig.class);
     private static final Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .serializeNulls()
@@ -63,11 +62,11 @@ public class AuthConfig {
                 config = gson.fromJson(fileReader, AuthConfig.class);
                 if (!Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
                     if (config.experimental.forcedOfflineUuids) {
-                        LOGGER.info("Server is in offline mode, forcedOfflineUuids option is irrelevant. Setting it to false.");
+                        LogInfo("Server is in offline mode, forcedOfflineUuids option is irrelevant. Setting it to false.");
                         config.experimental.forcedOfflineUuids = false;
                     }
                     if (config.main.premiumAutologin) {
-                        LOGGER.info("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
+                        LogInfo("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
                         config.main.premiumAutologin = false;
                     }
                 }
@@ -117,7 +116,7 @@ public class AuthConfig {
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             gson.toJson(this, writer);
         } catch (IOException e) {
-            LOGGER.error("Problem occurred when saving config", e);
+            LogError("Problem occurred when saving config", e);
         }
     }
 

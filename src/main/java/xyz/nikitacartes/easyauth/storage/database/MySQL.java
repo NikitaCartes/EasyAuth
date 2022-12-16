@@ -1,18 +1,17 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.mysql.cj.log.Log;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
 import java.sql.*;
 import java.util.HashMap;
 
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
+
 
 public class MySQL implements DbApi {
-    private static final Logger LOGGER = LoggerFactory.getLogger("MySQL");
-
     private final AuthConfig config;
     private Connection MySQLConnection;
 
@@ -21,7 +20,7 @@ public class MySQL implements DbApi {
      */
     public MySQL(AuthConfig config) {
         if (config.experimental.debugMode) {
-            LOGGER.info("You are using MySQL DB");
+            LogInfo("You are using MySQL DB");
         }
         this.config = config;
     }
@@ -30,7 +29,7 @@ public class MySQL implements DbApi {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             String uri = "jdbc:mysql://" + config.main.MySQLHost + "/" + config.main.MySQLDatabase + "?autoReconnect=true";
-            LOGGER.debug("connecting to {}", uri);
+            LogDebug(String.format("connecting to %s", uri));
             MySQLConnection = DriverManager.getConnection(uri, config.main.MySQLUser, config.main.MySQLPassword);
             PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?;");
             preparedStatement.setString(1, config.main.MySQLTableName);
@@ -57,11 +56,11 @@ public class MySQL implements DbApi {
     private void reConnect() {
         try {
             if (MySQLConnection != null && MySQLConnection.isValid(0)) {
-                LOGGER.warn("Reconnecting to a valid MySQL connection?");
+                LogWarn("Reconnecting to a valid MySQL connection?");
             }
             connect();
         } catch (DBApiException | SQLException e) {
-            LOGGER.error("Mysql reconnect failed", e);
+            LogError("Mysql reconnect failed", e);
         }
     }
 
@@ -73,12 +72,12 @@ public class MySQL implements DbApi {
             if (MySQLConnection != null) {
                 MySQLConnection.close();
                 MySQLConnection = null;
-                LOGGER.info("Database connection closed successfully.");
+                LogInfo("Database connection closed successfully.");
             }
         } catch (CommunicationsException e) {
-            LOGGER.error("Can't connect to database while closing", e);
+            LogError("Can't connect to database while closing", e);
         } catch (SQLException e) {
-            LOGGER.error("Database connection not closed", e);
+            LogError("Database connection not closed", e);
         }
     }
 
@@ -111,7 +110,7 @@ public class MySQL implements DbApi {
                 return true;
             }
         } catch (SQLException e) {
-            LOGGER.error("Register error ", e);
+            LogError("Register error ", e);
         }
         return false;
     }
@@ -129,7 +128,7 @@ public class MySQL implements DbApi {
             preparedStatement.setString(1, uuid);
             return preparedStatement.executeQuery().next();
         } catch (SQLException e) {
-            LOGGER.error("isUserRegistered error", e);
+            LogError("isUserRegistered error", e);
         }
         return false;
     }
@@ -146,7 +145,7 @@ public class MySQL implements DbApi {
             preparedStatement.setString(1, uuid);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            LOGGER.error("deleteUserData error", e);
+            LogError("deleteUserData error", e);
         }
     }
 
@@ -165,7 +164,7 @@ public class MySQL implements DbApi {
             preparedStatement.setString(1, uuid);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            LOGGER.error("updateUserData error", e);
+            LogError("updateUserData error", e);
         }
     }
 
@@ -186,7 +185,7 @@ public class MySQL implements DbApi {
                 return query.getString(1);
             }
         } catch (SQLException e) {
-            LOGGER.error("getUserData error", e);
+            LogError("getUserData error", e);
         }
         return "";
     }
@@ -205,12 +204,12 @@ public class MySQL implements DbApi {
 
                     preparedStatement.addBatch();
                 } catch (SQLException e) {
-                    LOGGER.atError().setMessage("Error saving player data! {} ").addArgument(uuid).setCause(e).log();
+                    LogError(String.format("Error saving player data! %s ", uuid));
                 }
             });
             preparedStatement.executeBatch();
         } catch (SQLException | NullPointerException e) {
-            LOGGER.error("Error saving players data", e);
+            LogError("Error saving players data", e);
         }
     }
 }

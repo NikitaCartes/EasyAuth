@@ -7,19 +7,17 @@ import com.google.gson.annotations.SerializedName;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 /**
  * Class used for storing the non-authenticated player's cache
  */
 public class PlayerCache {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PlayerCache.class);
 
     /**
      * Whether player is authenticated.
@@ -92,7 +90,7 @@ public class PlayerCache {
 
 
     public static PlayerCache fromJson(ServerPlayerEntity player, String fakeUuid) {
-        LOGGER.debug("Creating cache for {} {}", player != null ? player.getGameProfile().getName() : null, fakeUuid);
+        LogDebug(String.format("Creating cache for %s %s", player != null ? player.getGameProfile().getName() : null, fakeUuid));
 
         String json = DB.getUserData(fakeUuid);
         PlayerCache playerCache;

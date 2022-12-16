@@ -4,8 +4,6 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
@@ -17,11 +15,10 @@ import java.util.HashMap;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 
 public class LevelDB implements DbApi {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HasherBCrypt.class);
-
     private DB levelDBStore;
     private final AuthConfig config;
 
@@ -40,7 +37,7 @@ public class LevelDB implements DbApi {
             File file = new File(EasyAuth.gameDirectory + "/mods/EasyAuth/levelDBStore");
             if (!file.exists() && !file.mkdirs())
                 throw new DBApiException("Error creating LevelDB directory", null);
-            LOGGER.debug("You are using LevelDB");
+            LogDebug("You are using LevelDB");
             Options options = new Options();
             levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + (config.experimental.useSimpleAuthDatabase ? "SimpleAuth" : "EasyAuth") + "/levelDBStore"), options);
         } catch (IOException e) {
@@ -56,9 +53,9 @@ public class LevelDB implements DbApi {
             try {
                 levelDBStore.close();
                 levelDBStore = null;
-                LOGGER.info("Database connection closed successfully");
+                LogInfo("Database connection closed successfully");
             } catch (Error | IOException e) {
-                LOGGER.error("Database connection not closed", e);
+                LogError("Database connection not closed", e);
             }
         }
     }
@@ -89,7 +86,7 @@ public class LevelDB implements DbApi {
             }
             return false;
         } catch (Error e) {
-            LOGGER.error("Register error", e);
+            LogError("Register error", e);
             return false;
         }
     }
@@ -104,7 +101,7 @@ public class LevelDB implements DbApi {
         try {
             return levelDBStore.get(bytes("UUID:" + uuid)) != null;
         } catch (DBException e) {
-            LOGGER.error("isUserRegistered error", e);
+            LogError("isUserRegistered error", e);
         }
         return false;
     }
@@ -118,7 +115,7 @@ public class LevelDB implements DbApi {
         try {
             levelDBStore.delete(bytes("UUID:" + uuid));
         } catch (Error e) {
-            LOGGER.error("deleteUserData error", e);
+            LogError("deleteUserData error", e);
         }
     }
 
@@ -133,7 +130,7 @@ public class LevelDB implements DbApi {
         try {
             levelDBStore.put(bytes("UUID:" + uuid), bytes("data:" + data));
         } catch (Error e) {
-            LOGGER.error("updateUserData error", e);
+            LogError("updateUserData error", e);
         }
     }
 
@@ -148,7 +145,7 @@ public class LevelDB implements DbApi {
             if (isUserRegistered(uuid))  // Gets password from db and removes "data:" prefix from it
                 return new String(levelDBStore.get(bytes("UUID:" + uuid))).substring(5);
         } catch (Error e) {
-            LOGGER.error("getUserData error", e);
+            LogError("getUserData error", e);
         }
         return "";
     }
@@ -165,7 +162,7 @@ public class LevelDB implements DbApi {
             levelDBStore.write(batch);
             batch.close();
         } catch (IOException e) {
-            LOGGER.error("Error saving player data", e);
+            LogError("Error saving player data", e);
         }
     }
 }

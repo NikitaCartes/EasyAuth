@@ -10,8 +10,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.ReplaceOneModel;
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
@@ -20,9 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
 public class MongoDB implements DbApi {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDB.class);
     private final AuthConfig config;
     private MongoCollection<Document> collection;
     private MongoClient mongoClient;
@@ -33,7 +32,7 @@ public class MongoDB implements DbApi {
 
     public void connect() throws DBApiException {
         if (config.experimental.debugMode) {
-            LOGGER.info("You are using Mongo DB");
+            LogInfo("You are using Mongo DB");
         }
         try {
             mongoClient = MongoClients.create(config.main.MongoDBConnectionString);
@@ -46,7 +45,7 @@ public class MongoDB implements DbApi {
 
     public void close() {
         mongoClient.close();
-        LOGGER.info("Database connection closed successfully.");
+        LogInfo("Database connection closed successfully.");
         mongoClient = null;
         collection = null;
     }
@@ -55,7 +54,7 @@ public class MongoDB implements DbApi {
 
     @Override
     public boolean registerUser(String uuid, String data) {
-        LOGGER.error("RegisterUser isn't implemented in MongoDB");
+        LogError("RegisterUser isn't implemented in MongoDB");
         return false;
     }
 
@@ -69,7 +68,7 @@ public class MongoDB implements DbApi {
 
     @Override
     public void updateUserData(String uuid, String data) {
-        LOGGER.error("updateUserData isn't implemented in MongoDB");
+        LogError("updateUserData isn't implemented in MongoDB");
     }
 
     public String getUserData(String uuid) {

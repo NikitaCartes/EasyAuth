@@ -148,7 +148,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int reloadConfig(Entity sender) {
-        config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
+        config = AuthConfig.load(new File("./config/EasyAuth/config.json"));
 
         try {
             DB.connect();
@@ -178,7 +178,7 @@ public class AuthCommand {
             // Writing the global pass to config
             config.main.globalPassword = AuthHelper.hashPassword(password.toCharArray());
             config.main.enableGlobalPassword = true;
-            config.save(new File("./mods/EasyAuth/config.json"));
+            config.save(new File("./config/EasyAuth/config.json"));
         });
 
         if (sender != null)
@@ -211,7 +211,7 @@ public class AuthCommand {
             config.worldSpawn.yaw = yaw;
             config.worldSpawn.pitch = pitch;
             config.main.spawnOnJoin = true;
-            config.save(new File("./mods/EasyAuth/config.json"));
+            config.save(new File("./config/EasyAuth/config.json"));
         });
 
         // Getting sender
@@ -367,7 +367,7 @@ public class AuthCommand {
 
         THREADPOOL.submit(() -> {
             config.main.forcedOfflinePlayers.add(player.toLowerCase(Locale.ROOT));
-            config.save(new File("./mods/EasyAuth/config.json"));
+            config.save(new File("./config/EasyAuth/config.json"));
         });
 
         if (sender != null) {

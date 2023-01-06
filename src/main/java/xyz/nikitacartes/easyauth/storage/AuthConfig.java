@@ -400,5 +400,7 @@ public class AuthConfig {
         public boolean fakePlayerApiLoaded = false;
         public boolean floodgateLoaded = false;
         public boolean ccRestitchedLoaded = false;
+
+        public boolean floodgateBypassUsernameRegex = false;
     }
 }

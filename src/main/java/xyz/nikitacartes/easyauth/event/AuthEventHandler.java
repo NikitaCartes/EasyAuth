@@ -12,6 +12,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
+import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
 import java.util.regex.Matcher;
@@ -54,7 +55,7 @@ public class AuthEventHandler {
                             config.lang.playerAlreadyOnline, onlinePlayer.getName().getContent()
                     )
             );
-        } else if (!matcher.matches()) {
+        } else if (!(matcher.matches() || (config.experimental.floodgateLoaded && config.experimental.floodgateBypassUsernameRegex && FloodgateApiHelper.isFloodgatePlayer(profile.getId())))) {
             return Text.of(
                     String.format(
                             config.lang.disallowedUsername, config.main.usernameRegex

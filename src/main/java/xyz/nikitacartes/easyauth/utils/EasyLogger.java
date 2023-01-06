@@ -5,6 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
+
 public class EasyLogger {
     private static final Logger logger = LogManager.getLogger("EasyAuth");
 
@@ -33,11 +35,15 @@ public class EasyLogger {
     }
 
     public static void LogDebug(String message) {
-        log(Level.DEBUG, message);
+        if (config.experimental.debugMode) {
+            log(Level.DEBUG, message);
+        }
     }
 
     public static void LogDebug(String message, Throwable e) {
-        log(Level.DEBUG, message, e);
+        if (config.experimental.debugMode) {
+            log(Level.DEBUG, message, e);
+        }
     }
 
     public static void LogError(String message) {

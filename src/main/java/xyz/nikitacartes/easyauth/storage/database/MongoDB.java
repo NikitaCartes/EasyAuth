@@ -18,8 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 public class MongoDB implements DbApi {
     private final AuthConfig config;
@@ -31,9 +30,7 @@ public class MongoDB implements DbApi {
     }
 
     public void connect() throws DBApiException {
-        if (config.experimental.debugMode) {
-            LogInfo("You are using Mongo DB");
-        }
+        LogDebug("You are using Mongo DB");
         try {
             mongoClient = MongoClients.create(config.main.MongoDBConnectionString);
             MongoDatabase database = mongoClient.getDatabase(config.main.MongoDBDatabase);

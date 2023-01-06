@@ -19,9 +19,7 @@ public class MySQL implements DbApi {
      * Connects to the MySQL.
      */
     public MySQL(AuthConfig config) {
-        if (config.experimental.debugMode) {
-            LogInfo("You are using MySQL DB");
-        }
+        LogDebug("You are using MySQL DB");
         this.config = config;
     }
 

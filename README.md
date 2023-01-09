@@ -17,7 +17,6 @@ See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 * Many thanks for @samolego, author of SimpleAuth, for his mod, and his permission on creating this fork
 * Thanks to @were491 for improvement in login system
 * Thanks to @Nikijaz for implementing MySQL database support
-* Thanks to @@dmunozv04 for Floodgate support
 * Thanks to @dmunozv04 for Floodgate support
 * Thanks to @Wereii for 1.19.3 support
 

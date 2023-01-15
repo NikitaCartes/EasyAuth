@@ -31,6 +31,7 @@ Thank you so much for those who have already helped with translation of the mod!
 * @Uxzylon (French)
 * @DavidCZ2051, @Thewest123 (Czech)
 * @egeesin (Turkish)
+* @txlbr (Ukrainian)
 
 ### License
 

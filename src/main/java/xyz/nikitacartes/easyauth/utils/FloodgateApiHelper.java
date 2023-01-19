@@ -1,6 +1,5 @@
 package xyz.nikitacartes.easyauth.utils;
 
-import dev.cafeteria.fakeplayerapi.server.FakeServerPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import org.geysermc.floodgate.api.FloodgateApi;
 

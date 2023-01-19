@@ -130,10 +130,8 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      */
     @Override
     public boolean canSkipAuth() {
-        return (config.experimental.carpetLoaded && CarpetHelper.isPlayerFake(this.player)) ||
-                (config.experimental.fakePlayerApiLoaded && FakePlayerApiHelper.isPlayerFake(this.player)) ||
+        return (this.player.getClass() != ServerPlayerEntity.class) ||
                 (config.main.floodgateAutologin && config.experimental.floodgateLoaded && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
-                (config.experimental.ccRestitchedLoaded && ComputerCraftHelper.isPlayerFake(this.player)) ||
                 (isUsingMojangAccount() && config.main.premiumAutologin);
     }
 

@@ -15,6 +15,7 @@
 13) Fix `hideUnauthenticatedPLayersFromPlayerList`, thanks to @Wereii
 14) Update Simplified Chinese Localization, thanks to @GodGun968
 15) Add `floodgateBypassUsernameRegex` option that allow players that join via Floodgate even if their username isn't validated by the Regex matcher, thanks to @Biel675 
+16) Add Ukrainian translation, thanks to @txlbr
 
 ### 2.2.2, Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2
 

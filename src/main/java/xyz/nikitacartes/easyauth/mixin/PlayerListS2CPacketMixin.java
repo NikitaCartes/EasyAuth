@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
-import xyz.nikitacartes.easyauth.utils.CarpetHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
 import java.util.*;
@@ -26,8 +25,7 @@ public class PlayerListS2CPacketMixin {
 
     private static boolean hideFromTabList(ServerPlayerEntity player) {
         return !(PlayerCache.isAuthenticated(((PlayerAuth) player).getFakeUuid()) ||
-                (((PlayerAuth) player).isUsingMojangAccount() && config.main.premiumAutologin) ||
-                (FabricLoader.getInstance().isModLoaded("carpet") && CarpetHelper.isPlayerFake(player)));
+                (((PlayerAuth) player).isUsingMojangAccount() && config.main.premiumAutologin));
     }
     @ModifyVariable(
             method = "<init>(Ljava/util/EnumSet;Ljava/util/Collection;)V",

@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "CommandManagerMixin",
+    "MinecraftServerMixin",
     "SaveAllCommandMixin",
     "PlayerAdvancementTrackerMixin",
     "PlayerListS2CPacketMixin",

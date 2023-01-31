@@ -110,7 +110,7 @@ public class AuthEventHandler {
         // Tries to rescue player from nether portal
         if (config.main.tryPortalRescue) {
             BlockPos pos = player.getBlockPos();
-            player.teleport(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+            player.teleport(pos.getX() + 0.5, player.getY(), pos.getZ() + 0.5);
             if (player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL) || player.getWorld().getBlockState(player.getBlockPos().up()).getBlock().equals(Blocks.NETHER_PORTAL)) {
                 // Faking portal blocks to be air
                 BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket(pos, Blocks.AIR.getDefaultState());

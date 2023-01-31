@@ -240,10 +240,10 @@ public class AuthConfig {
             /**
              * Dimension id, e.g. "minecraft:overworld"
              */
-            public String dimension;
-            public double x;
-            public double y;
-            public double z;
+            public String dimension = "minecraft:overworld";
+            public double x = 0;
+            public double y = 64;
+            public double z = 0;
             public float yaw;
             public float pitch;
         }

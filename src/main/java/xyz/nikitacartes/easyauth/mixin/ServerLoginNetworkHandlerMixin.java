@@ -85,7 +85,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         // Caches the request
                         mojangAccountNamesCache.add(playername);
                         // Authentication continues in original method
-                    } else if (response == HttpURLConnection.HTTP_NO_CONTENT) {
+                    } else if (response == HttpURLConnection.HTTP_NO_CONTENT || response == HttpURLConnection.HTTP_NOT_FOUND) {
                         // Player doesn't have a Mojang account
                         httpsURLConnection.disconnect();
                         state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;

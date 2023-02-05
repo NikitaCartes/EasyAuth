@@ -19,6 +19,7 @@ See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 * Thanks to @Nikijaz for implementing MySQL database support
 * Thanks to @dmunozv04 for Floodgate support
 * Thanks to @Wereii for 1.19.3 support
+* Thanks to @martinszelcel for updating for new Mojang's API
 
 Thank you so much for those who have already helped with translation of the mod!
 

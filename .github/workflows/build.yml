@@ -22,17 +22,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - uses: actions/cache@v3
+      - name: build
+        uses: burrunan/gradle-cache-action@v1
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: "${{ runner.os }}-easyauth-${{ hashFiles('**/*.gradle*') }}"
-          restore-keys: |
-            ${{ runner.os }}-easyauth-
-
-      - name: Build
-        run: ./gradlew build
+          job-id: build
+          arguments: build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3

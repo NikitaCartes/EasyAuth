@@ -19,12 +19,12 @@ public class MySQL implements DbApi {
      * Connects to the MySQL.
      */
     public MySQL(AuthConfig config) {
-        LogDebug("You are using MySQL DB");
         this.config = config;
     }
 
     public void connect() throws DBApiException {
         try {
+            LogDebug("You are using MySQL DB");
             Class.forName("com.mysql.cj.jdbc.Driver");
             String uri = "jdbc:mysql://" + config.main.MySQLHost + "/" + config.main.MySQLDatabase + "?autoReconnect=true";
             LogDebug(String.format("connecting to %s", uri));

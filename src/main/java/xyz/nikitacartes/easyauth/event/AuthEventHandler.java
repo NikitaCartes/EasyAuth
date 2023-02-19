@@ -11,10 +11,12 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
+import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
+import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +47,12 @@ public class AuthEventHandler {
         PlayerEntity onlinePlayer = manager.getPlayer(incomingPlayerUsername);
 
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
+        if (usernamePattern == null) {
+            if (config == null) {
+                config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
+            }
+            usernamePattern = Pattern.compile(config.main.usernameRegex);
+        }
         Matcher matcher = usernamePattern.matcher(incomingPlayerUsername);
 
         if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && config.experimental.preventAnotherLocationKick) {

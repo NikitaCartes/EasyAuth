@@ -1,5 +1,9 @@
 plugins {
+    id "java"
+    id "java-library"
     id "fabric-loom" version "1.1-SNAPSHOT"
+    id ("com.modrinth.minotaur") version "2.+"
+    id ("com.matthewprenger.cursegradle") version "1.4.0"
 }
 
 repositories {
@@ -94,3 +98,53 @@ processResources {
     }
 }
 
+modrinth {
+    token.set(System.getenv("MODRINTH_TOKEN"))
+    projectId.set("aZj58GfX")
+    versionNumber.set("${project.version}")
+    versionName = "[1.19.3] ${project.version}"
+    versionType = "beta"
+    changelog.set("Releasenotes and Changelog:  \nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}")
+    uploadFile = remapJar
+    gameVersions.addAll("1.19.3")
+    loaders = ["fabric", "quilt"]
+    dependencies {
+        required.project("P7dR8mSH") // Fabric API
+    }
+}
+
+curseforge {
+    apiKey = System.getenv("CURSEFORGE_TOKEN") ?: ""
+    project {
+        id = "503866"
+        changelogType = "markdown"
+        changelog = "**Releasenotes and Changelog:**\n\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}"
+        releaseType = "beta"
+
+        addGameVersion("Fabric")
+        addGameVersion("Quilt")
+
+        addGameVersion("Java 18")
+        addGameVersion("Java 17")
+
+        addGameVersion("1.19.3")
+
+        mainArtifact(remapJar) {
+            displayName = "[1.19.3] ${project.version}"
+            relations {
+                requiredDependency("fabric-api")
+                embeddedLibrary 'server-translation-api'
+            }
+        }
+    }
+    options {
+        javaVersionAutoDetect = false
+        javaIntegration = false
+        forgeGradleIntegration = false
+    }
+}
+
+tasks.register("publish") {
+    dependsOn("modrinth")
+    dependsOn("curseforge")
+}

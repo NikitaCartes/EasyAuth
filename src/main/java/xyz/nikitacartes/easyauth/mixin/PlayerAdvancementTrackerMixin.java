@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 
-import java.io.File;
+import java.nio.file.Path;
 
 @Mixin(PlayerAdvancementTracker.class)
 public class PlayerAdvancementTrackerMixin {
@@ -23,17 +23,17 @@ public class PlayerAdvancementTrackerMixin {
     @Mutable
     @Shadow
     @Final
-    private File advancementFile;
+    private Path filePath;
 
     @Shadow
     private ServerPlayerEntity owner;
 
     @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V", at = @At("HEAD"))
     private void startMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.advancementFile.isFile()) {
+        if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.filePath.toFile().isFile()) {
             // Migrate
             String playername = owner.getGameProfile().getName();
-            this.advancementFile = new File(this.advancementFile.getParent(), Uuids.getOfflinePlayerUuid(playername) + ".json");
+            this.filePath = this.filePath.getParent().resolve(Uuids.getOfflinePlayerUuid(playername) + ".json");
         }
     }
 
@@ -41,7 +41,7 @@ public class PlayerAdvancementTrackerMixin {
     private void endMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
         if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount()) {
             // Changes the file name to use online UUID
-            this.advancementFile = new File(this.advancementFile.getParent(), owner.getUuid() + ".json");
+            this.filePath = this.filePath.getParent().resolve(owner.getUuid() + ".json");
         }
     }
 }

@@ -281,7 +281,7 @@ public class AuthConfig {
         public String corruptedPlayerData = "§cYour data is probably corrupted. Please contact admin.";
         public String userNotRegistered = "§cThis player is not registered!";
         public String cannotLogout = "§cYou cannot logout!";
-        public String offlineUuid = "Offline UUID for %s is ";
+        public String offlineUuid = "Offline UUID for %s is %s";
         public String registeredPlayers = "List of registered players:";
         public String addToForcedOffline = "Player successfully added into forcedOfflinePlayers list";
     }

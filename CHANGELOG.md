@@ -19,6 +19,8 @@
 17) Fix fall through half-blocks on login
 18) Add AutoSave for DB
 19) Fix [#83](https://github.com/NikitaCartes/EasyAuth/issues/83) for new Mojang's API, thanks to @martinszelcel
+20) Fix blank uuid in console log
+21) Add Polish translation, thanks to @LimakXRobczuk
 
 ### 2.2.2, Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2
 

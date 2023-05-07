@@ -49,7 +49,7 @@ public class AuthEventHandler {
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
         if (usernamePattern == null) {
             if (config == null) {
-                config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
+                config = AuthConfig.load(new File("./config/EasyAuth/config.json"));
             }
             usernamePattern = Pattern.compile(config.main.usernameRegex);
         }

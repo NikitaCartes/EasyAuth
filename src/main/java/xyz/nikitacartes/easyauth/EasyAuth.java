@@ -15,6 +15,7 @@ import xyz.nikitacartes.easyauth.storage.database.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,11 +70,23 @@ public class EasyAuth implements ModInitializer {
         }
 
         // Creating data directory (database and config files are stored there)
-        File file = new File(gameDirectory + "/mods/EasyAuth");
-        if (!file.exists() && !file.mkdirs())
-            throw new RuntimeException("[EasyAuth] Error creating directory!");
+        File file = new File(gameDirectory + "/config/EasyAuth");
+        if (!file.exists()) {
+            File oldFile = new File(gameDirectory + "/mods/EasyAuth");
+            if (!oldFile.exists()) {
+                if (!file.mkdirs())
+                    throw new RuntimeException("[EasyAuth] Error creating directory!");
+            }
+            else {
+                try {
+                    Files.move(oldFile.toPath(), file.toPath());
+                } catch (IOException e){
+                    throw new RuntimeException("[EasyAuth] Error moving old config! Please copy it manually from mods/EasyAuth to config/EasyAuth");
+                }
+            }
+        }
         // Loading config
-        config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
+        config = AuthConfig.load(new File(gameDirectory + "/config/EasyAuth/config.json"));
     }
 
     /**

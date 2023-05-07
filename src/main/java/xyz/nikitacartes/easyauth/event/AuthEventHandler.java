@@ -11,6 +11,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
+import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
@@ -49,7 +50,7 @@ public class AuthEventHandler {
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
         if (usernamePattern == null) {
             if (config == null) {
-                config = AuthConfig.load(new File("./config/EasyAuth/config.json"));
+                config = AuthConfig.load(new File(EasyAuth.gameDirectory + "/config/EasyAuth/config.json"));
             }
             usernamePattern = Pattern.compile(config.main.usernameRegex);
         }

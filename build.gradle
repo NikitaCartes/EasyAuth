@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "java-library"
-    id "fabric-loom" version "1.1-SNAPSHOT"
+    id "fabric-loom" version "1.2-SNAPSHOT"
     id ("com.modrinth.minotaur") version "2.+"
     id ("com.matthewprenger.cursegradle") version "1.4.0"
 }
@@ -65,7 +65,7 @@ dependencies {
     include implementation("org.mongodb:bson:${mongodb_version}")
 
     // MySQL driver
-    include implementation ("mysql:mysql-connector-java:${mysql_version}")
+    include implementation ("com.mysql:mysql-connector-j:${mysql_version}")
 
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"

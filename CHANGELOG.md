@@ -1,4 +1,4 @@
-### 3.0.0 Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2, 1.19, 1.19.1-1.19.2, 1.19.3, 1.19.4
+### 3.0.0 Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2, 1.19, 1.19.1-1.19.2, 1.19.3, 1.19.4, 1.20
 
 1) Fix MySQL support
 2) Add placeholder api support, thanks to @Nikijaz
@@ -21,6 +21,7 @@
 19) Fix [#83](https://github.com/NikitaCartes/EasyAuth/issues/83) for new Mojang's API, thanks to @martinszelcel
 20) Fix blank uuid in console log
 21) Add Polish translation, thanks to @LimakXRobczuk
+22) Fix [#51](https://github.com/NikitaCartes/EasyAuth/issues/51) that sometimes online player treated as offline
 
 ### 2.2.2, Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2
 

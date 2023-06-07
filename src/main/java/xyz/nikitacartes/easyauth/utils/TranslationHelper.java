@@ -1,8 +1,8 @@
 package xyz.nikitacartes.easyauth.utils;
 
+import eu.pb4.placeholders.api.TextParserUtils;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
-import java.util.Map.Entry;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
@@ -197,7 +197,7 @@ public class TranslationHelper {
                                 setStyle(Style.EMPTY.withClickEvent(
                                         new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))).
                                 formatted(Formatting.YELLOW)) :
-                Text.of(
+                TextParserUtils.formatText(
                         String.format(config.lang.offlineUuid, player) + " <yellow><copy:" + uuid.toString() + ">[" + uuid + "]"
                 );
     }
@@ -224,7 +224,7 @@ public class TranslationHelper {
                     message.append("<yellow>\n").append(i).append(": <copy:").append(entry.getKey()).append(">[").append(entry.getKey()).append("]");
                 }
             }
-            return Text.of(String.valueOf(message));
+            return TextParserUtils.formatText(String.valueOf(message));
         }
     }
 

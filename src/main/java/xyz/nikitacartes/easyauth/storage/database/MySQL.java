@@ -53,10 +53,13 @@ public class MySQL implements DbApi {
 
     private void reConnect() {
         try {
-            if (MySQLConnection != null && MySQLConnection.isValid(0)) {
-                LogWarn("Reconnecting to a valid MySQL connection?");
+            if (MySQLConnection == null || !MySQLConnection.isValid(5)) {
+                LogDebug("Reconnecting to MySQL");
+                if (MySQLConnection != null) {
+                    MySQLConnection.close();
+                }
+                connect();
             }
-            connect();
         } catch (DBApiException | SQLException e) {
             LogError("Mysql reconnect failed", e);
         }

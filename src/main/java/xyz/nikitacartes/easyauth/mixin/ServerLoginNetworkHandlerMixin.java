@@ -49,8 +49,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
     @Inject(
             method = "onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V",
             at = @At(
-                    value = "NEW",
-                    target = "com/mojang/authlib/GameProfile",
+                    value = "INVOKE",
+                    target = "Lcom/mojang/authlib/GameProfile;<init>(Ljava/util/UUID;Ljava/lang/String;)V",
                     shift = At.Shift.AFTER,
                     remap = false
             ),

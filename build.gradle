@@ -104,7 +104,7 @@ modrinth {
     versionNumber.set("${project.version}")
     versionName = "[1.20] ${project.version}"
     versionType = "beta"
-    changelog.set("Releasenotes and Changelog:  \nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}")
+    changelog.set("Release notes and Changelog: \nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}")
     uploadFile = remapJar
     gameVersions.addAll("1.20")
     loaders = ["fabric", "quilt"]
@@ -118,8 +118,10 @@ curseforge {
     project {
         id = "503866"
         changelogType = "markdown"
-        changelog = "**Releasenotes and Changelog:**\n\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}"
+        changelog = "**Release notes and Changelog:**\n\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}"
         releaseType = "beta"
+
+        addGameVersion("Server")
 
         addGameVersion("Fabric")
         addGameVersion("Quilt")

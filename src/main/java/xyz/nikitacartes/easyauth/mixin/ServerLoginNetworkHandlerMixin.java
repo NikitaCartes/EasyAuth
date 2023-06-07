@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import xyz.nikitacartes.easyauth.storage.database.MongoDB;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -60,7 +59,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
         if (config.main.premiumAutologin) {
             try {
-                String playername = (new GameProfile(null, packet.name())).getName().toLowerCase();
+                // Todo: use config
+                String playername = packet.name().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
                 if (playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername)) {

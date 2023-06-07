@@ -25,12 +25,10 @@
   ],
   "depends": {
     "fabric-api": "*",
-    "fabricloader": ">=0.14.11",
-    "minecraft": "~1.19.3",
-    "java": ">=17"
+    "fabricloader": "*",
+    "minecraft": ">=1.20-"
   },
   "suggests": {
-    "flamingo": "*",
     "fabric-permissions-api-v0": "*"
   }
 }

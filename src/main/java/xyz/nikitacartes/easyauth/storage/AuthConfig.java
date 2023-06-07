@@ -225,7 +225,7 @@ public class AuthConfig {
          * and you have some players that want to use username,
          * that is already taken.
          */
-        public ArrayList<String> forcedOfflinePlayers = new ArrayList<>(Collections.singletonList(""));
+        public ArrayList<String> forcedOfflinePlayers = new ArrayList<>();
         /**
          * Hide unauthenticated pLayers from player list
          */
@@ -390,5 +390,7 @@ public class AuthConfig {
         public boolean floodgateLoaded = false;
 
         public boolean floodgateBypassUsernameRegex = false;
+
+        public ArrayList<String> verifiedOnlinePlayer = new ArrayList<>();
     }
 }

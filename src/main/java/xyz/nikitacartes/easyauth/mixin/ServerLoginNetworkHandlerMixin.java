@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -63,13 +64,17 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 String playername = packet.name().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
-                if (playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername)) {
+                if (mojangAccountNamesCache.contains(playername) || config.experimental.verifiedOnlinePlayer.contains(playername)) {
+                    mojangAccountNamesCache.add(playername);
+                    return;
+                }
+                if ((playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername))) {
                     // Player definitely doesn't have a mojang account
                     state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
                     this.profile = new GameProfile(null, packet.name());
                     ci.cancel();
-                } else if (!mojangAccountNamesCache.contains(playername)) {
+                } else {
                     // Checking account status from API
                     HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://api.mojang.com/users/profiles/minecraft/" + playername).openConnection();
                     httpsURLConnection.setRequestMethod("GET");
@@ -84,6 +89,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
                         // Caches the request
                         mojangAccountNamesCache.add(playername);
+                        config.experimental.verifiedOnlinePlayer.add(playername);
+                        config.save(new File("./mods/EasyAuth/config.json"));
                         // Authentication continues in original method
                     } else if (response == HttpURLConnection.HTTP_NO_CONTENT || response == HttpURLConnection.HTTP_NOT_FOUND) {
                         // Player doesn't have a Mojang account

@@ -35,7 +35,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Translations
-    include modImplementation("xyz.nucleoid:server-translations-api:${project.server_translations_version}")
+    include modImplementation("fr.catcore:server-translations-api:${project.server_translations_version}")
 
     // Permissions
     include modImplementation("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}")
@@ -110,11 +110,11 @@ modrinth {
     token.set(System.getenv("MODRINTH_TOKEN"))
     projectId.set("aZj58GfX")
     versionNumber.set("${project.version}")
-    versionName = "[1.19.4] ${project.version}"
+    versionName = "[1.19.3] ${project.version}"
     versionType = "release"
     changelog.set("Release notes:\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}\n\nChangelog:\nhttps://github.com/NikitaCartes/EasyAuth/tree/HEAD/CHANGELOG.md")
     uploadFile = remapJar
-    gameVersions.addAll("1.19.4")
+    gameVersions.addAll("1.19.3")
     loaders = ["fabric"]
     dependencies {
         required.project("P7dR8mSH") // Fabric API
@@ -133,10 +133,10 @@ curseforge {
 
         addGameVersion("Java 21")
 
-        addGameVersion("1.19.4")
+        addGameVersion("1.19.3")
 
         mainArtifact(remapJar) {
-            displayName = "[1.19.4] ${project.version}"
+            displayName = "[1.19.3] ${project.version}"
             relations {
                 requiredDependency("fabric-api")
                 embeddedLibrary 'server-translation-api'

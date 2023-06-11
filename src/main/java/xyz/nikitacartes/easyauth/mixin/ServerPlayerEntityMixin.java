@@ -257,7 +257,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
     private void playerTick(CallbackInfo ci) {
         if (!this.easyAuth$isAuthenticated()) {
             // Checking player timer
-            if (kickTimer <= 0 && player.networkHandler.isConnectionOpen()) {
+            if (kickTimer <= 0 && player.networkHandler.getConnection().isOpen()) {
                 player.networkHandler.disconnect(langConfig.timeExpired.get());
             } else {
                 // Sending authentication prompt every 10 seconds

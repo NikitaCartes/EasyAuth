@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import xyz.nikitacartes.easyauth.storage.database.MongoDB;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.File;
@@ -50,8 +51,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
     @Inject(
             method = "onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V",
             at = @At(
-                    value = "INVOKE",
-                    target = "Lcom/mojang/authlib/GameProfile;<init>(Ljava/util/UUID;Ljava/lang/String;)V",
+                    value = "NEW",
+                    target = "com/mojang/authlib/GameProfile",
                     shift = At.Shift.AFTER,
                     remap = false
             ),
@@ -60,8 +61,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
         if (config.main.premiumAutologin) {
             try {
-                // Todo: use config
-                String playername = packet.name().toLowerCase();
+                String playername = (new GameProfile(null, packet.name())).getName().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
                 if (mojangAccountNamesCache.contains(playername) || config.experimental.verifiedOnlinePlayer.contains(playername)) {

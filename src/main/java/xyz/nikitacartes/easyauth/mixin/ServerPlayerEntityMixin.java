@@ -193,7 +193,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     private void playerTick(CallbackInfo ci) {
         if (!this.isAuthenticated()) {
             // Checking player timer
-            if (kickTimer <= 0 && player.networkHandler.isConnectionOpen()) {
+            if (kickTimer <= 0 && player.networkHandler.getConnection().isOpen()) {
                 player.networkHandler.disconnect(TranslationHelper.getTimeExpired());
             } else if (!playerCacheMap.containsKey(((PlayerAuth) player).getFakeUuid())) {
                 player.networkHandler.disconnect(TranslationHelper.getAccountDeleted());

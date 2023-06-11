@@ -3,6 +3,7 @@ package xyz.nikitacartes.easyauth.config;
 import com.google.common.io.Resources;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.apache.commons.text.StringSubstitutor;
@@ -16,6 +17,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static net.minecraft.text.Text.translatable;
 import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
 @ConfigSerializable
 public class LangConfigV1 extends ConfigTemplate {
@@ -147,10 +149,15 @@ public class LangConfigV1 extends ConfigTemplate {
 
         public void send(ServerCommandSource commandOutput) {
             if (enabled && commandOutput != null) {
-                if (langConfig.enableServerSideTranslation && serverSide) {
-                    commandOutput.sendMessage(translatable(key));
+                ServerPlayerEntity player = commandOutput.getPlayer();
+                if (player != null) {
+                    if (langConfig.enableServerSideTranslation && serverSide) {
+                        player.sendMessage(translatable(key));
+                    } else {
+                        player.sendMessage(Text.literal(fallback));
+                    }
                 } else {
-                    commandOutput.sendMessage(Text.literal(fallback));
+                    LogInfo(translatable(fallback).getString());
                 }
             }
         }
@@ -167,10 +174,15 @@ public class LangConfigV1 extends ConfigTemplate {
 
         public void send(ServerCommandSource commandOutput, Object... args) {
             if (enabled && commandOutput != null) {
-                if (langConfig.enableServerSideTranslation && serverSide) {
-                    commandOutput.sendMessage(translatable(key, args));
+                ServerPlayerEntity player = commandOutput.getPlayer();
+                if (player != null) {
+                    if (langConfig.enableServerSideTranslation && serverSide) {
+                        player.sendMessage(translatable(key, args));
+                    } else {
+                        player.sendMessage(translatable(fallback, args));
+                    }
                 } else {
-                    commandOutput.sendMessage(translatable(fallback, args));
+                    LogInfo(translatable(fallback, args).getString());
                 }
             }
         }

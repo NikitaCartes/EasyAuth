@@ -2,7 +2,7 @@ package xyz.nikitacartes.easyauth.utils;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 

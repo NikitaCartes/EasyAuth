@@ -5,7 +5,6 @@
   "mixins": [
     "CommandManagerMixin",
     "PlayerAdvancementTrackerMixin",
-    "PlayerListS2CPacketMixin",
     "PlayerManagerMixin",
     "WorldSaveHandlerMixin",
     "ServerLoginNetworkHandlerMixin",

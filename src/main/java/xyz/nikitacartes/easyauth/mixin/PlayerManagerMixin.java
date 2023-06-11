@@ -6,8 +6,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,7 +15,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
+import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -29,7 +29,6 @@ import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.io.File;
 import java.net.SocketAddress;
@@ -60,7 +59,7 @@ public abstract class PlayerManagerMixin {
     private RegistryKey<World> onPlayerConnect(RegistryKey<World> world, ClientConnection connection, ServerPlayerEntity player) {
         if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
             ((PlayerAuth) player).easyAuth$saveTrueDimension(world);
-            return RegistryKey.of(RegistryKeys.WORLD, new Identifier(config.worldSpawn.dimension));
+            return RegistryKey.of(Registry.WORLD_KEY, new Identifier(config.worldSpawn.dimension));
         }
         return world;
     }
@@ -119,10 +118,10 @@ public abstract class PlayerManagerMixin {
     }
 
     @Redirect(method = "respawnPlayer(Lnet/minecraft/server/network/ServerPlayerEntity;Z)Lnet/minecraft/server/network/ServerPlayerEntity;",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getSpawnPointDimension()Lnet/minecraft/registry/RegistryKey;"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getSpawnPointDimension()Lnet/minecraft/util/registry/RegistryKey;"))
     private RegistryKey<World> respawnPlayerDimension(ServerPlayerEntity instance, ServerPlayerEntity player, boolean alive) {
         if (!alive && config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
-            return RegistryKey.of(RegistryKeys.WORLD, new Identifier(config.worldSpawn.dimension));
+            return RegistryKey.of(Registry.WORLD_KEY, new Identifier(config.worldSpawn.dimension));
         }
         return instance.getSpawnPointDimension();
     }
@@ -171,7 +170,7 @@ public abstract class PlayerManagerMixin {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
         if (server.isOnlineMode() && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) player).easyAuth$isUsingMojangAccount() && !onlineFile.exists()) {
             String playername = player.getGameProfile().getName();
-            File offlineFile = new File(onlineFile.getParent(), Uuids.getOfflinePlayerUuid(playername) + ".json");
+            File offlineFile = new File(onlineFile.getParent(), DynamicSerializableUuid.getOfflinePlayerUuid(playername) + ".json");
             if (!offlineFile.renameTo(onlineFile)) {
                 LogWarn("Failed to migrate offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
             } else {

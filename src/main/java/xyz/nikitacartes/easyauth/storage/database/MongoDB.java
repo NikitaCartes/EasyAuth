@@ -4,7 +4,7 @@ import com.mongodb.MongoClientException;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.*;
 import com.mongodb.client.model.InsertOneModel;
-import net.minecraft.util.Uuids;
+import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import org.bson.Document;
 import xyz.nikitacartes.easyauth.config.StorageConfigV1;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
@@ -136,7 +136,7 @@ public class MongoDB implements DbApi {
                 data = findIterable.next().toJson();
             } else {
                 String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
-                String lowerCaseUuid = Uuids.getOfflinePlayerUuid(lowerCaseUsername).toString();
+                String lowerCaseUuid = DynamicSerializableUuid.getOfflinePlayerUuid(lowerCaseUsername).toString();
                 findIterable = collection.find(eq("UUID", lowerCaseUuid)).iterator();
                 if (findIterable.hasNext()) {
                     data = findIterable.next().toJson();

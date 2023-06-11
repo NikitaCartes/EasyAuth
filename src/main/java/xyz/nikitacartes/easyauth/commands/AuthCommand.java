@@ -331,7 +331,12 @@ public class AuthCommand {
                             .formatted(Formatting.YELLOW))
                             .append(", ");
                 });
-                source.sendMessage(message);
+                ServerPlayerEntity player = source.getPlayer();
+                if (player != null) {
+                    player.sendMessage(message);
+                } else {
+                    LogInfo(message.getString());
+                }
             }
         });
         return 1;
@@ -388,7 +393,12 @@ public class AuthCommand {
                 return;
             }
             // Send player information to the source
-            source.sendMessage(Text.literal("Player Info: " + playerData.toJson()));
+            ServerPlayerEntity player = source.getPlayer();
+            if (player != null) {
+                player.sendMessage(Text.literal("Player Info: " + playerData.toJson()));
+            } else {
+                LogInfo("Player Info: " + playerData.toJson());
+            }
         });
         return 1;
     }

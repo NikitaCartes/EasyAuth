@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
-import net.minecraft.util.Uuids;
+import net.minecraft.util.dynamic.DynamicSerializableUuid;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -74,7 +74,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     mojangAccountNamesCache.add(playername);
                     return;
                 }
-                if ((playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches())) {
+                if ((playerCacheMap.containsKey(DynamicSerializableUuid.getOfflinePlayerUuid(playername).toString()) || !matcher.matches())) {
                     // Player definitely doesn't have a mojang account
                     LogDebug("Player " + playername + " is cached as offline player");
                     state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;

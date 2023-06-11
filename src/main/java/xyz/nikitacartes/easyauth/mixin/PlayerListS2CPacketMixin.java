@@ -2,58 +2,50 @@ package xyz.nikitacartes.easyauth.mixin;
 
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 
 @Mixin(PlayerListS2CPacket.class)
 public class PlayerListS2CPacketMixin {
-    @Mutable
-    @Final
-    @Shadow
-    private List<PlayerListS2CPacket.Entry> entries;
 
     @Unique
     private static boolean hideFromTabList(ServerPlayerEntity player) {
         return ((PlayerAuth) player).isAuthenticated();
     }
+
     @ModifyVariable(
-            method = "<init>(Ljava/util/EnumSet;Ljava/util/Collection;)V",
+            method = "<init>(Lnet/minecraft/network/packet/s2c/play/PlayerListS2CPacket$Action;[Lnet/minecraft/server/network/ServerPlayerEntity;)V",
             at = @At("HEAD"),
             argsOnly = true)
-    private static Collection<ServerPlayerEntity> playerListS2CPacket(Collection<ServerPlayerEntity> players) {
-        // direct removeIf errors out as this seems to receive ImmutableCollection from time to time (?)
+    private static ServerPlayerEntity[] playerListS2CPacket(ServerPlayerEntity[] players) {
         if (config.main.hideUnauthenticatedPLayersFromPlayerList) {
-            ArrayList<ServerPlayerEntity> temp = new ArrayList<>();
-            for (ServerPlayerEntity player : players) {
-                if (!hideFromTabList(player)) {
-                    temp.add(player);
-                }
-            }
-            return temp.stream().toList();
+            List<ServerPlayerEntity> temp = new ArrayList<>();
+            Collections.addAll(temp, players);
+            temp.removeIf(PlayerListS2CPacketMixin::hideFromTabList);
+            return temp.toArray(new ServerPlayerEntity[0]);
         }
         return players;
     }
-    /* Check the other, single player arg constructor - overriding the entries field with empty if not allowed */
-    @Redirect(
-            method = "<init>(Lnet/minecraft/network/packet/s2c/play/PlayerListS2CPacket$Action;Lnet/minecraft/server/network/ServerPlayerEntity;)V",
-            at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/network/packet/s2c/play/PlayerListS2CPacket;entries:Ljava/util/List;",
-                    opcode = Opcodes.PUTFIELD
-            )
-    )
-    private void checkSetEntries(PlayerListS2CPacket instance, List<PlayerListS2CPacket.Entry> entries, PlayerListS2CPacket.Action _action, ServerPlayerEntity player) {
-        assert !entries.isEmpty();
-        if (config.main.hideUnauthenticatedPLayersFromPlayerList && hideFromTabList(player)) {
-            this.entries = new ArrayList<>();
-            return;
+
+    @ModifyVariable(
+            method = "<init>(Lnet/minecraft/network/packet/s2c/play/PlayerListS2CPacket$Action;Ljava/util/Collection;)V",
+            at = @At("HEAD"),
+            argsOnly = true)
+    private static Collection<ServerPlayerEntity> playerListS2CPacket(Collection<ServerPlayerEntity> players) {
+        if (config.main.hideUnauthenticatedPLayersFromPlayerList) {
+            players.removeIf(PlayerListS2CPacketMixin::hideFromTabList);
         }
-        this.entries = entries;
+        return players;
     }
+
 }

@@ -21,14 +21,12 @@ public abstract class ServerPlayNetworkHandlerMixin {
     @Shadow
     public ServerPlayerEntity player;
 
-    // Afaik we don't really care if this is cancelled before or after the validateMessage
-    // In case the player is not allowed to send message anyway then doing it before should save resources
     @Inject(
             method = "onChatMessage(Lnet/minecraft/network/packet/c2s/play/ChatMessageC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;validateMessage(Ljava/lang/String;Ljava/time/Instant;Lnet/minecraft/network/message/LastSeenMessageList$Acknowledgment;)Ljava/util/Optional;",
-                    shift = At.Shift.BEFORE
+                    target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;canAcceptMessage(Ljava/lang/String;Ljava/time/Instant;Lnet/minecraft/network/message/LastSeenMessageList$Acknowledgment;)Z",
+                    shift = At.Shift.AFTER
             ),
             cancellable = true
     )

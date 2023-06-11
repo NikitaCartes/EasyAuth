@@ -49,7 +49,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
         LogDebug(String.format("Teleporting player %s to %s", player.getName().getContent(), hide ? "spawn." : "position."));
         if (hide) {
             // Saving position
-            cache.lastLocation.dimension = player.getServerWorld();
+            cache.lastLocation.dimension = player.getWorld();
             cache.lastLocation.position = player.getPos();
             cache.lastLocation.yaw = player.getYaw();
             cache.lastLocation.pitch = player.getPitch();

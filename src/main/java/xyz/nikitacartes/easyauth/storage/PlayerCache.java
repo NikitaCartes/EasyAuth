@@ -107,7 +107,7 @@ public class PlayerCache {
             playerCache = new PlayerCache();
         if (player != null) {
             // Setting position cache
-            playerCache.lastLocation.dimension = player.getServerWorld();
+            playerCache.lastLocation.dimension = player.getWorld();
             playerCache.lastLocation.position = player.getPos();
             playerCache.lastLocation.yaw = player.getYaw();
             playerCache.lastLocation.pitch = player.getPitch();

@@ -122,7 +122,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
             LogDebug(String.format("Mounting player to vehicle %s", rootVehicle));
 
             NbtCompound nbtCompound = rootVehicle.getCompound("RootVehicle");
-            Entity entity = EntityType.loadEntityWithPassengers(nbtCompound.getCompound("Entity"), player.getServerWorld(), (vehicle) -> !player.getServerWorld().tryLoadEntity(vehicle) ? null : vehicle);
+            Entity entity = EntityType.loadEntityWithPassengers(nbtCompound.getCompound("Entity"), player.getWorld(), (vehicle) -> !player.getWorld().tryLoadEntity(vehicle) ? null : vehicle);
             if (entity != null) {
                 UUID uUID;
                 if (nbtCompound.containsUuid("Attach")) {

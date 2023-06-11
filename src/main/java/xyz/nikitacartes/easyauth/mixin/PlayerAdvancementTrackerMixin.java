@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
 
-import java.nio.file.Path;
+import java.io.File;
 
 @Mixin(PlayerAdvancementTracker.class)
 public class PlayerAdvancementTrackerMixin {
@@ -24,17 +24,17 @@ public class PlayerAdvancementTrackerMixin {
     @Mutable
     @Shadow
     @Final
-    private Path filePath;
+    private File advancementFile;
 
     @Shadow
     private ServerPlayerEntity owner;
 
     @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V", at = @At("HEAD"))
     private void startMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.filePath.toFile().isFile()) {
+        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.advancementFile.isFile()) {
             // Migrate
             String playername = owner.getGameProfile().getName();
-            this.filePath = this.filePath.getParent().resolve(Uuids.getOfflinePlayerUuid(playername) + ".json");
+            this.advancementFile = new File(this.advancementFile.getParent(), Uuids.getOfflinePlayerUuid(playername) + ".json");
         }
     }
 
@@ -42,7 +42,7 @@ public class PlayerAdvancementTrackerMixin {
     private void endMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
         if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount()) {
             // Changes the file name to use online UUID
-            this.filePath = this.filePath.getParent().resolve(owner.getUuid() + ".json");
+            this.advancementFile = new File(this.advancementFile.getParent(), owner.getUuid() + ".json");
         }
     }
 }

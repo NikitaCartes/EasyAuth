@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
 @Mixin(ServerLoginNetworkHandler.class)
@@ -60,22 +61,33 @@ public abstract class ServerLoginNetworkHandlerMixin {
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
         if (config.main.premiumAutologin) {
             try {
-                // Todo: use config
                 String playername = packet.name().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
+                if (config.main.forcedOfflinePlayers.contains(playername)) {
+                    LogDebug("Player " + playername + " is forced to be offline");
+                    mojangAccountNamesCache.remove(playername);
+                    state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+
+                    this.profile = new GameProfile(null, packet.name());
+                    ci.cancel();
+                    return;
+                }
                 if (mojangAccountNamesCache.contains(playername) || config.experimental.verifiedOnlinePlayer.contains(playername)) {
+                    LogDebug("Player " + playername + " is cached as online player. Authentication continues as vanilla");
                     mojangAccountNamesCache.add(playername);
                     return;
                 }
-                if ((playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches() || config.main.forcedOfflinePlayers.contains(playername))) {
+                if ((playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches())) {
                     // Player definitely doesn't have a mojang account
+                    LogDebug("Player " + playername + " is cached as offline player");
                     state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
                     this.profile = new GameProfile(null, packet.name());
                     ci.cancel();
                 } else {
                     // Checking account status from API
+                    LogDebug("Checking player " + playername + " for premium status");
                     HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://api.mojang.com/users/profiles/minecraft/" + playername).openConnection();
                     httpsURLConnection.setRequestMethod("GET");
                     httpsURLConnection.setConnectTimeout(5000);
@@ -85,7 +97,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     if (response == HttpURLConnection.HTTP_OK) {
                         // Player has a Mojang account
                         httpsURLConnection.disconnect();
-
+                        LogDebug("Player " + playername + " has a Mojang account");
 
                         // Caches the request
                         mojangAccountNamesCache.add(playername);
@@ -95,6 +107,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     } else if (response == HttpURLConnection.HTTP_NO_CONTENT || response == HttpURLConnection.HTTP_NOT_FOUND) {
                         // Player doesn't have a Mojang account
                         httpsURLConnection.disconnect();
+                        LogDebug("Player " + playername + " doesn't have a Mojang account");
                         state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
 
                         this.profile = new GameProfile(null, packet.name());

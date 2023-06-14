@@ -1,5 +1,6 @@
 package xyz.nikitacartes.easyauth.utils;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +16,7 @@ public class EasyLogger {
     }
 
     static void log(Level level, String message, Throwable e) {
-        logger.atLevel(level).log(Strings.concat("[EasyAuth]: ", message), e);
+        logger.atLevel(level).log("[EasyAuth]: " + message + "\n" + ExceptionUtils.getStackTrace(e));
     }
 
     public static void LogInfo(String message) {

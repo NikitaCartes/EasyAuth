@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 /**
  * This class will take care of actions players try to do,
@@ -155,6 +156,9 @@ public class AuthEventHandler {
     // Player execute command
     public static ActionResult onPlayerCommand(ServerPlayerEntity player, String command) {
         // Getting the message to then be able to check it
+        if (config.experimental.allowCommands) {
+            return ActionResult.PASS;
+        }
         if (player == null) {
             return ActionResult.PASS;
         }
@@ -164,6 +168,13 @@ public class AuthEventHandler {
             return ActionResult.PASS;
         }
         if (!((PlayerAuth) player).isAuthenticated()) {
+            for (String allowedCommand : config.experimental.allowedCommands) {
+                if (command.startsWith(allowedCommand)) {
+                    LogDebug("Player " + player.getName() + " executed command " + command + " without being authenticated.");
+                    return ActionResult.PASS;
+                }
+            }
+            LogDebug("Player " + player.getName() + " tried to execute command " + command + " without being authenticated.");
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }

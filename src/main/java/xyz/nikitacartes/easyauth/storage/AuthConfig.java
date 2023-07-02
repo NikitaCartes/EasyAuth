@@ -305,6 +305,8 @@ public class AuthConfig {
          * Allows chat (but not commands, except for /login and /register).
          */
         public boolean allowChat = false;
+        public boolean allowCommands = false;
+        public ArrayList<String> allowedCommands = new ArrayList<>();
         /**
          * Allows player movement.
          */

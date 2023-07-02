@@ -18,6 +18,5 @@ public class CommandManagerMixin {
         if (result == ActionResult.FAIL) {
             cir.setReturnValue(1);
         }
-        return;
     }
 }

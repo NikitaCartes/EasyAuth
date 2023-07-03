@@ -106,7 +106,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     @Override
     public Text getAuthMessage() {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
-        if (!config.main.enableGlobalPassword && cache.password.isEmpty()) {
+        if (!config.main.enableGlobalPassword && (cache == null || cache.password.isEmpty())) {
             if (config.experimental.enableServerSideTranslation) {
                 return Text.translatable("text.easyauth.notAuthenticated").append("\n").append(Text.translatable("text.easyauth.registerRequired"));
             } else {

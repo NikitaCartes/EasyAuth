@@ -37,13 +37,13 @@ public class EasyLogger {
 
     public static void LogDebug(String message) {
         if (config != null && config.experimental.debugMode) {
-            log(Level.DEBUG, message);
+            log(Level.INFO, "[DEBUG]: " + message);
         }
     }
 
     public static void LogDebug(String message, Throwable e) {
         if (config != null && config.experimental.debugMode) {
-            log(Level.DEBUG, message, e);
+            log(Level.INFO, "[DEBUG]: " + message, e);
         }
     }
 

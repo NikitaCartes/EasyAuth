@@ -44,7 +44,6 @@ public class AuthEventHandler {
     public static Text checkCanPlayerJoinServer(GameProfile profile, PlayerManager manager) {
         // Getting the player. By this point, the player's game profile has been authenticated so the UUID is legitimate.
         String incomingPlayerUsername = profile.getName();
-        String incomingPlayerUuid = profile.getId().toString();
         PlayerEntity onlinePlayer = manager.getPlayer(incomingPlayerUsername);
 
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
@@ -75,6 +74,11 @@ public class AuthEventHandler {
         if (config.main.maxLoginTries != -1) {
             // We won't load the player cache *into the map* if it is not already present (first join since restart)
             // because loading the player cache with a null player prevents the last location from being set.
+            if (profile.getId() == null) {
+                LogDebug("Player UUID is null, skipping kicking attempt check.");
+                return null;
+            }
+            String incomingPlayerUuid = profile.getId().toString();
             PlayerCache playerCache = playerCacheMap.containsKey(incomingPlayerUuid) ?
                     playerCacheMap.get(incomingPlayerUuid) : PlayerCache.fromJson(null, incomingPlayerUuid);
             if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {

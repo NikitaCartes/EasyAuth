@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import xyz.nikitacartes.easyauth.commands.*;
+import xyz.nikitacartes.easyauth.config.MainConfig;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
@@ -60,6 +61,12 @@ public class EasyAuth implements ModInitializer {
 
     public static void init(Path gameDir) {
         gameDirectory = gameDir;
+        {
+            File file = new File(gameDirectory + "/config/EasyAuth");
+            if (!file.exists() && !file.mkdirs()) throw new RuntimeException("[EasyAuth] Error creating directory!");
+        }
+        MainConfig mainConfig = new MainConfig();
+        mainConfig.saveConfig();
         LogInfo("EasyAuth mod by samo_lego, NikitaCartes.");
 
         try {

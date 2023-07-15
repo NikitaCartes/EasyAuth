@@ -10,7 +10,7 @@ repositories {
     maven { name "Translation"; url "https://maven.nucleoid.xyz" }
     maven { name "Permission"; url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { name "Floodgate Api"; url "https://repo.opencollab.dev/main" }
-    mavenLocal()
+    mavenCentral()
 }
 
 archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
@@ -67,9 +67,13 @@ dependencies {
     // MySQL driver
     include implementation ("com.mysql:mysql-connector-j:${mysql_version}")
 
+    // Hocon config
+    include implementation("org.spongepowered:configurate-hocon:${hocon_version}")
+
+    include implementation("org.apache.commons:commons-text:${commons_text_version}")
+
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"
-
 }
 
 tasks.withType(JavaCompile).configureEach {

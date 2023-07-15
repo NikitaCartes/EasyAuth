@@ -50,9 +50,6 @@ public class ExtendedConfig {
     public boolean useSimpleAuthDb = false;
     public boolean forcedOfflineUuid = false;
 
-    private ExtendedConfig() {
-    }
-
     public static ExtendedConfig load() {
         Path path = gameDirectory.resolve("config/EasyAuth").resolve(configPath);
         if (Files.exists(path)) {

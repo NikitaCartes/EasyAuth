@@ -32,8 +32,6 @@ public class MainConfig {
     public int configVersion = 1;
     public WorldSpawn worldSpawn = new WorldSpawn();
 
-    private MainConfig() {
-    }
 
     public static MainConfig load() {
         Path path = gameDirectory.resolve("config/EasyAuth").resolve(configPath);

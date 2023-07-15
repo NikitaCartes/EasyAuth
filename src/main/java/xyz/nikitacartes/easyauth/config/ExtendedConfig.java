@@ -2,28 +2,18 @@ package xyz.nikitacartes.easyauth.config;
 
 import com.google.common.io.Resources;
 import org.apache.commons.text.StringSubstitutor;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
 @ConfigSerializable
-public class ExtendedConfig {
-
-    private static final String configPath = "extended.conf";
-
+public class ExtendedConfig extends Config {
     public boolean allowChat = false;
     public boolean allowCommands = false;
     public ArrayList<String> allowedCommands = new ArrayList<>();
@@ -50,32 +40,11 @@ public class ExtendedConfig {
     public boolean useSimpleAuthDb = false;
     public boolean forcedOfflineUuid = false;
 
-    public static ExtendedConfig load() {
-        Path path = gameDirectory.resolve("config/EasyAuth").resolve(configPath);
-        if (Files.exists(path)) {
-            final HoconConfigurationLoader loader = HoconConfigurationLoader
-                    .builder()
-                    .path(path)
-                    .build();
-            try {
-                return loader.load().get(ExtendedConfig.class);
-            } catch (ConfigurateException e) {
-                throw new RuntimeException("[EasyAuth] Failed to load config file", e);
-            }
-        } else {
-            ExtendedConfig config = new ExtendedConfig();
-            config.save();
-            return config;
-        }
-    }
-
-    private String handleTemplate() throws IOException {
+    protected String handleTemplate() throws IOException {
         Map<String, Object> configValues = new HashMap<>();
         configValues.put("allowChat", allowChat);
         configValues.put("allowCommands", allowCommands);
-        configValues.put("allowedCommands", allowedCommands.stream()
-                        .map(s -> "\"" + s + "\"")
-                        .collect(Collectors.joining(", ")));
+        configValues.put("allowedCommands", handleArray(allowedCommands));
         configValues.put("allowMovement", allowMovement);
         configValues.put("allowBlockInteraction", allowBlockInteraction);
         configValues.put("allowEntityInteraction", allowEntityInteraction);
@@ -98,18 +67,11 @@ public class ExtendedConfig {
         configValues.put("useBcrypt", useBcrypt);
         configValues.put("useSimpleAuthDb", useSimpleAuthDb);
         configValues.put("forcedOfflineUuid", forcedOfflineUuid);
-        String configTemplate = Resources.toString(getResource("config/" + configPath), UTF_8);
+        String configTemplate = Resources.toString(getResource("config/" + getConfigPath()), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);
     }
 
-    public void save() {
-        Path path = gameDirectory.resolve("config/EasyAuth").resolve(configPath);
-        try {
-            Files.writeString(path, handleTemplate());
-        } catch (IOException e) {
-            LogError("Failed to save config file", e);
-        }
+    protected String getConfigPath() {
+        return "extended.conf";
     }
-
-
 }

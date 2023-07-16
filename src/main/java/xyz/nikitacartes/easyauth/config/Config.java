@@ -50,6 +50,17 @@ public abstract class Config {
 
     protected String handleArray(ArrayList<String> strings) {
         return strings.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", "));
+    }
 
+    public String escapeString(String string) {
+        return string
+                .replace("\\", "\\\\")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                .replace("\b", "\\b")
+                .replace("\f", "\\f")
+                .replace("\"", "\\\"")
+                .replace("'", "\\'");
     }
 }

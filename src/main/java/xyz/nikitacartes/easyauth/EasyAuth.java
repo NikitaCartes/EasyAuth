@@ -9,6 +9,7 @@ import net.minecraft.server.MinecraftServer;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.ExtendedConfig;
 import xyz.nikitacartes.easyauth.config.MainConfig;
+import xyz.nikitacartes.easyauth.config.TranslationConfig;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
@@ -80,6 +81,7 @@ public class EasyAuth implements ModInitializer {
         }
         MainConfig config = MainConfig.load();
         ExtendedConfig extendedConfig = ExtendedConfig.load();
+        TranslationConfig translationConfig = TranslationConfig.load();
         {
             // Creating data directory (database and config files are stored there)
             File file2 = new File(gameDirectory + "/mods/EasyAuth");

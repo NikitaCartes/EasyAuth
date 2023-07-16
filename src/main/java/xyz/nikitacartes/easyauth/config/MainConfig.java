@@ -25,6 +25,10 @@ public class MainConfig extends Config {
     public int configVersion = 1;
     public WorldSpawn worldSpawn = new WorldSpawn();
 
+    public static MainConfig load() {
+        return loadConfig(MainConfig.class, "main.conf");
+    }
+
     @Override
     protected String getConfigPath() {
         return "main.conf";

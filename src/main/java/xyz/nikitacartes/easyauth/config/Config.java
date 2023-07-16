@@ -14,15 +14,8 @@ import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
 public abstract class Config {
-    public static <T extends Config> T load(Class<T> configClass) {
-        T config;
-        try {
-            config = configClass.getDeclaredConstructor().newInstance();
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
-                 InvocationTargetException e) {
-            throw new RuntimeException("[EasyAuth] Failed to load config file", e);
-        }
-        Path path = gameDirectory.resolve("config/EasyAuth").resolve(config.getConfigPath());
+    public static <T extends Config> T loadConfig(Class<T> configClass, String configPath) {
+        Path path = gameDirectory.resolve("config/EasyAuth").resolve(configPath);
         if (Files.exists(path)) {
             final HoconConfigurationLoader loader = HoconConfigurationLoader.builder().path(path).build();
             try {
@@ -31,8 +24,14 @@ public abstract class Config {
                 throw new RuntimeException("[EasyAuth] Failed to load config file", e);
             }
         } else {
-            config.save();
-            return config;
+            try {
+                T config = configClass.getDeclaredConstructor().newInstance();
+                config.save();
+                return config;
+            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                     InvocationTargetException e) {
+                throw new RuntimeException("[EasyAuth] Failed to create config file", e);
+            }
         }
     }
 

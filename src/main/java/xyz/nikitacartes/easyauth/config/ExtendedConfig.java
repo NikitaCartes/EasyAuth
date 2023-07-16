@@ -40,6 +40,10 @@ public class ExtendedConfig extends Config {
     public boolean useSimpleAuthDb = false;
     public boolean forcedOfflineUuid = false;
 
+    public static ExtendedConfig load() {
+        return loadConfig(ExtendedConfig.class, "extended.conf");
+    }
+
     protected String handleTemplate() throws IOException {
         Map<String, Object> configValues = new HashMap<>();
         configValues.put("allowChat", allowChat);

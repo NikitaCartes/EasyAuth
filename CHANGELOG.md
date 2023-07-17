@@ -22,7 +22,8 @@
 20) Fix blank uuid in console log
 21) Add Polish translation, thanks to @LimakXRobczuk
 22) Fix [#51](https://github.com/NikitaCartes/EasyAuth/issues/51) that sometimes online player treated as offline
-23) Added options to allow certain commands to be used before login
+23) Add options to allow certain commands to be used before login
+24) Add option to skip all authentication if it's already done by another thing (mod/proxy/etc)
 
 ### 2.2.2, Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2
 

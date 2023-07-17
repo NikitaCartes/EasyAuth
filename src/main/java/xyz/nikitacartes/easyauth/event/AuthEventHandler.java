@@ -117,6 +117,10 @@ public class AuthEventHandler {
             player.setInvisible(false);
             return;
         }
+        if (config.experimental.skipAllAuthChecks) {
+            ((PlayerAuth) player).setAuthenticated(true);
+            return;
+        }
         ((PlayerAuth) player).setAuthenticated(false);
 
 

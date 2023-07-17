@@ -396,5 +396,10 @@ public class AuthConfig {
         public boolean floodgateBypassUsernameRegex = false;
 
         public ArrayList<String> verifiedOnlinePlayer = new ArrayList<>();
+
+        /**
+         * Skip all authentication checks for all players. Should be used if authentication is handled by another plugin/proxy/etc.
+         */
+        public boolean skipAllAuthChecks = false;
     }
 }

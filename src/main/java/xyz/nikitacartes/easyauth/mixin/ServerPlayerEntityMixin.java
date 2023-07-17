@@ -1,8 +1,10 @@
 package xyz.nikitacartes.easyauth.mixin;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -51,6 +53,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
             cache.lastLocation.position = player.getPos();
             cache.lastLocation.yaw = player.getYaw();
             cache.lastLocation.pitch = player.getPitch();
+            cache.ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
 
             // Teleports player to spawn
             player.teleport(
@@ -72,6 +75,18 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
                 cache.lastLocation.yaw,
                 cache.lastLocation.pitch
         );
+        // Mount player to vehicle if it exists
+        if (cache.ridingEntityUUID != null) {
+            ServerWorld world = server.getWorld(cache.lastLocation.dimension.getRegistryKey());
+            if (world == null) return;
+            Entity entity = world.getEntity(cache.ridingEntityUUID);
+            if (entity != null) {
+                player.startRiding(entity, true);
+            } else {
+                LogDebug("Could not find vehicle for player " + player.getName().getContent());
+            }
+        }
+
     }
 
     /**

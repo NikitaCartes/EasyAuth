@@ -9,6 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -66,6 +67,11 @@ public class PlayerCache {
     public boolean wasInPortal = false;
 
     /**
+     * Contains the UUID of the entity that the player was riding before leaving the server.
+     */
+    public UUID ridingEntityUUID = null;
+
+    /**
      * Last recorded position before de-authentication.
      */
     public static class LastLocation {
@@ -105,6 +111,7 @@ public class PlayerCache {
             playerCache.lastLocation.position = player.getPos();
             playerCache.lastLocation.yaw = player.getYaw();
             playerCache.lastLocation.pitch = player.getPitch();
+            playerCache.ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
 
             playerCache.wasInPortal = false;
         }

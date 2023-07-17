@@ -147,8 +147,7 @@ public class AuthEventHandler {
             playerCache.lastIp = player.getIp();
 
             // Setting the session expire time
-            if (config.main.sessionTimeoutTime != -1)
-                playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000L;
+            playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000L;
         } else if (config.main.spawnOnJoin) {
             ((PlayerAuth) player).hidePosition(false);
 

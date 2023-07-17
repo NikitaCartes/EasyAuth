@@ -39,6 +39,7 @@ public class ExtendedConfig extends Config {
     public boolean useBcrypt = false;
     public boolean useSimpleAuthDb = false;
     public boolean forcedOfflineUuid = false;
+    public boolean skipAllAuthChecks = false;
 
     public static ExtendedConfig load() {
         return loadConfig(ExtendedConfig.class, "extended.conf");
@@ -71,6 +72,7 @@ public class ExtendedConfig extends Config {
         configValues.put("useBcrypt", useBcrypt);
         configValues.put("useSimpleAuthDb", useSimpleAuthDb);
         configValues.put("forcedOfflineUuid", forcedOfflineUuid);
+        configValues.put("skipAllAuthChecks", skipAllAuthChecks);
         String configTemplate = Resources.toString(getResource("config/" + getConfigPath()), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);
     }

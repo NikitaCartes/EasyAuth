@@ -64,12 +64,7 @@ public class AuthConfig {
                         config.experimental.forcedOfflineUuids = false;
                     }
                     if (config.main.premiumAutologin) {
-                        LogWarn("You cannot use server in offline mode and premiumAutologin! Disabling the latter.");
-                        config.main.premiumAutologin = false;
-                    }
-                } else {
-                    if (!config.main.premiumAutologin) {
-                        LogWarn("With online-mode enabled and premiumAutoLogin disabled, offline players will not be able to join.");
+                        LogInfo("You have premiumAutologin enabled. Enable online-mode so that online player can not register.");
                     }
                 }
                 if (config.experimental.enableServerSideTranslation && !FabricLoader.getInstance().isModLoaded("server_translations_api")) {

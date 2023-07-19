@@ -1,15 +1,10 @@
 package xyz.nikitacartes.easyauth.mixin;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
-import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
 import java.util.*;
@@ -23,9 +18,9 @@ public class PlayerListS2CPacketMixin {
     @Shadow
     private List<PlayerListS2CPacket.Entry> entries;
 
+    @Unique
     private static boolean hideFromTabList(ServerPlayerEntity player) {
-        return !(PlayerCache.isAuthenticated(((PlayerAuth) player).getFakeUuid()) ||
-                (((PlayerAuth) player).isUsingMojangAccount() && config.main.premiumAutologin));
+        return ((PlayerAuth) player).isAuthenticated();
     }
     @ModifyVariable(
             method = "<init>(Ljava/util/EnumSet;Ljava/util/Collection;)V",

@@ -19,8 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
 
@@ -71,7 +70,7 @@ public class WorldSaveHandlerMixin {
     private NbtCompound migratePlayerData(NbtCompound compoundTag, PlayerEntity player) {
         // Checking for offline player data only if online doesn't exist yet
         String playername = player.getGameProfile().getName().toLowerCase();
-        if (config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
+        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
             LogDebug(String.format("Migrating data for %s", playername));
             File file = new File(this.playerDataDir, Uuids.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
             if (file.exists() && file.isFile())

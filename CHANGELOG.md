@@ -4,6 +4,7 @@
 1) Add option to skip all authentication if it's already done by another thing (mod/proxy/etc):
    - `skipAllAuthChecks`
 2) Player will be re-mounted on entity if they were dismounted on login with `spawnOnJoin` enabled
+3) Changed behavior of `premiumAutologin`. Now it only allows online players not to authorize when logging in
 
 ----
 ### 3.0.18

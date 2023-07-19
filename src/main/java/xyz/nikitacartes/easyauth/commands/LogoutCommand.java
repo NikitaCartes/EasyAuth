@@ -3,14 +3,12 @@ package xyz.nikitacartes.easyauth.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import static net.minecraft.server.command.CommandManager.literal;
-import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
 
 public class LogoutCommand {
 
@@ -25,12 +23,13 @@ public class LogoutCommand {
     private static int logout(ServerCommandSource serverCommandSource) throws CommandSyntaxException {
         ServerPlayerEntity player = serverCommandSource.getPlayerOrThrow();
 
-        if (!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {
+        if (((PlayerAuth) player).isAuthenticated()) {
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             ((PlayerAuth) player).setAuthenticated(false);
             player.sendMessage(TranslationHelper.getSuccessfulLogout(), false);
-        } else
+        } else {
             player.sendMessage(TranslationHelper.getCannotLogout(), false);
+        }
         return 1;
     }
 }

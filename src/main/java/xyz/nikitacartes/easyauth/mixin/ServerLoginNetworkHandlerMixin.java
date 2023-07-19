@@ -2,8 +2,10 @@ package xyz.nikitacartes.easyauth.mixin;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.util.Uuids;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,6 +35,10 @@ public abstract class ServerLoginNetworkHandlerMixin {
     @Shadow
     ServerLoginNetworkHandler.State state;
 
+    @Final
+    @Shadow
+    MinecraftServer server;
+
     @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
     private void acceptPlayer(CallbackInfo ci) {
         if (config.experimental.forcedOfflineUuids) {
@@ -59,7 +65,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
             cancellable = true
     )
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
-        if (config.main.premiumAutologin) {
+        if (server.isOnlineMode()) {
             try {
                 String playername = packet.name().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");

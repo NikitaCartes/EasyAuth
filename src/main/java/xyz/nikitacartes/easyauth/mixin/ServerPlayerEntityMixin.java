@@ -54,6 +54,8 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
             cache.lastLocation.yaw = player.getYaw();
             cache.lastLocation.pitch = player.getPitch();
             cache.ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
+            LogDebug(String.format("Saving position of player %s", cache.lastLocation));
+            LogDebug(String.format("Saving vehicle of player %s", cache.ridingEntityUUID));
 
             // Teleports player to spawn
             player.teleport(
@@ -75,8 +77,10 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
                 cache.lastLocation.yaw,
                 cache.lastLocation.pitch
         );
+        LogDebug(String.format("Teleported player to %s", cache.lastLocation));
         // Mount player to vehicle if it exists
         if (cache.ridingEntityUUID != null) {
+            LogDebug(String.format("Mounting player to vehicle %s", cache.ridingEntityUUID));
             ServerWorld world = server.getWorld(cache.lastLocation.dimension.getRegistryKey());
             if (world == null) return;
             Entity entity = world.getEntity(cache.ridingEntityUUID);
@@ -157,7 +161,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      */
     @Override
     public boolean isUsingMojangAccount() {
-        return mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase());
+        return server.isOnlineMode() && mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase());
     }
 
     /**

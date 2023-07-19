@@ -3,11 +3,14 @@ package xyz.nikitacartes.easyauth.mixin;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Uuids;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Shadow;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,6 +28,10 @@ import static xyz.nikitacartes.easyauth.EasyAuth.config;
 
 @Mixin(PlayerManager.class)
 public abstract class PlayerManagerMixin {
+
+    @Final
+    @Shadow
+    private MinecraftServer server;
 
     @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("RETURN"))
     private void onPlayerConnect(ClientConnection clientConnection, ServerPlayerEntity serverPlayerEntity, CallbackInfo ci) {
@@ -59,7 +66,7 @@ public abstract class PlayerManagerMixin {
     )
     private void migrateOfflineStats(PlayerEntity player, CallbackInfoReturnable<ServerStatHandler> cir, UUID uUID, ServerStatHandler serverStatHandler, File serverStatsDir, File playerStatFile) {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
-        if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
+        if (server.isOnlineMode() && !config.experimental.forcedOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
             String playername = player.getGameProfile().getName();
             File offlineFile = new File(onlineFile.getParent(), Uuids.getOfflinePlayerUuid(playername) + ".json");
             offlineFile.renameTo(onlineFile);

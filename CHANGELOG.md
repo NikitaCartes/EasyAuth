@@ -5,6 +5,7 @@
    - `skipAllAuthChecks`
 2) Player will be re-mounted on entity if they were dismounted on login with `spawnOnJoin` enabled
 3) Changed behavior of `premiumAutologin`. Now it only allows online players not to authorize when logging in
+4) Fix incompatibility with LuckPerms with enabled forcedOfflineUuids
 
 ----
 ### 3.0.18

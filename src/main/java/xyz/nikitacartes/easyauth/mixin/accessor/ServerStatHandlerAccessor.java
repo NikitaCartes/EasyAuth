@@ -1,4 +1,4 @@
-package xyz.nikitacartes.easyauth.mixin;
+package xyz.nikitacartes.easyauth.mixin.accessor;
 
 import net.minecraft.stat.ServerStatHandler;
 import org.spongepowered.asm.mixin.Mixin;

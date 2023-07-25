@@ -1,3 +1,5 @@
 accessWidener	v1	named
 
 accessible class net/minecraft/server/network/ServerLoginNetworkHandler$State
+accessible method net/minecraft/server/network/ServerLoginNetworkHandler toOfflineProfile (Lcom/mojang/authlib/GameProfile;)Lcom/mojang/authlib/GameProfile;
+accessible field net/minecraft/server/network/ServerLoginNetworkHandler profile Lcom/mojang/authlib/GameProfile;

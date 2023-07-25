@@ -5,16 +5,16 @@
   "mixins": [
     "CommandManagerMixin",
     "MinecraftServerMixin",
-    "SaveAllCommandMixin",
     "PlayerAdvancementTrackerMixin",
     "PlayerListS2CPacketMixin",
     "PlayerManagerMixin",
+    "SaveAllCommandMixin",
     "ServerLoginNetworkHandlerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
-    "ServerStatHandlerAccessor",
     "SlotMixin",
-    "WorldSaveHandlerMixin"
+    "WorldSaveHandlerMixin",
+    "accessor.ServerStatHandlerAccessor"
   ],
   "minVersion": "0.8",
   "injectors": {

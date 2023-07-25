@@ -1,11 +1,15 @@
 package xyz.nikitacartes.easyauth.event;
 
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
+import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -279,6 +283,12 @@ public class AuthEventHandler {
         }
 
         return ActionResult.PASS;
+    }
+
+    public static void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, ServerLoginNetworking.LoginSynchronizer sync) {
+        if (config.experimental.forcedOfflineUuids) {
+            netHandler.profile = netHandler.toOfflineProfile(netHandler.profile);
+        }
     }
 
 }

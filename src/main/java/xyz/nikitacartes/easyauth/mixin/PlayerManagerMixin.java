@@ -12,6 +12,7 @@ import net.minecraft.util.Uuids;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.mixin.accessor.ServerStatHandlerAccessor;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

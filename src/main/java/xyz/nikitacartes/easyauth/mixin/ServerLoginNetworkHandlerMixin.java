@@ -30,21 +30,11 @@ public abstract class ServerLoginNetworkHandlerMixin {
     GameProfile profile;
 
     @Shadow
-    protected abstract GameProfile toOfflineProfile(GameProfile profile);
-
-    @Shadow
     ServerLoginNetworkHandler.State state;
 
     @Final
     @Shadow
     MinecraftServer server;
-
-    @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
-    private void acceptPlayer(CallbackInfo ci) {
-        if (config.experimental.forcedOfflineUuids) {
-            this.profile = this.toOfflineProfile(this.profile);
-        }
-    }
 
     /**
      * Checks whether the player has purchased an account.

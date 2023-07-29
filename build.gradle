@@ -118,10 +118,8 @@ curseforge {
     project {
         id = "503866"
         changelogType = "markdown"
-        changelog = "**Release notes and Changelog:**\n\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}"
+        changelog = "Release notes:\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}\n\nChangelog:\nhttps://github.com/NikitaCartes/EasyAuth/tree/HEAD/CHANGELOG.md"
         releaseType = "beta"
-
-        addGameVersion("Server")
 
         addGameVersion("Fabric")
         addGameVersion("Quilt")

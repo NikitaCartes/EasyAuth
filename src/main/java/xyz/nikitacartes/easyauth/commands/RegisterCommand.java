@@ -37,7 +37,7 @@ public class RegisterCommand {
     // Method called for hashing the password & writing to DB
     private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayerOrThrow();
-        if (config.main.enableGlobalPassword) {
+        if (config.enableGlobalPassword) {
             player.sendMessage(TranslationHelper.getLoginRequired(), false);
             return 0;
         } else if (((PlayerAuth) player).isAuthenticated()) {
@@ -49,10 +49,10 @@ public class RegisterCommand {
         }
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            if (pass1.length() < config.main.minPasswordChars) {
+            if (pass1.length() < extendedConfig.minPasswordLength) {
                 player.sendMessage(TranslationHelper.getMinPasswordChars(), false);
                 return;
-            } else if (pass1.length() > config.main.maxPasswordChars && config.main.maxPasswordChars != -1) {
+            } else if (pass1.length() > extendedConfig.maxPasswordLength && extendedConfig.maxPasswordLength != -1) {
                 player.sendMessage(TranslationHelper.getMaxPasswordChars(), false);
                 return;
             }

@@ -71,7 +71,7 @@ public class WorldSaveHandlerMixin {
     private NbtCompound migratePlayerData(NbtCompound compoundTag, PlayerEntity player) {
         // Checking for offline player data only if online doesn't exist yet
         String playername = player.getGameProfile().getName().toLowerCase();
-        if (config.main.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
+        if (config.premiumAutologin && mojangAccountNamesCache.contains(playername) && !this.fileExists) {
             LogDebug(String.format("Migrating data for %s", playername));
             File file = new File(this.playerDataDir, Uuids.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
             if (file.exists() && file.isFile())

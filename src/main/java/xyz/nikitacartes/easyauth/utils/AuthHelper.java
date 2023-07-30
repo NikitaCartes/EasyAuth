@@ -3,8 +3,7 @@ package xyz.nikitacartes.easyauth.utils;
 import xyz.nikitacartes.easyauth.utils.hashing.HasherArgon2;
 import xyz.nikitacartes.easyauth.utils.hashing.HasherBCrypt;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
 
 public class AuthHelper {
     /**
@@ -16,11 +15,11 @@ public class AuthHelper {
      */
     public static PasswordOptions checkPassword(String uuid, char[] password) {
         String hashed = playerCacheMap.get(uuid).password;
-        if (config.main.enableGlobalPassword) {
+        if (config.enableGlobalPassword) {
             // We have global password enabled
             // Player must know global password or password set by auth register
             char [] passwordCopy = password.clone();
-            return (verifyPassword(password, config.main.globalPassword) || (!hashed.isEmpty() && verifyPassword(passwordCopy, hashed))) ? PasswordOptions.CORRECT : PasswordOptions.WRONG;
+            return (verifyPassword(password, technicalConfig.globalPassword) || (!hashed.isEmpty() && verifyPassword(passwordCopy, hashed))) ? PasswordOptions.CORRECT : PasswordOptions.WRONG;
         } else {
             if (hashed.isEmpty())
                 return PasswordOptions.NOT_REGISTERED;
@@ -37,14 +36,14 @@ public class AuthHelper {
      * @return hashed password as string
      */
     public static String hashPassword(char[] password) {
-        if (config.experimental.useBCryptLibrary)
+        if (extendedConfig.useBcrypt)
             return HasherBCrypt.hash(password);
         else
             return HasherArgon2.hash(password);
     }
 
     private static boolean verifyPassword(char[] pass, String hashed) {
-        if (config.experimental.useBCryptLibrary)
+        if (extendedConfig.useBcrypt)
             return HasherBCrypt.verify(pass, hashed);
         else
             return HasherArgon2.verify(pass, hashed);

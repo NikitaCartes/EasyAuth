@@ -1,17 +1,23 @@
 package xyz.nikitacartes.easyauth.config;
 
+import net.fabricmc.loader.api.FabricLoader;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import xyz.nikitacartes.easyauth.EasyAuth;
+import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
 
 public abstract class Config {
     public static <T extends Config> T loadConfig(Class<T> configClass, String configPath) {
@@ -24,18 +30,55 @@ public abstract class Config {
                 throw new RuntimeException("[EasyAuth] Failed to load config file", e);
             }
         } else {
-            try {
-                T config = configClass.getDeclaredConstructor().newInstance();
-                config.save();
-                return config;
-            } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
-                     InvocationTargetException e) {
-                throw new RuntimeException("[EasyAuth] Failed to create config file", e);
-            }
+            return null;
         }
     }
 
-    protected abstract String getConfigPath();
+    public static <T extends Config> T createConfig(Class<T> configClass) {
+        try {
+            T config = configClass.getDeclaredConstructor().newInstance();
+            config.save();
+            return config;
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
+            throw new RuntimeException("[EasyAuth] Failed to create config file", e);
+        }
+    }
+
+    public static void loadConfigs() {
+        File file = new File(gameDirectory + "/config/EasyAuth");
+        if (!file.exists() && !file.mkdirs()) {
+            throw new RuntimeException("[EasyAuth] Error creating directory for configs");
+        }
+        EasyAuth.config = MainConfigV1.load();
+        if (EasyAuth.config == null) {
+            EasyAuth.config = MainConfigV1.create();
+            EasyAuth.technicalConfig = TechnicalConfigV1.create();
+            EasyAuth.langConfig = LangConfigV1.create();
+            EasyAuth.technicalConfig = TechnicalConfigV1.create();
+            EasyAuth.storageConfig = StorageConfigV1.create();
+
+            ConfigMigration.migrateFromV0();
+        } else {
+            EasyAuth.technicalConfig = TechnicalConfigV1.load();
+            EasyAuth.langConfig = LangConfigV1.load();
+            EasyAuth.technicalConfig = TechnicalConfigV1.load();
+            EasyAuth.storageConfig = StorageConfigV1.load();
+        }
+
+        if (EasyAuth.langConfig.enableServerSideTranslation && !FabricLoader.getInstance().isModLoaded("server_translations_api")) {
+            EasyAuth.langConfig.enableServerSideTranslation = false;
+        }
+        AuthEventHandler.usernamePattern = Pattern.compile(EasyAuth.extendedConfig.usernameRegexp);
+    }
+
+    public static void saveConfigs() {
+        EasyAuth.config.save();
+        EasyAuth.technicalConfig.save();
+        EasyAuth.langConfig.save();
+        EasyAuth.technicalConfig.save();
+        EasyAuth.storageConfig.save();
+    }
 
     public void save() {
         Path path = gameDirectory.resolve("config/EasyAuth").resolve(getConfigPath());
@@ -45,8 +88,6 @@ public abstract class Config {
             LogError("Failed to save config file", e);
         }
     }
-
-    protected abstract String handleTemplate() throws IOException;
 
     protected String handleArray(ArrayList<String> strings) {
         return strings.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", "));
@@ -63,4 +104,9 @@ public abstract class Config {
                 .replace("\"", "\\\"")
                 .replace("'", "\\'");
     }
+
+    protected abstract String getConfigPath();
+
+    protected abstract String handleTemplate() throws IOException;
+
 }

@@ -10,7 +10,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
-import xyz.nikitacartes.easyauth.storage.AuthConfig;
+import xyz.nikitacartes.easyauth.config.Config;
+import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.storage.database.DBApiException;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
@@ -142,7 +143,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int reloadConfig(Entity sender) {
-        config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
+        Config.loadConfigs();
 
         try {
             DB.connect();
@@ -153,7 +154,7 @@ public class AuthCommand {
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getConfigurationReloaded(), false);
         else
-            LogInfo(config.lang.configurationReloaded);
+            LogInfo(langConfig.configurationReloaded);
         return 1;
     }
 
@@ -170,15 +171,16 @@ public class AuthCommand {
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
             // Writing the global pass to config
-            config.main.globalPassword = AuthHelper.hashPassword(password.toCharArray());
-            config.main.enableGlobalPassword = true;
-            config.save(new File("./mods/EasyAuth/config.json"));
+            technicalConfig.globalPassword = AuthHelper.hashPassword(password.toCharArray());
+            config.enableGlobalPassword = true;
+            technicalConfig.save();
+            config.save();
         });
 
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getGlobalPasswordSet(), false);
         else
-            LogInfo(config.lang.globalPasswordSet);
+            LogInfo(langConfig.globalPasswordSet);
         return 1;
     }
 
@@ -204,8 +206,8 @@ public class AuthCommand {
             config.worldSpawn.z = z;
             config.worldSpawn.yaw = yaw;
             config.worldSpawn.pitch = pitch;
-            config.main.spawnOnJoin = true;
-            config.save(new File("./mods/EasyAuth/config.json"));
+            config.hidePlayerCoords = true;
+            config.save();
         });
 
         // Getting sender
@@ -213,7 +215,7 @@ public class AuthCommand {
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getWorldSpawnSet(), false);
         else
-            LogInfo(config.lang.worldSpawnSet);
+            LogInfo(langConfig.worldSpawnSet);
         return 1;
     }
 
@@ -234,7 +236,7 @@ public class AuthCommand {
         if (sender != null)
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataDeleted(), false);
         else
-            LogInfo(config.lang.userdataDeleted);
+            LogInfo(langConfig.userdataDeleted);
         return 1; // Success
     }
 
@@ -264,7 +266,7 @@ public class AuthCommand {
             if (sender != null)
                 ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataUpdated(), false);
             else
-                LogInfo(config.lang.userdataUpdated);
+                LogInfo(langConfig.userdataUpdated);
         });
         return 0;
     }
@@ -294,7 +296,7 @@ public class AuthCommand {
                 if (sender != null)
                     ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserNotRegistered(), false);
                 else
-                    LogInfo(config.lang.userNotRegistered);
+                    LogInfo(langConfig.userNotRegistered);
                 return;
             }
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
@@ -302,7 +304,7 @@ public class AuthCommand {
             if (sender != null)
                 ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataUpdated(), false);
             else
-                LogInfo(config.lang.userdataUpdated);
+                LogInfo(langConfig.userdataUpdated);
         });
         return 0;
     }
@@ -324,7 +326,7 @@ public class AuthCommand {
             ((PlayerEntity) sender).sendMessage(
                     TranslationHelper.getOfflineUuid(player, uuid), false);
         } else
-            LogInfo(String.format(config.lang.offlineUuid, player, uuid));
+            LogInfo(String.format(langConfig.offlineUuid, player, uuid));
         return 1;
     }
 
@@ -360,15 +362,15 @@ public class AuthCommand {
         Entity sender = source.getEntity();
 
         THREADPOOL.submit(() -> {
-            config.main.forcedOfflinePlayers.add(player.toLowerCase(Locale.ROOT));
-            config.experimental.verifiedOnlinePlayer.remove(player.toLowerCase(Locale.ROOT));
-            config.save(new File("./mods/EasyAuth/config.json"));
+            technicalConfig.forcedOfflinePlayers.add(player.toLowerCase(Locale.ROOT));
+            technicalConfig.confirmedOnlinePlayers.remove(player.toLowerCase(Locale.ROOT));
+            technicalConfig.save();
         });
 
         if (sender != null) {
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getAddToForcedOffline(), false);
         } else
-            LogInfo(config.lang.addToForcedOffline);
+            LogInfo(langConfig.addToForcedOffline);
         return 1;
     }
 

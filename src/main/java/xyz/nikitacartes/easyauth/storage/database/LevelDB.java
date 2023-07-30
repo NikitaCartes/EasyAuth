@@ -5,9 +5,9 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import xyz.nikitacartes.easyauth.EasyAuth;
-import xyz.nikitacartes.easyauth.storage.AuthConfig;
+import xyz.nikitacartes.easyauth.config.StorageConfigV1;
+import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
-import xyz.nikitacartes.easyauth.utils.hashing.HasherBCrypt;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,12 +20,12 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 public class LevelDB implements DbApi {
     private DB levelDBStore;
-    private final AuthConfig config;
+    private final StorageConfigV1 config;
 
     /**
      * Prepares connection to the LevelDB.
      */
-    public LevelDB(AuthConfig config) {
+    public LevelDB(StorageConfigV1 config) {
         this.config = config;
     }
 
@@ -39,7 +39,7 @@ public class LevelDB implements DbApi {
                 throw new DBApiException("Error creating LevelDB directory", null);
             LogDebug("You are using LevelDB");
             Options options = new Options();
-            levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + (config.experimental.useSimpleAuthDatabase ? "SimpleAuth" : "EasyAuth") + "/levelDBStore"), options);
+            levelDBStore = factory.open(new File(EasyAuth.gameDirectory + "/mods/" + (config.useSimpleAuthDb ? "SimpleAuth" : "EasyAuth") + "/levelDBStore"), options);
         } catch (IOException e) {
             throw new DBApiException("Failed setting up LevelDB", e);
         }

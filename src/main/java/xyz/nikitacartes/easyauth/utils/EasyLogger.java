@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 public class EasyLogger {
     private static final Logger logger = LogManager.getLogger("EasyAuth");
@@ -36,13 +37,13 @@ public class EasyLogger {
     }
 
     public static void LogDebug(String message) {
-        if (config != null && config.experimental.debugMode) {
+        if (extendedConfig != null && config.debug) {
             log(Level.INFO, "[DEBUG]: " + message);
         }
     }
 
     public static void LogDebug(String message, Throwable e) {
-        if (config != null && config.experimental.debugMode) {
+        if (config != null && config.debug) {
             log(Level.INFO, "[DEBUG]: " + message, e);
         }
     }

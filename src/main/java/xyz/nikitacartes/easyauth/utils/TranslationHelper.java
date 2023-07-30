@@ -5,206 +5,205 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import java.util.UUID;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
 
 public class TranslationHelper {
 
     public static Text getEnterPassword() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.enterPassword") :
-                Text.of(config.lang.enterPassword);
+                Text.of(langConfig.enterPassword);
     }
 
     public static Text getEnterNewPassword() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.enterNewPassword") :
-                Text.of(config.lang.enterNewPassword);
+                Text.of(langConfig.enterNewPassword);
     }
 
     public static Text getWrongPassword() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.wrongPassword") :
-                Text.of(config.lang.wrongPassword);
+                Text.of(langConfig.wrongPassword);
     }
 
     public static Text getMatchPassword() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.matchPassword") :
-                Text.of(config.lang.matchPassword);
+                Text.of(langConfig.matchPassword);
     }
 
     public static Text getPasswordUpdated() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.passwordUpdated") :
-                Text.of(config.lang.passwordUpdated);
+                Text.of(langConfig.passwordUpdated);
     }
 
     public static Text getLoginRequired() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.loginRequired") :
-                Text.of(config.lang.loginRequired);
+                Text.of(langConfig.loginRequired);
     }
 
     public static Text getLoginTriesExceeded() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.loginTriesExceeded") :
-                Text.of(config.lang.loginTriesExceeded);
+                Text.of(langConfig.loginTriesExceeded);
     }
 
     public static Text getGlobalPasswordSet() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.globalPasswordSet") :
-                Text.of(config.lang.globalPasswordSet);
+                Text.of(langConfig.globalPasswordSet);
     }
 
     public static Text getCannotChangePassword() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.cannotChangePassword") :
-                Text.of(config.lang.cannotChangePassword);
+                Text.of(langConfig.cannotChangePassword);
     }
 
     public static Text getCannotUnregister() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.cannotUnregister") :
-                Text.of(config.lang.cannotUnregister);
+                Text.of(langConfig.cannotUnregister);
     }
 
     public static Text getNotAuthenticated() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.notAuthenticated") :
-                Text.of(config.lang.notAuthenticated);
+                Text.of(langConfig.notAuthenticated);
     }
 
     public static Text getAlreadyAuthenticated() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.alreadyAuthenticated") :
-                Text.of(config.lang.alreadyAuthenticated);
+                Text.of(langConfig.alreadyAuthenticated);
     }
 
     public static Text getSuccessfullyAuthenticated() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.successfullyAuthenticated") :
-                Text.of(config.lang.successfullyAuthenticated);
+                Text.of(langConfig.successfullyAuthenticated);
     }
 
     public static Text getSuccessfulLogout() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.successfulLogout") :
-                Text.of(config.lang.successfulLogout);
+                Text.of(langConfig.successfulLogout);
     }
 
     public static Text getTimeExpired() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.timeExpired") :
-                Text.of(config.lang.timeExpired);
+                Text.of(langConfig.timeExpired);
     }
 
     public static Text getRegisterRequired() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.registerRequired") :
-                Text.of(config.lang.registerRequired);
+                Text.of(langConfig.registerRequired);
     }
 
     public static Text getAlreadyRegistered() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.alreadyAuthenticated") :
-                Text.of(config.lang.alreadyAuthenticated);
+                Text.of(langConfig.alreadyAuthenticated);
     }
 
     public static Text getRegisterSuccess() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.registerSuccess") :
-                Text.of(config.lang.registerSuccess);
+                Text.of(langConfig.registerSuccess);
     }
 
     public static Text getUserdataDeleted() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.userdataDeleted") :
-                Text.of(config.lang.userdataDeleted);
+                Text.of(langConfig.userdataDeleted);
     }
 
     public static Text getUserdataUpdated() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.userdataUpdated") :
-                Text.of(config.lang.userdataUpdated);
+                Text.of(langConfig.userdataUpdated);
     }
 
     public static Text getAccountDeleted() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.accountDeleted") :
-                Text.of(config.lang.accountDeleted);
+                Text.of(langConfig.accountDeleted);
     }
 
     public static Text getConfigurationReloaded() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.configurationReloaded") :
-                Text.of(config.lang.configurationReloaded);
+                Text.of(langConfig.configurationReloaded);
     }
 
     public static Text getMaxPasswordChars() {
-        return config.experimental.enableServerSideTranslation ?
-                Text.translatable("text.easyauth.maxPasswordChars", config.main.maxPasswordChars) :
-                Text.of(String.format(config.lang.maxPasswordChars, config.main.maxPasswordChars));
+        return langConfig.enableServerSideTranslation ?
+                Text.translatable("text.easyauth.maxPasswordChars", extendedConfig.maxPasswordLength) :
+                Text.of(String.format(langConfig.maxPasswordChars, extendedConfig.maxPasswordLength));
     }
 
     public static Text getMinPasswordChars() {
-        return config.experimental.enableServerSideTranslation ?
-                Text.translatable("text.easyauth.minPasswordChars", config.main.minPasswordChars) :
-                Text.of(String.format(config.lang.minPasswordChars, config.main.minPasswordChars));
+        return langConfig.enableServerSideTranslation ?
+                Text.translatable("text.easyauth.minPasswordChars", extendedConfig.minPasswordLength) :
+                Text.of(String.format(langConfig.minPasswordChars, extendedConfig.minPasswordLength));
     }
 
     public static Text getDisallowedUsername() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.disallowedUsername") :
-                Text.of(config.lang.disallowedUsername);
+                Text.of(langConfig.disallowedUsername);
     }
 
     public static Text getPlayerAlreadyOnline() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.playerAlreadyOnline") :
-                Text.of(config.lang.playerAlreadyOnline);
+                Text.of(langConfig.playerAlreadyOnline);
     }
 
     public static Text getWorldSpawnSet() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.worldSpawnSet") :
-                Text.of(config.lang.worldSpawnSet);
+                Text.of(langConfig.worldSpawnSet);
     }
 
     public static Text getCorruptedPlayerData() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.corruptedPlayerData") :
-                Text.of(config.lang.corruptedPlayerData);
+                Text.of(langConfig.corruptedPlayerData);
     }
 
     public static Text getUserNotRegistered() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.userNotRegistered") :
-                Text.of(config.lang.userNotRegistered);
+                Text.of(langConfig.userNotRegistered);
     }
 
     public static Text getCannotLogout() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.cannotLogout") :
-                Text.of(config.lang.cannotLogout);
+                Text.of(langConfig.cannotLogout);
     }
 
     public static Text getOfflineUuid(String player, UUID uuid) {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.offlineUuid", player).
                         append(Text.translatable(" [" + uuid + "]").
                                 setStyle(Style.EMPTY.withClickEvent(
                                         new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))).
                                 formatted(Formatting.YELLOW)) :
                 TextParserUtils.formatText(
-                        String.format(config.lang.offlineUuid, player) + " <yellow><copy:" + uuid.toString() + ">[" + uuid + "]"
+                        String.format(langConfig.offlineUuid, player) + " <yellow><copy:" + uuid.toString() + ">[" + uuid + "]"
                 );
     }
 
     public static Text getRegisteredPlayers(boolean plainString) {
         int i = 0;
-        if (config.experimental.enableServerSideTranslation && !plainString) {
+        if (langConfig.enableServerSideTranslation && !plainString) {
             MutableText message = Text.translatable("text.easyauth.registeredPlayers");
             for (var entry : playerCacheMap.entrySet()) {
                 if (!entry.getValue().password.isEmpty()) {
@@ -217,7 +216,7 @@ public class TranslationHelper {
             }
             return message;
         } else {
-            StringBuilder message = new StringBuilder(config.lang.registeredPlayers);
+            StringBuilder message = new StringBuilder(langConfig.registeredPlayers);
             for (var entry : playerCacheMap.entrySet()) {
                 if (!entry.getValue().password.isEmpty()) {
                     i++;
@@ -229,9 +228,9 @@ public class TranslationHelper {
     }
 
     public static Text getAddToForcedOffline() {
-        return config.experimental.enableServerSideTranslation ?
+        return langConfig.enableServerSideTranslation ?
                 Text.translatable("text.easyauth.addToForcedOffline") :
-                Text.of(config.lang.addToForcedOffline);
+                Text.of(langConfig.addToForcedOffline);
     }
 
 

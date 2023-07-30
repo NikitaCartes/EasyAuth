@@ -35,7 +35,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
     @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
     private void acceptPlayer(CallbackInfo ci) {
-        if (config.experimental.forcedOfflineUuids) {
+        if (extendedConfig.forcedOfflineUuid) {
             this.profile = this.toOfflineProfile(this.profile);
         }
     }
@@ -59,12 +59,12 @@ public abstract class ServerLoginNetworkHandlerMixin {
             cancellable = true
     )
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
-        if (config.main.premiumAutologin) {
+        if (config.premiumAutologin) {
             try {
                 String playername = packet.name().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
                 Matcher matcher = pattern.matcher(playername);
-                if (config.main.forcedOfflinePlayers.contains(playername)) {
+                if (technicalConfig.forcedOfflinePlayers.contains(playername)) {
                     LogDebug("Player " + playername + " is forced to be offline");
                     mojangAccountNamesCache.remove(playername);
                     state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
@@ -73,7 +73,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     ci.cancel();
                     return;
                 }
-                if (mojangAccountNamesCache.contains(playername) || config.experimental.verifiedOnlinePlayer.contains(playername)) {
+                if (mojangAccountNamesCache.contains(playername) || technicalConfig.confirmedOnlinePlayers.contains(playername)) {
                     LogDebug("Player " + playername + " is cached as online player. Authentication continues as vanilla");
                     mojangAccountNamesCache.add(playername);
                     return;
@@ -101,8 +101,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
                         // Caches the request
                         mojangAccountNamesCache.add(playername);
-                        config.experimental.verifiedOnlinePlayer.add(playername);
-                        config.save(new File("./mods/EasyAuth/config.json"));
+                        technicalConfig.confirmedOnlinePlayers.add(playername);
+                        technicalConfig.save();
                         // Authentication continues in original method
                     } else if (response == HttpURLConnection.HTTP_NO_CONTENT || response == HttpURLConnection.HTTP_NOT_FOUND) {
                         // Player doesn't have a Mojang account

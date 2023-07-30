@@ -33,7 +33,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     public MinecraftServer server;
     // * 20 for 20 ticks in second
     @Unique
-    private int kickTimer = config.main.kickTime * 20;
+    private long kickTimer = config.kickTimeout * 20;
 
     /**
      * Teleports player to spawn or last location that is recorded.
@@ -85,7 +85,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     public String getFakeUuid() {
         // If server is in online mode online-mode UUIDs should be used
         assert server != null;
-        if (server.isOnlineMode() && this.isUsingMojangAccount() && !config.experimental.forcedOfflineUuids)
+        if (server.isOnlineMode() && this.isUsingMojangAccount() && !extendedConfig.forcedOfflineUuid)
             return player.getUuidAsString();
         /*
             Lower case is used for Player and PlAyEr to get same UUID (for password storing)
@@ -106,17 +106,17 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     @Override
     public Text getAuthMessage() {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
-        if (!config.main.enableGlobalPassword && (cache == null || cache.password.isEmpty())) {
-            if (config.experimental.enableServerSideTranslation) {
+        if (!config.enableGlobalPassword && (cache == null || cache.password.isEmpty())) {
+            if (langConfig.enableServerSideTranslation) {
                 return Text.translatable("text.easyauth.notAuthenticated").append("\n").append(Text.translatable("text.easyauth.registerRequired"));
             } else {
-                return Text.of(config.lang.notAuthenticated + "\n" + config.lang.registerRequired);
+                return Text.of(langConfig.notAuthenticated + "\n" + langConfig.registerRequired);
             }
         } else {
-            if (config.experimental.enableServerSideTranslation) {
+            if (langConfig.enableServerSideTranslation) {
                 return Text.translatable("text.easyauth.notAuthenticated").append("\n").append(Text.translatable("text.easyauth.loginRequired"));
             } else {
-                return Text.of(config.lang.notAuthenticated + "\n" + config.lang.loginRequired);
+                return Text.of(langConfig.notAuthenticated + "\n" + langConfig.loginRequired);
             }
         }
 
@@ -131,8 +131,8 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
     @Override
     public boolean canSkipAuth() {
         return (this.player.getClass() != ServerPlayerEntity.class) ||
-                (config.main.floodgateAutologin && config.experimental.floodgateLoaded && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
-                (isUsingMojangAccount() && config.main.premiumAutologin);
+                (config.floodgateAutoLogin && technicalConfig.floodgateLoaded && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
+                (isUsingMojangAccount() && config.premiumAutologin);
     }
 
     /**
@@ -167,15 +167,15 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
         PlayerCache playerCache = playerCacheMap.get(this.getFakeUuid());
         playerCache.isAuthenticated = authenticated;
 
-        player.setInvulnerable(!authenticated && config.experimental.playerInvulnerable);
-        player.setInvisible(!authenticated && config.experimental.playerInvisible);
+        player.setInvulnerable(!authenticated && extendedConfig.playerInvulnerable);
+        player.setInvisible(!authenticated && extendedConfig.playerIgnored);
 
         // Teleporting player (hiding / restoring position)
-        if (config.main.spawnOnJoin)
+        if (config.hidePlayerCoords)
             this.hidePosition(!authenticated);
 
         if (authenticated) {
-            kickTimer = config.main.kickTime * 20;
+            kickTimer = config.kickTimeout * 20;
             // Updating blocks if needed (in case if portal rescue action happened)
             if (playerCache.wasInPortal) {
                 World world = player.getEntityWorld();

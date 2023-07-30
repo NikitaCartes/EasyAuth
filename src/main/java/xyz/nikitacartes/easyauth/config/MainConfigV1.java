@@ -12,29 +12,31 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class MainConfig extends Config {
+public class MainConfigV1 extends Config {
     public boolean premiumAutologin = true;
     public boolean floodgateAutoLogin = true;
-    public int maxLoginTries = 3;
-    public int kickTimeout = 60;
-    public int resetLoginAttemptsTimeout = 120;
-    public int sessionTimeout = 86400;
+    public long maxLoginTries = 3;
+    public long kickTimeout = 60;
+    public long resetLoginAttemptsTimeout = 120;
+    public long sessionTimeout = 86400;
     public boolean enableGlobalPassword = false;
     public boolean hidePlayerCoords = false;
     public boolean debug = false;
-    public int configVersion = 1;
+    public long configVersion = 1;
     public WorldSpawn worldSpawn = new WorldSpawn();
 
-    public static MainConfig load() {
-        return loadConfig(MainConfig.class, "main.conf");
+    public static MainConfigV1 load() {
+        return loadConfig(MainConfigV1.class, "main.conf");
     }
 
-    @Override
+    public static MainConfigV1 create() {
+        return createConfig(MainConfigV1.class);
+    }
+
     protected String getConfigPath() {
         return "main.conf";
     }
 
-    @Override
     protected String handleTemplate() throws IOException {
         Map<String, Object> configValues = new HashMap<>();
         configValues.put("premiumAutologin", premiumAutologin);

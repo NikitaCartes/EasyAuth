@@ -10,7 +10,8 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.ReplaceOneModel;
 import org.bson.Document;
-import xyz.nikitacartes.easyauth.storage.AuthConfig;
+import xyz.nikitacartes.easyauth.config.StorageConfigV1;
+import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
 import java.util.ArrayList;
@@ -21,19 +22,19 @@ import static com.mongodb.client.model.Filters.eq;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 public class MongoDB implements DbApi {
-    private final AuthConfig config;
+    private final StorageConfigV1 config;
     private MongoCollection<Document> collection;
     private MongoClient mongoClient;
 
-    public MongoDB(AuthConfig config) {
+    public MongoDB(StorageConfigV1 config) {
         this.config = config;
     }
 
     public void connect() throws DBApiException {
         LogDebug("You are using Mongo DB");
         try {
-            mongoClient = MongoClients.create(config.main.MongoDBConnectionString);
-            MongoDatabase database = mongoClient.getDatabase(config.main.MongoDBDatabase);
+            mongoClient = MongoClients.create(config.mongoDBConfig.mongodbConnectionString);
+            MongoDatabase database = mongoClient.getDatabase(config.mongoDBConfig.mongodbDatabase);
             collection = database.getCollection("players");
         } catch (MongoClientException | MongoCommandException e) {
             throw new DBApiException("Failed connecting to MongoDB", e);

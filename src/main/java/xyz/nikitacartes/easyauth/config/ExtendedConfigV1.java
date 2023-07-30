@@ -13,7 +13,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class ExtendedConfig extends Config {
+public class ExtendedConfigV1 extends Config {
     public boolean allowChat = false;
     public boolean allowCommands = false;
     public ArrayList<String> allowedCommands = new ArrayList<>();
@@ -27,22 +27,29 @@ public class ExtendedConfig extends Config {
     public boolean allowItemUsing = false;
     public boolean playerInvulnerable = true;
     public boolean playerIgnored = true;
-    public int teleportationTimeoutMs = 5;
+    public long teleportationTimeoutMs = 5;
     public boolean enableAliases = true;
     public boolean tryPortalRescue = true;
-    public int minPasswordLength = 4;
-    public int maxPasswordLength = -1;
+    public long minPasswordLength = 4;
+    public long maxPasswordLength = -1;
     public String usernameRegexp = "^[a-zA-Z0-9_]{3,16}$";
     public boolean floodgateBypassRegex = true;
     public boolean hidePlayersFromPlayerList = false;
     public boolean preventAnotherLocationKick = true;
     public boolean useBcrypt = false;
-    public boolean useSimpleAuthDb = false;
     public boolean forcedOfflineUuid = false;
     public boolean skipAllAuthChecks = false;
 
-    public static ExtendedConfig load() {
-        return loadConfig(ExtendedConfig.class, "extended.conf");
+    public static ExtendedConfigV1 load() {
+        return loadConfig(ExtendedConfigV1.class, "extended.conf");
+    }
+
+    public static ExtendedConfigV1 create() {
+        return createConfig(ExtendedConfigV1.class);
+    }
+
+    protected String getConfigPath() {
+        return "extended.conf";
     }
 
     protected String handleTemplate() throws IOException {
@@ -70,14 +77,10 @@ public class ExtendedConfig extends Config {
         configValues.put("hidePlayersFromPlayerList", hidePlayersFromPlayerList);
         configValues.put("preventAnotherLocationKick", preventAnotherLocationKick);
         configValues.put("useBcrypt", useBcrypt);
-        configValues.put("useSimpleAuthDb", useSimpleAuthDb);
         configValues.put("forcedOfflineUuid", forcedOfflineUuid);
         configValues.put("skipAllAuthChecks", skipAllAuthChecks);
         String configTemplate = Resources.toString(getResource("config/" + getConfigPath()), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);
     }
 
-    protected String getConfigPath() {
-        return "extended.conf";
-    }
 }

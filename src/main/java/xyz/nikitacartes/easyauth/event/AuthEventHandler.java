@@ -11,7 +11,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
-import xyz.nikitacartes.easyauth.storage.AuthConfig;
+import xyz.nikitacartes.easyauth.config.Config;
+import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
@@ -20,8 +21,7 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
-import static xyz.nikitacartes.easyauth.EasyAuth.playerCacheMap;
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 /**
@@ -49,29 +49,29 @@ public class AuthEventHandler {
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
         if (usernamePattern == null) {
             if (config == null) {
-                config = AuthConfig.load(new File("./mods/EasyAuth/config.json"));
+                Config.saveConfigs();
             }
-            usernamePattern = Pattern.compile(config.main.usernameRegex);
+            usernamePattern = Pattern.compile(extendedConfig.usernameRegexp);
         }
         Matcher matcher = usernamePattern.matcher(incomingPlayerUsername);
 
-        if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && config.experimental.preventAnotherLocationKick) {
+        if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && extendedConfig.preventAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
             return Text.of(
                     String.format(
-                            config.lang.playerAlreadyOnline, onlinePlayer.getName().getContent()
+                            langConfig.playerAlreadyOnline, onlinePlayer.getName().getContent()
                     )
             );
-        } else if (!(matcher.matches() || (config.experimental.floodgateLoaded && config.experimental.floodgateBypassUsernameRegex && FloodgateApiHelper.isFloodgatePlayer(profile.getId())))) {
+        } else if (!(matcher.matches() || (technicalConfig.floodgateLoaded && extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(profile.getId())))) {
             return Text.of(
                     String.format(
-                            config.lang.disallowedUsername, config.main.usernameRegex
+                            langConfig.disallowedUsername, extendedConfig.usernameRegexp
                     )
             );
         }
         // If the player has too many login attempts, kick them immediately.
-        if (config.main.maxLoginTries != -1) {
+        if (config.maxLoginTries != -1) {
             // We won't load the player cache *into the map* if it is not already present (first join since restart)
             // because loading the player cache with a null player prevents the last location from being set.
             if (profile.getId() == null) {
@@ -81,8 +81,8 @@ public class AuthEventHandler {
             String incomingPlayerUuid = profile.getId().toString();
             PlayerCache playerCache = playerCacheMap.containsKey(incomingPlayerUuid) ?
                     playerCacheMap.get(incomingPlayerUuid) : PlayerCache.fromJson(null, incomingPlayerUuid);
-            if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
-                return Text.of(config.lang.loginTriesExceeded);
+            if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.resetLoginAttemptsTimeout) {
+                return Text.of(langConfig.loginTriesExceeded);
             }
         }
         return null;
@@ -121,7 +121,7 @@ public class AuthEventHandler {
 
 
         // Tries to rescue player from nether portal
-        if (config.main.tryPortalRescue) {
+        if (extendedConfig.tryPortalRescue) {
             BlockPos pos = player.getBlockPos();
             player.teleport(pos.getX() + 0.5, player.getY(), pos.getZ() + 0.5);
             if (player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL) || player.getWorld().getBlockState(player.getBlockPos().up()).getBlock().equals(Blocks.NETHER_PORTAL)) {
@@ -147,9 +147,9 @@ public class AuthEventHandler {
             playerCache.lastIp = player.getIp();
 
             // Setting the session expire time
-            if (config.main.sessionTimeoutTime != -1)
-                playerCache.validUntil = System.currentTimeMillis() + config.main.sessionTimeoutTime * 1000L;
-        } else if (config.main.spawnOnJoin) {
+            if (config.sessionTimeout != -1)
+                playerCache.validUntil = System.currentTimeMillis() + config.sessionTimeout * 1000L;
+        } else if (config.hidePlayerCoords) {
             ((PlayerAuth) player).hidePosition(false);
 
             player.setInvulnerable(false);
@@ -160,7 +160,7 @@ public class AuthEventHandler {
     // Player execute command
     public static ActionResult onPlayerCommand(ServerPlayerEntity player, String command) {
         // Getting the message to then be able to check it
-        if (config.experimental.allowCommands) {
+        if (extendedConfig.allowCommands) {
             return ActionResult.PASS;
         }
         if (player == null) {
@@ -168,11 +168,11 @@ public class AuthEventHandler {
         }
         if (command.startsWith("login ")
                 || command.startsWith("register ")
-                || (config.experimental.enableAliases && command.startsWith("l "))) {
+                || (extendedConfig.enableAliases && command.startsWith("l "))) {
             return ActionResult.PASS;
         }
         if (!((PlayerAuth) player).isAuthenticated()) {
-            for (String allowedCommand : config.experimental.allowedCommands) {
+            for (String allowedCommand : extendedConfig.allowedCommands) {
                 if (command.startsWith(allowedCommand)) {
                     LogDebug("Player " + player.getName() + " executed command " + command + " without being authenticated.");
                     return ActionResult.PASS;
@@ -187,7 +187,7 @@ public class AuthEventHandler {
 
     // Player chatting
     public static ActionResult onPlayerChat(ServerPlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowChat) {
+        if (!((PlayerAuth) player).isAuthenticated() && !extendedConfig.allowChat) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
@@ -199,8 +199,8 @@ public class AuthEventHandler {
         // Player will fall if enabled (prevent fly kick)
         boolean auth = ((PlayerAuth) player).isAuthenticated();
         // Otherwise, movement should be disabled
-        if (!auth && !config.experimental.allowMovement) {
-            if (System.nanoTime() >= lastAcceptedPacket + config.experimental.teleportationTimeoutInMs * 1000000) {
+        if (!auth && !extendedConfig.allowMovement) {
+            if (System.nanoTime() >= lastAcceptedPacket + extendedConfig.teleportationTimeoutMs * 1000000) {
                 player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
                 lastAcceptedPacket = System.nanoTime();
             }
@@ -213,7 +213,7 @@ public class AuthEventHandler {
 
     // Using a block (right-click function)
     public static ActionResult onUseBlock(PlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowBlockUse) {
+        if (!((PlayerAuth) player).isAuthenticated() && !extendedConfig.allowBlockInteraction) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
@@ -222,7 +222,7 @@ public class AuthEventHandler {
 
     // Breaking a block
     public static boolean onBreakBlock(PlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowBlockPunch) {
+        if (!((PlayerAuth) player).isAuthenticated() && !extendedConfig.allowBlockBreaking) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return false;
         }
@@ -231,7 +231,7 @@ public class AuthEventHandler {
 
     // Using an item
     public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowItemUse) {
+        if (!((PlayerAuth) player).isAuthenticated() && !extendedConfig.allowItemUsing) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
@@ -241,7 +241,7 @@ public class AuthEventHandler {
 
     // Dropping an item
     public static ActionResult onDropItem(PlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowItemDrop) {
+        if (!((PlayerAuth) player).isAuthenticated() && !extendedConfig.allowItemDropping) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
@@ -250,7 +250,7 @@ public class AuthEventHandler {
 
     // Changing inventory (item moving etc.)
     public static ActionResult onTakeItem(ServerPlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowItemMoving) {
+        if (!((PlayerAuth) player).isAuthenticated() && !extendedConfig.allowItemMoving) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
@@ -260,7 +260,7 @@ public class AuthEventHandler {
 
     // Attacking an entity
     public static ActionResult onAttackEntity(PlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.experimental.allowEntityPunch) {
+        if (!((PlayerAuth) player).isAuthenticated() && !extendedConfig.allowEntityAttacking) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }
@@ -270,7 +270,7 @@ public class AuthEventHandler {
 
     // Interacting with entity
     public static ActionResult onUseEntity(PlayerEntity player) {
-        if (!((PlayerAuth) player).isAuthenticated() && !config.main.allowEntityInteract) {
+        if (!((PlayerAuth) player).isAuthenticated() && !extendedConfig.allowEntityInteraction) {
             player.sendMessage(((PlayerAuth) player).getAuthMessage(), false);
             return ActionResult.FAIL;
         }

@@ -23,7 +23,7 @@ public class LoginCommand {
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         LiteralCommandNode<ServerCommandSource> node = registerLogin(dispatcher); // Registering the "/login" command
-        if (config.experimental.enableAliases) {
+        if (extendedConfig.enableAliases) {
             dispatcher.register(literal("l")
                     .requires(Permissions.require("easyauth.commands.login", true))
                     .redirect(node));
@@ -55,13 +55,13 @@ public class LoginCommand {
         THREADPOOL.submit(() -> {
             PlayerCache playerCache = playerCacheMap.get(uuid);
 
-            int maxLoginTries = config.main.maxLoginTries;
+            long maxLoginTries = config.maxLoginTries;
             AtomicInteger curLoginTries = playerCache.loginTries;
             AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(uuid, pass.toCharArray());
 
             if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
                 // Check their kick timeout to avoid giving away information if they're already supposed to be kicked.
-                if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.experimental.resetLoginAttemptsTime) {
+                if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.resetLoginAttemptsTimeout) {
                     player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
                     return;
                 }

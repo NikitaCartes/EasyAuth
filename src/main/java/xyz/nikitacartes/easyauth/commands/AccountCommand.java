@@ -65,7 +65,7 @@ public class AccountCommand {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayerOrThrow();
 
-        if (config.main.enableGlobalPassword) {
+        if (config.enableGlobalPassword) {
             player.sendMessage(
                     TranslationHelper.getCannotUnregister(),
                     false
@@ -97,7 +97,7 @@ public class AccountCommand {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayerOrThrow();
 
-        if (config.main.enableGlobalPassword) {
+        if (config.enableGlobalPassword) {
             player.sendMessage(
                     TranslationHelper.getCannotChangePassword(),
                     false
@@ -107,10 +107,10 @@ public class AccountCommand {
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
             if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), oldPass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
-                if (newPass.length() < config.main.minPasswordChars) {
+                if (newPass.length() < extendedConfig.minPasswordLength) {
                     player.sendMessage(TranslationHelper.getMinPasswordChars(), false);
                     return;
-                } else if (newPass.length() > config.main.maxPasswordChars && config.main.maxPasswordChars != -1) {
+                } else if (newPass.length() > extendedConfig.maxPasswordLength && extendedConfig.maxPasswordLength != -1) {
                     player.sendMessage(TranslationHelper.getMaxPasswordChars(), false);
                     return;
                 }

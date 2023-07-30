@@ -22,6 +22,7 @@ import java.net.SocketAddress;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 @Mixin(PlayerManager.class)
 public abstract class PlayerManagerMixin {
@@ -59,7 +60,7 @@ public abstract class PlayerManagerMixin {
     )
     private void migrateOfflineStats(PlayerEntity player, CallbackInfoReturnable<ServerStatHandler> cir, UUID uUID, ServerStatHandler serverStatHandler, File serverStatsDir, File playerStatFile) {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
-        if (config.main.premiumAutologin && !config.experimental.forcedOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
+        if (config.premiumAutologin && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
             String playername = player.getGameProfile().getName();
             File offlineFile = new File(onlineFile.getParent(), Uuids.getOfflinePlayerUuid(playername) + ".json");
             offlineFile.renameTo(onlineFile);

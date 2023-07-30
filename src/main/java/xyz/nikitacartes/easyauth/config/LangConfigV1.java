@@ -12,7 +12,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class TranslationConfig extends Config {
+public class LangConfigV1 extends Config {
 
     public boolean enableServerSideTranslation = true;
     public String enterPassword = "§6You need to enter your password!";
@@ -49,16 +49,18 @@ public class TranslationConfig extends Config {
     public String registeredPlayers = "List of registered players:";
     public String addToForcedOffline = "Player successfully added into forcedOfflinePlayers list";
 
-    public static TranslationConfig load() {
-        return loadConfig(TranslationConfig.class, "translation.conf");
+    public static LangConfigV1 load() {
+        return loadConfig(LangConfigV1.class, "translation.conf");
     }
 
-    @Override
+    public static LangConfigV1 create() {
+        return createConfig(LangConfigV1.class);
+    }
+
     protected String getConfigPath() {
         return "translation.conf";
     }
 
-    @Override
     protected String handleTemplate() throws IOException {
         Map<String, Object> configValues = new HashMap<>();
         configValues.put("enableServerSideTranslation", enableServerSideTranslation);

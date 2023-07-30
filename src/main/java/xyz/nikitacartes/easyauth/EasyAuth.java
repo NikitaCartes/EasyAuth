@@ -7,15 +7,11 @@ import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import xyz.nikitacartes.easyauth.commands.*;
-import xyz.nikitacartes.easyauth.config.ExtendedConfig;
-import xyz.nikitacartes.easyauth.config.MainConfig;
-import xyz.nikitacartes.easyauth.config.TranslationConfig;
+import xyz.nikitacartes.easyauth.config.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
-import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.storage.database.*;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -55,10 +51,11 @@ public class EasyAuth implements ModInitializer {
     // Server properties
     public static final Properties serverProp = new Properties();
 
-    /**
-     * Config of the EasyAuth mod.
-     */
-    public static AuthConfig config;
+    public static MainConfigV1 config;
+    public static ExtendedConfigV1 extendedConfig;
+    public static LangConfigV1 langConfig;
+    public static TechnicalConfigV1 technicalConfig;
+    public static StorageConfigV1 storageConfig;
 
 
     public static void init(Path gameDir) {
@@ -75,20 +72,21 @@ public class EasyAuth implements ModInitializer {
             LogError("Error while reading server properties: ", e);
         }
 
-        File file = new File(gameDirectory + "/config/EasyAuth");
-        if (!file.exists() && !file.mkdirs()) {
-            throw new RuntimeException("[EasyAuth] Error creating directory for configs");
+        Config.loadConfigs();
+
+        if (DB != null && !DB.isClosed()) {
+            DB.close();
         }
-        MainConfig config = MainConfig.load();
-        ExtendedConfig extendedConfig = ExtendedConfig.load();
-        TranslationConfig translationConfig = TranslationConfig.load();
-        {
-            // Creating data directory (database and config files are stored there)
-            File file2 = new File(gameDirectory + "/mods/EasyAuth");
-            if (!file2.exists() && !file2.mkdirs()) throw new RuntimeException("[EasyAuth] Error creating directory!");
-            // Loading config
-            EasyAuth.config = AuthConfig.load(new File(gameDirectory + "/mods/EasyAuth/config.json"));
+
+        if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mysql")) {
+            DB = new MySQL(EasyAuth.storageConfig);
+        } else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mongodb")) {
+            DB = new MongoDB(EasyAuth.storageConfig);
+        } else {
+            DB = new LevelDB(EasyAuth.storageConfig);
         }
+
+
 
 
 

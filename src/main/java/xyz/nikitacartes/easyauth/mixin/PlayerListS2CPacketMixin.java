@@ -15,6 +15,7 @@ import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import java.util.*;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 @Mixin(PlayerListS2CPacket.class)
 public class PlayerListS2CPacketMixin {
@@ -25,7 +26,7 @@ public class PlayerListS2CPacketMixin {
 
     private static boolean hideFromTabList(ServerPlayerEntity player) {
         return !(PlayerCache.isAuthenticated(((PlayerAuth) player).getFakeUuid()) ||
-                (((PlayerAuth) player).isUsingMojangAccount() && config.main.premiumAutologin));
+                (((PlayerAuth) player).isUsingMojangAccount() && config.premiumAutologin));
     }
     @ModifyVariable(
             method = "<init>(Ljava/util/EnumSet;Ljava/util/Collection;)V",
@@ -33,7 +34,7 @@ public class PlayerListS2CPacketMixin {
             argsOnly = true)
     private static Collection<ServerPlayerEntity> playerListS2CPacket(Collection<ServerPlayerEntity> players) {
         // direct removeIf errors out as this seems to receive ImmutableCollection from time to time (?)
-        if (config.main.hideUnauthenticatedPLayersFromPlayerList) {
+        if (extendedConfig.hidePlayersFromPlayerList) {
             ArrayList<ServerPlayerEntity> temp = new ArrayList<>();
             for (ServerPlayerEntity player : players) {
                 if (!hideFromTabList(player)) {
@@ -55,7 +56,7 @@ public class PlayerListS2CPacketMixin {
     )
     private void checkSetEntries(PlayerListS2CPacket instance, List<PlayerListS2CPacket.Entry> entries, PlayerListS2CPacket.Action _action, ServerPlayerEntity player) {
         assert !entries.isEmpty();
-        if (config.main.hideUnauthenticatedPLayersFromPlayerList && hideFromTabList(player)) {
+        if (extendedConfig.hidePlayersFromPlayerList && hideFromTabList(player)) {
             this.entries = new ArrayList<>();
             return;
         }

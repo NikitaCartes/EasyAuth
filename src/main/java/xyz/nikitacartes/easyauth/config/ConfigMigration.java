@@ -99,7 +99,6 @@ public class ConfigMigration {
         EasyAuth.technicalConfig.globalPassword = oldConfig.main.globalPassword;
         EasyAuth.technicalConfig.forcedOfflinePlayers = oldConfig.main.forcedOfflinePlayers;
         EasyAuth.technicalConfig.confirmedOnlinePlayers = oldConfig.experimental.verifiedOnlinePlayer;
-        EasyAuth.technicalConfig.floodgateLoaded = oldConfig.experimental.floodgateLoaded;
         EasyAuth.technicalConfig.save();
 
         EasyAuth.storageConfig.databaseType = oldConfig.main.databaseType;

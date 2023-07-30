@@ -42,7 +42,6 @@ public class TechnicalConfigV1 extends Config {
         configValues.put("globalPassword", globalPassword == null ? "null" : globalPassword);
         configValues.put("forcedOfflinePlayers", handleArray(forcedOfflinePlayers));
         configValues.put("confirmedOnlinePlayers", handleArray(confirmedOnlinePlayers));
-        configValues.put("floodgateLoaded", floodgateLoaded);
         String configTemplate = Resources.toString(getResource("config/" + getConfigPath()), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);
     }

@@ -48,9 +48,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
             method = "onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lcom/mojang/authlib/GameProfile;<init>(Ljava/util/UUID;Ljava/lang/String;)V",
-                    shift = At.Shift.AFTER,
-                    remap = false
+                    target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"
             ),
             cancellable = true
     )
@@ -63,9 +61,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 if (config.main.forcedOfflinePlayers.contains(playername)) {
                     LogDebug("Player " + playername + " is forced to be offline");
                     mojangAccountNamesCache.remove(playername);
-                    state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+                    state = ServerLoginNetworkHandler.State.VERIFYING;
 
-                    this.profile = new GameProfile(null, packet.name());
+                    this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
                     ci.cancel();
                     return;
                 }
@@ -77,9 +75,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 if ((playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches())) {
                     // Player definitely doesn't have a mojang account
                     LogDebug("Player " + playername + " is cached as offline player");
-                    state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+                    state = ServerLoginNetworkHandler.State.VERIFYING;
 
-                    this.profile = new GameProfile(null, packet.name());
+                    this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
                     ci.cancel();
                 } else {
                     // Checking account status from API
@@ -104,9 +102,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         // Player doesn't have a Mojang account
                         httpsURLConnection.disconnect();
                         LogDebug("Player " + playername + " doesn't have a Mojang account");
-                        state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+                        state = ServerLoginNetworkHandler.State.VERIFYING;
 
-                        this.profile = new GameProfile(null, packet.name());
+                        this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
                         ci.cancel();
                     }
                 }

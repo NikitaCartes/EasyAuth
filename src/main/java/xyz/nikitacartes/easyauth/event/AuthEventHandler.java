@@ -287,7 +287,7 @@ public class AuthEventHandler {
 
     public static void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, ServerLoginNetworking.LoginSynchronizer sync) {
         if (config.experimental.forcedOfflineUuids) {
-            netHandler.profile = netHandler.toOfflineProfile(netHandler.profile);
+            netHandler.profile = ServerLoginNetworkHandler.createOfflineProfile(netHandler.profile.getName());
         }
     }
 

@@ -1,5 +1,5 @@
 ### 3.0.19
-##### Minecraft 1.20
+##### Minecraft 1.20[.1], 1.20.2
 
 1) Add option to skip all authentication if it's already done by another thing (mod/proxy/etc):
    - `skipAllAuthChecks`

@@ -10,7 +10,6 @@ repositories {
     maven { name "Translation"; url "https://maven.nucleoid.xyz" }
     maven { name "Permission"; url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { name "Floodgate Api"; url "https://repo.opencollab.dev/main" }
-    mavenLocal()
 }
 
 base.archivesName = "${project.mod_id}-mc${project.minecraft_version}"
@@ -104,11 +103,11 @@ modrinth {
     token.set(System.getenv("MODRINTH_TOKEN"))
     projectId.set("aZj58GfX")
     versionNumber.set("${project.version}")
-    versionName = "[1.20.3] ${project.version}"
+    versionName = "[1.20.3, 1.20.4] ${project.version}"
     versionType = "beta"
     changelog.set("Release notes:\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}\n\nChangelog:\nhttps://github.com/NikitaCartes/EasyAuth/tree/HEAD/CHANGELOG.md")
     uploadFile = remapJar
-    gameVersions.addAll("1.20.3")
+    gameVersions.addAll("1.20.3", "1.20.4")
     loaders = ["fabric", "quilt"]
     dependencies {
         required.project("P7dR8mSH") // Fabric API
@@ -130,9 +129,10 @@ curseforge {
         addGameVersion("Java 17")
 
         addGameVersion("1.20.3")
+        addGameVersion("1.20.4")
 
         mainArtifact(remapJar) {
-            displayName = "[1.20.3] ${project.version}"
+            displayName = "[1.20.3, 1.20.4] ${project.version}"
             relations {
                 requiredDependency("fabric-api")
                 embeddedLibrary 'server-translation-api'

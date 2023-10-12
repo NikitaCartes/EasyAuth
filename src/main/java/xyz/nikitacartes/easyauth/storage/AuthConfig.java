@@ -396,5 +396,10 @@ public class AuthConfig {
          * Skip all authentication checks for all players. Should be used if authentication is handled by another plugin/proxy/etc.
          */
         public boolean skipAllAuthChecks = false;
+
+        /**
+         * Add player to forcedOfflinePlayers list automatically when they join the server.
+         */
+        public boolean autoAddToForcedOffline = false;
     }
 }

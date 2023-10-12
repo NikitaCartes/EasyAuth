@@ -69,7 +69,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 }
                 if (mojangAccountNamesCache.contains(playername) || config.experimental.verifiedOnlinePlayer.contains(playername)) {
                     LogDebug("Player " + playername + " is cached as online player. Authentication continues as vanilla");
-                    mojangAccountNamesCache.add(playername);
+                    // mojangAccountNamesCache.add(playername);
                     return;
                 }
                 if ((playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches())) {
@@ -94,9 +94,6 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         LogDebug("Player " + playername + " has a Mojang account");
 
                         // Caches the request
-                        mojangAccountNamesCache.add(playername);
-                        config.experimental.verifiedOnlinePlayer.add(playername);
-                        config.save(new File("./mods/EasyAuth/config.json"));
                         // Authentication continues in original method
                     } else if (response == HttpURLConnection.HTTP_NO_CONTENT || response == HttpURLConnection.HTTP_NOT_FOUND) {
                         // Player doesn't have a Mojang account

@@ -10,6 +10,7 @@
     "PlayerManagerMixin",
     "SaveAllCommandMixin",
     "ServerLoginNetworkHandlerMixin",
+    "ServerLoginNetworkHandlerThreadMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
     "SlotMixin",

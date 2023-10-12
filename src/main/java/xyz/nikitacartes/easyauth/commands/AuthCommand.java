@@ -359,9 +359,9 @@ public class AuthCommand {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
+        config.main.forcedOfflinePlayers.add(player.toLowerCase(Locale.ROOT));
+        config.experimental.verifiedOnlinePlayer.remove(player.toLowerCase(Locale.ROOT));
         THREADPOOL.submit(() -> {
-            config.main.forcedOfflinePlayers.add(player.toLowerCase(Locale.ROOT));
-            config.experimental.verifiedOnlinePlayer.remove(player.toLowerCase(Locale.ROOT));
             config.save(new File("./mods/EasyAuth/config.json"));
         });
 

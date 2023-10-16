@@ -15,6 +15,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.AuthHelper.hashPassword;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 
 public class RegisterCommand {
@@ -63,6 +64,7 @@ public class RegisterCommand {
                 player.sendMessage(TranslationHelper.getRegisterSuccess(), false);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 playerCache.password = hashPassword(pass1.toCharArray());
+                LogDebug("Player " + player.getName().getString() + "(" + player.getUuidAsString() + ") successfully registered with password: " + playerCache.password);
                 return;
             }
             player.sendMessage(TranslationHelper.getAlreadyRegistered(), false);

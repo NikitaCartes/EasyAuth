@@ -31,7 +31,7 @@ public class PlayerAdvancementTrackerMixin {
 
     @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V", at = @At("HEAD"))
     private void startMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount() && !this.filePath.toFile().isFile()) {
+        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).easyAuth$isUsingMojangAccount() && !this.filePath.toFile().isFile()) {
             // Migrate
             String playername = owner.getGameProfile().getName();
             this.filePath = this.filePath.getParent().resolve(Uuids.getOfflinePlayerUuid(playername) + ".json");
@@ -40,7 +40,7 @@ public class PlayerAdvancementTrackerMixin {
 
     @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V", at = @At("TAIL"))
     private void endMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).isUsingMojangAccount()) {
+        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !config.experimental.forcedOfflineUuids && ((PlayerAuth) this.owner).easyAuth$isUsingMojangAccount()) {
             // Changes the file name to use online UUID
             this.filePath = this.filePath.getParent().resolve(owner.getUuid() + ".json");
         }

@@ -27,10 +27,10 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin {
     @Shadow
-    GameProfile profile;
+    public GameProfile profile;
 
     @Shadow
-    ServerLoginNetworkHandler.State state;
+    private ServerLoginNetworkHandler.State state;
 
     @Final
     @Shadow

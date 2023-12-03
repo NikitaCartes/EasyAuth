@@ -29,6 +29,7 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 @Mixin(ServerPlayerEntity.class)
 public class ServerPlayerEntityMixin implements PlayerAuth {
+    @Unique
     private final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
     @Final
     @Shadow
@@ -44,8 +45,8 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * @param hide whether to teleport player to spawn (provided in config) or last recorded position
      */
     @Override
-    public void hidePosition(boolean hide) {
-        PlayerCache cache = playerCacheMap.get(this.getFakeUuid());
+    public void easyAuth$hidePosition(boolean hide) {
+        PlayerCache cache = playerCacheMap.get(this.easyAuth$getFakeUuid());
         LogDebug(String.format("Teleporting player %s to %s", player.getName().getContent(), hide ? "spawn." : "position."));
         if (hide) {
             // Saving position
@@ -101,10 +102,10 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * @return converted UUID as string
      */
     @Override
-    public String getFakeUuid() {
+    public String easyAuth$getFakeUuid() {
         // If server is in online mode online-mode UUIDs should be used
         assert server != null;
-        if (server.isOnlineMode() && this.isUsingMojangAccount() && !config.experimental.forcedOfflineUuids)
+        if (server.isOnlineMode() && this.easyAuth$isUsingMojangAccount() && !config.experimental.forcedOfflineUuids)
             return player.getUuidAsString();
         /*
             Lower case is used for Player and PlAyEr to get same UUID (for password storing)
@@ -123,8 +124,8 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * @return Text with appropriate string (login or register)
      */
     @Override
-    public Text getAuthMessage() {
-        final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
+    public Text easyAuth$getAuthMessage() {
+        final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid());
         if (!config.main.enableGlobalPassword && (cache == null || cache.password.isEmpty())) {
             if (config.experimental.enableServerSideTranslation) {
                 return Text.translatable("text.easyauth.notAuthenticated").append("\n").append(Text.translatable("text.easyauth.registerRequired"));
@@ -148,10 +149,10 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * @return true if player can skip authentication process, otherwise false
      */
     @Override
-    public boolean canSkipAuth() {
+    public boolean easyAuth$canSkipAuth() {
         return (this.player.getClass() != ServerPlayerEntity.class) ||
                 (config.main.floodgateAutologin && config.experimental.floodgateLoaded && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
-                (isUsingMojangAccount() && config.main.premiumAutologin);
+                (easyAuth$isUsingMojangAccount() && config.main.premiumAutologin);
     }
 
     /**
@@ -160,7 +161,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * @return true if they are  using mojang account, otherwise false
      */
     @Override
-    public boolean isUsingMojangAccount() {
+    public boolean easyAuth$isUsingMojangAccount() {
         return server.isOnlineMode() && mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase());
     }
 
@@ -170,9 +171,9 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * @return false if player is not authenticated, otherwise true.
      */
     @Override
-    public boolean isAuthenticated() {
-        String uuid = ((PlayerAuth) player).getFakeUuid();
-        return this.canSkipAuth() || (playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated);
+    public boolean easyAuth$isAuthenticated() {
+        String uuid = ((PlayerAuth) player).easyAuth$getFakeUuid();
+        return this.easyAuth$canSkipAuth() || (playerCacheMap.containsKey(uuid) && playerCacheMap.get(uuid).isAuthenticated);
     }
 
     /**
@@ -182,8 +183,8 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * @param authenticated whether player should be authenticated
      */
     @Override
-    public void setAuthenticated(boolean authenticated) {
-        PlayerCache playerCache = playerCacheMap.get(this.getFakeUuid());
+    public void easyAuth$setAuthenticated(boolean authenticated) {
+        PlayerCache playerCache = playerCacheMap.get(this.easyAuth$getFakeUuid());
         playerCache.isAuthenticated = authenticated;
 
         player.setInvulnerable(!authenticated && config.experimental.playerInvulnerable);
@@ -191,7 +192,7 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
 
         // Teleporting player (hiding / restoring position)
         if (config.main.spawnOnJoin)
-            this.hidePosition(!authenticated);
+            this.easyAuth$hidePosition(!authenticated);
 
         if (authenticated) {
             kickTimer = config.main.kickTime * 20;
@@ -210,16 +211,16 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
 
     @Inject(method = "playerTick()V", at = @At("HEAD"), cancellable = true)
     private void playerTick(CallbackInfo ci) {
-        if (!this.isAuthenticated()) {
+        if (!this.easyAuth$isAuthenticated()) {
             // Checking player timer
             if (kickTimer <= 0 && player.networkHandler.isConnectionOpen()) {
                 player.networkHandler.disconnect(TranslationHelper.getTimeExpired());
-            } else if (!playerCacheMap.containsKey(((PlayerAuth) player).getFakeUuid())) {
+            } else if (!playerCacheMap.containsKey(((PlayerAuth) player).easyAuth$getFakeUuid())) {
                 player.networkHandler.disconnect(TranslationHelper.getAccountDeleted());
             } else {
                 // Sending authentication prompt every 10 seconds
                 if (kickTimer % 200 == 0)
-                    player.sendMessage(this.getAuthMessage(), false);
+                    player.sendMessage(this.easyAuth$getAuthMessage(), false);
                 --kickTimer;
             }
             ci.cancel();

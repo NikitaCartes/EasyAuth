@@ -13,7 +13,7 @@ public interface PlayerAuth {
      * @param hide whether to teleport player to spawn (provided in config) or last recorded position
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
-    void hidePosition(boolean hide);
+    void easyAuth$hidePosition(boolean hide);
 
     /**
      * Converts player uuid, to ensure player with "nAmE" and "NamE" get same uuid.
@@ -23,7 +23,7 @@ public interface PlayerAuth {
      * @return converted UUID as string
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
-    String getFakeUuid();
+    String easyAuth$getFakeUuid();
 
 
     /**
@@ -32,7 +32,7 @@ public interface PlayerAuth {
      * @param authenticated whether player should be authenticated
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
-    void setAuthenticated(boolean authenticated);
+    void easyAuth$setAuthenticated(boolean authenticated);
 
     /**
      * Checks whether player is authenticated.
@@ -40,7 +40,7 @@ public interface PlayerAuth {
      * @return false if player is not authenticated, otherwise true.
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
-    boolean isAuthenticated();
+    boolean easyAuth$isAuthenticated();
 
     /**
      * Gets the text which tells the player
@@ -49,7 +49,7 @@ public interface PlayerAuth {
      * @return Text with appropriate string (login or register)
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
-    Text getAuthMessage();
+    Text easyAuth$getAuthMessage();
 
     /**
      * Checks whether player is a fake player (from CarpetMod).
@@ -57,12 +57,12 @@ public interface PlayerAuth {
      * @return true if player is fake (can skip authentication process), otherwise false
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
-    boolean canSkipAuth();
+    boolean easyAuth$canSkipAuth();
 
     /**
      * Whether the player is using the mojang account
      *
      * @return true if paid, false if cracked
      */
-    boolean isUsingMojangAccount();
+    boolean easyAuth$isUsingMojangAccount();
 }

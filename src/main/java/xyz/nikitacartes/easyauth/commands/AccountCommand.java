@@ -75,11 +75,11 @@ public class AccountCommand {
 
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            String uuid = ((PlayerAuth) player).getFakeUuid();
+            String uuid = ((PlayerAuth) player).easyAuth$getFakeUuid();
             if (AuthHelper.checkPassword(uuid, pass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
                 DB.deleteUserData(uuid);
                 player.sendMessage(TranslationHelper.getAccountDeleted(), false);
-                ((PlayerAuth) player).setAuthenticated(false);
+                ((PlayerAuth) player).easyAuth$setAuthenticated(false);
                 player.networkHandler.disconnect(TranslationHelper.getAccountDeleted());
                 playerCacheMap.remove(uuid);
                 return;
@@ -106,7 +106,7 @@ public class AccountCommand {
         }
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            if (AuthHelper.checkPassword(((PlayerAuth) player).getFakeUuid(), oldPass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
+            if (AuthHelper.checkPassword(((PlayerAuth) player).easyAuth$getFakeUuid(), oldPass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
                 if (newPass.length() < config.main.minPasswordChars) {
                     player.sendMessage(TranslationHelper.getMinPasswordChars(), false);
                     return;
@@ -115,7 +115,7 @@ public class AccountCommand {
                     return;
                 }
                 // Changing password in playercache
-                playerCacheMap.get(((PlayerAuth) player).getFakeUuid()).password = AuthHelper.hashPassword(newPass.toCharArray());
+                playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid()).password = AuthHelper.hashPassword(newPass.toCharArray());
                 player.sendMessage(
                         TranslationHelper.getPasswordUpdated(),
                         false

@@ -41,7 +41,7 @@ public class RegisterCommand {
         if (config.main.enableGlobalPassword) {
             player.sendMessage(TranslationHelper.getLoginRequired(), false);
             return 0;
-        } else if (((PlayerAuth) player).isAuthenticated()) {
+        } else if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             player.sendMessage(TranslationHelper.getAlreadyAuthenticated(), false);
             return 0;
         } else if (!pass1.equals(pass2)) {
@@ -58,9 +58,9 @@ public class RegisterCommand {
                 return;
             }
 
-            PlayerCache playerCache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
+            PlayerCache playerCache = playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid());
             if (playerCache.password.isEmpty()) {
-                ((PlayerAuth) player).setAuthenticated(true);
+                ((PlayerAuth) player).easyAuth$setAuthenticated(true);
                 player.sendMessage(TranslationHelper.getRegisterSuccess(), false);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 playerCache.password = hashPassword(pass1.toCharArray());

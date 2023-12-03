@@ -27,6 +27,8 @@ import java.net.SocketAddress;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
 
 @Mixin(PlayerManager.class)
 public abstract class PlayerManagerMixin {
@@ -68,10 +70,14 @@ public abstract class PlayerManagerMixin {
     )
     private void migrateOfflineStats(PlayerEntity player, CallbackInfoReturnable<ServerStatHandler> cir, UUID uUID, ServerStatHandler serverStatHandler, File serverStatsDir, File playerStatFile) {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
-        if (server.isOnlineMode() && !config.experimental.forcedOfflineUuids && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
+        if (server.isOnlineMode() && !config.experimental.forcedOfflineUuids && ((PlayerAuth) player).easyAuth$isUsingMojangAccount() && !onlineFile.exists()) {
             String playername = player.getGameProfile().getName();
             File offlineFile = new File(onlineFile.getParent(), Uuids.getOfflinePlayerUuid(playername) + ".json");
-            offlineFile.renameTo(onlineFile);
+            if (!offlineFile.renameTo(onlineFile)) {
+                LogWarn("Failed to migrate offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
+            } else {
+                LogDebug("Migrated offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
+            }
 
             ((ServerStatHandlerAccessor) serverStatHandler).setFile(onlineFile);
         }

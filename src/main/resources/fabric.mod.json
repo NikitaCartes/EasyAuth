@@ -10,7 +10,8 @@
   ],
   "contact": {
     "homepage": "https://github.com/NikitaCartes/EasyAuth",
-    "sources": "https://github.com/NikitaCartes/EasyAuth"
+    "sources": "https://github.com/NikitaCartes/EasyAuth",
+    "issues": "https://github.com/NikitaCartes/EasyAuth/issues"
   },
   "license": "MIT",
   "environment": "server",

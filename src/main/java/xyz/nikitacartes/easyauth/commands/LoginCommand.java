@@ -47,9 +47,9 @@ public class LoginCommand {
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayerOrThrow();
-        String uuid = ((PlayerAuth) player).getFakeUuid();
+        String uuid = ((PlayerAuth) player).easyAuth$getFakeUuid();
         LogDebug("Player " + player.getName().getString() + "(" + uuid + ") is trying to login");
-        if (((PlayerAuth) player).isAuthenticated()) {
+        if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             LogDebug("Player " + player.getName().getString() + "(" + uuid + ") is already authenticated");
             player.sendMessage(TranslationHelper.getAlreadyAuthenticated(), false);
             return 0;
@@ -70,7 +70,7 @@ public class LoginCommand {
                     return;
                 }
                 player.sendMessage(TranslationHelper.getSuccessfullyAuthenticated(), false);
-                ((PlayerAuth) player).setAuthenticated(true);
+                ((PlayerAuth) player).easyAuth$setAuthenticated(true);
                 curLoginTries.set(0);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;

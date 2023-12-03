@@ -3,6 +3,7 @@ package xyz.nikitacartes.easyauth.mixin;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtTagSizeTracker;
 import net.minecraft.util.Uuids;
 import net.minecraft.world.WorldSaveHandler;
 import org.spongepowered.asm.mixin.Final;
@@ -75,7 +76,7 @@ public class WorldSaveHandlerMixin {
             File file = new File(this.playerDataDir, Uuids.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
             if (file.exists() && file.isFile())
                 try {
-                    compoundTag = NbtIo.readCompressed(new FileInputStream(file));
+                    compoundTag = NbtIo.readCompressed(new FileInputStream(file), NbtTagSizeTracker.ofUnlimitedBytes());
                 } catch (IOException e) {
                     LogWarn(String.format("Failed to load player data for: %s", playername));
                 }

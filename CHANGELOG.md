@@ -1,3 +1,8 @@
+### 3.0.20
+##### Minecraft 1.20.3
+
+Update dependencies
+
 ### 3.0.19
 ##### Minecraft 1.20[.1], 1.20.2
 

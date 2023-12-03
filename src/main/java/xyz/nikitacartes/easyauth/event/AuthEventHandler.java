@@ -14,6 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import xyz.nikitacartes.easyauth.storage.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
@@ -286,8 +287,8 @@ public class AuthEventHandler {
     }
 
     public static void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, ServerLoginNetworking.LoginSynchronizer sync) {
-        if (config.experimental.forcedOfflineUuids) {
-            netHandler.profile = ServerLoginNetworkHandler.createOfflineProfile(netHandler.profile.getName());
+        if (config.experimental.forcedOfflineUuids && netHandler.profile != null) {
+            netHandler.profile = Uuids.getOfflinePlayerProfile(netHandler.profile.getName());
         }
     }
 

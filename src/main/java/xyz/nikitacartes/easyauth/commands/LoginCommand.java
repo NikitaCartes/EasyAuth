@@ -21,7 +21,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
 
 public class LoginCommand {
 
-    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         LiteralCommandNode<ServerCommandSource> node = registerLogin(dispatcher); // Registering the "/login" command
         if (extendedConfig.enableAliases) {
             dispatcher.register(literal("l")
@@ -30,7 +30,7 @@ public class LoginCommand {
         }
     }
 
-    public static LiteralCommandNode<ServerCommandSource> registerLogin(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public LiteralCommandNode<ServerCommandSource> registerLogin(CommandDispatcher<ServerCommandSource> dispatcher) {
         return dispatcher.register(literal("login")
                 .requires(Permissions.require("easyauth.commands.login", true))
                 .then(argument("password", string())
@@ -43,7 +43,7 @@ public class LoginCommand {
     }
 
     // Method called for checking the password
-    private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
+    private int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayerOrThrow();
         String uuid = ((PlayerAuth) player).getFakeUuid();

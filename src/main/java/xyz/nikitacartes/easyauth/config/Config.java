@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
 
 public abstract class Config {
+
     public static <T extends Config> T loadConfig(Class<T> configClass, String configPath) {
         Path path = gameDirectory.resolve("config/EasyAuth").resolve(configPath);
         if (Files.exists(path)) {
@@ -55,14 +55,14 @@ public abstract class Config {
             EasyAuth.config = MainConfigV1.create();
             EasyAuth.technicalConfig = TechnicalConfigV1.create();
             EasyAuth.langConfig = LangConfigV1.create();
-            EasyAuth.technicalConfig = TechnicalConfigV1.create();
+            EasyAuth.extendedConfig = ExtendedConfigV1.create();
             EasyAuth.storageConfig = StorageConfigV1.create();
 
             ConfigMigration.migrateFromV0();
         } else {
-            EasyAuth.technicalConfig = TechnicalConfigV1.load();
+            EasyAuth.technicalConfig = new TechnicalConfigV1();
             EasyAuth.langConfig = LangConfigV1.load();
-            EasyAuth.technicalConfig = TechnicalConfigV1.load();
+            EasyAuth.extendedConfig = ExtendedConfigV1.load();
             EasyAuth.storageConfig = StorageConfigV1.load();
         }
 
@@ -76,7 +76,7 @@ public abstract class Config {
         EasyAuth.config.save();
         EasyAuth.technicalConfig.save();
         EasyAuth.langConfig.save();
-        EasyAuth.technicalConfig.save();
+        EasyAuth.extendedConfig.save();
         EasyAuth.storageConfig.save();
     }
 

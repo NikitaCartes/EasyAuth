@@ -19,8 +19,7 @@ import static xyz.nikitacartes.easyauth.utils.AuthHelper.hashPassword;
 
 public class RegisterCommand {
 
-    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-
+    public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/register" command
         dispatcher.register(literal("register")
                 .requires(Permissions.require("easyauth.commands.register", true))
@@ -35,7 +34,7 @@ public class RegisterCommand {
     }
 
     // Method called for hashing the password & writing to DB
-    private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
+    private int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayerOrThrow();
         if (config.enableGlobalPassword) {
             player.sendMessage(TranslationHelper.getLoginRequired(), false);

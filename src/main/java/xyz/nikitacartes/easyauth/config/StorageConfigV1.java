@@ -29,7 +29,7 @@ public class StorageConfigV1 extends Config {
     }
 
     protected String getConfigPath() {
-        return "main.conf";
+        return "storage.conf";
     }
 
     protected String handleTemplate() throws IOException {

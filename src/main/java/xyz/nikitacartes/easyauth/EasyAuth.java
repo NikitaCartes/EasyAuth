@@ -27,6 +27,7 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 public class EasyAuth implements ModInitializer {
     public static final String MOD_ID = "easyauth";
 
+    public static final String MOD_NAME = "EasyAuth";
 
     public static DbApi DB = null;
 
@@ -58,8 +59,9 @@ public class EasyAuth implements ModInitializer {
     public static StorageConfigV1 storageConfig;
 
 
-    public static void init(Path gameDir) {
-        gameDirectory = gameDir;
+    @Override
+    public void onInitialize() {
+        gameDirectory = FabricLoader.getInstance().getGameDir();
         LogInfo("EasyAuth mod by NikitaCartes");
 
         try {
@@ -85,17 +87,40 @@ public class EasyAuth implements ModInitializer {
         } else {
             DB = new LevelDB(EasyAuth.storageConfig);
         }
+        try {
+            DB.connect();
+        } catch (DBApiException e) {
+            LogError("onInitialize error: ", e);
+        }
 
+        // Registering the commands
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
+            (new RegisterCommand()).registerCommand(dispatcher);
+            (new LoginCommand()).registerCommand(dispatcher);
+            (new LogoutCommand()).registerCommand(dispatcher);
+            (new AuthCommand()).registerCommand(dispatcher);
+            (new AccountCommand()).registerCommand(dispatcher);
+        });
 
-
-
-
+        // From Fabric API
+        PlayerBlockBreakEvents.BEFORE.register((world, player, blockPos, blockState, blockEntity) -> AuthEventHandler.onBreakBlock(player));
+        UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));
+        UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
+        UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
+        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> (new AuthCommand()).reloadConfig(null));
+        ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
+        ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
     }
 
-    /**
-     * Called on server stop.
-     */
-    public static void stop() {
+    private void onStartServer(MinecraftServer server) {
+        if (DB.isClosed()) {
+            LogError("Couldn't connect to database. Stopping server");
+            server.stop(false);
+        }
+    }
+
+    private void onStopServer(MinecraftServer server) {
         LogInfo("Shutting down EasyAuth.");
         DB.saveAll(playerCacheMap);
 
@@ -112,45 +137,5 @@ public class EasyAuth implements ModInitializer {
 
         // Closing DbApi connection
         DB.close();
-    }
-
-    @Override
-    public void onInitialize() {
-        EasyAuth.init(FabricLoader.getInstance().getGameDir());
-        try {
-            DB.connect();
-        } catch (DBApiException e) {
-            LogError("onInitialize error: ", e);
-        }
-
-        // Registering the commands
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
-            RegisterCommand.registerCommand(dispatcher);
-            LoginCommand.registerCommand(dispatcher);
-            LogoutCommand.registerCommand(dispatcher);
-            AuthCommand.registerCommand(dispatcher);
-            AccountCommand.registerCommand(dispatcher);
-        });
-
-        // From Fabric API
-        PlayerBlockBreakEvents.BEFORE.register((world, player, blockPos, blockState, blockEntity) -> AuthEventHandler.onBreakBlock(player));
-        UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));
-        UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
-        AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
-        UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(null));
-        ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
-        ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
-    }
-
-    private void onStartServer(MinecraftServer server) {
-        if (DB.isClosed()) {
-            LogError("Couldn't connect to database. Stopping server");
-            server.stop(false);
-        }
-    }
-
-    private void onStopServer(MinecraftServer server) {
-        EasyAuth.stop();
     }
 }

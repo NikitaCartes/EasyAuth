@@ -1,5 +1,6 @@
 package xyz.nikitacartes.easyauth.commands;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.BlockPosArgumentType;
@@ -33,7 +34,7 @@ public class AuthCommand {
      *
      * @param dispatcher
      */
-    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("auth")
                 .requires(Permissions.require("easyauth.commands.auth.root", 3))
                 .then(literal("reload")
@@ -142,7 +143,8 @@ public class AuthCommand {
      * @param sender executioner of the command
      * @return 0
      */
-    public static int reloadConfig(Entity sender) {
+    public int reloadConfig(Entity sender) {
+        DB.close();
         Config.loadConfigs();
 
         try {
@@ -155,7 +157,7 @@ public class AuthCommand {
             ((PlayerEntity) sender).sendMessage(TranslationHelper.getConfigurationReloaded(), false);
         else
             LogInfo(langConfig.configurationReloaded);
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     /**
@@ -165,7 +167,7 @@ public class AuthCommand {
      * @param password password that will be set
      * @return 0
      */
-    private static int setGlobalPassword(ServerCommandSource source, String password) {
+    private int setGlobalPassword(ServerCommandSource source, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
         // Different thread to avoid lag spikes
@@ -196,7 +198,7 @@ public class AuthCommand {
      * @param pitch  player pitch (x rotation)
      * @return 0
      */
-    private static int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z, float yaw, float pitch) {
+    private int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z, float yaw, float pitch) {
         // Setting config values and saving
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
@@ -226,7 +228,7 @@ public class AuthCommand {
      * @param uuid   uuid of the player to delete account for
      * @return 0
      */
-    private static int removeAccount(ServerCommandSource source, String uuid) {
+    private int removeAccount(ServerCommandSource source, String uuid) {
         Entity sender = source.getEntity();
         THREADPOOL.submit(() -> {
             DB.deleteUserData(uuid);
@@ -248,7 +250,7 @@ public class AuthCommand {
      * @param password new password for the player account
      * @return 0
      */
-    private static int registerUser(ServerCommandSource source, String uuid, String password) {
+    private int registerUser(ServerCommandSource source, String uuid, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
@@ -279,7 +281,7 @@ public class AuthCommand {
      * @param password new password for the player
      * @return 0
      */
-    private static int updatePassword(ServerCommandSource source, String uuid, String password) {
+    private int updatePassword(ServerCommandSource source, String uuid, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
@@ -316,7 +318,7 @@ public class AuthCommand {
      * @param player player to get uuid from
      * @return 0
      */
-    private static int getOfflineUuid(ServerCommandSource source, String player) {
+    private int getOfflineUuid(ServerCommandSource source, String player) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
@@ -336,7 +338,7 @@ public class AuthCommand {
      * @param source executioner of the command
      * @return 0
      */
-    public static int getRegisteredPlayers(ServerCommandSource source) {
+    public int getRegisteredPlayers(ServerCommandSource source) {
         Entity sender = source.getEntity();
 
         THREADPOOL.submit(() -> {
@@ -357,7 +359,7 @@ public class AuthCommand {
      * @param player player to add in list
      * @return 0
      */
-    private static int addPlayerToForcedOffline(ServerCommandSource source, String player) {
+    private int addPlayerToForcedOffline(ServerCommandSource source, String player) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 

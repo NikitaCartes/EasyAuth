@@ -12,7 +12,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
 import xyz.nikitacartes.easyauth.EasyAuth;
-import xyz.nikitacartes.easyauth.config.GenericConfig;
 import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.storage.database.DBApiException;

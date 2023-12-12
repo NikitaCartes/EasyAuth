@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
-public abstract class GenericConfig<Config> {
+public abstract class ConfigTemplate<Config> {
 
     private transient final Pattern pattern = Pattern.compile("^[^$\"{}\\[\\]:=,+#`^?!@*&\\\\\\s/]+");
     transient final String configPath;
     private transient final Class<Config> configClass;
 
-    GenericConfig(Class<Config> configClass, String configPath) {
+    ConfigTemplate(Class<Config> configClass, String configPath) {
         this.configPath = configPath;
         this.configClass = configClass;
     }

@@ -13,7 +13,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class ExtendedConfigV1 extends GenericConfig<ExtendedConfigV1> {
+public class ExtendedConfigV1 extends ConfigTemplate<ExtendedConfigV1> {
     public boolean allowChat = false;
     public boolean allowCommands = false;
     public ArrayList<String> allowedCommands = new ArrayList<>();

@@ -12,7 +12,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class LangConfigV1 extends GenericConfig<LangConfigV1> {
+public class LangConfigV1 extends ConfigTemplate<LangConfigV1> {
 
     public boolean enableServerSideTranslation = true;
     public String enterPassword = "§6You need to enter your password!";

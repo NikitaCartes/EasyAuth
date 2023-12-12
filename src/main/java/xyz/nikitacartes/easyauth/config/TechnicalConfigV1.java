@@ -1,7 +1,6 @@
 package xyz.nikitacartes.easyauth.config;
 
 import com.google.common.io.Resources;
-import net.fabricmc.loader.api.FabricLoader;
 import org.apache.commons.text.StringSubstitutor;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -14,7 +13,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class TechnicalConfigV1 extends GenericConfig<TechnicalConfigV1> {
+public class TechnicalConfigV1 extends ConfigTemplate<TechnicalConfigV1> {
 
     public String globalPassword = null;
     public ArrayList<String> forcedOfflinePlayers = new ArrayList<>();

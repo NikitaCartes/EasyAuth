@@ -12,7 +12,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class MainConfigV1 extends GenericConfig<MainConfigV1> {
+public class MainConfigV1 extends ConfigTemplate<MainConfigV1> {
     public boolean premiumAutologin = true;
     public boolean floodgateAutoLogin = true;
     public long maxLoginTries = 3;

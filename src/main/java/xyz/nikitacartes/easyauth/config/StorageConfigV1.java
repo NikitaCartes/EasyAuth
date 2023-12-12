@@ -12,7 +12,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class StorageConfigV1 extends GenericConfig<StorageConfigV1> {
+public class StorageConfigV1 extends ConfigTemplate<StorageConfigV1> {
     public String databaseType = "leveldb";
     public MySqlConfig mySqlConfig = new MySqlConfig();
     public MongoDBConfig mongoDBConfig = new MongoDBConfig();

@@ -12,7 +12,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class LangConfigV1 extends ConfigTemplate<LangConfigV1> {
+public class LangConfigV1 extends ConfigTemplate {
 
     public boolean enableServerSideTranslation = true;
     public String enterPassword = "§6You need to enter your password!";
@@ -51,46 +51,13 @@ public class LangConfigV1 extends ConfigTemplate<LangConfigV1> {
 
 
     public LangConfigV1() {
-        super(LangConfigV1.class, "translation.conf");
-        LangConfigV1 temp = loadConfig();
-        if (temp != null) {
-            this.enableServerSideTranslation = temp.enableServerSideTranslation;
-            this.enterPassword = temp.enterPassword;
-            this.enterNewPassword = temp.enterNewPassword;
-            this.wrongPassword = temp.wrongPassword;
-            this.matchPassword = temp.matchPassword;
-            this.passwordUpdated = temp.passwordUpdated;
-            this.loginRequired = temp.loginRequired;
-            this.loginTriesExceeded = temp.loginTriesExceeded;
-            this.globalPasswordSet = temp.globalPasswordSet;
-            this.cannotChangePassword = temp.cannotChangePassword;
-            this.cannotUnregister = temp.cannotUnregister;
-            this.notAuthenticated = temp.notAuthenticated;
-            this.alreadyAuthenticated = temp.alreadyAuthenticated;
-            this.successfullyAuthenticated = temp.successfullyAuthenticated;
-            this.successfulLogout = temp.successfulLogout;
-            this.timeExpired = temp.timeExpired;
-            this.registerRequired = temp.registerRequired;
-            this.alreadyRegistered = temp.alreadyRegistered;
-            this.registerSuccess = temp.registerSuccess;
-            this.userdataDeleted = temp.userdataDeleted;
-            this.userdataUpdated = temp.userdataUpdated;
-            this.accountDeleted = temp.accountDeleted;
-            this.configurationReloaded = temp.configurationReloaded;
-            this.maxPasswordChars = temp.maxPasswordChars;
-            this.minPasswordChars = temp.minPasswordChars;
-            this.disallowedUsername = temp.disallowedUsername;
-            this.playerAlreadyOnline = temp.playerAlreadyOnline;
-            this.worldSpawnSet = temp.worldSpawnSet;
-            this.corruptedPlayerData = temp.corruptedPlayerData;
-            this.userNotRegistered = temp.userNotRegistered;
-            this.cannotLogout = temp.cannotLogout;
-            this.offlineUuid = temp.offlineUuid;
-            this.registeredPlayers = temp.registeredPlayers;
-            this.addToForcedOffline = temp.addToForcedOffline;
-        }
+        super("translation.conf");
     }
 
+    public static LangConfigV1 load() {
+        LangConfigV1 config = loadConfig(LangConfigV1.class, "translation.conf");
+        return config != null ? config : new LangConfigV1();
+    }
 
     protected String handleTemplate() throws IOException {
         Map<String, Object> configValues = new HashMap<>();

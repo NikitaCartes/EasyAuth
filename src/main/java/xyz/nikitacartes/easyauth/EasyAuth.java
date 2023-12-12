@@ -27,8 +27,6 @@ import java.util.regex.Pattern;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 public class EasyAuth implements ModInitializer {
-    public static final String MOD_ID = "easyauth";
-
     public static DbApi DB = null;
 
     public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
@@ -148,25 +146,25 @@ public class EasyAuth implements ModInitializer {
     }
 
     public static void loadConfigs() {
-        VersionConfig version = new VersionConfig();
+        VersionConfig version = VersionConfig.load();
 
         switch (version.configVersion) {
             case -1:
             case 1: {
-                EasyAuth.config = new MainConfigV1();
-                EasyAuth.technicalConfig = new TechnicalConfigV1();
-                EasyAuth.langConfig = new LangConfigV1();
-                EasyAuth.extendedConfig = new ExtendedConfigV1();
-                EasyAuth.storageConfig = new StorageConfigV1();
+                EasyAuth.config = MainConfigV1.load();
+                EasyAuth.technicalConfig = TechnicalConfigV1.load();
+                EasyAuth.langConfig = LangConfigV1.load();
+                EasyAuth.extendedConfig = ExtendedConfigV1.load();
+                EasyAuth.storageConfig = StorageConfigV1.load();
                 break;
             }
             default: {
                 LogError("Unknown config version: " + version.configVersion + "\n Using last known version");
-                EasyAuth.config = new MainConfigV1();
-                EasyAuth.technicalConfig = new TechnicalConfigV1();
-                EasyAuth.langConfig = new LangConfigV1();
-                EasyAuth.extendedConfig = new ExtendedConfigV1();
-                EasyAuth.storageConfig = new StorageConfigV1();
+                EasyAuth.config = MainConfigV1.load();
+                EasyAuth.technicalConfig = TechnicalConfigV1.load();
+                EasyAuth.langConfig = LangConfigV1.load();
+                EasyAuth.extendedConfig = ExtendedConfigV1.load();
+                EasyAuth.storageConfig = StorageConfigV1.load();
                 break;
             }
         }

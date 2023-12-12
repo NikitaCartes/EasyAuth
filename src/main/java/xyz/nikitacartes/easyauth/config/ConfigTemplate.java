@@ -13,18 +13,15 @@ import java.util.stream.Collectors;
 import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
-public abstract class ConfigTemplate<Config> {
-
+public abstract class ConfigTemplate {
     private transient final Pattern pattern = Pattern.compile("^[^$\"{}\\[\\]:=,+#`^?!@*&\\\\\\s/]+");
     transient final String configPath;
-    private transient final Class<Config> configClass;
 
-    ConfigTemplate(Class<Config> configClass, String configPath) {
+    ConfigTemplate(String configPath) {
         this.configPath = configPath;
-        this.configClass = configClass;
     }
 
-    public Config loadConfig() {
+    public static <Config extends ConfigTemplate> Config loadConfig(Class<Config> configClass, String configPath) {
         Path path = gameDirectory.resolve("config/EasyAuth").resolve(configPath);
         if (Files.exists(path)) {
             final HoconConfigurationLoader loader = HoconConfigurationLoader.builder().path(path).build();

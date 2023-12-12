@@ -12,7 +12,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class MainConfigV1 extends ConfigTemplate<MainConfigV1> {
+public class MainConfigV1 extends ConfigTemplate {
     public boolean premiumAutologin = true;
     public boolean floodgateAutoLogin = true;
     public long maxLoginTries = 3;
@@ -27,21 +27,12 @@ public class MainConfigV1 extends ConfigTemplate<MainConfigV1> {
 
 
     public MainConfigV1() {
-        super(MainConfigV1.class, "main.conf");
-        MainConfigV1 temp = loadConfig();
-        if (temp != null) {
-            this.premiumAutologin = temp.premiumAutologin;
-            this.floodgateAutoLogin = temp.floodgateAutoLogin;
-            this.maxLoginTries = temp.maxLoginTries;
-            this.kickTimeout = temp.kickTimeout;
-            this.resetLoginAttemptsTimeout = temp.resetLoginAttemptsTimeout;
-            this.sessionTimeout = temp.sessionTimeout;
-            this.enableGlobalPassword = temp.enableGlobalPassword;
-            this.hidePlayerCoords = temp.hidePlayerCoords;
-            this.debug = temp.debug;
-            this.configVersion = temp.configVersion;
-            this.worldSpawn = temp.worldSpawn;
-        }
+        super("main.conf");
+    }
+
+    public static MainConfigV1 load() {
+        MainConfigV1 config = loadConfig(MainConfigV1.class, "main.conf");
+        return config != null ? config : new MainConfigV1();
     }
 
     protected String handleTemplate() throws IOException {

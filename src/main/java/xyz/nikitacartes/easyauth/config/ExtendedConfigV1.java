@@ -13,7 +13,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class ExtendedConfigV1 extends ConfigTemplate<ExtendedConfigV1> {
+public class ExtendedConfigV1 extends ConfigTemplate {
     public boolean allowChat = false;
     public boolean allowCommands = false;
     public ArrayList<String> allowedCommands = new ArrayList<>();
@@ -41,35 +41,12 @@ public class ExtendedConfigV1 extends ConfigTemplate<ExtendedConfigV1> {
     public boolean skipAllAuthChecks = false;
 
     public ExtendedConfigV1() {
-        super(ExtendedConfigV1.class, "extended.conf");
-        ExtendedConfigV1 temp = loadConfig();
-        if (temp != null) {
-            this.allowChat = temp.allowChat;
-            this.allowCommands = temp.allowCommands;
-            this.allowedCommands = temp.allowedCommands;
-            this.allowMovement = temp.allowMovement;
-            this.allowBlockInteraction = temp.allowBlockInteraction;
-            this.allowEntityInteraction = temp.allowEntityInteraction;
-            this.allowBlockBreaking = temp.allowBlockBreaking;
-            this.allowEntityAttacking = temp.allowEntityAttacking;
-            this.allowItemDropping = temp.allowItemDropping;
-            this.allowItemMoving = temp.allowItemMoving;
-            this.allowItemUsing = temp.allowItemUsing;
-            this.playerInvulnerable = temp.playerInvulnerable;
-            this.playerIgnored = temp.playerIgnored;
-            this.teleportationTimeoutMs = temp.teleportationTimeoutMs;
-            this.enableAliases = temp.enableAliases;
-            this.tryPortalRescue = temp.tryPortalRescue;
-            this.minPasswordLength = temp.minPasswordLength;
-            this.maxPasswordLength = temp.maxPasswordLength;
-            this.usernameRegexp = temp.usernameRegexp;
-            this.floodgateBypassRegex = temp.floodgateBypassRegex;
-            this.hidePlayersFromPlayerList = temp.hidePlayersFromPlayerList;
-            this.preventAnotherLocationKick = temp.preventAnotherLocationKick;
-            this.useBcrypt = temp.useBcrypt;
-            this.forcedOfflineUuid = temp.forcedOfflineUuid;
-            this.skipAllAuthChecks = temp.skipAllAuthChecks;
-        }
+        super("extended.conf");
+    }
+
+    public static ExtendedConfigV1 load() {
+        ExtendedConfigV1 config = loadConfig(ExtendedConfigV1.class, "extended.conf");
+        return config != null ? config : new ExtendedConfigV1();
     }
 
     protected String handleTemplate() throws IOException {

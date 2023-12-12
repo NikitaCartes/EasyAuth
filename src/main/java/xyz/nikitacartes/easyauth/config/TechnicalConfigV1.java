@@ -13,7 +13,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class TechnicalConfigV1 extends ConfigTemplate<TechnicalConfigV1> {
+public class TechnicalConfigV1 extends ConfigTemplate {
 
     public String globalPassword = null;
     public ArrayList<String> forcedOfflinePlayers = new ArrayList<>();
@@ -21,14 +21,12 @@ public class TechnicalConfigV1 extends ConfigTemplate<TechnicalConfigV1> {
     public boolean floodgateLoaded = false;
 
     public TechnicalConfigV1() {
-        super(TechnicalConfigV1.class, "technical.conf");
-        TechnicalConfigV1 temp = loadConfig();
-        if (temp != null) {
-            this.globalPassword = temp.globalPassword;
-            this.forcedOfflinePlayers = temp.forcedOfflinePlayers;
-            this.confirmedOnlinePlayers = temp.confirmedOnlinePlayers;
-            this.floodgateLoaded = temp.floodgateLoaded;
-        }
+        super("technical.conf");
+    }
+
+    public static TechnicalConfigV1 load() {
+        TechnicalConfigV1 config = loadConfig(TechnicalConfigV1.class, "technical.conf");
+        return config != null ? config : new TechnicalConfigV1();
     }
 
     protected String handleTemplate() throws IOException {

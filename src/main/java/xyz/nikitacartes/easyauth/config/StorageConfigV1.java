@@ -7,26 +7,25 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class StorageConfigV1 extends ConfigTemplate<StorageConfigV1> {
+public class StorageConfigV1 extends ConfigTemplate {
     public String databaseType = "leveldb";
     public MySqlConfig mySqlConfig = new MySqlConfig();
     public MongoDBConfig mongoDBConfig = new MongoDBConfig();
     public boolean useSimpleAuthDb = false;
 
     public StorageConfigV1() {
-        super(StorageConfigV1.class, "storage.conf");
-        StorageConfigV1 temp = loadConfig();
-        if (temp != null) {
-            this.databaseType = temp.databaseType;
-            this.mySqlConfig = temp.mySqlConfig;
-            this.mongoDBConfig = temp.mongoDBConfig;
-            this.useSimpleAuthDb = temp.useSimpleAuthDb;
-        }
+        super("storage.conf");
+    }
+
+    public static StorageConfigV1 load() {
+        StorageConfigV1 config = loadConfig(StorageConfigV1.class, "storage.conf");
+        return config != null ? config : new StorageConfigV1();
     }
 
     protected String handleTemplate() throws IOException {

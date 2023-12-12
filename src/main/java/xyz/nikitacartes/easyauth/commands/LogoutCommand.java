@@ -14,7 +14,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.mojangAccountNamesCache;
 
 public class LogoutCommand {
 
-    public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/logout" command
         dispatcher.register(literal("logout")
                 .requires(Permissions.require("easyauth.commands.logout", true))
@@ -22,7 +22,7 @@ public class LogoutCommand {
         );
     }
 
-    private int logout(ServerCommandSource serverCommandSource) throws CommandSyntaxException {
+    private static int logout(ServerCommandSource serverCommandSource) throws CommandSyntaxException {
         ServerPlayerEntity player = serverCommandSource.getPlayerOrThrow();
 
         if (!mojangAccountNamesCache.contains(player.getGameProfile().getName().toLowerCase())) {

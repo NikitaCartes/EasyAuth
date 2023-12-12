@@ -17,7 +17,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
 
 public class AccountCommand {
 
-    public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         // Registering the "/account" command
         dispatcher.register(literal("account")
                 .requires(Permissions.require("easyauth.commands.account.root", true))
@@ -61,7 +61,7 @@ public class AccountCommand {
     }
 
     // Method called for checking the password and then removing user's account from db
-    private int unregister(ServerCommandSource source, String pass) throws CommandSyntaxException {
+    private static int unregister(ServerCommandSource source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayerOrThrow();
 
@@ -93,7 +93,7 @@ public class AccountCommand {
     }
 
     // Method called for checking the password and then changing it
-    private int changePassword(ServerCommandSource source, String oldPass, String newPass) throws CommandSyntaxException {
+    private static int changePassword(ServerCommandSource source, String oldPass, String newPass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayerOrThrow();
 

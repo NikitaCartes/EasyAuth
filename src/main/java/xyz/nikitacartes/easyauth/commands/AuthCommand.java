@@ -33,7 +33,7 @@ public class AuthCommand {
      *
      * @param dispatcher
      */
-    public void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("auth")
                 .requires(Permissions.require("easyauth.commands.auth.root", 3))
                 .then(literal("reload")
@@ -142,7 +142,7 @@ public class AuthCommand {
      * @param sender executioner of the command
      * @return 0
      */
-    public int reloadConfig(Entity sender) {
+    public static int reloadConfig(Entity sender) {
         DB.close();
         EasyAuth.loadConfigs();
 
@@ -166,7 +166,7 @@ public class AuthCommand {
      * @param password password that will be set
      * @return 0
      */
-    private int setGlobalPassword(ServerCommandSource source, String password) {
+    private static int setGlobalPassword(ServerCommandSource source, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
         // Different thread to avoid lag spikes
@@ -197,7 +197,7 @@ public class AuthCommand {
      * @param pitch  player pitch (x rotation)
      * @return 0
      */
-    private int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z, float yaw, float pitch) {
+    private static int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z, float yaw, float pitch) {
         // Setting config values and saving
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
@@ -227,7 +227,7 @@ public class AuthCommand {
      * @param uuid   uuid of the player to delete account for
      * @return 0
      */
-    private int removeAccount(ServerCommandSource source, String uuid) {
+    private static int removeAccount(ServerCommandSource source, String uuid) {
         Entity sender = source.getEntity();
         THREADPOOL.submit(() -> {
             DB.deleteUserData(uuid);
@@ -249,7 +249,7 @@ public class AuthCommand {
      * @param password new password for the player account
      * @return 0
      */
-    private int registerUser(ServerCommandSource source, String uuid, String password) {
+    private static int registerUser(ServerCommandSource source, String uuid, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
@@ -280,7 +280,7 @@ public class AuthCommand {
      * @param password new password for the player
      * @return 0
      */
-    private int updatePassword(ServerCommandSource source, String uuid, String password) {
+    private static int updatePassword(ServerCommandSource source, String uuid, String password) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
@@ -317,7 +317,7 @@ public class AuthCommand {
      * @param player player to get uuid from
      * @return 0
      */
-    private int getOfflineUuid(ServerCommandSource source, String player) {
+    private static int getOfflineUuid(ServerCommandSource source, String player) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 
@@ -337,7 +337,7 @@ public class AuthCommand {
      * @param source executioner of the command
      * @return 0
      */
-    public int getRegisteredPlayers(ServerCommandSource source) {
+    public static int getRegisteredPlayers(ServerCommandSource source) {
         Entity sender = source.getEntity();
 
         THREADPOOL.submit(() -> {
@@ -358,7 +358,7 @@ public class AuthCommand {
      * @param player player to add in list
      * @return 0
      */
-    private int addPlayerToForcedOffline(ServerCommandSource source, String player) {
+    private static int addPlayerToForcedOffline(ServerCommandSource source, String player) {
         // Getting the player who send the command
         Entity sender = source.getEntity();
 

@@ -29,8 +29,6 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 public class EasyAuth implements ModInitializer {
     public static final String MOD_ID = "easyauth";
 
-    public static final String MOD_NAME = "EasyAuth";
-
     public static DbApi DB = null;
 
     public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
@@ -97,11 +95,11 @@ public class EasyAuth implements ModInitializer {
 
         // Registering the commands
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
-            (new RegisterCommand()).registerCommand(dispatcher);
-            (new LoginCommand()).registerCommand(dispatcher);
-            (new LogoutCommand()).registerCommand(dispatcher);
-            (new AuthCommand()).registerCommand(dispatcher);
-            (new AccountCommand()).registerCommand(dispatcher);
+            RegisterCommand.registerCommand(dispatcher);
+            LoginCommand.registerCommand(dispatcher);
+            LogoutCommand.registerCommand(dispatcher);
+            AuthCommand.registerCommand(dispatcher);
+            AccountCommand.registerCommand(dispatcher);
         });
 
         // From Fabric API
@@ -110,7 +108,7 @@ public class EasyAuth implements ModInitializer {
         UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
         AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
         UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> (new AuthCommand()).reloadConfig(null));
+        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(null));
         ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
     }

@@ -12,6 +12,7 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.storage.database.*;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -21,6 +22,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
@@ -74,7 +76,7 @@ public class EasyAuth implements ModInitializer {
             LogError("Error while reading server properties: ", e);
         }
 
-        Config.loadConfigs();
+        loadConfigs();
 
         if (DB != null && !DB.isClosed()) {
             DB.close();
@@ -137,5 +139,33 @@ public class EasyAuth implements ModInitializer {
 
         // Closing DbApi connection
         DB.close();
+    }
+
+    public static void loadConfigs() {
+        File file = new File(gameDirectory + "/config/EasyAuth");
+        if (!file.exists()) {
+            if (!file.mkdir()) {
+                throw new RuntimeException("[EasyAuth] Error creating directory for configs");
+            }
+        }
+        EasyAuth.config = new MainConfigV1();
+        EasyAuth.technicalConfig = new TechnicalConfigV1();
+        EasyAuth.langConfig = new LangConfigV1();
+        EasyAuth.extendedConfig = new ExtendedConfigV1();
+        EasyAuth.storageConfig = new StorageConfigV1();
+
+        if (!EasyAuth.config.isLoaded) {
+            ConfigMigration.migrateFromV0();
+        }
+
+        AuthEventHandler.usernamePattern = Pattern.compile(EasyAuth.extendedConfig.usernameRegexp);
+    }
+
+    public static void saveConfigs() {
+        EasyAuth.config.save();
+        EasyAuth.technicalConfig.save();
+        EasyAuth.langConfig.save();
+        EasyAuth.extendedConfig.save();
+        EasyAuth.storageConfig.save();
     }
 }

@@ -6,7 +6,6 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.config.StorageConfigV1;
-import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 
 import java.io.File;

@@ -12,7 +12,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class LangConfigV1 extends Config {
+public class LangConfigV1 extends GenericConfig<LangConfigV1> {
 
     public boolean enableServerSideTranslation = true;
     public String enterPassword = "§6You need to enter your password!";
@@ -49,56 +49,87 @@ public class LangConfigV1 extends Config {
     public String registeredPlayers = "List of registered players:";
     public String addToForcedOffline = "Player successfully added into forcedOfflinePlayers list";
 
-    public static LangConfigV1 load() {
-        return loadConfig(LangConfigV1.class, "translation.conf");
+
+    public LangConfigV1() {
+        super(LangConfigV1.class, "translation.conf");
+        LangConfigV1 temp = loadConfig();
+        if (temp != null) {
+            this.enableServerSideTranslation = temp.enableServerSideTranslation;
+            this.enterPassword = temp.enterPassword;
+            this.enterNewPassword = temp.enterNewPassword;
+            this.wrongPassword = temp.wrongPassword;
+            this.matchPassword = temp.matchPassword;
+            this.passwordUpdated = temp.passwordUpdated;
+            this.loginRequired = temp.loginRequired;
+            this.loginTriesExceeded = temp.loginTriesExceeded;
+            this.globalPasswordSet = temp.globalPasswordSet;
+            this.cannotChangePassword = temp.cannotChangePassword;
+            this.cannotUnregister = temp.cannotUnregister;
+            this.notAuthenticated = temp.notAuthenticated;
+            this.alreadyAuthenticated = temp.alreadyAuthenticated;
+            this.successfullyAuthenticated = temp.successfullyAuthenticated;
+            this.successfulLogout = temp.successfulLogout;
+            this.timeExpired = temp.timeExpired;
+            this.registerRequired = temp.registerRequired;
+            this.alreadyRegistered = temp.alreadyRegistered;
+            this.registerSuccess = temp.registerSuccess;
+            this.userdataDeleted = temp.userdataDeleted;
+            this.userdataUpdated = temp.userdataUpdated;
+            this.accountDeleted = temp.accountDeleted;
+            this.configurationReloaded = temp.configurationReloaded;
+            this.maxPasswordChars = temp.maxPasswordChars;
+            this.minPasswordChars = temp.minPasswordChars;
+            this.disallowedUsername = temp.disallowedUsername;
+            this.playerAlreadyOnline = temp.playerAlreadyOnline;
+            this.worldSpawnSet = temp.worldSpawnSet;
+            this.corruptedPlayerData = temp.corruptedPlayerData;
+            this.userNotRegistered = temp.userNotRegistered;
+            this.cannotLogout = temp.cannotLogout;
+            this.offlineUuid = temp.offlineUuid;
+            this.registeredPlayers = temp.registeredPlayers;
+            this.addToForcedOffline = temp.addToForcedOffline;
+        }
     }
 
-    public static LangConfigV1 create() {
-        return createConfig(LangConfigV1.class);
-    }
-
-    protected String getConfigPath() {
-        return "translation.conf";
-    }
 
     protected String handleTemplate() throws IOException {
         Map<String, Object> configValues = new HashMap<>();
-        configValues.put("enableServerSideTranslation", enableServerSideTranslation);
-        configValues.put("enterPassword", escapeString(enterPassword));
-        configValues.put("enterNewPassword", escapeString(enterNewPassword));
-        configValues.put("wrongPassword", escapeString(wrongPassword));
-        configValues.put("matchPassword", escapeString(matchPassword));
-        configValues.put("passwordUpdated", escapeString(passwordUpdated));
-        configValues.put("loginRequired", escapeString(loginRequired));
-        configValues.put("loginTriesExceeded", escapeString(loginTriesExceeded));
-        configValues.put("globalPasswordSet", escapeString(globalPasswordSet));
-        configValues.put("cannotChangePassword", escapeString(cannotChangePassword));
-        configValues.put("cannotUnregister", escapeString(cannotUnregister));
-        configValues.put("notAuthenticated", escapeString(notAuthenticated));
-        configValues.put("alreadyAuthenticated", escapeString(alreadyAuthenticated));
-        configValues.put("successfullyAuthenticated", escapeString(successfullyAuthenticated));
-        configValues.put("successfulLogout", escapeString(successfulLogout));
-        configValues.put("timeExpired", escapeString(timeExpired));
-        configValues.put("registerRequired", escapeString(registerRequired));
-        configValues.put("alreadyRegistered", escapeString(alreadyRegistered));
-        configValues.put("registerSuccess", escapeString(registerSuccess));
-        configValues.put("userdataDeleted", escapeString(userdataDeleted));
-        configValues.put("userdataUpdated", escapeString(userdataUpdated));
-        configValues.put("accountDeleted", escapeString(accountDeleted));
-        configValues.put("configurationReloaded", escapeString(configurationReloaded));
-        configValues.put("maxPasswordChars", escapeString(maxPasswordChars));
-        configValues.put("minPasswordChars", escapeString(minPasswordChars));
-        configValues.put("disallowedUsername", escapeString(disallowedUsername));
-        configValues.put("playerAlreadyOnline", escapeString(playerAlreadyOnline));
-        configValues.put("worldSpawnSet", escapeString(worldSpawnSet));
-        configValues.put("corruptedPlayerData", escapeString(corruptedPlayerData));
-        configValues.put("userNotRegistered", escapeString(userNotRegistered));
-        configValues.put("cannotLogout", escapeString(cannotLogout));
-        configValues.put("offlineUuid", escapeString(offlineUuid));
-        configValues.put("registeredPlayers", escapeString(registeredPlayers));
-        configValues.put("addToForcedOffline", escapeString(addToForcedOffline));
+        configValues.put("enableServerSideTranslation", wrapIfNecessary(enableServerSideTranslation));
+        configValues.put("enterPassword", wrapIfNecessary(enterPassword));
+        configValues.put("enterNewPassword", wrapIfNecessary(enterNewPassword));
+        configValues.put("wrongPassword", wrapIfNecessary(wrongPassword));
+        configValues.put("matchPassword", wrapIfNecessary(matchPassword));
+        configValues.put("passwordUpdated", wrapIfNecessary(passwordUpdated));
+        configValues.put("loginRequired", wrapIfNecessary(loginRequired));
+        configValues.put("loginTriesExceeded", wrapIfNecessary(loginTriesExceeded));
+        configValues.put("globalPasswordSet", wrapIfNecessary(globalPasswordSet));
+        configValues.put("cannotChangePassword", wrapIfNecessary(cannotChangePassword));
+        configValues.put("cannotUnregister", wrapIfNecessary(cannotUnregister));
+        configValues.put("notAuthenticated", wrapIfNecessary(notAuthenticated));
+        configValues.put("alreadyAuthenticated", wrapIfNecessary(alreadyAuthenticated));
+        configValues.put("successfullyAuthenticated", wrapIfNecessary(successfullyAuthenticated));
+        configValues.put("successfulLogout", wrapIfNecessary(successfulLogout));
+        configValues.put("timeExpired", wrapIfNecessary(timeExpired));
+        configValues.put("registerRequired", wrapIfNecessary(registerRequired));
+        configValues.put("alreadyRegistered", wrapIfNecessary(alreadyRegistered));
+        configValues.put("registerSuccess", wrapIfNecessary(registerSuccess));
+        configValues.put("userdataDeleted", wrapIfNecessary(userdataDeleted));
+        configValues.put("userdataUpdated", wrapIfNecessary(userdataUpdated));
+        configValues.put("accountDeleted", wrapIfNecessary(accountDeleted));
+        configValues.put("configurationReloaded", wrapIfNecessary(configurationReloaded));
+        configValues.put("maxPasswordChars", wrapIfNecessary(maxPasswordChars));
+        configValues.put("minPasswordChars", wrapIfNecessary(minPasswordChars));
+        configValues.put("disallowedUsername", wrapIfNecessary(disallowedUsername));
+        configValues.put("playerAlreadyOnline", wrapIfNecessary(playerAlreadyOnline));
+        configValues.put("worldSpawnSet", wrapIfNecessary(worldSpawnSet));
+        configValues.put("corruptedPlayerData", wrapIfNecessary(corruptedPlayerData));
+        configValues.put("userNotRegistered", wrapIfNecessary(userNotRegistered));
+        configValues.put("cannotLogout", wrapIfNecessary(cannotLogout));
+        configValues.put("offlineUuid", wrapIfNecessary(offlineUuid));
+        configValues.put("registeredPlayers", wrapIfNecessary(registeredPlayers));
+        configValues.put("addToForcedOffline", wrapIfNecessary(addToForcedOffline));
 
-        String configTemplate = Resources.toString(getResource("config/" + getConfigPath()), UTF_8);
+        String configTemplate = Resources.toString(getResource("config/" + configPath), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);
     }
 }

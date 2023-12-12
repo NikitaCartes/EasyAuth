@@ -11,13 +11,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
-import xyz.nikitacartes.easyauth.config.Config;
-import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
+import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
-import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,7 +47,7 @@ public class AuthEventHandler {
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
         if (usernamePattern == null) {
             if (config == null) {
-                Config.saveConfigs();
+                EasyAuth.saveConfigs();
             }
             usernamePattern = Pattern.compile(extendedConfig.usernameRegexp);
         }

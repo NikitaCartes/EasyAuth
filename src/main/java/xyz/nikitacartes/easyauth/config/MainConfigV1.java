@@ -12,7 +12,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
-public class MainConfigV1 extends Config {
+public class MainConfigV1 extends GenericConfig<MainConfigV1> {
     public boolean premiumAutologin = true;
     public boolean floodgateAutoLogin = true;
     public long maxLoginTries = 3;
@@ -24,38 +24,47 @@ public class MainConfigV1 extends Config {
     public boolean debug = false;
     public long configVersion = 1;
     public WorldSpawn worldSpawn = new WorldSpawn();
+    public transient boolean isLoaded = false;
 
-    public static MainConfigV1 load() {
-        return loadConfig(MainConfigV1.class, "main.conf");
-    }
 
-    public static MainConfigV1 create() {
-        return createConfig(MainConfigV1.class);
-    }
-
-    protected String getConfigPath() {
-        return "main.conf";
+    public MainConfigV1() {
+        super(MainConfigV1.class, "main.conf");
+        MainConfigV1 temp = loadConfig();
+        if (temp != null) {
+            this.isLoaded = true;
+            this.premiumAutologin = temp.premiumAutologin;
+            this.floodgateAutoLogin = temp.floodgateAutoLogin;
+            this.maxLoginTries = temp.maxLoginTries;
+            this.kickTimeout = temp.kickTimeout;
+            this.resetLoginAttemptsTimeout = temp.resetLoginAttemptsTimeout;
+            this.sessionTimeout = temp.sessionTimeout;
+            this.enableGlobalPassword = temp.enableGlobalPassword;
+            this.hidePlayerCoords = temp.hidePlayerCoords;
+            this.debug = temp.debug;
+            this.configVersion = temp.configVersion;
+            this.worldSpawn = temp.worldSpawn;
+        }
     }
 
     protected String handleTemplate() throws IOException {
-        Map<String, Object> configValues = new HashMap<>();
-        configValues.put("premiumAutologin", premiumAutologin);
-        configValues.put("floodgateAutologin", floodgateAutoLogin);
-        configValues.put("maxLoginTries", maxLoginTries);
-        configValues.put("kickTimeout", kickTimeout);
-        configValues.put("resetLoginAttemptsTimeout", resetLoginAttemptsTimeout);
-        configValues.put("sessionTimeout", sessionTimeout);
-        configValues.put("enableGlobalPassword", enableGlobalPassword);
-        configValues.put("hidePlayerCoords", hidePlayerCoords);
-        configValues.put("worldSpawn.dimension", worldSpawn.dimension);
-        configValues.put("worldSpawn.x", worldSpawn.x);
-        configValues.put("worldSpawn.y", worldSpawn.y);
-        configValues.put("worldSpawn.z", worldSpawn.z);
-        configValues.put("worldSpawn.yaw", worldSpawn.yaw);
-        configValues.put("worldSpawn.pitch", worldSpawn.pitch);
-        configValues.put("debug", debug);
-        configValues.put("configVersion", configVersion);
-        String configTemplate = Resources.toString(getResource("config/" + getConfigPath()), UTF_8);
+        Map<String, String> configValues = new HashMap<>();
+        configValues.put("premiumAutologin", wrapIfNecessary(premiumAutologin));
+        configValues.put("floodgateAutologin", wrapIfNecessary(floodgateAutoLogin));
+        configValues.put("maxLoginTries", wrapIfNecessary(maxLoginTries));
+        configValues.put("kickTimeout", wrapIfNecessary(kickTimeout));
+        configValues.put("resetLoginAttemptsTimeout", wrapIfNecessary(resetLoginAttemptsTimeout));
+        configValues.put("sessionTimeout", wrapIfNecessary(sessionTimeout));
+        configValues.put("enableGlobalPassword", wrapIfNecessary(enableGlobalPassword));
+        configValues.put("hidePlayerCoords", wrapIfNecessary(hidePlayerCoords));
+        configValues.put("worldSpawn.dimension", wrapIfNecessary(worldSpawn.dimension));
+        configValues.put("worldSpawn.x", wrapIfNecessary(worldSpawn.x));
+        configValues.put("worldSpawn.y", wrapIfNecessary(worldSpawn.y));
+        configValues.put("worldSpawn.z", wrapIfNecessary(worldSpawn.z));
+        configValues.put("worldSpawn.yaw", wrapIfNecessary(worldSpawn.yaw));
+        configValues.put("worldSpawn.pitch", wrapIfNecessary(worldSpawn.pitch));
+        configValues.put("debug", wrapIfNecessary(debug));
+        configValues.put("configVersion", wrapIfNecessary(configVersion));
+        String configTemplate = Resources.toString(getResource("config/" + configPath), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);
     }
 

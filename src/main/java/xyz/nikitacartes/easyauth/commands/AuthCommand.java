@@ -11,14 +11,14 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
-import xyz.nikitacartes.easyauth.config.Config;
+import xyz.nikitacartes.easyauth.EasyAuth;
+import xyz.nikitacartes.easyauth.config.GenericConfig;
 import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.storage.database.DBApiException;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
-import java.io.File;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -145,7 +145,7 @@ public class AuthCommand {
      */
     public int reloadConfig(Entity sender) {
         DB.close();
-        Config.loadConfigs();
+        EasyAuth.loadConfigs();
 
         try {
             DB.connect();

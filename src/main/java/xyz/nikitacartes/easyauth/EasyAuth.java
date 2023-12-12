@@ -74,6 +74,14 @@ public class EasyAuth implements ModInitializer {
             LogError("Error while reading server properties: ", e);
         }
 
+        File file = new File(gameDirectory + "/config/EasyAuth");
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                throw new RuntimeException("[EasyAuth] Error creating directory for configs");
+            }
+            ConfigMigration.migrateFromV0();
+        }
+
         loadConfigs();
 
         if (DB != null && !DB.isClosed()) {
@@ -140,22 +148,28 @@ public class EasyAuth implements ModInitializer {
     }
 
     public static void loadConfigs() {
-        File file = new File(gameDirectory + "/config/EasyAuth");
-        if (!file.exists()) {
-            if (!file.mkdir()) {
-                throw new RuntimeException("[EasyAuth] Error creating directory for configs");
+        VersionConfig version = new VersionConfig();
+
+        switch (version.configVersion) {
+            case -1:
+            case 1: {
+                EasyAuth.config = new MainConfigV1();
+                EasyAuth.technicalConfig = new TechnicalConfigV1();
+                EasyAuth.langConfig = new LangConfigV1();
+                EasyAuth.extendedConfig = new ExtendedConfigV1();
+                EasyAuth.storageConfig = new StorageConfigV1();
+                break;
+            }
+            default: {
+                LogError("Unknown config version: " + version.configVersion + "\n Using last known version");
+                EasyAuth.config = new MainConfigV1();
+                EasyAuth.technicalConfig = new TechnicalConfigV1();
+                EasyAuth.langConfig = new LangConfigV1();
+                EasyAuth.extendedConfig = new ExtendedConfigV1();
+                EasyAuth.storageConfig = new StorageConfigV1();
+                break;
             }
         }
-        EasyAuth.config = new MainConfigV1();
-        EasyAuth.technicalConfig = new TechnicalConfigV1();
-        EasyAuth.langConfig = new LangConfigV1();
-        EasyAuth.extendedConfig = new ExtendedConfigV1();
-        EasyAuth.storageConfig = new StorageConfigV1();
-
-        if (!EasyAuth.config.isLoaded) {
-            ConfigMigration.migrateFromV0();
-        }
-
         AuthEventHandler.usernamePattern = Pattern.compile(EasyAuth.extendedConfig.usernameRegexp);
     }
 

@@ -24,14 +24,12 @@ public class MainConfigV1 extends ConfigTemplate<MainConfigV1> {
     public boolean debug = false;
     public long configVersion = 1;
     public WorldSpawn worldSpawn = new WorldSpawn();
-    public transient boolean isLoaded = false;
 
 
     public MainConfigV1() {
         super(MainConfigV1.class, "main.conf");
         MainConfigV1 temp = loadConfig();
         if (temp != null) {
-            this.isLoaded = true;
             this.premiumAutologin = temp.premiumAutologin;
             this.floodgateAutoLogin = temp.floodgateAutoLogin;
             this.maxLoginTries = temp.maxLoginTries;

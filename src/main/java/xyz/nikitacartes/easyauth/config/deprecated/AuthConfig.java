@@ -20,10 +20,8 @@ public class AuthConfig {
         } catch (SecurityException e) {
             return null;
         }
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
-                StandardCharsets.UTF_8))) {
-            return new GsonBuilder().setPrettyPrinting().serializeNulls().create().fromJson(fileReader,
-                    AuthConfig.class);
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            return new GsonBuilder().setPrettyPrinting().serializeNulls().create().fromJson(fileReader, AuthConfig.class);
         } catch (IOException e) {
             throw new RuntimeException("[EasyAuth] Problem occurred when trying to load old config: ", e);
         }

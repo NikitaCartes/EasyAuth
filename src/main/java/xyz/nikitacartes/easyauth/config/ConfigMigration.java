@@ -6,6 +6,7 @@ import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import java.io.File;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
 public class ConfigMigration {
 
@@ -15,6 +16,9 @@ public class ConfigMigration {
             return;
         }
 
+        LogInfo("Migrating config from v0 to v1");
+
+        EasyAuth.config = new MainConfigV1();
         EasyAuth.config.premiumAutologin = oldConfig.main.premiumAutologin;
         EasyAuth.config.floodgateAutoLogin = oldConfig.main.floodgateAutologin;
         EasyAuth.config.maxLoginTries = oldConfig.main.maxLoginTries;
@@ -33,6 +37,7 @@ public class ConfigMigration {
         EasyAuth.config.worldSpawn.pitch = oldConfig.worldSpawn.pitch;
         EasyAuth.config.save();
 
+        EasyAuth.extendedConfig = new ExtendedConfigV1();
         EasyAuth.extendedConfig.allowChat = oldConfig.experimental.allowChat;
         EasyAuth.extendedConfig.allowCommands = oldConfig.experimental.allowCommands;
         EasyAuth.extendedConfig.allowedCommands = oldConfig.experimental.allowedCommands;
@@ -60,6 +65,7 @@ public class ConfigMigration {
         EasyAuth.extendedConfig.skipAllAuthChecks = oldConfig.experimental.skipAllAuthChecks;
         EasyAuth.extendedConfig.save();
 
+        EasyAuth.langConfig = new LangConfigV1();
         EasyAuth.langConfig.enableServerSideTranslation = oldConfig.experimental.enableServerSideTranslation;
         EasyAuth.langConfig.enterPassword = oldConfig.lang.enterPassword;
         EasyAuth.langConfig.enterNewPassword = oldConfig.lang.enterNewPassword;
@@ -96,11 +102,13 @@ public class ConfigMigration {
         EasyAuth.langConfig.addToForcedOffline = oldConfig.lang.addToForcedOffline;
         EasyAuth.langConfig.save();
 
+        EasyAuth.technicalConfig = new TechnicalConfigV1();
         EasyAuth.technicalConfig.globalPassword = oldConfig.main.globalPassword;
         EasyAuth.technicalConfig.forcedOfflinePlayers = oldConfig.main.forcedOfflinePlayers;
         EasyAuth.technicalConfig.confirmedOnlinePlayers = oldConfig.experimental.verifiedOnlinePlayer;
         EasyAuth.technicalConfig.save();
 
+        EasyAuth.storageConfig = new StorageConfigV1();
         EasyAuth.storageConfig.databaseType = oldConfig.main.databaseType;
         EasyAuth.storageConfig.mySqlConfig.mysqlHost = oldConfig.main.MySQLHost;
         EasyAuth.storageConfig.mySqlConfig.mysqlUser = oldConfig.main.MySQLUser;
@@ -110,5 +118,6 @@ public class ConfigMigration {
         EasyAuth.storageConfig.mongoDBConfig.mongodbConnectionString = oldConfig.main.MongoDBConnectionString;
         EasyAuth.storageConfig.mongoDBConfig.mongodbDatabase = oldConfig.main.MongoDBDatabase;
         EasyAuth.storageConfig.useSimpleAuthDb = oldConfig.experimental.useSimpleAuthDatabase;
+        EasyAuth.storageConfig.save();
     }
 }

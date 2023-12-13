@@ -15,6 +15,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.AuthHelper.hashPassword;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 
 public class RegisterCommand {
@@ -40,7 +41,7 @@ public class RegisterCommand {
         if (config.enableGlobalPassword) {
             player.sendMessage(TranslationHelper.getLoginRequired(), false);
             return 0;
-        } else if (((PlayerAuth) player).isAuthenticated()) {
+        } else if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             player.sendMessage(TranslationHelper.getAlreadyAuthenticated(), false);
             return 0;
         } else if (!pass1.equals(pass2)) {
@@ -57,12 +58,13 @@ public class RegisterCommand {
                 return;
             }
 
-            PlayerCache playerCache = playerCacheMap.get(((PlayerAuth) player).getFakeUuid());
+            PlayerCache playerCache = playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid());
             if (playerCache.password.isEmpty()) {
-                ((PlayerAuth) player).setAuthenticated(true);
+                ((PlayerAuth) player).easyAuth$setAuthenticated(true);
                 player.sendMessage(TranslationHelper.getRegisterSuccess(), false);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 playerCache.password = hashPassword(pass1.toCharArray());
+                LogDebug("Player " + player.getName().getString() + "(" + player.getUuidAsString() + ") successfully registered with password: " + playerCache.password);
                 return;
             }
             player.sendMessage(TranslationHelper.getAlreadyRegistered(), false);

@@ -27,7 +27,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
             method = "onChatMessage(Lnet/minecraft/network/packet/c2s/play/ChatMessageC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;validateMessage(Ljava/lang/String;Ljava/time/Instant;Lnet/minecraft/network/message/LastSeenMessageList$Acknowledgment;)Ljava/util/Optional;",
+                    target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;validateMessage(Lnet/minecraft/network/message/LastSeenMessageList$Acknowledgment;)Ljava/util/Optional;",
                     shift = At.Shift.BEFORE
             ),
             cancellable = true

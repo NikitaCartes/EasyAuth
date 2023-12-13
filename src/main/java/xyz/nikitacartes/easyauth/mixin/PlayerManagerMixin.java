@@ -3,12 +3,17 @@ package xyz.nikitacartes.easyauth.mixin;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
+import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Uuids;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Shadow;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.mixin.accessor.ServerStatHandlerAccessor;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,14 +27,20 @@ import java.net.SocketAddress;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 @Mixin(PlayerManager.class)
 public abstract class PlayerManagerMixin {
 
-    @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("RETURN"))
-    private void onPlayerConnect(ClientConnection clientConnection, ServerPlayerEntity serverPlayerEntity, CallbackInfo ci) {
-        AuthEventHandler.onPlayerJoin(serverPlayerEntity);
+    @Final
+    @Shadow
+    private MinecraftServer server;
+
+    @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V", at = @At("RETURN"))
+    private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
+        AuthEventHandler.onPlayerJoin(player);
     }
 
     @Inject(method = "remove(Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("HEAD"))
@@ -60,10 +71,14 @@ public abstract class PlayerManagerMixin {
     )
     private void migrateOfflineStats(PlayerEntity player, CallbackInfoReturnable<ServerStatHandler> cir, UUID uUID, ServerStatHandler serverStatHandler, File serverStatsDir, File playerStatFile) {
         File onlineFile = new File(serverStatsDir, uUID + ".json");
-        if (config.premiumAutologin && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) player).isUsingMojangAccount() && !onlineFile.exists()) {
+        if (server.isOnlineMode() && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) player).easyAuth$isUsingMojangAccount() && !onlineFile.exists()) {
             String playername = player.getGameProfile().getName();
             File offlineFile = new File(onlineFile.getParent(), Uuids.getOfflinePlayerUuid(playername) + ".json");
-            offlineFile.renameTo(onlineFile);
+            if (!offlineFile.renameTo(onlineFile)) {
+                LogWarn("Failed to migrate offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
+            } else {
+                LogDebug("Migrated offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
+            }
 
             ((ServerStatHandlerAccessor) serverStatHandler).setFile(onlineFile);
         }

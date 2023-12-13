@@ -4,6 +4,7 @@ import xyz.nikitacartes.easyauth.utils.hashing.HasherArgon2;
 import xyz.nikitacartes.easyauth.utils.hashing.HasherBCrypt;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 public class AuthHelper {
     /**
@@ -15,6 +16,11 @@ public class AuthHelper {
      */
     public static PasswordOptions checkPassword(String uuid, char[] password) {
         String hashed = playerCacheMap.get(uuid).password;
+        if (config.experimental.debugMode) {
+            LogDebug("Checking password for " + uuid);
+            LogDebug("Stored password's hash: " + hashed);
+            LogDebug("Hashed password: " + hashPassword(password));
+        }
         if (config.enableGlobalPassword) {
             // We have global password enabled
             // Player must know global password or password set by auth register

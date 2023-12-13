@@ -10,7 +10,8 @@
   ],
   "contact": {
     "homepage": "https://github.com/NikitaCartes/EasyAuth",
-    "sources": "https://github.com/NikitaCartes/EasyAuth"
+    "sources": "https://github.com/NikitaCartes/EasyAuth",
+    "issues": "https://github.com/NikitaCartes/EasyAuth/issues"
   },
   "license": "MIT",
   "environment": "server",
@@ -26,7 +27,7 @@
   "depends": {
     "fabric-api": "*",
     "fabricloader": "*",
-    "minecraft": ">=1.20-"
+    "minecraft": ">=1.20.3-"
   },
   "suggests": {
     "fabric-permissions-api-v0": "*"

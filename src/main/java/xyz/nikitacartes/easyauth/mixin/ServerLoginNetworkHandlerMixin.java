@@ -2,8 +2,10 @@ package xyz.nikitacartes.easyauth.mixin;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.util.Uuids;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,20 +27,14 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin {
     @Shadow
-    GameProfile profile;
+    public GameProfile profile;
 
     @Shadow
-    protected abstract GameProfile toOfflineProfile(GameProfile profile);
+    private ServerLoginNetworkHandler.State state;
 
+    @Final
     @Shadow
-    ServerLoginNetworkHandler.State state;
-
-    @Inject(method = "acceptPlayer()V", at = @At("HEAD"))
-    private void acceptPlayer(CallbackInfo ci) {
-        if (extendedConfig.forcedOfflineUuid) {
-            this.profile = this.toOfflineProfile(this.profile);
-        }
-    }
+    MinecraftServer server;
 
     /**
      * Checks whether the player has purchased an account.
@@ -52,14 +48,12 @@ public abstract class ServerLoginNetworkHandlerMixin {
             method = "onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lcom/mojang/authlib/GameProfile;<init>(Ljava/util/UUID;Ljava/lang/String;)V",
-                    shift = At.Shift.AFTER,
-                    remap = false
+                    target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"
             ),
             cancellable = true
     )
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
-        if (config.premiumAutologin) {
+        if (server.isOnlineMode()) {
             try {
                 String playername = packet.name().toLowerCase();
                 Pattern pattern = Pattern.compile("^[a-z0-9_]{3,16}$");
@@ -67,9 +61,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 if (technicalConfig.forcedOfflinePlayers.contains(playername)) {
                     LogDebug("Player " + playername + " is forced to be offline");
                     mojangAccountNamesCache.remove(playername);
-                    state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+                    state = ServerLoginNetworkHandler.State.VERIFYING;
 
-                    this.profile = new GameProfile(null, packet.name());
+                    this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
                     ci.cancel();
                     return;
                 }
@@ -81,9 +75,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 if ((playerCacheMap.containsKey(Uuids.getOfflinePlayerUuid(playername).toString()) || !matcher.matches())) {
                     // Player definitely doesn't have a mojang account
                     LogDebug("Player " + playername + " is cached as offline player");
-                    state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+                    state = ServerLoginNetworkHandler.State.VERIFYING;
 
-                    this.profile = new GameProfile(null, packet.name());
+                    this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
                     ci.cancel();
                 } else {
                     // Checking account status from API
@@ -108,9 +102,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
                         // Player doesn't have a Mojang account
                         httpsURLConnection.disconnect();
                         LogDebug("Player " + playername + " doesn't have a Mojang account");
-                        state = ServerLoginNetworkHandler.State.READY_TO_ACCEPT;
+                        state = ServerLoginNetworkHandler.State.VERIFYING;
 
-                        this.profile = new GameProfile(null, packet.name());
+                        this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
                         ci.cancel();
                     }
                 }

@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "java-library"
-    id "fabric-loom" version "1.2-SNAPSHOT"
+    id "fabric-loom" version "1.3-SNAPSHOT"
     id ("com.modrinth.minotaur") version "2.+"
     id ("com.matthewprenger.cursegradle") version "1.4.0"
 }
@@ -10,14 +10,15 @@ repositories {
     maven { name "Translation"; url "https://maven.nucleoid.xyz" }
     maven { name "Permission"; url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { name "Floodgate Api"; url "https://repo.opencollab.dev/main" }
-    mavenCentral()
 }
 
-archivesBaseName = "${project.mod_id}-mc${project.minecraft_version}"
+base.archivesName = "${project.mod_id}-mc${project.minecraft_version}"
 version = "${project.mod_version}"
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 loom {
     accessWidenerPath = file("src/main/resources/easyauth.accesswidener")
@@ -34,13 +35,13 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Translations
-    include modImplementation("xyz.nucleoid:server-translations-api:${project.server_translations_version}+${project.server_translations_branch}")
+    include modImplementation("xyz.nucleoid:server-translations-api:${project.server_translations_version}")
 
     // Permissions
     include modImplementation("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}")
 
     // Placeholder API
-    include modImplementation("eu.pb4:placeholder-api:${project.placeholder_api_version}+${project.placeholder_api_branch}")
+    include modImplementation("eu.pb4:placeholder-api:${project.placeholder_api_version}")
 
     // Mods
     modCompileOnly "org.geysermc.floodgate:api:${floodgate_api_version}"
@@ -105,11 +106,11 @@ modrinth {
     token.set(System.getenv("MODRINTH_TOKEN"))
     projectId.set("aZj58GfX")
     versionNumber.set("${project.version}")
-    versionName = "[1.20, 1.20.1] ${project.version}"
+    versionName = "[1.20.3, 1.20.4] ${project.version}"
     versionType = "beta"
-    changelog.set("Release notes and Changelog: \nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}")
+    changelog.set("Release notes:\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}\n\nChangelog:\nhttps://github.com/NikitaCartes/EasyAuth/tree/HEAD/CHANGELOG.md")
     uploadFile = remapJar
-    gameVersions.addAll("1.20", "1.20.1")
+    gameVersions.addAll("1.20.3", "1.20.4")
     loaders = ["fabric", "quilt"]
     dependencies {
         required.project("P7dR8mSH") // Fabric API
@@ -121,10 +122,8 @@ curseforge {
     project {
         id = "503866"
         changelogType = "markdown"
-        changelog = "**Release notes and Changelog:**\n\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}"
+        changelog = "Release notes:\nhttps://github.com/NikitaCartes/EasyAuth/releases/tag/${project.version}\n\nChangelog:\nhttps://github.com/NikitaCartes/EasyAuth/tree/HEAD/CHANGELOG.md"
         releaseType = "beta"
-
-        addGameVersion("Server")
 
         addGameVersion("Fabric")
         addGameVersion("Quilt")
@@ -132,11 +131,11 @@ curseforge {
         addGameVersion("Java 18")
         addGameVersion("Java 17")
 
-        addGameVersion("1.20")
-        addGameVersion("1.20.1")
+        addGameVersion("1.20.3")
+        addGameVersion("1.20.4")
 
         mainArtifact(remapJar) {
-            displayName = "[1.20, 1.20.1] ${project.version}"
+            displayName = "[1.20.3, 1.20.4] ${project.version}"
             relations {
                 requiredDependency("fabric-api")
                 embeddedLibrary 'server-translation-api'

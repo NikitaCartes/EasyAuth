@@ -24,7 +24,7 @@ See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 Thank you so much for those who have already helped with translation of the mod!
 
 * @alphatoasterous (Russian)
-* @Neubulae, @GodGun968 (Chinese)
+* @Neubulae, @GodGun968, @Sam5440 (Chinese)
 * @Zailer43 (Spanish)
 * @Kljunas2 (Slovene)
 * @Bendimester23 (Hungarian)
@@ -34,6 +34,7 @@ Thank you so much for those who have already helped with translation of the mod!
 * @egeesin (Turkish)
 * @txlbr (Ukrainian)
 * @LimakXRobczuk (Polish)
+* @Rizzo1812 (Italian)
 
 ### License
 

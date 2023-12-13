@@ -1,9 +1,11 @@
-### 3.0.21
+### 3.0.21-SNAPSHOT
 ##### Minecraft 1.20.3-1.20.4
 
 1) Change config system entirely.
 2) Fix `hidePlayersFromPlayerList`
 3) Add `/reg` alias for `/register`
+4) Add Italian translation, thanks to @Rizzo1812
+5) Add Taiwan Chinese translation, thanks to @Sam5440
 
 ----
 ### 3.0.20
@@ -15,7 +17,7 @@ Update dependencies
 ### 3.0.19
 ##### Minecraft 1.20[.1], 1.20.2
 
-1) Add option to skip all authentication if it's already done by another thing (mod/proxy/etc):
+1) Add option to skip all authentication if it's already done by another thing (mod/proxy/etc.):
    - `skipAllAuthChecks`
 2) Player will be re-mounted on entity if they were dismounted on login with `spawnOnJoin` enabled
 3) Changed behavior of `premiumAutologin`. Now it only allows online players not to authorize when logging in

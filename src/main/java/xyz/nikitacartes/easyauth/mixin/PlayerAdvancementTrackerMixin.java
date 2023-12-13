@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.serverProp;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 

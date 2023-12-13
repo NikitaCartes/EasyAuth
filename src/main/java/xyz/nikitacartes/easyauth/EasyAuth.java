@@ -121,7 +121,7 @@ public class EasyAuth implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
 
-        Identifier earlyPhase = new Identifier(MOD_ID, "early");
+        Identifier earlyPhase = new Identifier("easyauth", "early");
         ServerLoginConnectionEvents.QUERY_START.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
         ServerLoginConnectionEvents.QUERY_START.register(earlyPhase, AuthEventHandler::onPreLogin);
     }

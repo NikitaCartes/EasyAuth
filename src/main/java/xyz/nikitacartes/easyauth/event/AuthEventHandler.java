@@ -114,7 +114,7 @@ public class AuthEventHandler {
             player.setInvisible(false);
             return;
         }
-        if (config.experimental.skipAllAuthChecks) {
+        if (extendedConfig.skipAllAuthChecks) {
             ((PlayerAuth) player).easyAuth$setAuthenticated(true);
             return;
         }
@@ -279,7 +279,7 @@ public class AuthEventHandler {
     }
 
     public static void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, ServerLoginNetworking.LoginSynchronizer sync) {
-        if (config.experimental.forcedOfflineUuids && netHandler.profile != null) {
+        if (extendedConfig.forcedOfflineUuid && netHandler.profile != null) {
             netHandler.profile = Uuids.getOfflinePlayerProfile(netHandler.profile.getName());
         }
     }

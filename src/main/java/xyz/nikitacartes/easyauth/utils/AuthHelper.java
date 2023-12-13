@@ -16,7 +16,7 @@ public class AuthHelper {
      */
     public static PasswordOptions checkPassword(String uuid, char[] password) {
         String hashed = playerCacheMap.get(uuid).password;
-        if (config.experimental.debugMode) {
+        if (config.debug) {
             LogDebug("Checking password for " + uuid);
             LogDebug("Stored password's hash: " + hashed);
             LogDebug("Hashed password: " + hashPassword(password));

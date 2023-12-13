@@ -2,6 +2,7 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,10 +21,19 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 public class RegisterCommand {
 
+    // Registering the "/reg" alias
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+        LiteralCommandNode<ServerCommandSource> node = registerRegister(dispatcher);
+        if (extendedConfig.enableAliases) {
+            dispatcher.register(literal("reg")
+                    .requires(Permissions.require("easyauth.commands.register", true))
+                    .redirect(node));
+        }
+    }
 
-        // Registering the "/register" command
-        dispatcher.register(literal("register")
+    // Registering the "/register" command
+    public static LiteralCommandNode<ServerCommandSource> registerRegister(CommandDispatcher<ServerCommandSource> dispatcher) {
+        return dispatcher.register(literal("register")
                 .requires(Permissions.require("easyauth.commands.register", true))
                 .then(argument("password", string())
                         .then(argument("passwordAgain", string())

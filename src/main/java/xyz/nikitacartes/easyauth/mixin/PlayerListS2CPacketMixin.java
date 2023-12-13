@@ -21,7 +21,7 @@ public class PlayerListS2CPacketMixin {
 
     @Unique
     private static boolean hideFromTabList(ServerPlayerEntity player) {
-        return ((PlayerAuth) player).easyAuth$isAuthenticated();
+        return !((PlayerAuth) player).easyAuth$isAuthenticated();
     }
     @ModifyVariable(
             method = "<init>(Ljava/util/EnumSet;Ljava/util/Collection;)V",

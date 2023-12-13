@@ -1,8 +1,17 @@
+### 3.0.21
+##### Minecraft 1.20.3-1.20.4
+
+1) Change config system entirely.
+2) Fix `hidePlayersFromPlayerList`
+3) Add `/reg` alias for `/register`
+
+----
 ### 3.0.20
-##### Minecraft 1.20.3
+##### Minecraft 1.20.3-1.20.4
 
 Update dependencies
 
+----
 ### 3.0.19
 ##### Minecraft 1.20[.1], 1.20.2
 

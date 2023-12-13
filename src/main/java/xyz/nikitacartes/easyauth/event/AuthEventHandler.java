@@ -45,12 +45,6 @@ public class AuthEventHandler {
         PlayerEntity onlinePlayer = manager.getPlayer(incomingPlayerUsername);
 
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
-        if (usernamePattern == null) {
-            if (config == null) {
-                EasyAuth.saveConfigs();
-            }
-            usernamePattern = Pattern.compile(extendedConfig.usernameRegexp);
-        }
         Matcher matcher = usernamePattern.matcher(incomingPlayerUsername);
 
         if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).canSkipAuth()) && extendedConfig.preventAnotherLocationKick) {

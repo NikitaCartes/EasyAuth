@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -66,14 +67,18 @@ public abstract class ConfigTemplate {
     }
 
     protected String wrapIfNecessary(double string) {
-        return String.format("%.4f", string);
+        return String.format(Locale.US, "%.4f", string);
+    }
+
+    protected String wrapIfNecessary(long string) {
+        return String.valueOf(string);
     }
 
     protected <T extends List<String>> String wrapIfNecessary(T strings) {
-        return strings
+        return "[" + strings
                 .stream()
                 .map(this::wrapIfNecessary)
-                .collect(Collectors.joining(",\n"));
+                .collect(Collectors.joining(",\n  ")) + "]";
     }
 
     protected abstract String handleTemplate() throws IOException;

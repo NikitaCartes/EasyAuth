@@ -40,9 +40,6 @@ dependencies {
     // Permissions
     include modImplementation("me.lucko:fabric-permissions-api:${project.fabric_permissions_version}")
 
-    // Placeholder API
-    include modImplementation("eu.pb4:placeholder-api:${project.placeholder_api_version}")
-
     // Mods
     modCompileOnly "org.geysermc.floodgate:api:${floodgate_api_version}"
 

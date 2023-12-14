@@ -26,9 +26,11 @@ import xyz.nikitacartes.easyauth.utils.*;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendLoginRequired;
+import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendRegisterRequired;
 
 @Mixin(ServerPlayerEntity.class)
-public class ServerPlayerEntityMixin implements PlayerAuth {
+public abstract class ServerPlayerEntityMixin implements PlayerAuth {
     @Unique
     private final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
     @Final
@@ -124,23 +126,13 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
      * @return Text with appropriate string (login or register)
      */
     @Override
-    public Text easyAuth$getAuthMessage() {
+    public void easyAuth$sendAuthMessage() {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid());
         if (!config.enableGlobalPassword && (cache == null || cache.password.isEmpty())) {
-            if (langConfig.enableServerSideTranslation) {
-                return Text.translatable("text.easyauth.notAuthenticated").append("\n").append(Text.translatable("text.easyauth.registerRequired"));
-            } else {
-                return Text.of(langConfig.notAuthenticated + "\n" + langConfig.registerRequired);
-            }
+            sendRegisterRequired(player);
         } else {
-            if (langConfig.enableServerSideTranslation) {
-                return Text.translatable("text.easyauth.notAuthenticated").append("\n").append(Text.translatable("text.easyauth.loginRequired"));
-            } else {
-                return Text.of(langConfig.notAuthenticated + "\n" + langConfig.loginRequired);
-            }
+            sendLoginRequired(player);
         }
-
-
     }
 
     /**
@@ -219,8 +211,9 @@ public class ServerPlayerEntityMixin implements PlayerAuth {
                 player.networkHandler.disconnect(TranslationHelper.getAccountDeleted());
             } else {
                 // Sending authentication prompt every 10 seconds
-                if (kickTimer % 200 == 0)
-                    player.sendMessage(this.easyAuth$getAuthMessage(), false);
+                if (kickTimer % 200 == 0) {
+                    this.easyAuth$sendAuthMessage();
+                }
                 --kickTimer;
             }
             ci.cancel();

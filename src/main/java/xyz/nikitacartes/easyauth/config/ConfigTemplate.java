@@ -1,9 +1,17 @@
 package xyz.nikitacartes.easyauth.config;
 
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -25,7 +33,11 @@ public abstract class ConfigTemplate {
     public static <Config extends ConfigTemplate> Config loadConfig(Class<Config> configClass, String configPath) {
         Path path = gameDirectory.resolve("config/EasyAuth").resolve(configPath);
         if (Files.exists(path)) {
-            final HoconConfigurationLoader loader = HoconConfigurationLoader.builder().path(path).build();
+            final HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
+                    .defaultOptions(configurationOptions ->
+                            configurationOptions.serializers(builder ->
+                                    builder.register(MutableText.class, MutableTextSerializer.INSTANCE)))
+                    .path(path).build();
             try {
                 return loader.load().get(configClass);
             } catch (ConfigurateException e) {
@@ -81,6 +93,32 @@ public abstract class ConfigTemplate {
                 .collect(Collectors.joining(",\n  ")) + "]";
     }
 
+    protected String wrapIfNecessary(MutableText text) {
+        if (text.getContent() instanceof TranslatableTextContent) {
+            return wrapIfNecessary(((TranslatableTextContent) text.getContent()).getKey());
+        } else {
+            return wrapIfNecessary(text.getString());
+        }
+    }
+
     protected abstract String handleTemplate() throws IOException;
+
+
+    static final class MutableTextSerializer implements TypeSerializer<MutableText> {
+        static final MutableTextSerializer INSTANCE = new MutableTextSerializer();
+        @Override
+        public MutableText deserialize(Type type, ConfigurationNode node) {
+            return Text.translatableWithFallback("text.easyauth." + node.key(), node.getString());
+        }
+
+        @Override
+        public void serialize(Type type, @Nullable MutableText obj, ConfigurationNode node) throws SerializationException {
+            if (obj == null || obj.getString().isEmpty()) {
+                node.raw(null);
+                return;
+            }
+            node.set(obj.getString());
+        }
+    }
 
 }

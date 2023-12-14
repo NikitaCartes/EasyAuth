@@ -49,7 +49,7 @@ public interface PlayerAuth {
      * @return Text with appropriate string (login or register)
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
      */
-    Text easyAuth$getAuthMessage();
+    void easyAuth$sendAuthMessage();
 
     /**
      * Checks whether player is a fake player (from CarpetMod).

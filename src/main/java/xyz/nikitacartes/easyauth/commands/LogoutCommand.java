@@ -6,9 +6,10 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
-import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import static net.minecraft.server.command.CommandManager.literal;
+import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendCannotLogout;
+import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendSuccessfulLogout;
 
 public class LogoutCommand {
 
@@ -26,9 +27,9 @@ public class LogoutCommand {
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             ((PlayerAuth) player).easyAuth$setAuthenticated(false);
-            player.sendMessage(TranslationHelper.getSuccessfulLogout(), false);
+            sendSuccessfulLogout(serverCommandSource);
         } else {
-            player.sendMessage(TranslationHelper.getCannotLogout(), false);
+            sendCannotLogout(serverCommandSource);
         }
         return 1;
     }

@@ -19,6 +19,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.TranslationHelper.*;
 
 public class LoginCommand {
 
@@ -38,7 +39,7 @@ public class LoginCommand {
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    ctx.getSource().getPlayerOrThrow().sendMessage(TranslationHelper.getEnterPassword(), false);
+                    sendEnterPassword(ctx.getSource());
                     return 0;
                 }));
     }
@@ -51,7 +52,7 @@ public class LoginCommand {
         LogDebug("Player " + player.getName().getString() + "(" + uuid + ") is trying to login");
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             LogDebug("Player " + player.getName().getString() + "(" + uuid + ") is already authenticated");
-            player.sendMessage(TranslationHelper.getAlreadyAuthenticated(), false);
+            sendAlreadyAuthenticated(source);
             return 0;
         }
         // Putting rest of the command in different thread to avoid lag spikes
@@ -69,14 +70,14 @@ public class LoginCommand {
                     player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
                     return;
                 }
-                player.sendMessage(TranslationHelper.getSuccessfullyAuthenticated(), false);
+                sendSuccessfullyAuthenticated(source);
                 ((PlayerAuth) player).easyAuth$setAuthenticated(true);
                 curLoginTries.set(0);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;
             } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
                 LogDebug("Player " + player.getName().getString() + "(" + uuid + ") is not registered");
-                player.sendMessage(TranslationHelper.getRegisterRequired(), false);
+                sendRegisterRequired(source);
                 return;
             } else if (curLoginTries.incrementAndGet() == maxLoginTries && maxLoginTries != -1) { // Player exceeded maxLoginTries
                 LogDebug("Player " + player.getName().getString() + "(" + uuid + ") exceeded max login tries");
@@ -92,7 +93,7 @@ public class LoginCommand {
             }
             LogDebug("Player " + player.getName().getString() + "(" + uuid + ") provided wrong password");
             // Sending wrong pass message
-            player.sendMessage(TranslationHelper.getWrongPassword(), false);
+            sendWrongPassword(source);
         });
         return 0;
     }

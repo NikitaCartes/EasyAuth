@@ -2,3 +2,5 @@ accessWidener	v1	named
 
 accessible class net/minecraft/server/network/ServerLoginNetworkHandler$State
 accessible field net/minecraft/server/network/ServerLoginNetworkHandler profile Lcom/mojang/authlib/GameProfile;
+accessible field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
+mutable field net/minecraft/stat/ServerStatHandler file Ljava/io/File;

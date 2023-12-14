@@ -6,8 +6,7 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.DimensionArgumentType;
 import net.minecraft.command.argument.RotationArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
@@ -16,7 +15,6 @@ import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.storage.database.DBApiException;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
-import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -26,6 +24,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
+import static xyz.nikitacartes.easyauth.utils.TranslationHelper.*;
 
 public class AuthCommand {
     /**
@@ -38,7 +37,7 @@ public class AuthCommand {
                 .requires(Permissions.require("easyauth.commands.auth.root", 3))
                 .then(literal("reload")
                         .requires(Permissions.require("easyauth.commands.auth.reload", 3))
-                        .executes(ctx -> reloadConfig(ctx.getSource().getEntity()))
+                        .executes(ctx -> reloadConfig(ctx.getSource()))
                 )
                 .then(literal("setGlobalPassword")
                         .requires(Permissions.require("easyauth.commands.auth.setGlobalPassword", 4))
@@ -142,7 +141,7 @@ public class AuthCommand {
      * @param sender executioner of the command
      * @return 0
      */
-    public static int reloadConfig(Entity sender) {
+    public static int reloadConfig(ServerCommandSource sender) {
         DB.close();
         EasyAuth.loadConfigs();
 
@@ -152,11 +151,22 @@ public class AuthCommand {
             LogError("onInitialize error: ", e);
         }
 
-        if (sender != null)
-            ((PlayerEntity) sender).sendMessage(TranslationHelper.getConfigurationReloaded(), false);
-        else
-            LogInfo(langConfig.configurationReloaded);
+        sendConfigurationReloaded(sender);
+
         return Command.SINGLE_SUCCESS;
+    }
+
+    public static void reloadConfig(MinecraftServer sender) {
+        DB.close();
+        EasyAuth.loadConfigs();
+
+        try {
+            DB.connect();
+        } catch (DBApiException e) {
+            LogError("onInitialize error: ", e);
+        }
+
+        sendConfigurationReloaded(sender);
     }
 
     /**
@@ -167,8 +177,6 @@ public class AuthCommand {
      * @return 0
      */
     private static int setGlobalPassword(ServerCommandSource source, String password) {
-        // Getting the player who send the command
-        Entity sender = source.getEntity();
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
             // Writing the global pass to config
@@ -178,10 +186,7 @@ public class AuthCommand {
             config.save();
         });
 
-        if (sender != null)
-            ((PlayerEntity) sender).sendMessage(TranslationHelper.getGlobalPasswordSet(), false);
-        else
-            LogInfo(langConfig.globalPasswordSet);
+        sendGlobalPasswordSet(source);
         return 1;
     }
 
@@ -211,12 +216,7 @@ public class AuthCommand {
             config.save();
         });
 
-        // Getting sender
-        Entity sender = source.getEntity();
-        if (sender != null)
-            ((PlayerEntity) sender).sendMessage(TranslationHelper.getWorldSpawnSet(), false);
-        else
-            LogInfo(langConfig.worldSpawnSet);
+        sendWorldSpawnSet(source);
         return 1;
     }
 
@@ -228,16 +228,12 @@ public class AuthCommand {
      * @return 0
      */
     private static int removeAccount(ServerCommandSource source, String uuid) {
-        Entity sender = source.getEntity();
         THREADPOOL.submit(() -> {
             DB.deleteUserData(uuid);
             playerCacheMap.remove(uuid);
         });
 
-        if (sender != null)
-            ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataDeleted(), false);
-        else
-            LogInfo(langConfig.userdataDeleted);
+        sendUserdataDeleted(source);
         return 1; // Success
     }
 
@@ -250,9 +246,6 @@ public class AuthCommand {
      * @return 0
      */
     private static int registerUser(ServerCommandSource source, String uuid, String password) {
-        // Getting the player who send the command
-        Entity sender = source.getEntity();
-
         THREADPOOL.submit(() -> {
             PlayerCache playerCache;
             if (playerCacheMap.containsKey(uuid)) {
@@ -264,10 +257,7 @@ public class AuthCommand {
             playerCacheMap.put(uuid, playerCache);
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
 
-            if (sender != null)
-                ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataUpdated(), false);
-            else
-                LogInfo(langConfig.userdataUpdated);
+            sendUserdataUpdated(source);
         });
         return 0;
     }
@@ -281,9 +271,6 @@ public class AuthCommand {
      * @return 0
      */
     private static int updatePassword(ServerCommandSource source, String uuid, String password) {
-        // Getting the player who send the command
-        Entity sender = source.getEntity();
-
         THREADPOOL.submit(() -> {
             PlayerCache playerCache;
             if (playerCacheMap.containsKey(uuid)) {
@@ -294,18 +281,12 @@ public class AuthCommand {
 
             playerCacheMap.put(uuid, playerCache);
             if (playerCacheMap.get(uuid).password.isEmpty()) {
-                if (sender != null)
-                    ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserNotRegistered(), false);
-                else
-                    LogInfo(langConfig.userNotRegistered);
+                sendUserNotRegistered(source);
                 return;
             }
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
 
-            if (sender != null)
-                ((PlayerEntity) sender).sendMessage(TranslationHelper.getUserdataUpdated(), false);
-            else
-                LogInfo(langConfig.userdataUpdated);
+            sendUserdataUpdated(source);
         });
         return 0;
     }
@@ -318,16 +299,9 @@ public class AuthCommand {
      * @return 0
      */
     private static int getOfflineUuid(ServerCommandSource source, String player) {
-        // Getting the player who send the command
-        Entity sender = source.getEntity();
-
         UUID uuid = Uuids.getOfflinePlayerUuid(player.toLowerCase(Locale.ROOT));
 
-        if (sender != null) {
-            ((PlayerEntity) sender).sendMessage(
-                    TranslationHelper.getOfflineUuid(player, uuid), false);
-        } else
-            LogInfo(String.format(langConfig.offlineUuid, player, uuid));
+        sendOfflineUuid(source, player, uuid);
         return 1;
     }
 
@@ -338,14 +312,8 @@ public class AuthCommand {
      * @return 0
      */
     public static int getRegisteredPlayers(ServerCommandSource source) {
-        Entity sender = source.getEntity();
-
         THREADPOOL.submit(() -> {
-            if (sender != null) {
-                ((PlayerEntity) sender).sendMessage(TranslationHelper.getRegisteredPlayers(false), false);
-            } else {
-                LogInfo(TranslationHelper.getRegisteredPlayers(true).getContent().toString());
-            }
+            sendRegisteredPlayers(source);
         });
         return 1;
     }
@@ -359,19 +327,13 @@ public class AuthCommand {
      * @return 0
      */
     private static int addPlayerToForcedOffline(ServerCommandSource source, String player) {
-        // Getting the player who send the command
-        Entity sender = source.getEntity();
-
         THREADPOOL.submit(() -> {
             technicalConfig.forcedOfflinePlayers.add(player.toLowerCase(Locale.ROOT));
             technicalConfig.confirmedOnlinePlayers.remove(player.toLowerCase(Locale.ROOT));
             technicalConfig.save();
         });
 
-        if (sender != null) {
-            ((PlayerEntity) sender).sendMessage(TranslationHelper.getAddToForcedOffline(), false);
-        } else
-            LogInfo(langConfig.addToForcedOffline);
+        sendAddToForcedOffline(source);
         return 1;
     }
 

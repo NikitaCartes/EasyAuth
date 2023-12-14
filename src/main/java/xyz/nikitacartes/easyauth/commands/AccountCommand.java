@@ -14,6 +14,7 @@ import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.utils.TranslationHelper.*;
 
 public class AccountCommand {
 
@@ -24,10 +25,7 @@ public class AccountCommand {
                 .then(literal("unregister")
                         .requires(Permissions.require("easyauth.commands.account.unregister", true))
                         .executes(ctx -> {
-                            ctx.getSource().getPlayerOrThrow().sendMessage(
-                                    TranslationHelper.getEnterPassword(),
-                                    false
-                            );
+                            sendEnterPassword(ctx.getSource());
                             return 1;
                         })
                         .then(argument("password", string())
@@ -42,9 +40,7 @@ public class AccountCommand {
                         .requires(Permissions.require("easyauth.commands.account.changePassword", true))
                         .then(argument("old password", string())
                                 .executes(ctx -> {
-                                    ctx.getSource().getPlayerOrThrow().sendMessage(
-                                            TranslationHelper.getEnterNewPassword(),
-                                            false);
+                                    sendEnterNewPassword(ctx.getSource());
                                     return 1;
                                 })
                                 .then(argument("new password", string())
@@ -66,10 +62,7 @@ public class AccountCommand {
         ServerPlayerEntity player = source.getPlayerOrThrow();
 
         if (config.enableGlobalPassword) {
-            player.sendMessage(
-                    TranslationHelper.getCannotUnregister(),
-                    false
-            );
+            sendCannotUnregister(source);
             return 0;
         }
 
@@ -78,16 +71,13 @@ public class AccountCommand {
             String uuid = ((PlayerAuth) player).easyAuth$getFakeUuid();
             if (AuthHelper.checkPassword(uuid, pass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
                 DB.deleteUserData(uuid);
-                player.sendMessage(TranslationHelper.getAccountDeleted(), false);
+                sendAccountDeleted(source);
                 ((PlayerAuth) player).easyAuth$setAuthenticated(false);
                 player.networkHandler.disconnect(TranslationHelper.getAccountDeleted());
                 playerCacheMap.remove(uuid);
                 return;
             }
-            player.sendMessage(
-                    TranslationHelper.getWrongPassword(),
-                    false
-            );
+            sendWrongPassword(source);
         });
         return 0;
     }
@@ -98,33 +88,25 @@ public class AccountCommand {
         ServerPlayerEntity player = source.getPlayerOrThrow();
 
         if (config.enableGlobalPassword) {
-            player.sendMessage(
-                    TranslationHelper.getCannotChangePassword(),
-                    false
-            );
+            sendCannotChangePassword(source);
             return 0;
         }
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
             if (AuthHelper.checkPassword(((PlayerAuth) player).easyAuth$getFakeUuid(), oldPass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
                 if (newPass.length() < extendedConfig.minPasswordLength) {
-                    player.sendMessage(TranslationHelper.getMinPasswordChars(), false);
+                    sendMinPasswordChars(source);
                     return;
                 } else if (newPass.length() > extendedConfig.maxPasswordLength && extendedConfig.maxPasswordLength != -1) {
-                    player.sendMessage(TranslationHelper.getMaxPasswordChars(), false);
+                    sendMaxPasswordChars(source);
                     return;
                 }
                 // Changing password in playercache
                 playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid()).password = AuthHelper.hashPassword(newPass.toCharArray());
-                player.sendMessage(
-                        TranslationHelper.getPasswordUpdated(),
-                        false
-                );
-            } else
-                player.sendMessage(
-                        TranslationHelper.getWrongPassword(),
-                        false
-                );
+                sendPasswordUpdated(source);
+            } else {
+                sendWrongPassword(source);
+            }
         });
         return 0;
     }

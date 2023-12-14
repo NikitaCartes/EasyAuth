@@ -16,7 +16,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
-import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
@@ -26,6 +25,7 @@ import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.TranslationHelper.*;
 
 /**
  * This class will take care of actions players try to do,
@@ -55,17 +55,10 @@ public class AuthEventHandler {
         if ((onlinePlayer != null && !((PlayerAuth) onlinePlayer).easyAuth$canSkipAuth()) && extendedConfig.preventAnotherLocationKick) {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
-            return Text.of(
-                    String.format(
-                            langConfig.playerAlreadyOnline, onlinePlayer.getName().getContent()
-                    )
-            );
+
+            return getPlayerAlreadyOnline(onlinePlayer);
         } else if (!(matcher.matches() || (technicalConfig.floodgateLoaded && extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(profile.getId())))) {
-            return Text.of(
-                    String.format(
-                            langConfig.disallowedUsername, extendedConfig.usernameRegexp
-                    )
-            );
+            return getDisallowedUsername();
         }
         // If the player has too many login attempts, kick them immediately.
         if (config.maxLoginTries != -1) {
@@ -79,7 +72,7 @@ public class AuthEventHandler {
             PlayerCache playerCache = playerCacheMap.containsKey(incomingPlayerUuid) ?
                     playerCacheMap.get(incomingPlayerUuid) : PlayerCache.fromJson(null, incomingPlayerUuid);
             if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.resetLoginAttemptsTimeout) {
-                return Text.of(langConfig.loginTriesExceeded);
+                return getLoginTriesExceeded();
             }
         }
         return null;
@@ -179,7 +172,7 @@ public class AuthEventHandler {
                 }
             }
             LogDebug("Player " + player.getName() + " tried to execute command " + command + " without being authenticated.");
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -188,7 +181,7 @@ public class AuthEventHandler {
     // Player chatting
     public static ActionResult onPlayerChat(ServerPlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowChat) {
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -214,7 +207,7 @@ public class AuthEventHandler {
     // Using a block (right-click function)
     public static ActionResult onUseBlock(PlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowBlockInteraction) {
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -223,7 +216,7 @@ public class AuthEventHandler {
     // Breaking a block
     public static boolean onBreakBlock(PlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowBlockBreaking) {
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return false;
         }
         return true;
@@ -232,7 +225,7 @@ public class AuthEventHandler {
     // Using an item
     public static TypedActionResult<ItemStack> onUseItem(PlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowItemUsing) {
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return TypedActionResult.fail(ItemStack.EMPTY);
         }
 
@@ -242,7 +235,7 @@ public class AuthEventHandler {
     // Dropping an item
     public static ActionResult onDropItem(PlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowItemDropping) {
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
         return ActionResult.PASS;
@@ -251,7 +244,7 @@ public class AuthEventHandler {
     // Changing inventory (item moving etc.)
     public static ActionResult onTakeItem(ServerPlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowItemMoving) {
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
 
@@ -261,7 +254,7 @@ public class AuthEventHandler {
     // Attacking an entity
     public static ActionResult onAttackEntity(PlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowEntityAttacking) {
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
 
@@ -271,7 +264,7 @@ public class AuthEventHandler {
     // Interacting with entity
     public static ActionResult onUseEntity(PlayerEntity player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowEntityInteraction) {
-            player.sendMessage(((PlayerAuth) player).easyAuth$getAuthMessage(), false);
+            ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }
 

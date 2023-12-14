@@ -117,7 +117,7 @@ public class EasyAuth implements ModInitializer {
         UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
         AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
         UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(null));
+        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(server));
         ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
 
@@ -156,7 +156,24 @@ public class EasyAuth implements ModInitializer {
         VersionConfig version = VersionConfig.load();
 
         switch (version.configVersion) {
-            case -1:
+            case -1: {
+                EasyAuth.config = MainConfigV1.load();
+                EasyAuth.config.save();
+
+                EasyAuth.technicalConfig = TechnicalConfigV1.load();
+                EasyAuth.technicalConfig.save();
+
+                EasyAuth.langConfig = LangConfigV1.load();
+                EasyAuth.langConfig.save();
+
+                EasyAuth.extendedConfig = ExtendedConfigV1.load();
+                EasyAuth.extendedConfig.save();
+
+                EasyAuth.storageConfig = StorageConfigV1.load();
+                EasyAuth.storageConfig.save();
+
+                break;
+            }
             case 1: {
                 EasyAuth.config = MainConfigV1.load();
                 EasyAuth.technicalConfig = TechnicalConfigV1.load();

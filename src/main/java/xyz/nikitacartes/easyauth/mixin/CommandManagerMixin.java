@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendLoginRequired;
+import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 
 @Mixin(CommandManager.class)
 public class CommandManagerMixin {
@@ -18,7 +18,7 @@ public class CommandManagerMixin {
     private void checkCanUseCommands(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfo ci) {
         ActionResult result = AuthEventHandler.onPlayerCommand(parseResults.getContext().getSource().getPlayer(), command);
         if (result == ActionResult.FAIL) {
-            sendLoginRequired(parseResults.getContext().getSource());
+            langConfig.loginRequired.send(parseResults.getContext().getSource());
             ci.cancel();
         }
     }

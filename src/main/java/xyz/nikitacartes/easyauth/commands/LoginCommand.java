@@ -9,7 +9,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
-import xyz.nikitacartes.easyauth.utils.TranslationHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,7 +18,6 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.*;
 
 public class LoginCommand {
 
@@ -39,7 +37,7 @@ public class LoginCommand {
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    sendEnterPassword(ctx.getSource());
+                    langConfig.enterPassword.send(ctx.getSource());
                     return 0;
                 }));
     }
@@ -52,7 +50,7 @@ public class LoginCommand {
         LogDebug("Player " + player.getName().getString() + "(" + uuid + ") is trying to login");
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             LogDebug("Player " + player.getName().getString() + "(" + uuid + ") is already authenticated");
-            sendAlreadyAuthenticated(source);
+            langConfig.alreadyAuthenticated.send(source);
             return 0;
         }
         // Putting rest of the command in different thread to avoid lag spikes
@@ -67,25 +65,25 @@ public class LoginCommand {
                 LogDebug("Player " + player.getName().getString() + "(" + uuid + ") provide correct password");
                 if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.resetLoginAttemptsTimeout) {
                     LogDebug("Player " + player.getName().getString() + "(" + uuid + ") will be kicked due to kick timeout");
-                    player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
+                    player.networkHandler.disconnect(langConfig.loginTriesExceeded.get());
                     return;
                 }
-                sendSuccessfullyAuthenticated(source);
+                langConfig.successfullyAuthenticated.send(source);
                 ((PlayerAuth) player).easyAuth$setAuthenticated(true);
                 curLoginTries.set(0);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;
             } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
                 LogDebug("Player " + player.getName().getString() + "(" + uuid + ") is not registered");
-                sendRegisterRequired(source);
+                langConfig.registerRequired.send(source);
                 return;
             } else if (curLoginTries.incrementAndGet() == maxLoginTries && maxLoginTries != -1) { // Player exceeded maxLoginTries
                 LogDebug("Player " + player.getName().getString() + "(" + uuid + ") exceeded max login tries");
                 // Send the player a different error message if the max login tries is 1.
                 if (maxLoginTries == 1) {
-                    player.networkHandler.disconnect(TranslationHelper.getWrongPassword());
+                    player.networkHandler.disconnect(langConfig.wrongPassword.get());
                 } else {
-                    player.networkHandler.disconnect(TranslationHelper.getLoginTriesExceeded());
+                    player.networkHandler.disconnect(langConfig.loginTriesExceeded.get());
                 }
                 playerCache.lastKicked = System.currentTimeMillis();
                 curLoginTries.set(0);
@@ -93,7 +91,7 @@ public class LoginCommand {
             }
             LogDebug("Player " + player.getName().getString() + "(" + uuid + ") provided wrong password");
             // Sending wrong pass message
-            sendWrongPassword(source);
+            langConfig.wrongPassword.send(source);
         });
         return 0;
     }

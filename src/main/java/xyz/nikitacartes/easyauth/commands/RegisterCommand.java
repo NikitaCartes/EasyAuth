@@ -16,7 +16,6 @@ import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.AuthHelper.hashPassword;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.*;
 
 
 public class RegisterCommand {
@@ -40,7 +39,7 @@ public class RegisterCommand {
                                 .executes(ctx -> register(ctx.getSource(), getString(ctx, "password"), getString(ctx, "passwordAgain")))
                         ))
                 .executes(ctx -> {
-                    sendEnterPassword(ctx.getSource());
+                    langConfig.enterPassword.send(ctx.getSource());
                     return 0;
                 }));
     }
@@ -49,35 +48,35 @@ public class RegisterCommand {
     private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayerOrThrow();
         if (config.enableGlobalPassword) {
-            sendLoginRequired(source);
+            langConfig.loginRequired.send(source);
             return 0;
         } else if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
-            sendAlreadyAuthenticated(source);
+            langConfig.alreadyAuthenticated.send(source);
             return 0;
         } else if (!pass1.equals(pass2)) {
-            sendMatchPassword(source);
+            langConfig.matchPassword.send(source);
             return 0;
         }
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
             if (pass1.length() < extendedConfig.minPasswordLength) {
-                sendMinPasswordChars(source);
+                langConfig.minPasswordChars.send(source);
                 return;
             } else if (pass1.length() > extendedConfig.maxPasswordLength && extendedConfig.maxPasswordLength != -1) {
-                sendMaxPasswordChars(source);
+                langConfig.maxPasswordChars.send(source);
                 return;
             }
 
             PlayerCache playerCache = playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid());
             if (playerCache.password.isEmpty()) {
                 ((PlayerAuth) player).easyAuth$setAuthenticated(true);
-                sendRegisterSuccess(source);
+                langConfig.registerSuccess.send(source);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 playerCache.password = hashPassword(pass1.toCharArray());
                 LogDebug("Player " + player.getName().getString() + "(" + player.getUuidAsString() + ") successfully registered with password: " + playerCache.password);
                 return;
             }
-            sendAlreadyRegistered(source);
+            langConfig.alreadyRegistered.send(source);
         });
         return 0;
     }

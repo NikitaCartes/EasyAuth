@@ -8,8 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
 import static net.minecraft.server.command.CommandManager.literal;
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendCannotLogout;
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendSuccessfulLogout;
+import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 
 public class LogoutCommand {
 
@@ -27,9 +26,9 @@ public class LogoutCommand {
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             ((PlayerAuth) player).easyAuth$setAuthenticated(false);
-            sendSuccessfulLogout(serverCommandSource);
+            langConfig.successfulLogout.send(serverCommandSource);
         } else {
-            sendCannotLogout(serverCommandSource);
+            langConfig.cannotLogout.send(serverCommandSource);
         }
         return 1;
     }

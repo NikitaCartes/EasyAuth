@@ -8,6 +8,11 @@ import net.minecraft.command.argument.DimensionArgumentType;
 import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
 import xyz.nikitacartes.easyauth.EasyAuth;
@@ -24,7 +29,6 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.*;
 
 public class AuthCommand {
     /**
@@ -151,7 +155,7 @@ public class AuthCommand {
             LogError("onInitialize error: ", e);
         }
 
-        sendConfigurationReloaded(sender);
+        langConfig.configurationReloaded.send(sender);
 
         return Command.SINGLE_SUCCESS;
     }
@@ -166,7 +170,7 @@ public class AuthCommand {
             LogError("onInitialize error: ", e);
         }
 
-        sendConfigurationReloaded(sender);
+        langConfig.configurationReloaded.send(sender);
     }
 
     /**
@@ -186,7 +190,7 @@ public class AuthCommand {
             config.save();
         });
 
-        sendGlobalPasswordSet(source);
+        langConfig.globalPasswordSet.send(source);
         return 1;
     }
 
@@ -216,7 +220,7 @@ public class AuthCommand {
             config.save();
         });
 
-        sendWorldSpawnSet(source);
+        langConfig.worldSpawnSet.send(source);
         return 1;
     }
 
@@ -233,7 +237,7 @@ public class AuthCommand {
             playerCacheMap.remove(uuid);
         });
 
-        sendUserdataDeleted(source);
+        langConfig.userdataDeleted.send(source);
         return 1; // Success
     }
 
@@ -257,7 +261,7 @@ public class AuthCommand {
             playerCacheMap.put(uuid, playerCache);
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
 
-            sendUserdataUpdated(source);
+            langConfig.userdataUpdated.send(source);
         });
         return 0;
     }
@@ -281,12 +285,12 @@ public class AuthCommand {
 
             playerCacheMap.put(uuid, playerCache);
             if (playerCacheMap.get(uuid).password.isEmpty()) {
-                sendUserNotRegistered(source);
+                langConfig.userNotRegistered.send(source);
                 return;
             }
             playerCacheMap.get(uuid).password = AuthHelper.hashPassword(password.toCharArray());
 
-            sendUserdataUpdated(source);
+            langConfig.userdataUpdated.send(source);
         });
         return 0;
     }
@@ -301,7 +305,9 @@ public class AuthCommand {
     private static int getOfflineUuid(ServerCommandSource source, String player) {
         UUID uuid = Uuids.getOfflinePlayerUuid(player.toLowerCase(Locale.ROOT));
 
-        sendOfflineUuid(source, player, uuid);
+        langConfig.offlineUuid.send(source, player, Text.literal("[" + uuid + "]").setStyle(Style.EMPTY
+                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))
+                .withColor(Formatting.YELLOW)));
         return 1;
     }
 
@@ -313,7 +319,20 @@ public class AuthCommand {
      */
     public static int getRegisteredPlayers(ServerCommandSource source) {
         THREADPOOL.submit(() -> {
-            sendRegisteredPlayers(source);
+            if (langConfig.registeredPlayers.enabled) {
+                int i = 0;
+                MutableText message = langConfig.registeredPlayers.get();
+                for (var entry : playerCacheMap.entrySet()) {
+                    if (!entry.getValue().password.isEmpty()) {
+                        i++;
+                        message.append(Text.translatable("\n" + i + ": [" + entry.getKey() + "]")
+                                .setStyle(Style.EMPTY.withClickEvent(
+                                        new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, entry.getKey())))
+                                .formatted(Formatting.YELLOW));
+                    }
+                }
+                source.sendMessage(message);
+            }
         });
         return 1;
     }
@@ -333,7 +352,7 @@ public class AuthCommand {
             technicalConfig.save();
         });
 
-        sendAddToForcedOffline(source);
+        langConfig.addToForcedOffline.send(source);
         return 1;
     }
 

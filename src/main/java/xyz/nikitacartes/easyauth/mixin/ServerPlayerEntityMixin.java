@@ -5,7 +5,6 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
@@ -26,8 +25,6 @@ import xyz.nikitacartes.easyauth.utils.*;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendLoginRequired;
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.sendRegisterRequired;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin implements PlayerAuth {
@@ -129,9 +126,9 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
     public void easyAuth$sendAuthMessage() {
         final PlayerCache cache = playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid());
         if (!config.enableGlobalPassword && (cache == null || cache.password.isEmpty())) {
-            sendRegisterRequired(player);
+            langConfig.registerRequired.send(player);
         } else {
-            sendLoginRequired(player);
+            langConfig.loginRequired.send(player);
         }
     }
 
@@ -206,9 +203,9 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
         if (!this.easyAuth$isAuthenticated()) {
             // Checking player timer
             if (kickTimer <= 0 && player.networkHandler.isConnectionOpen()) {
-                player.networkHandler.disconnect(TranslationHelper.getTimeExpired());
+                player.networkHandler.disconnect(langConfig.timeExpired.get());
             } else if (!playerCacheMap.containsKey(((PlayerAuth) player).easyAuth$getFakeUuid())) {
-                player.networkHandler.disconnect(TranslationHelper.getAccountDeleted());
+                player.networkHandler.disconnect(langConfig.accountDeleted.get());
             } else {
                 // Sending authentication prompt every 10 seconds
                 if (kickTimer % 200 == 0) {

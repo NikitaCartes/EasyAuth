@@ -1,8 +1,5 @@
 package xyz.nikitacartes.easyauth.config;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -21,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
+import static xyz.nikitacartes.easyauth.config.LangConfigV1.TranslatableText;
 
 public abstract class ConfigTemplate {
     private transient final Pattern pattern = Pattern.compile("^[^$\"{}\\[\\]:=,+#`^?!@*&\\\\\\s/]+");
@@ -36,7 +34,7 @@ public abstract class ConfigTemplate {
             final HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
                     .defaultOptions(configurationOptions ->
                             configurationOptions.serializers(builder ->
-                                    builder.register(MutableText.class, MutableTextSerializer.INSTANCE)))
+                                    builder.register(TranslatableText.class, TranslatableTextSerializer.INSTANCE)))
                     .path(path).build();
             try {
                 return loader.load().get(configClass);
@@ -93,31 +91,59 @@ public abstract class ConfigTemplate {
                 .collect(Collectors.joining(",\n  ")) + "]";
     }
 
-    protected String wrapIfNecessary(MutableText text) {
-        if (text.getContent() instanceof TranslatableTextContent) {
-            return wrapIfNecessary(((TranslatableTextContent) text.getContent()).getKey());
-        } else {
-            return wrapIfNecessary(text.getString());
-        }
+    protected String wrapIfNecessary(TranslatableText text) {
+        return "{\n\t\"text\": " + wrapIfNecessary(text.fallback) +
+                "\n\t\"enabled\": " + text.enabled +
+                "\n\t\"serverSide\": " + text.serverSide +
+                "\n}";
     }
 
     protected abstract String handleTemplate() throws IOException;
 
 
-    static final class MutableTextSerializer implements TypeSerializer<MutableText> {
-        static final MutableTextSerializer INSTANCE = new MutableTextSerializer();
-        @Override
-        public MutableText deserialize(Type type, ConfigurationNode node) {
-            return Text.translatableWithFallback("text.easyauth." + node.key(), node.getString());
+    static final class TranslatableTextSerializer implements TypeSerializer<TranslatableText> {
+        static final TranslatableTextSerializer INSTANCE = new TranslatableTextSerializer();
+        private static final String TEXT = "text";
+        private static final String ENABLED = "enabled";
+        private static final String SERVER_SIDE = "serverSide";
+
+        private <T> String camelCase(T input) throws SerializationException {
+            if (!(input instanceof String string)) {
+                throw new SerializationException("Key " + input + " should be a string");
+            }
+            String[] parts = string.split("-");
+            StringBuilder result = new StringBuilder(parts[0]);
+            for (int i = 1; i < parts.length; i++) {
+                result.append(parts[i].substring(0, 1).toUpperCase());
+                result.append(parts[i].substring(1));
+            }
+            return result.toString();
         }
 
         @Override
-        public void serialize(Type type, @Nullable MutableText obj, ConfigurationNode node) throws SerializationException {
-            if (obj == null || obj.getString().isEmpty()) {
-                node.raw(null);
+        public TranslatableText deserialize(Type type, ConfigurationNode node) throws SerializationException {
+            final String text = node.node(TEXT).getString("");
+            final boolean enabled = node.node(ENABLED).getBoolean(true);
+            final boolean serverSide = node.node(SERVER_SIDE).getBoolean(true);
+
+            if (text == null || text.isEmpty()) {
+                return new TranslatableText("text.easyauth." + camelCase(node.key()), "", false, serverSide);
+            }
+
+            return new TranslatableText("text.easyauth." + camelCase(node.key()), text, enabled, serverSide);
+        }
+
+        @Override
+        public void serialize(Type type, @Nullable TranslatableText obj, ConfigurationNode node) throws SerializationException {
+            if (obj == null || obj.fallback.isEmpty()) {
+                node.node(TEXT).set("");
+                node.node(ENABLED).set(false);
+                node.node(SERVER_SIDE).set(true);
                 return;
             }
-            node.set(obj.getString());
+            node.node(TEXT).set(obj.fallback);
+            node.node(ENABLED).set(obj.enabled);
+            node.node(SERVER_SIDE).set(obj.serverSide);
         }
     }
 

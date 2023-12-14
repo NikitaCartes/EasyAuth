@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
-import static xyz.nikitacartes.easyauth.utils.TranslationHelper.*;
 
 /**
  * This class will take care of actions players try to do,
@@ -56,9 +55,9 @@ public class AuthEventHandler {
             // Player needs to be kicked, since there's already a player with that name
             // playing on the server
 
-            return getPlayerAlreadyOnline(onlinePlayer);
+            return langConfig.playerAlreadyOnline.get(onlinePlayer.getName());
         } else if (!(matcher.matches() || (technicalConfig.floodgateLoaded && extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(profile.getId())))) {
-            return getDisallowedUsername();
+            return langConfig.disallowedUsername.get(extendedConfig.usernameRegexp);
         }
         // If the player has too many login attempts, kick them immediately.
         if (config.maxLoginTries != -1) {
@@ -72,7 +71,7 @@ public class AuthEventHandler {
             PlayerCache playerCache = playerCacheMap.containsKey(incomingPlayerUuid) ?
                     playerCacheMap.get(incomingPlayerUuid) : PlayerCache.fromJson(null, incomingPlayerUuid);
             if (playerCache.lastKicked >= System.currentTimeMillis() - 1000 * config.resetLoginAttemptsTimeout) {
-                return getLoginTriesExceeded();
+                return langConfig.loginTriesExceeded.get();
             }
         }
         return null;

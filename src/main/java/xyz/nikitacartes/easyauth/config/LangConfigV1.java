@@ -1,9 +1,10 @@
 package xyz.nikitacartes.easyauth.config;
 
 import com.google.common.io.Resources;
+import net.minecraft.server.command.CommandOutput;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import org.apache.commons.text.StringSubstitutor;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -13,45 +14,47 @@ import java.util.Map;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static net.minecraft.text.Text.translatable;
 import static net.minecraft.text.Text.translatableWithFallback;
+import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 
 @ConfigSerializable
 public class LangConfigV1 extends ConfigTemplate {
 
     public boolean enableServerSideTranslation = true;
-    public MutableText enterPassword = translatableWithFallback("text.easyauth.enterPassword", "§6You need to enter your password!");
-    public MutableText enterNewPassword = translatableWithFallback("text.easyauth.enterNewPassword", "§4You need to enter new password!");
-    public MutableText wrongPassword = translatableWithFallback("text.easyauth.wrongPassword", "§4Wrong password!");
-    public MutableText matchPassword = translatableWithFallback("text.easyauth.matchPassword", "§6Passwords must match!");
-    public MutableText passwordUpdated = translatableWithFallback("text.easyauth.passwordUpdated", "§aYour password was updated successfully!");
-    public MutableText loginRequired = translatableWithFallback("text.easyauth.loginRequired", "§cYou are not authenticated!\n§6Use /login, /l to authenticate!");
-    public MutableText loginTriesExceeded = translatableWithFallback("text.easyauth.loginTriesExceeded", "§4Too many login tries. Please wait a few minutes and try again.");
-    public MutableText globalPasswordSet = translatableWithFallback("text.easyauth.globalPasswordSet", "§aGlobal password was successfully set!");
-    public MutableText cannotChangePassword = translatableWithFallback("text.easyauth.cannotChangePassword", "§cYou cannot change password!");
-    public MutableText cannotUnregister = translatableWithFallback("text.easyauth.cannotUnregister", "§cYou cannot unregister this account!");
-    public MutableText notAuthenticated = translatableWithFallback("text.easyauth.notAuthenticated", "§cYou are not authenticated!\n§6Try with /login, /l or /register.");
-    public MutableText alreadyAuthenticated = translatableWithFallback("text.easyauth.alreadyAuthenticated", "§6You are already authenticated.");
-    public MutableText successfullyAuthenticated = translatableWithFallback("text.easyauth.successfullyAuthenticated", "§aYou are now authenticated.");
-    public MutableText successfulLogout = translatableWithFallback("text.easyauth.successfulLogout", "§aLogged out successfully.");
-    public MutableText timeExpired = translatableWithFallback("text.easyauth.timeExpired", "§cTime for authentication has expired.");
-    public MutableText registerRequired = translatableWithFallback("text.easyauth.registerRequired", "§6Type /register <password> <password> to claim this account.");
-    public MutableText alreadyRegistered = translatableWithFallback("text.easyauth.alreadyRegistered", "§6This account name is already registered!");
-    public MutableText registerSuccess = translatableWithFallback("text.easyauth.registerSuccess", "§aYou are now authenticated.");
-    public MutableText userdataDeleted = translatableWithFallback("text.easyauth.userdataDeleted", "§aUserdata deleted.");
-    public MutableText userdataUpdated = translatableWithFallback("text.easyauth.userdataUpdated", "§aUserdata updated.");
-    public MutableText accountDeleted = translatableWithFallback("text.easyauth.accountDeleted", "§aYour account was successfully deleted!");
-    public MutableText configurationReloaded = translatableWithFallback("text.easyauth.configurationReloaded", "§aConfiguration file was reloaded successfully.");
-    public MutableText maxPasswordChars = translatableWithFallback("text.easyauth.maxPasswordChars", "§6Password can be at most %d characters long!");
-    public MutableText minPasswordChars = translatableWithFallback("text.easyauth.minPasswordChars", "§6Password needs to be at least %d characters long!");
-    public MutableText disallowedUsername = translatableWithFallback("text.easyauth.disallowedUsername", "§6Invalid username characters! Allowed character regex: %s");
-    public MutableText playerAlreadyOnline = translatableWithFallback("text.easyauth.playerAlreadyOnline", "§cPlayer %s is already online!");
-    public MutableText worldSpawnSet = translatableWithFallback("text.easyauth.worldSpawnSet", "§aSpawn for logging in was set successfully.");
-    public MutableText corruptedPlayerData = translatableWithFallback("text.easyauth.corruptedPlayerData", "§cYour data is probably corrupted. Please contact admin.");
-    public MutableText userNotRegistered = translatableWithFallback("text.easyauth.userNotRegistered", "§cThis player is not registered!");
-    public MutableText cannotLogout = translatableWithFallback("text.easyauth.cannotLogout", "§cYou cannot logout!");
-    public MutableText offlineUuid = translatableWithFallback("text.easyauth.offlineUuid", "Offline UUID for %s is %s");
-    public MutableText registeredPlayers = translatableWithFallback("text.easyauth.registeredPlayers", "List of registered players:");
-    public MutableText addToForcedOffline = translatableWithFallback("text.easyauth.addToForcedOffline", "Player successfully added into forcedOfflinePlayers list");
+    public TranslatableText enterPassword = new TranslatableText("text.easyauth.enterPassword", "§6You need to enter your password!");
+    public TranslatableText enterNewPassword = new TranslatableText("text.easyauth.enterNewPassword", "§4You need to enter new password!");
+    public TranslatableText wrongPassword = new TranslatableText("text.easyauth.wrongPassword", "§4Wrong password!");
+    public TranslatableText matchPassword = new TranslatableText("text.easyauth.matchPassword", "§6Passwords must match!");
+    public TranslatableText passwordUpdated = new TranslatableText("text.easyauth.passwordUpdated", "§aYour password was updated successfully!");
+    public TranslatableText loginRequired = new TranslatableText("text.easyauth.loginRequired", "§cYou are not authenticated!\n§6Use /login, /l to authenticate!");
+    public TranslatableText loginTriesExceeded = new TranslatableText("text.easyauth.loginTriesExceeded", "§4Too many login tries. Please wait a few minutes and try again.");
+    public TranslatableText globalPasswordSet = new TranslatableText("text.easyauth.globalPasswordSet", "§aGlobal password was successfully set!");
+    public TranslatableText cannotChangePassword = new TranslatableText("text.easyauth.cannotChangePassword", "§cYou cannot change password!");
+    public TranslatableText cannotUnregister = new TranslatableText("text.easyauth.cannotUnregister", "§cYou cannot unregister this account!");
+    public TranslatableText notAuthenticated = new TranslatableText("text.easyauth.notAuthenticated", "§cYou are not authenticated!\n§6Try with /login, /l or /register.");
+    public TranslatableText alreadyAuthenticated = new TranslatableText("text.easyauth.alreadyAuthenticated", "§6You are already authenticated.");
+    public TranslatableText successfullyAuthenticated = new TranslatableText("text.easyauth.successfullyAuthenticated", "§aYou are now authenticated.");
+    public TranslatableText successfulLogout = new TranslatableText("text.easyauth.successfulLogout", "§aLogged out successfully.");
+    public TranslatableText timeExpired = new TranslatableText("text.easyauth.timeExpired", "§cTime for authentication has expired.");
+    public TranslatableText registerRequired = new TranslatableText("text.easyauth.registerRequired", "§6Type /register <password> <password> to claim this account.");
+    public TranslatableText alreadyRegistered = new TranslatableText("text.easyauth.alreadyRegistered", "§6This account name is already registered!");
+    public TranslatableText registerSuccess = new TranslatableText("text.easyauth.registerSuccess", "§aYou are now authenticated.");
+    public TranslatableText userdataDeleted = new TranslatableText("text.easyauth.userdataDeleted", "§aUserdata deleted.");
+    public TranslatableText userdataUpdated = new TranslatableText("text.easyauth.userdataUpdated", "§aUserdata updated.");
+    public TranslatableText accountDeleted = new TranslatableText("text.easyauth.accountDeleted", "§aYour account was successfully deleted!");
+    public TranslatableText configurationReloaded = new TranslatableText("text.easyauth.configurationReloaded", "§aConfiguration file was reloaded successfully.");
+    public TranslatableText maxPasswordChars = new TranslatableText("text.easyauth.maxPasswordChars", "§6Password can be at most %d characters long!");
+    public TranslatableText minPasswordChars = new TranslatableText("text.easyauth.minPasswordChars", "§6Password needs to be at least %d characters long!");
+    public TranslatableText disallowedUsername = new TranslatableText("text.easyauth.disallowedUsername", "§6Invalid username characters! Allowed character regex: %s");
+    public TranslatableText playerAlreadyOnline = new TranslatableText("text.easyauth.playerAlreadyOnline", "§cPlayer %s is already online!");
+    public TranslatableText worldSpawnSet = new TranslatableText("text.easyauth.worldSpawnSet", "§aSpawn for logging in was set successfully.");
+    public TranslatableText corruptedPlayerData = new TranslatableText("text.easyauth.corruptedPlayerData", "§cYour data is probably corrupted. Please contact admin.");
+    public TranslatableText userNotRegistered = new TranslatableText("text.easyauth.userNotRegistered", "§cThis player is not registered!");
+    public TranslatableText cannotLogout = new TranslatableText("text.easyauth.cannotLogout", "§cYou cannot logout!");
+    public TranslatableText offlineUuid = new TranslatableText("text.easyauth.offlineUuid", "Offline UUID for %s is %s");
+    public TranslatableText registeredPlayers = new TranslatableText("text.easyauth.registeredPlayers", "List of registered players:");
+    public TranslatableText addToForcedOffline = new TranslatableText("text.easyauth.addToForcedOffline", "Player successfully added into forcedOfflinePlayers list");
 
 
     public LangConfigV1() {
@@ -60,52 +63,7 @@ public class LangConfigV1 extends ConfigTemplate {
 
     public static LangConfigV1 load() {
         LangConfigV1 config = loadConfig(LangConfigV1.class, "translation.conf");
-        if (config == null) {
-            return new LangConfigV1().disableServerSideTranslation();
-        } else {
-            if (config.enableServerSideTranslation) {
-                return config;
-            } else {
-                return config.disableServerSideTranslation();
-            }
-        }
-    }
-
-    private LangConfigV1 disableServerSideTranslation() {
-        enterPassword = getLiteral(enterPassword);
-        enterNewPassword = getLiteral(enterNewPassword);
-        wrongPassword = getLiteral(wrongPassword);
-        matchPassword = getLiteral(matchPassword);
-        passwordUpdated = getLiteral(passwordUpdated);
-        loginRequired = getLiteral(loginRequired);
-        loginTriesExceeded = getLiteral(loginTriesExceeded);
-        globalPasswordSet = getLiteral(globalPasswordSet);
-        cannotChangePassword = getLiteral(cannotChangePassword);
-        cannotUnregister = getLiteral(cannotUnregister);
-        notAuthenticated = getLiteral(notAuthenticated);
-        alreadyAuthenticated = getLiteral(alreadyAuthenticated);
-        successfullyAuthenticated = getLiteral(successfullyAuthenticated);
-        successfulLogout = getLiteral(successfulLogout);
-        timeExpired = getLiteral(timeExpired);
-        registerRequired = getLiteral(registerRequired);
-        alreadyRegistered = getLiteral(alreadyRegistered);
-        registerSuccess = getLiteral(registerSuccess);
-        userdataDeleted = getLiteral(userdataDeleted);
-        userdataUpdated = getLiteral(userdataUpdated);
-        accountDeleted = getLiteral(accountDeleted);
-        configurationReloaded = getLiteral(configurationReloaded);
-        maxPasswordChars = getLiteral(maxPasswordChars);
-        minPasswordChars = getLiteral(minPasswordChars);
-        disallowedUsername = getLiteral(disallowedUsername);
-        playerAlreadyOnline = getLiteral(playerAlreadyOnline);
-        worldSpawnSet = getLiteral(worldSpawnSet);
-        corruptedPlayerData = getLiteral(corruptedPlayerData);
-        userNotRegistered = getLiteral(userNotRegistered);
-        cannotLogout = getLiteral(cannotLogout);
-        offlineUuid = getLiteral(offlineUuid);
-        registeredPlayers = getLiteral(registeredPlayers);
-        addToForcedOffline = getLiteral(addToForcedOffline);
-        return this;
+        return config != null ? config : new LangConfigV1();
     }
 
     protected String handleTemplate() throws IOException {
@@ -149,12 +107,79 @@ public class LangConfigV1 extends ConfigTemplate {
         return new StringSubstitutor(configValues).replace(configTemplate);
     }
 
-    private MutableText getLiteral(MutableText text) {
-        TranslatableTextContent content = (TranslatableTextContent) text.getContent();
-        if (content.getFallback() == null || content.getFallback().isEmpty()) {
-            return null;
+    public static final class TranslatableText {
+        private final String key;
+        public final String fallback;
+        public final boolean enabled;
+        public final boolean serverSide;
+
+        public TranslatableText(String key, String fallback) {
+            this.key = key;
+            this.fallback = fallback;
+            this.enabled = true;
+            this.serverSide = true;
         }
-        return Text.literal(content.getFallback());
+
+        public TranslatableText(String key, String fallback, boolean enabled, boolean serverSide) {
+            this.key = key;
+            this.fallback = fallback;
+            this.enabled = enabled;
+            this.serverSide = serverSide;
+        }
+
+        public void send(ServerCommandSource commandOutput) {
+            if (enabled && commandOutput != null) {
+                if (langConfig.enableServerSideTranslation && serverSide) {
+                    commandOutput.sendMessage(translatableWithFallback(key, fallback));
+                } else {
+                    commandOutput.sendMessage(Text.literal(fallback));
+                }
+            }
+        }
+
+        public <T extends CommandOutput> void send(T commandOutput) {
+            if (enabled && commandOutput != null) {
+                if (langConfig.enableServerSideTranslation && serverSide) {
+                    commandOutput.sendMessage(translatableWithFallback(key, fallback));
+                } else {
+                    commandOutput.sendMessage(Text.literal(fallback));
+                }
+            }
+        }
+
+        public void send(ServerCommandSource commandOutput, Object... args) {
+            if (enabled && commandOutput != null) {
+                if (langConfig.enableServerSideTranslation && serverSide) {
+                    commandOutput.sendMessage(translatableWithFallback(key, fallback, args));
+                } else {
+                    commandOutput.sendMessage(translatable(fallback, args));
+                }
+            }
+        }
+
+        public MutableText get() {
+            if (enabled) {
+                if (langConfig.enableServerSideTranslation && serverSide) {
+                    return translatableWithFallback(key, fallback);
+                } else {
+                    return Text.literal(fallback);
+                }
+            } else {
+                return Text.literal("");
+            }
+        }
+
+        public MutableText get(Object... args) {
+            if (enabled) {
+                if (langConfig.enableServerSideTranslation && serverSide) {
+                    return translatableWithFallback(key, fallback, args);
+                } else {
+                    return translatable(fallback, args);
+                }
+            } else {
+                return Text.literal("");
+            }
+        }
     }
 
 }

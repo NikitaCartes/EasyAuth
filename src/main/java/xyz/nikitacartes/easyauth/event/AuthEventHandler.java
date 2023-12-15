@@ -160,7 +160,8 @@ public class AuthEventHandler {
         }
         if (command.startsWith("login ")
                 || command.startsWith("register ")
-                || (extendedConfig.enableAliases && command.startsWith("l "))) {
+                || (extendedConfig.aliases.login && command.startsWith("l "))
+                || (extendedConfig.aliases.register && command.startsWith("reg "))) {
             return ActionResult.PASS;
         }
         if (!((PlayerAuth) player).easyAuth$isAuthenticated()) {

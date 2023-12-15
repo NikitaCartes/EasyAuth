@@ -23,7 +23,7 @@ public class LoginCommand {
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         LiteralCommandNode<ServerCommandSource> node = registerLogin(dispatcher); // Registering the "/login" command
-        if (extendedConfig.enableAliases) {
+        if (extendedConfig.aliases.login) {
             dispatcher.register(literal("l")
                     .requires(Permissions.require("easyauth.commands.login", true))
                     .redirect(node));

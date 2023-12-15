@@ -53,7 +53,7 @@ public class ConfigMigration {
         EasyAuth.extendedConfig.playerInvulnerable = oldConfig.experimental.playerInvulnerable;
         EasyAuth.extendedConfig.playerIgnored = oldConfig.experimental.playerInvisible;
         EasyAuth.extendedConfig.teleportationTimeoutMs = oldConfig.experimental.teleportationTimeoutInMs;
-        EasyAuth.extendedConfig.enableAliases = oldConfig.experimental.enableAliases;
+        EasyAuth.extendedConfig.aliases = new ExtendedConfigV1.Aliases(oldConfig.experimental.enableAliases, oldConfig.experimental.enableAliases);
         EasyAuth.extendedConfig.tryPortalRescue = oldConfig.main.tryPortalRescue;
         EasyAuth.extendedConfig.minPasswordLength = oldConfig.main.minPasswordChars;
         EasyAuth.extendedConfig.maxPasswordLength = oldConfig.main.maxPasswordChars;

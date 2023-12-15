@@ -23,7 +23,7 @@ public class RegisterCommand {
     // Registering the "/reg" alias
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         LiteralCommandNode<ServerCommandSource> node = registerRegister(dispatcher);
-        if (extendedConfig.enableAliases) {
+        if (extendedConfig.aliases.register) {
             dispatcher.register(literal("reg")
                     .requires(Permissions.require("easyauth.commands.register", true))
                     .redirect(node));

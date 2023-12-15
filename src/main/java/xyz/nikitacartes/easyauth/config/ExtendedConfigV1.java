@@ -28,7 +28,7 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     public boolean playerInvulnerable = true;
     public boolean playerIgnored = true;
     public long teleportationTimeoutMs = 5;
-    public boolean enableAliases = true;
+    public Aliases aliases = new Aliases(true, true);
     public boolean tryPortalRescue = true;
     public long minPasswordLength = 4;
     public long maxPasswordLength = -1;
@@ -65,7 +65,8 @@ public class ExtendedConfigV1 extends ConfigTemplate {
         configValues.put("playerInvulnerable", wrapIfNecessary(playerInvulnerable));
         configValues.put("playerIgnored", wrapIfNecessary(playerIgnored));
         configValues.put("teleportationTimeoutMs", wrapIfNecessary(teleportationTimeoutMs));
-        configValues.put("enableAliases", wrapIfNecessary(enableAliases));
+        configValues.put("aliases.login", wrapIfNecessary(aliases.login));
+        configValues.put("aliases.register", wrapIfNecessary(aliases.register));
         configValues.put("tryPortalRescue", wrapIfNecessary(tryPortalRescue));
         configValues.put("minPasswordLength", wrapIfNecessary(minPasswordLength));
         configValues.put("maxPasswordLength", wrapIfNecessary(maxPasswordLength));
@@ -78,6 +79,21 @@ public class ExtendedConfigV1 extends ConfigTemplate {
         configValues.put("skipAllAuthChecks", wrapIfNecessary(skipAllAuthChecks));
         String configTemplate = Resources.toString(getResource("config/" + configPath), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);
+    }
+
+    @ConfigSerializable
+    public static final class Aliases {
+
+        Aliases() {
+        }
+
+        Aliases(boolean login, boolean register) {
+            this.login = login;
+            this.register = register;
+        }
+
+        public boolean login;
+        public boolean register;
     }
 
 }

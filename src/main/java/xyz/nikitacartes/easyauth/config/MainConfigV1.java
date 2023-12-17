@@ -13,7 +13,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ConfigSerializable
 public class MainConfigV1 extends ConfigTemplate {
-    public boolean premiumAutologin = true;
+    public boolean premiumAutoLogin = true;
     public boolean floodgateAutoLogin = true;
     public long maxLoginTries = 3;
     public long kickTimeout = 60;
@@ -32,12 +32,16 @@ public class MainConfigV1 extends ConfigTemplate {
 
     public static MainConfigV1 load() {
         MainConfigV1 config = loadConfig(MainConfigV1.class, "main.conf");
-        return config != null ? config : new MainConfigV1();
+        if (config == null) {
+            config = new MainConfigV1();
+            config.save();
+        }
+        return config;
     }
 
     protected String handleTemplate() throws IOException {
         Map<String, String> configValues = new HashMap<>();
-        configValues.put("premiumAutologin", wrapIfNecessary(premiumAutologin));
+        configValues.put("premiumAutologin", wrapIfNecessary(premiumAutoLogin));
         configValues.put("floodgateAutologin", wrapIfNecessary(floodgateAutoLogin));
         configValues.put("maxLoginTries", wrapIfNecessary(maxLoginTries));
         configValues.put("kickTimeout", wrapIfNecessary(kickTimeout));

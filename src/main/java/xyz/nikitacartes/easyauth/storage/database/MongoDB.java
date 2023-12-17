@@ -32,8 +32,8 @@ public class MongoDB implements DbApi {
     public void connect() throws DBApiException {
         LogDebug("You are using Mongo DB");
         try {
-            mongoClient = MongoClients.create(config.mongoDBConfig.mongodbConnectionString);
-            MongoDatabase database = mongoClient.getDatabase(config.mongoDBConfig.mongodbDatabase);
+            mongoClient = MongoClients.create(config.mongodb.mongodbConnectionString);
+            MongoDatabase database = mongoClient.getDatabase(config.mongodb.mongodbDatabase);
             collection = database.getCollection("players");
         } catch (MongoClientException | MongoCommandException e) {
             throw new DBApiException("Failed connecting to MongoDB", e);

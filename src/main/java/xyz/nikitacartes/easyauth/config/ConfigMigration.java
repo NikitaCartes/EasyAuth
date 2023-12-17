@@ -21,7 +21,7 @@ public class ConfigMigration {
         LogInfo("Migrating config from v0 to v1");
 
         EasyAuth.config = new MainConfigV1();
-        EasyAuth.config.premiumAutologin = oldConfig.main.premiumAutologin;
+        EasyAuth.config.premiumAutoLogin = oldConfig.main.premiumAutologin;
         EasyAuth.config.floodgateAutoLogin = oldConfig.main.floodgateAutologin;
         EasyAuth.config.maxLoginTries = oldConfig.main.maxLoginTries;
         EasyAuth.config.kickTimeout = oldConfig.main.kickTime;
@@ -112,14 +112,14 @@ public class ConfigMigration {
 
         EasyAuth.storageConfig = new StorageConfigV1();
         EasyAuth.storageConfig.databaseType = notNull(oldConfig.main.databaseType);
-        EasyAuth.storageConfig.mySqlConfig.mysqlHost = notNull(oldConfig.main.MySQLHost);
-        EasyAuth.storageConfig.mySqlConfig.mysqlUser = notNull(oldConfig.main.MySQLUser);
-        EasyAuth.storageConfig.mySqlConfig.mysqlPassword = notNull(oldConfig.main.MySQLPassword);
-        EasyAuth.storageConfig.mySqlConfig.mysqlDatabase = notNull(oldConfig.main.MySQLDatabase);
-        EasyAuth.storageConfig.mySqlConfig.mysqlTable = notNull(oldConfig.main.MySQLTableName);
-        EasyAuth.storageConfig.mongoDBConfig.mongodbConnectionString = notNull(oldConfig.main.MongoDBConnectionString);
-        EasyAuth.storageConfig.mongoDBConfig.mongodbDatabase = notNull(oldConfig.main.MongoDBDatabase);
-        EasyAuth.storageConfig.useSimpleAuthDb = oldConfig.experimental.useSimpleAuthDatabase;
+        EasyAuth.storageConfig.mysql.mysqlHost = notNull(oldConfig.main.MySQLHost);
+        EasyAuth.storageConfig.mysql.mysqlUser = notNull(oldConfig.main.MySQLUser);
+        EasyAuth.storageConfig.mysql.mysqlPassword = notNull(oldConfig.main.MySQLPassword);
+        EasyAuth.storageConfig.mysql.mysqlDatabase = notNull(oldConfig.main.MySQLDatabase);
+        EasyAuth.storageConfig.mysql.mysqlTable = notNull(oldConfig.main.MySQLTableName);
+        EasyAuth.storageConfig.mongodb.mongodbConnectionString = notNull(oldConfig.main.MongoDBConnectionString);
+        EasyAuth.storageConfig.mongodb.mongodbDatabase = notNull(oldConfig.main.MongoDBDatabase);
+        EasyAuth.storageConfig.useSimpleauthDb = oldConfig.experimental.useSimpleAuthDatabase;
         EasyAuth.storageConfig.save();
     }
     

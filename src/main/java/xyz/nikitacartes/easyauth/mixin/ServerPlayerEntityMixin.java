@@ -141,7 +141,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
     public boolean easyAuth$canSkipAuth() {
         return (this.player.getClass() != ServerPlayerEntity.class) ||
                 (config.floodgateAutoLogin && technicalConfig.floodgateLoaded && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
-                (easyAuth$isUsingMojangAccount() && config.premiumAutologin);
+                (easyAuth$isUsingMojangAccount() && config.premiumAutoLogin);
     }
 
     /**

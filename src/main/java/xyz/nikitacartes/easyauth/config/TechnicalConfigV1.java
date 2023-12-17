@@ -1,6 +1,7 @@
 package xyz.nikitacartes.easyauth.config;
 
 import com.google.common.io.Resources;
+import net.fabricmc.loader.api.FabricLoader;
 import org.apache.commons.text.StringSubstitutor;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
@@ -18,7 +19,7 @@ public class TechnicalConfigV1 extends ConfigTemplate {
     public String globalPassword = null;
     public ArrayList<String> forcedOfflinePlayers = new ArrayList<>();
     public ArrayList<String> confirmedOnlinePlayers = new ArrayList<>();
-    public boolean floodgateLoaded = false;
+    public transient boolean floodgateLoaded = false;
 
     public TechnicalConfigV1() {
         super("technical.conf");
@@ -26,7 +27,14 @@ public class TechnicalConfigV1 extends ConfigTemplate {
 
     public static TechnicalConfigV1 load() {
         TechnicalConfigV1 config = loadConfig(TechnicalConfigV1.class, "technical.conf");
-        return config != null ? config : new TechnicalConfigV1();
+        if (config == null) {
+            config = new TechnicalConfigV1();
+            config.save();
+        }
+        if (FabricLoader.getInstance().isModLoaded("floodgate")) {
+            config.floodgateLoaded = true;
+        }
+        return config;
     }
 
     protected String handleTemplate() throws IOException {

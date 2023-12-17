@@ -63,7 +63,11 @@ public class LangConfigV1 extends ConfigTemplate {
 
     public static LangConfigV1 load() {
         LangConfigV1 config = loadConfig(LangConfigV1.class, "translation.conf");
-        return config != null ? config : new LangConfigV1();
+        if (config == null) {
+            config = new LangConfigV1();
+            config.save();
+        }
+        return config;
     }
 
     protected String handleTemplate() throws IOException {

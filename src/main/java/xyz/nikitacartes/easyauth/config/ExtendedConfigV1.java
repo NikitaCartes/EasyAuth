@@ -46,7 +46,11 @@ public class ExtendedConfigV1 extends ConfigTemplate {
 
     public static ExtendedConfigV1 load() {
         ExtendedConfigV1 config = loadConfig(ExtendedConfigV1.class, "extended.conf");
-        return config != null ? config : new ExtendedConfigV1();
+        if (config == null) {
+            config = new ExtendedConfigV1();
+            config.save();
+        }
+        return config;
     }
 
     protected String handleTemplate() throws IOException {

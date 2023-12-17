@@ -6,6 +6,9 @@
 3) Add `/reg` alias for `/register`
 4) Add Italian translation, thanks to @Rizzo1812
 5) Add Taiwan Chinese translation, thanks to @Sam5440
+6) Add message when player is log in with valid session and online account:
+   - `text.easyauth.validSession`
+   - `text.easyauth.onlinePlayerLogin`
 
 ----
 ### 3.0.20

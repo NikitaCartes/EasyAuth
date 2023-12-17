@@ -55,6 +55,8 @@ public class LangConfigV1 extends ConfigTemplate {
     public TranslatableText offlineUuid = new TranslatableText("text.easyauth.offlineUuid", "Offline UUID for %s is %s");
     public TranslatableText registeredPlayers = new TranslatableText("text.easyauth.registeredPlayers", "List of registered players:");
     public TranslatableText addToForcedOffline = new TranslatableText("text.easyauth.addToForcedOffline", "Player successfully added into forcedOfflinePlayers list");
+    public TranslatableText validSession = new TranslatableText("text.easyauth.validSession", "§aYou have a valid session. No need to log in.");
+    public TranslatableText onlinePlayerLogin = new TranslatableText("text.easyauth.onlinePlayerLogin", "§aYou are using an online account. No need to log in.");
 
 
     public LangConfigV1() {
@@ -106,6 +108,8 @@ public class LangConfigV1 extends ConfigTemplate {
         configValues.put("offlineUuid", wrapIfNecessary(offlineUuid));
         configValues.put("registeredPlayers", wrapIfNecessary(registeredPlayers));
         configValues.put("addToForcedOffline", wrapIfNecessary(addToForcedOffline));
+        configValues.put("validSession", wrapIfNecessary(validSession));
+        configValues.put("onlinePlayerLogin", wrapIfNecessary(onlinePlayerLogin));
 
         String configTemplate = Resources.toString(getResource("config/" + configPath), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);

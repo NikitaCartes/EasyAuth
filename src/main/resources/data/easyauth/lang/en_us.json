@@ -31,5 +31,7 @@
   "text.easyauth.cannotLogout": "§cYou cannot logout!",
   "text.easyauth.offlineUuid": "Offline UUID for player %s is (click to copy)\n",
   "text.easyauth.registeredPlayers": "List of registered players:",
-  "text.easyauth.addToForcedOffline": "Player successfully added into forcedOfflinePlayers list"
+  "text.easyauth.addToForcedOffline": "Player successfully added into forcedOfflinePlayers list",
+  "text.easyauth.validSession": "§aYou have a valid session. No need to log in.",
+  "text.easyauth.onlinePlayerLogin": "§aYou are using an online account. No need to log in."
 }

@@ -83,6 +83,7 @@ public class AuthEventHandler {
         if (((PlayerAuth) player).easyAuth$canSkipAuth()) {
             player.setInvulnerable(false);
             player.setInvisible(false);
+            langConfig.onlinePlayerLogin.send(player);
             return;
         }
         // Checking if session is still valid
@@ -96,14 +97,13 @@ public class AuthEventHandler {
         } else {
             playerCache = playerCacheMap.get(uuid);
         }
-        if (
-                playerCache.isAuthenticated &&
-                        playerCache.validUntil >= System.currentTimeMillis() &&
-                        player.getIp().equals(playerCache.lastIp)
-        ) {
+        if (playerCache.isAuthenticated &&
+                playerCache.validUntil >= System.currentTimeMillis() &&
+                player.getIp().equals(playerCache.lastIp)) {
             // Valid session
             player.setInvulnerable(false);
             player.setInvisible(false);
+            langConfig.validSession.send(player);
             return;
         }
         if (extendedConfig.skipAllAuthChecks) {

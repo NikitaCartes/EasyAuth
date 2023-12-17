@@ -30,5 +30,7 @@
   "text.easyauth.userNotRegistered": "§cЭтот игрок не зарегистрирован!",
   "text.easyauth.cannotLogout": "§cВы не можете выйти!",
   "text.easyauth.offlineUuid": "Оффлайн UUID для игрока %s (нажмите для копирования):\n",
-  "text.easyauth.registeredPlayers": "Список зарегестрированных игроков:"
+  "text.easyauth.registeredPlayers": "Список зарегестрированных игроков:",
+  "text.easyauth.validSession": "§aВаша сессия действительна. Вы уже авторизованы.",
+  "text.easyauth.onlinePlayerLogin": "§aВы используете онлайн аккаунт. Вы уже авторизованы."
 }

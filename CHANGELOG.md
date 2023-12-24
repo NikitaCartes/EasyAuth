@@ -9,6 +9,8 @@
 6) Add message when player is log in with valid session and online account:
    - `text.easyauth.validSession`
    - `text.easyauth.onlinePlayerLogin`
+7) If player leave server while at respawn screen, they will be killed after log in to prevent coordinates leaking.
+8) Fix infinite "Loading Terrain" problem with terrain not loading 
 
 ----
 ### 3.0.20

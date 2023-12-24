@@ -6,14 +6,9 @@ import net.minecraft.text.Text;
  * PLayer authentication extension.
  */
 public interface PlayerAuth {
-    /**
-     * Teleports player to spawn or last location that is recorded.
-     * Last location means the location before de-authentication.
-     *
-     * @param hide whether to teleport player to spawn (provided in config) or last recorded position
-     * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>
-     */
-    void easyAuth$hidePosition(boolean hide);
+    void easyAuth$saveLastLocation();
+
+    void easyAuth$restoreLastLocation();
 
     /**
      * Converts player uuid, to ensure player with "nAmE" and "NamE" get same uuid.

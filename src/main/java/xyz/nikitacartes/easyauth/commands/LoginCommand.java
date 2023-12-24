@@ -70,6 +70,7 @@ public class LoginCommand {
                 }
                 langConfig.successfullyAuthenticated.send(source);
                 ((PlayerAuth) player).easyAuth$setAuthenticated(true);
+                ((PlayerAuth) player).easyAuth$restoreLastLocation();
                 curLoginTries.set(0);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 return;

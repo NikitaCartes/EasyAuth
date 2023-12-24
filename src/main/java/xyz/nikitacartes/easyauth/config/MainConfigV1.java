@@ -69,5 +69,9 @@ public class MainConfigV1 extends ConfigTemplate {
         public double z = 0;
         public float yaw;
         public float pitch;
+
+        public String toString() {
+            return String.format("WorldSpawn{dimension=%s, x=%s, y=%s, z=%s, yaw=%s, pitch=%s}", dimension, x, y, z, yaw, pitch);
+        }
     }
 }

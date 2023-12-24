@@ -70,6 +70,7 @@ public class RegisterCommand {
             PlayerCache playerCache = playerCacheMap.get(((PlayerAuth) player).easyAuth$getFakeUuid());
             if (playerCache.password.isEmpty()) {
                 ((PlayerAuth) player).easyAuth$setAuthenticated(true);
+                ((PlayerAuth) player).easyAuth$restoreLastLocation();
                 langConfig.registerSuccess.send(source);
                 // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
                 playerCache.password = hashPassword(pass1.toCharArray());

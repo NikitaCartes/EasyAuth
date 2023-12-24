@@ -1,7 +1,13 @@
 package xyz.nikitacartes.easyauth.utils;
 
+import com.google.common.net.InetAddresses;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.server.network.ServerPlayerEntity;
 import xyz.nikitacartes.easyauth.utils.hashing.HasherArgon2;
 import xyz.nikitacartes.easyauth.utils.hashing.HasherBCrypt;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
@@ -59,5 +65,16 @@ public class AuthHelper {
         CORRECT,
         WRONG,
         NOT_REGISTERED
+    }
+
+    public static boolean hasValidSession(ServerPlayerEntity player, ClientConnection connection) {
+        String uuid = ((PlayerAuth) player).easyAuth$getFakeUuid();
+        SocketAddress socketAddress = connection.getAddress();
+        String playerIp = socketAddress instanceof InetSocketAddress inetSocketAddress ? InetAddresses.toAddrString(inetSocketAddress.getAddress()) : "<unknown>";
+        return ((PlayerAuth) player).easyAuth$canSkipAuth() ||
+                (playerCacheMap.containsKey(uuid) &&
+                        playerCacheMap.get(uuid).isAuthenticated &&
+                        playerCacheMap.get(uuid).validUntil >= System.currentTimeMillis() &&
+                        playerIp.equals(playerCacheMap.get(uuid).lastIp));
     }
 }

@@ -26,6 +26,7 @@ public class LogoutCommand {
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             ((PlayerAuth) player).easyAuth$setAuthenticated(false);
+            ((PlayerAuth) player).easyAuth$saveLastLocation();
             langConfig.successfulLogout.send(serverCommandSource);
         } else {
             langConfig.cannotLogout.send(serverCommandSource);

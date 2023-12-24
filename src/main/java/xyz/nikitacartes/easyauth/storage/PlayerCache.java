@@ -79,6 +79,10 @@ public class PlayerCache {
         public Vec3d position;
         public float yaw;
         public float pitch;
+
+        public String toString() {
+            return String.format("LastLocation{dimension=%s, position=%s, yaw=%s, pitch=%s}", dimension, position, yaw, pitch);
+        }
     }
 
     public final LastLocation lastLocation = new LastLocation();

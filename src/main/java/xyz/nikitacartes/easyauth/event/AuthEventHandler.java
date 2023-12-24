@@ -108,6 +108,7 @@ public class AuthEventHandler {
         }
         if (extendedConfig.skipAllAuthChecks) {
             ((PlayerAuth) player).easyAuth$setAuthenticated(true);
+            ((PlayerAuth) player).easyAuth$restoreLastLocation();
             return;
         }
         ((PlayerAuth) player).easyAuth$setAuthenticated(false);
@@ -142,7 +143,7 @@ public class AuthEventHandler {
             // Setting the session expire time
             playerCache.validUntil = System.currentTimeMillis() + config.sessionTimeout * 1000L;
         } else if (config.hidePlayerCoords) {
-            ((PlayerAuth) player).easyAuth$hidePosition(false);
+            ((PlayerAuth) player).easyAuth$restoreLastLocation();
 
             player.setInvulnerable(false);
             player.setInvisible(false);
@@ -277,4 +278,9 @@ public class AuthEventHandler {
         }
     }
 
+    public enum HidingDirection {
+        TO_SPAWN,
+        TO_LAST_LOCATION,
+        NONE
+    }
 }

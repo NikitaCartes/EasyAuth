@@ -71,6 +71,7 @@ public class AccountCommand {
                 DB.deleteUserData(uuid);
                 langConfig.accountDeleted.send(source);
                 ((PlayerAuth) player).easyAuth$setAuthenticated(false);
+                ((PlayerAuth) player).easyAuth$saveLastLocation();
                 player.networkHandler.disconnect(langConfig.accountDeleted.get());
                 playerCacheMap.remove(uuid);
                 return;

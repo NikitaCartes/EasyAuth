@@ -11,10 +11,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Uuids;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.io.File;
 import java.net.SocketAddress;
+import java.util.Optional;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -78,13 +82,6 @@ public abstract class PlayerManagerMixin {
 
             LogDebug(String.format("Teleporting player %s", ((PlayerAuth) player).easyAuth$getFakeUuid()));
 
-            /*
-            cache.lastLocation.dimension = player.getServerWorld();
-            cache.lastLocation.position = new Vec3d(args.get(0), args.get(1), args.get(2));
-            cache.lastLocation.yaw = args.get(3);
-            cache.lastLocation.pitch = args.get(4);
-             */
-
             NbtCompound nbtCompound = playerManager.loadPlayerData(player);
             if(nbtCompound != null && nbtCompound.contains("RootVehicle", 10)) {
                 NbtCompound nbtCompound2 = nbtCompound.getCompound("RootVehicle");
@@ -103,6 +100,32 @@ public abstract class PlayerManagerMixin {
             args.set(3, config.worldSpawn.yaw);
             args.set(4, config.worldSpawn.pitch);
         }
+    }
+
+    @Redirect(method = "respawnPlayer(Lnet/minecraft/server/network/ServerPlayerEntity;Z)Lnet/minecraft/server/network/ServerPlayerEntity;",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;findRespawnPosition(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;FZZ)Ljava/util/Optional;"))
+    private Optional<Vec3d> respawnPlayer(ServerWorld world, BlockPos pos, float angle, boolean forced, boolean alive, ServerPlayerEntity player, boolean alive2) {
+        if (!alive && config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return Optional.of(new Vec3d(config.worldSpawn.x, config.worldSpawn.y, config.worldSpawn.z));
+        }
+        return PlayerEntity.findRespawnPosition(world, pos, angle, forced, alive);
+    }
+    @Redirect(method = "respawnPlayer(Lnet/minecraft/server/network/ServerPlayerEntity;Z)Lnet/minecraft/server/network/ServerPlayerEntity;",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getSpawnPointPosition()Lnet/minecraft/util/math/BlockPos;"))
+    private BlockPos respawnPlayerBlockPos(ServerPlayerEntity instance, ServerPlayerEntity player, boolean alive) {
+        if (!alive && config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return new BlockPos((int) config.worldSpawn.x, (int) config.worldSpawn.y, (int) config.worldSpawn.z);
+        }
+        return instance.getSpawnPointPosition();
+    }
+
+    @Redirect(method = "respawnPlayer(Lnet/minecraft/server/network/ServerPlayerEntity;Z)Lnet/minecraft/server/network/ServerPlayerEntity;",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getSpawnPointDimension()Lnet/minecraft/registry/RegistryKey;"))
+    private RegistryKey<World> respawnPlayerDimension(ServerPlayerEntity instance, ServerPlayerEntity player, boolean alive) {
+        if (!alive && config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return RegistryKey.of(RegistryKeys.WORLD, new Identifier(config.worldSpawn.dimension));
+        }
+        return instance.getSpawnPointDimension();
     }
 
     @Redirect(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V",

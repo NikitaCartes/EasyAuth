@@ -69,7 +69,16 @@ public class PlayerCache {
     /**
      * Contains the UUID of the entity that the player was riding before leaving the server.
      */
+    @Expose
+    @SerializedName("riding_entity_uuid")
     public UUID ridingEntityUUID = null;
+
+    /**
+     * Whether player was dead
+     */
+    @Expose
+    @SerializedName("was_dead")
+    public boolean wasDead = false;
 
     /**
      * Last recorded position before de-authentication.
@@ -116,6 +125,7 @@ public class PlayerCache {
             playerCache.lastLocation.yaw = player.getYaw();
             playerCache.lastLocation.pitch = player.getPitch();
             playerCache.ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
+            playerCache.wasDead = player.isDead();
 
             playerCache.wasInPortal = false;
         }

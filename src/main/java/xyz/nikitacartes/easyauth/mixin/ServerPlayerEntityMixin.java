@@ -1,6 +1,7 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -47,6 +48,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
         cache.lastLocation.yaw = player.getYaw();
         cache.lastLocation.pitch = player.getPitch();
         cache.ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
+        cache.wasDead = player.isDead();
         LogDebug(String.format("Saving position of player %s as %s", player.getName().getContent(), cache.lastLocation));
         LogDebug(String.format("Saving vehicle of player %s as %s", player.getName().getContent(), cache.ridingEntityUUID));
     }
@@ -59,6 +61,11 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
         PlayerCache cache = playerCacheMap.get(this.easyAuth$getFakeUuid());
         if (cache == null) {
             LogDebug("Player cache is null, not saving position.");
+            return;
+        }
+        if (cache.wasDead) {
+            player.kill();
+            player.getScoreboard().forEachScore(ScoreboardCriterion.DEATH_COUNT, player, (score) -> score.setScore(score.getScore() - 1));
             return;
         }
         // Puts player to last cached position

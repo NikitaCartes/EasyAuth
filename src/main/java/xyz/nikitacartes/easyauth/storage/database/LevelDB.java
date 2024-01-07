@@ -149,6 +149,18 @@ public class LevelDB implements DbApi {
         return "";
     }
 
+    public HashMap<String, String> getAllData() {
+        HashMap<String, String> registeredPlayers = new HashMap<>();
+        try {
+            levelDBStore.forEach((key) -> {
+                registeredPlayers.put(new String(key.getKey()).substring(5), new String(key.getValue()).substring(5));
+            });
+        } catch (Error e) {
+            LogError("getAllData error", e);
+        }
+        return registeredPlayers;
+    }
+
     public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         WriteBatch batch = levelDBStore.createWriteBatch();
         // Updating player data.

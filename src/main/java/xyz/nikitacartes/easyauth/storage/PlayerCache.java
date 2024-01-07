@@ -97,7 +97,7 @@ public class PlayerCache {
     public final LastLocation lastLocation = new LastLocation();
 
 
-    private static final Gson gson = new GsonBuilder()
+    public static final Gson gson = new GsonBuilder()
             .excludeFieldsWithoutExposeAnnotation()
             .create();
 

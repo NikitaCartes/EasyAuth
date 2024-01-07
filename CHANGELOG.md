@@ -1,3 +1,9 @@
+### 3.0.23-SNAPSHOT
+##### Minecraft 1.20.3-1.20.4
+
+1) Fix `auth list`.
+
+
 ### 3.0.22-SNAPSHOT
 ##### Minecraft 1.20.3-1.20.4
 

@@ -23,11 +23,13 @@ import xyz.nikitacartes.easyauth.utils.AuthHelper;
 
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
+import static xyz.nikitacartes.easyauth.storage.PlayerCache.gson;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 public class AuthCommand {
@@ -320,17 +322,17 @@ public class AuthCommand {
     public static int getRegisteredPlayers(ServerCommandSource source) {
         THREADPOOL.submit(() -> {
             if (langConfig.registeredPlayers.enabled) {
-                int i = 0;
+                AtomicInteger i = new AtomicInteger();
                 MutableText message = langConfig.registeredPlayers.get();
-                for (var entry : playerCacheMap.entrySet()) {
-                    if (!entry.getValue().password.isEmpty()) {
-                        i++;
-                        message.append(Text.translatable("\n" + i + ": [" + entry.getKey() + "]")
+                DB.getAllData().forEach((uuid, playerCache) -> {
+                    if (!playerCache.isEmpty() && !gson.fromJson(playerCache, PlayerCache.class).password.isEmpty()) {
+                        i.getAndIncrement();
+                        message.append(Text.translatable("\n" + i + ": [" + uuid + "]")
                                 .setStyle(Style.EMPTY.withClickEvent(
-                                        new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, entry.getKey())))
+                                        new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid)))
                                 .formatted(Formatting.YELLOW));
                     }
-                }
+                });
                 source.sendMessage(message);
             }
         });

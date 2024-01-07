@@ -190,6 +190,24 @@ public class MySQL implements DbApi {
         return "";
     }
 
+    @Override
+    public HashMap<String, String> getAllData() {
+        HashMap<String, String> registeredPlayers = new HashMap<>();
+        try {
+            reConnect();
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("SELECT * FROM " + config.mysql.mysqlTable + ";");
+            ResultSet query = preparedStatement.executeQuery();
+            while (query.next()) {
+                String uuid = query.getString(2);
+                String data = query.getString(3);
+                registeredPlayers.put(uuid, data);
+            }
+        } catch (SQLException e) {
+            LogError("getAllData error", e);
+        }
+        return registeredPlayers;
+    }
+
     public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         try {
             reConnect();

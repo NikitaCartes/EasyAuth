@@ -62,5 +62,11 @@ public interface DbApi {
      */
     String getUserData(String uuid);
 
+    /**
+     * Get all data from DbApi.
+     * @return HashMap with all data.
+     */
+    HashMap<String, String> getAllData();
+
     void saveAll(HashMap<String, PlayerCache> playerCacheMap);
 }

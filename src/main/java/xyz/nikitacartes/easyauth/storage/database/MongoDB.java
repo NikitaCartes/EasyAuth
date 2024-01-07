@@ -76,6 +76,17 @@ public class MongoDB implements DbApi {
         return "";
     }
 
+    @Override
+    public HashMap<String, String> getAllData() {
+        HashMap<String, String> registeredPlayers = new HashMap<>();
+        collection.find().forEach(document -> {
+            String uuid = document.getString("UUID");
+            String data = document.toJson();
+            registeredPlayers.put(uuid, data);
+        });
+        return registeredPlayers;
+    }
+
     public void saveAll(HashMap<String, PlayerCache> playerCacheMap) {
         List<InsertOneModel<Document>> writeList = new ArrayList<>();
         List<ReplaceOneModel<Document>> updateList = new ArrayList<>();

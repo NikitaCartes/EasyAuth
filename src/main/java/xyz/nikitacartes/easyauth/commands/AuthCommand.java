@@ -8,6 +8,7 @@ import net.minecraft.command.argument.DimensionArgumentType;
 import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -20,6 +21,7 @@ import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.PlayerCache;
 import xyz.nikitacartes.easyauth.storage.database.DBApiException;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
+import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
 import java.util.Locale;
 import java.util.UUID;
@@ -133,6 +135,15 @@ public class AuthCommand {
                         .requires(Permissions.require("easyauth.commands.auth.addToForcedOffline", 3))
                         .then(argument("player", word())
                                 .executes(ctx -> addPlayerToForcedOffline(
+                                        ctx.getSource(),
+                                        getString(ctx, "player")
+                                ))
+                        )
+                )
+                .then(literal("forceAuth")
+                        .requires(Permissions.require("easyauth.commands.auth.forceAuth", 3))
+                        .then(argument("player", word())
+                                .executes(ctx -> forceAuthPlayer(
                                         ctx.getSource(),
                                         getString(ctx, "player")
                                 ))
@@ -355,6 +366,39 @@ public class AuthCommand {
         });
 
         langConfig.addToForcedOffline.send(source);
+        return 1;
+    }
+
+    /**
+     * Forcefully authenticates a player. Used by admins
+     * to make a player bypass (once) the authentication.
+     * Useful when the admins are testing/know the player
+     * and the player can't type in commands or something like that.
+     *
+     * @param source executioner of the command
+     * @param player player to force-auth
+     * @return 0
+     */
+    private static int forceAuthPlayer(ServerCommandSource source, String player) {
+        ServerPlayerEntity p = source.getServer().getPlayerManager().getPlayer(player);
+        if(p == null){
+            langConfig.playerNotOnline.send(source);
+            return 0;
+        }
+        if (((PlayerAuth) p).easyAuth$isAuthenticated()) {
+            LogDebug("Player " + p.getName().getString() + "(" + player + ") is already authenticated");
+            langConfig.alreadyAuthenticated.send(source);
+            return 0;
+        }
+        THREADPOOL.submit(() -> {
+            ((PlayerAuth) p).easyAuth$setAuthenticated(true);
+            ((PlayerAuth) p).easyAuth$restoreLastLocation();
+            PlayerCache playerCache = playerCacheMap.get(player);
+            playerCache.loginTries.set(0);
+            LogDebug("Player " + p.getName().getString() + "(" + player + ") was forcefully authenticated by " + source.getName());
+        });
+        langConfig.successfullyAuthenticated.send(p);
+        langConfig.forceAuthenticatedPlayer.send(source);
         return 1;
     }
 

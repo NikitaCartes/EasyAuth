@@ -31,5 +31,7 @@
   "text.easyauth.cannotLogout": "§cNon puoi effettuare il logout!",
   "text.easyauth.offlineUuid": "L'UUID offline per il giocatore %s è (clicca per copiare)\n",
   "text.easyauth.registeredPlayers": "Lista di giocatori registrati:",
-  "text.easyauth.addToForcedOffline": "Giocatore inserito correttamente alla lista forcedOfflinePlayers."
+  "text.easyauth.addToForcedOffline": "Giocatore inserito correttamente nella lista forcedOfflinePlayers.",
+  "text.easyauth.playerNotOnline": "§cIl giocatore indicato non è online al momento, impossibile forzare autenticazione.",
+  "text.easyauth.forceAuthenticatedPlayer": "§aIl giocatore è stato forzatamente autenticato con successo."
 }

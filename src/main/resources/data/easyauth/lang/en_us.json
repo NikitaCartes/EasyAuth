@@ -33,5 +33,8 @@
   "text.easyauth.registeredPlayers": "List of registered players:",
   "text.easyauth.addToForcedOffline": "Player successfully added into forcedOfflinePlayers list",
   "text.easyauth.validSession": "§aYou have a valid session. No need to log in.",
-  "text.easyauth.onlinePlayerLogin": "§aYou are using an online account. No need to log in."
+  "text.easyauth.onlinePlayerLogin": "§aYou are using an online account. No need to log in.",
+  "text.easyauth.playerNotOnline": "§cThe player you have specified is not online at the moment, cannot force auth.",
+  "text.easyauth.forceAuthenticatedPlayer": "§aThe player was successfully force authenticated."
+
 }

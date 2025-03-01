@@ -72,9 +72,9 @@ public abstract class PlayerManagerMixin {
         if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
             ((PlayerAuth) player).easyAuth$saveTrueLocation();
 
-            Optional<NbtCompound> nbtCompound = playerManager.loadPlayerData(player);
-            if(nbtCompound.isPresent() && nbtCompound.get().contains("RootVehicle", 10)) {
-                NbtCompound rootVehicle = nbtCompound.get().getCompound("RootVehicle");
+            NbtCompound nbtCompound = playerManager.loadPlayerData(player);
+            if(nbtCompound != null && nbtCompound.contains("RootVehicle", 10)) {
+                NbtCompound rootVehicle = nbtCompound.getCompound("RootVehicle");
                 NbtCompound rootRootVehicle = new NbtCompound();
                 rootRootVehicle.put("RootVehicle", rootVehicle);
                 ((PlayerAuth) player).easyAuth$setRootVehicle(rootRootVehicle);

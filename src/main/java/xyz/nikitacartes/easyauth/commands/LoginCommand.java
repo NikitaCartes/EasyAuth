@@ -48,9 +48,9 @@ public class LoginCommand {
         ServerPlayerEntity player = source.getPlayerOrThrow();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
-        LogDebug("Player " + player.getNameForScoreboard() + " is trying to login");
+        LogDebug("Player " + player.getName().getString() + " is trying to login");
         if (playerAuth.easyAuth$isAuthenticated()) {
-            LogDebug("Player " + player.getNameForScoreboard() + " is already authenticated");
+            LogDebug("Player " + player.getName().getString() + " is already authenticated");
             langConfig.alreadyAuthenticated.send(source);
             return 0;
         }
@@ -59,9 +59,9 @@ public class LoginCommand {
         AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(playerData, pass.toCharArray());
 
         if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
-            LogDebug("Player " + player.getNameForScoreboard() + " provide correct password");
+            LogDebug("Player " + player.getName().getString() + " provide correct password");
             if (playerData.lastKickedDate.plusSeconds(config.resetLoginAttemptsTimeout).isAfter(ZonedDateTime.now())) {
-                LogDebug("Player " + player.getNameForScoreboard() + " will be kicked due to kick timeout");
+                LogDebug("Player " + player.getName().getString() + " will be kicked due to kick timeout");
                 player.networkHandler.disconnect(langConfig.loginTriesExceeded.get());
                 return 0;
             }
@@ -75,7 +75,7 @@ public class LoginCommand {
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
             return 0;
         } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
-            LogDebug("Player " + player.getNameForScoreboard() + " is not registered");
+            LogDebug("Player " + player.getName().getString() + " is not registered");
             if (config.singleUseGlobalPassword) {
                 langConfig.registerRequiredWithGlobalPassword.send(source);
                 return 0;
@@ -85,7 +85,7 @@ public class LoginCommand {
         }
         playerData.loginTries++;
         if (playerData.loginTries >= config.maxLoginTries && config.maxLoginTries != -1) { // Player exceeded maxLoginTries
-            LogDebug("Player " + player.getNameForScoreboard() + " exceeded max login tries");
+            LogDebug("Player " + player.getName().getString() + " exceeded max login tries");
             // Send the player a different error message if the max login tries is 1.
             playerData.lastKickedDate = ZonedDateTime.now();
             playerData.loginTries = 0;
@@ -97,7 +97,7 @@ public class LoginCommand {
             }
             return 0;
         }
-        LogDebug("Player " + player.getNameForScoreboard() + " provided wrong password");
+        LogDebug("Player " + player.getName().getString() + " provided wrong password");
         // Sending wrong pass message
         langConfig.wrongPassword.send(source);
         return 0;

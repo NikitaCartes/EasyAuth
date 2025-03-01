@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.util.Uuids;
 import net.minecraft.world.WorldSaveHandler;
 import org.spongepowered.asm.mixin.Final;
@@ -52,7 +51,7 @@ public class WorldSaveHandlerMixin {
                 File file = new File(this.playerDataDir, Uuids.getOfflinePlayerUuid(player.getGameProfile().getName()) + ".dat");
                 if (file.exists() && file.isFile()) {
                     try {
-                        cir.setReturnValue(NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes()));
+                        cir.setReturnValue(NbtIo.readCompressed(file));
                     } catch (IOException e) {
                         LogWarn(String.format("Failed to load player data for: %s", playername));
                     }

@@ -98,7 +98,7 @@ public class AccountCommand {
 
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
-            String username = player.getNameForScoreboard();
+            String username = player.getName().getString();
             if (AuthHelper.checkPassword(playerAuth, pass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
                 DB.deleteUserData(username);
                 langConfig.accountDeleted.send(source);

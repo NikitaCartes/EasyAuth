@@ -61,7 +61,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
     private boolean wasDead = false;
 
     @Unique
-    PlayerEntryV1 playerEntryV1 = new PlayerEntryV1(player.getNameForScoreboard());
+    PlayerEntryV1 playerEntryV1 = new PlayerEntryV1(player.getName().getString());
 
     @Unique
     private boolean canSkipAuth = false;
@@ -83,9 +83,9 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
 
         ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
         wasDead = player.isDead();
-        LogDebug(String.format("Saving position of player %s as %s", player.getNameForScoreboard(), lastLocation));
+        LogDebug(String.format("Saving position of player %s as %s", player.getName().getString(), lastLocation));
         if (ridingEntityUUID != null) {
-            LogDebug(String.format("Saving vehicle of player %s as %s", player.getNameForScoreboard(), ridingEntityUUID));
+            LogDebug(String.format("Saving vehicle of player %s as %s", player.getName().getString(), ridingEntityUUID));
         }
     }
 
@@ -104,7 +104,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
         }
         if (wasDead) {
             player.kill();
-            player.getScoreboard().forEachScore(ScoreboardCriterion.DEATH_COUNT, player, (score) -> score.setScore(score.getScore() - 1));
+            player.getScoreboard().forEachScore(ScoreboardCriterion.DEATH_COUNT, player.getName().getString(), (score) -> score.setScore(score.getScore() - 1));
             return;
         }
         // Puts player to last saved position
@@ -115,7 +115,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
                 lastLocation.position.getZ(),
                 lastLocation.yaw,
                 lastLocation.pitch);
-        LogDebug(String.format("Teleported player %s to %s", player.getNameForScoreboard(), lastLocation));
+        LogDebug(String.format("Teleported player %s to %s", player.getName().getString(), lastLocation));
 
         if (rootVehicle != null) {
             LogDebug(String.format("Mounting player to vehicle %s", rootVehicle));
@@ -158,7 +158,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
             if (entity != null) {
                 player.startRiding(entity, true);
             } else {
-                LogDebug("Could not find vehicle for player " + player.getNameForScoreboard());
+                LogDebug("Could not find vehicle for player " + player.getName().getString());
             }
         }
     }

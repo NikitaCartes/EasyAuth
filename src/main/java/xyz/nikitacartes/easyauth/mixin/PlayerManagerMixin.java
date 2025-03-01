@@ -83,12 +83,12 @@ public abstract class PlayerManagerMixin {
 
                 if (rootVehicle.containsUuid("Attach")) {
                     ((PlayerAuth) player).easyAuth$setRidingEntityUUID(rootVehicle.getUuid("Attach"));
-                    LogDebug(String.format("Saving vehicle of player %s as %s", player.getNameForScoreboard(), rootVehicle.getUuid("Attach")));
+                    LogDebug(String.format("Saving vehicle of player %s as %s", player.getName(), rootVehicle.getUuid("Attach")));
                 }
             }
 
-            LogDebug(String.format("Teleporting player %s", player.getNameForScoreboard()));
-            LogDebug(String.format("Spawn position of player %s is %s", player.getNameForScoreboard(), config.worldSpawn));
+            LogDebug(String.format("Teleporting player %s", player.getName().getString()));
+            LogDebug(String.format("Spawn position of player %s is %s", player.getName().getString(), config.worldSpawn));
 
             args.set(0, config.worldSpawn.x);
             args.set(1, config.worldSpawn.y);

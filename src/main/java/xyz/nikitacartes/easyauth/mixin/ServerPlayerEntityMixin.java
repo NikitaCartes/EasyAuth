@@ -1,12 +1,10 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import com.google.common.net.InetAddresses;
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.server.MinecraftServer;
@@ -29,8 +27,7 @@ import xyz.nikitacartes.easyauth.utils.*;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.EnumSet;
-import java.util.Optional;
+import java.util.Iterator;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -106,7 +103,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
             return;
         }
         if (wasDead) {
-            player.kill(player.getServerWorld());
+            player.kill();
             player.getScoreboard().forEachScore(ScoreboardCriterion.DEATH_COUNT, player, (score) -> score.setScore(score.getScore() - 1));
             return;
         }
@@ -116,15 +113,40 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
                 lastLocation.position.getX(),
                 lastLocation.position.getY(),
                 lastLocation.position.getZ(),
-                EnumSet.noneOf(PositionFlag.class),
                 lastLocation.yaw,
-                lastLocation.pitch,
-                true);
+                lastLocation.pitch);
         LogDebug(String.format("Teleported player %s to %s", player.getNameForScoreboard(), lastLocation));
 
         if (rootVehicle != null) {
             LogDebug(String.format("Mounting player to vehicle %s", rootVehicle));
-            player.readRootVehicle(Optional.of(rootVehicle));
+
+            NbtCompound nbtCompound = rootVehicle.getCompound("RootVehicle");
+            Entity entity = EntityType.loadEntityWithPassengers(nbtCompound.getCompound("Entity"), player.getServerWorld(), (vehicle) -> !player.getServerWorld().tryLoadEntity(vehicle) ? null : vehicle);
+            if (entity != null) {
+                UUID uUID;
+                if (nbtCompound.containsUuid("Attach")) {
+                    uUID = nbtCompound.getUuid("Attach");
+                } else {
+                    uUID = null;
+                }
+
+                Iterator var23;
+                Entity entity2;
+                if (entity.getUuid().equals(uUID)) {
+                    player.startRiding(entity, true);
+                } else {
+                    var23 = entity.getPassengersDeep().iterator();
+
+                    while(var23.hasNext()) {
+                        entity2 = (Entity)var23.next();
+                        if (entity2.getUuid().equals(uUID)) {
+                            player.startRiding(entity2, true);
+                            break;
+                        }
+                    }
+                }
+            }
+
         }
 
         if (player.getVehicle() == null && ridingEntityUUID != null) {

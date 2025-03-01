@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
@@ -35,6 +36,7 @@ import java.io.File;
 import java.net.SocketAddress;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
@@ -103,7 +105,7 @@ public abstract class PlayerManagerMixin {
     @WrapOperation(method = "respawnPlayer",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getRespawnTarget(ZLnet/minecraft/world/TeleportTarget$PostDimensionTransition;)Lnet/minecraft/world/TeleportTarget;"))
     private TeleportTarget replaceRespawnTarget(ServerPlayerEntity instance, boolean alive, TeleportTarget.PostDimensionTransition postDimensionTransition, Operation<TeleportTarget> original) {
-        if (alive && config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {
+        if (!alive && config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {
             return new TeleportTarget(
                 this.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(config.worldSpawn.dimension))),
                 new Vec3d(config.worldSpawn.x, config.worldSpawn.y, config.worldSpawn.z),
@@ -151,11 +153,11 @@ public abstract class PlayerManagerMixin {
     }
 
     @WrapOperation(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;readRootVehicle(Ljava/util/Optional;)V"))
-    private void doNotMountPlayerToVehicle(ServerPlayerEntity instance, Optional<NbtCompound> nbt, Operation<Void> original) {
-        if (config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {
-            return;
+                        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityType;loadEntityWithPassengers(Lnet/minecraft/nbt/NbtCompound;Lnet/minecraft/world/World;Ljava/util/function/Function;)Lnet/minecraft/entity/Entity;"))
+    private Entity onPlayerConnectStartRiding(NbtCompound nbt, World world, Function<Entity, Entity> entityProcessor, Operation<Entity> original, @Local(argsOnly = true) ServerPlayerEntity player) {
+        if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return null;
         }
-        original.call(instance, nbt);
+        return original.call(nbt, world, entityProcessor);
     }
 }

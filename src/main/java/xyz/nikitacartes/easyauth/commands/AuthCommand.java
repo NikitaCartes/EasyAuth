@@ -84,8 +84,8 @@ public class AuthCommand {
                                                                 // +1 to not spawn player in ground
                                                                 BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY() + 1,
                                                                 BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ(),
-                                                                RotationArgumentType.getRotation(ctx, "angle").getRotation(ctx.getSource()).y,
-                                                                RotationArgumentType.getRotation(ctx, "angle").getRotation(ctx.getSource()).x
+                                                                RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).y,
+                                                                RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).x
                                                         )
                                                 )
                                         )

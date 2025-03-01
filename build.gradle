@@ -75,6 +75,9 @@ dependencies {
     include implementation("com.typesafe:config:${typesafe_config_version}")
     include implementation("io.leangen.geantyref:geantyref:${geantyref_version}")
 
+    // OTP generation
+    include implementation("com.github.bastiaanjansen:otp-java:${otp_version}")
+
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"
 }

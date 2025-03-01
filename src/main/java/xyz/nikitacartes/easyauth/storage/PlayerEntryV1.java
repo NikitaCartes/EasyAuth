@@ -1,11 +1,15 @@
 package xyz.nikitacartes.easyauth.storage;
 
+import com.bastiaanjansen.otp.HMACAlgorithm;
+import com.bastiaanjansen.otp.TOTPGenerator;
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.server.network.ServerPlayerEntity;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
+import java.lang.reflect.Type;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -76,12 +80,34 @@ public class PlayerEntryV1 {
     public ZonedDateTime registrationDate = getUnixZero();
 
     /**
+     * OTP secret key for 2FA.
+     */
+    @Expose
+    @SerializedName("otp_secret")
+    public String otpSecret = null;
+
+    /**
+     * OTP enabled for the player.
+     */
+    @Expose
+    @SerializedName("otp_enabled")
+    public boolean otpEnabled = false;
+
+    /**
+     * Does player need both password and OTP to login.
+     */
+    @Expose
+    @SerializedName("2fa_required")
+    public boolean twoFactorAuthRequired = false;
+
+    /**
      * Stores version of the player data.
      */
     @Expose
     @SerializedName("data_version")
     public int dataVersion = 1;
 
+    private TOTPGenerator totpGenerator = null;
 
     public PlayerEntryV1(String username, String usernameLowerCase, String uuid, String json) {
         PlayerEntryV1 entry = gson.fromJson(json, PlayerEntryV1.class);
@@ -99,6 +125,19 @@ public class PlayerEntryV1 {
         this.lastKickedDate = entry.lastKickedDate == null ? startOfTime : entry.lastKickedDate;
         this.registrationDate = entry.registrationDate == null ? startOfTime : entry.registrationDate;
         this.dataVersion = entry.dataVersion;
+
+        if (entry.otpSecret != null && config.otpEnabled) {
+            this.totpGenerator = new TOTPGenerator.Builder(entry.otpSecret)
+                    .withHOTPGenerator(builder -> {
+                        builder.withPasswordLength(6);
+                        builder.withAlgorithm(HMACAlgorithm.SHA1);
+                    })
+                    .withPeriod(Duration.ofSeconds(30))
+                    .build();
+            this.otpSecret = entry.otpSecret;
+        } else {
+            this.otpSecret = null;
+        }
     }
 
     public PlayerEntryV1(String username) {
@@ -125,17 +164,31 @@ public class PlayerEntryV1 {
     }
 
     private static class ZonedDateTimeAdapter implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {
-        private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-
         @Override
-        public JsonElement serialize(ZonedDateTime src, java.lang.reflect.Type typeOfSrc, com.google.gson.JsonSerializationContext context) {
-            return new JsonPrimitive(src.format(formatter));
+        public JsonElement serialize(ZonedDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
         }
 
         @Override
-        public ZonedDateTime deserialize(JsonElement json, java.lang.reflect.Type typeOfT, com.google.gson.JsonDeserializationContext context) throws JsonParseException {
-            return ZonedDateTime.parse(json.getAsString(), formatter);
+        public ZonedDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return ZonedDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_ZONED_DATE_TIME);
         }
+    }
+
+    public boolean verifyOtp(String otp) {
+        if (otpSecret == null) {
+            return false;
+        }
+        if (totpGenerator == null) {
+            this.totpGenerator = new TOTPGenerator.Builder(otpSecret)
+                    .withHOTPGenerator(builder -> {
+                        builder.withPasswordLength(6);
+                        builder.withAlgorithm(HMACAlgorithm.SHA1);
+                    })
+                    .withPeriod(Duration.ofSeconds(30))
+                    .build();
+        }
+        return totpGenerator.verify(otp, 1);
     }
 }
 

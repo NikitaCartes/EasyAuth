@@ -20,6 +20,7 @@ public class MainConfigV1 extends ConfigTemplate {
     public long kickTimeout = 60;
     public long resetLoginAttemptsTimeout = 120;
     public long sessionTimeout = 86400;
+    public boolean otpEnabled = true;
     public boolean enableGlobalPassword = false;
     public boolean singleUseGlobalPassword = false;
     public boolean hidePlayerCoords = false;
@@ -50,6 +51,7 @@ public class MainConfigV1 extends ConfigTemplate {
         configValues.put("kickTimeout", wrapIfNecessary(kickTimeout));
         configValues.put("resetLoginAttemptsTimeout", wrapIfNecessary(resetLoginAttemptsTimeout));
         configValues.put("sessionTimeout", wrapIfNecessary(sessionTimeout));
+        configValues.put("otpEnabled", wrapIfNecessary(otpEnabled));
         configValues.put("enableGlobalPassword", wrapIfNecessary(enableGlobalPassword));
         configValues.put("singleUseGlobalPassword", wrapIfNecessary(singleUseGlobalPassword));
         configValues.put("hidePlayerCoords", wrapIfNecessary(hidePlayerCoords));

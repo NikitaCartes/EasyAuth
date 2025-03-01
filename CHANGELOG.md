@@ -10,26 +10,30 @@
    - Add option `offline-by-default` (default `false`) to mark all players as offline by default
    - Delete `auth addToForcedOffline <player>` command
 3) Add `hide-inventory` option in `extended.conf` to hide inventory of unauthenticated players. Default `true`
-4) Player allowed to log in even if player with same nickname is already online if they join from same IP
-5) Database overhaul:
+4) Add ability to log in with OTP:
+   - `enable-otp` in `main.conf` to enable OTP. Default `true`
+   - `account otp generate` to generate OTP secret
+   - `account otp enable <otp code>` to enable OTP
+   - `account otp disable <otp code>` to disable OTP
+   - `account enable2Fa <password> <otp code>` to enable 2FA
+   - `account disable2Fa <password> <otp code>` to disable 2FA
+   - `auth resetOtp <player>` admin command to reset OTP for player
+5) Player allowed to log in even if player with same nickname is already online if they join from same IP
+6) Database overhaul:
    - Now database key is username instead of uuid
    - SQLite is now default database instead of LevelDB
    - Drop support for LevelDB (data from LevelDB will be migrated to SQLite automatically)
    - Config version is now 2
    - All players from `usercache.json` will be migrated automatically
-6) Change default hash algorithm to Argon2 from BCrypt
+7) Change default hash algorithm to Argon2 from BCrypt
    - If you previously used BCrypt, typed password will be checked both against BCrypt and Argon2 (option `check-unmigrated-argon2` in `extended.conf`)
-7) Increased default `teleportation-timeout-ms` from 5 to 20 ms
-8) `confirmed-online-players` and `forced-offline-players` is not used anymore. Now they are stored in database for each player separately
-9) Added new option `allow-case-insensitive-username` in `extended.conf` to allow players with same nickname but different case to join (default `false`)
-10) Fix bug with respawn while leaving server being dead
-11) Add setting `authentication-prompt-interval` in `extended.conf` to set interval between authentication prompts
-12) Add `auth getPlayerInfo` command
-13) Add `mojang-api-settings` in `extended.conf` for custom Mojang API settings
-
-14) ToDo: Check migration from offline to online user
-15) ToDo: Check migration when player changes name
-16) ToDo: OTP
+8) Increased default `teleportation-timeout-ms` from 5 to 20 ms
+9) `confirmed-online-players` and `forced-offline-players` is not used anymore. Now they are stored in database for each player separately
+10) Added new option `allow-case-insensitive-username` in `extended.conf` to allow players with same nickname but different case to join (default `false`)
+11) Fix bug with respawn while leaving server being dead
+12) Add setting `authentication-prompt-interval` in `extended.conf` to set interval between authentication prompts
+13) Add `auth getPlayerInfo` command
+14) Add `mojang-api-settings` in `extended.conf` for custom Mojang API settings
  
 ### 3.0.28
 ##### Minecraft 1.21.2 - 1.21.4

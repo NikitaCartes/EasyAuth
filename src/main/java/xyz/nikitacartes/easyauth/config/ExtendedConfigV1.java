@@ -115,7 +115,7 @@ public class ExtendedConfigV1 extends ConfigTemplate {
 
     @ConfigSerializable
     public static final class MojangApiSettings {
-        public String url = "https://api.mojang.com/users/profiles/minecraft/";
+        public String url = "https://api.minecraftservices.com/minecraft/profile/lookup/name/";
         public int connectionTimeout = 5000;
         public int readTimeout = 5000;
     }

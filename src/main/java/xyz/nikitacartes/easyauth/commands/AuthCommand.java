@@ -157,6 +157,17 @@ public class AuthCommand {
                         )
                 )
         );
+        if (config.otpEnabled) {
+            dispatcher.register(literal("auth")
+                    .requires(Permissions.require("easyauth.commands.auth.root", 3))
+                    .then(literal("resetOtp")
+                            .requires(Permissions.require("easyauth.commands.auth.resetOtp", 3))
+                            .then(argument("username", word())
+                                    .executes(ctx -> resetOtp(ctx.getSource(), getString(ctx, "username")))
+                            )
+                    )
+            );
+        }
     }
 
     /**
@@ -388,7 +399,30 @@ public class AuthCommand {
                 return;
             }
             // Send player information to the source
-            source.sendMessage(Text.literal("Player Info: " + playerData));
+            source.sendMessage(Text.literal("Player Info: " + playerData.toJson()));
+        });
+        return 1;
+    }
+
+    /**
+     * Resets the OTP secret for a player.
+     *
+     * @param source   executioner of the command
+     * @param username username of the player to reset OTP for
+     * @return 0
+     */
+    private static int resetOtp(ServerCommandSource source, String username) {
+        THREADPOOL.submit(() -> {
+            PlayerEntryV1 playerData = DB.getUserData(username);
+            if (playerData == null) {
+                langConfig.userNotRegistered.send(source);
+                return;
+            }
+            playerData.otpSecret = null;
+            playerData.otpEnabled = false;
+            playerData.twoFactorAuthRequired = false;
+            playerData.update();
+            langConfig.otpReset.send(source, username);
         });
         return 1;
     }

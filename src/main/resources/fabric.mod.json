@@ -27,7 +27,7 @@
   "depends": {
     "fabric-api": "*",
     "fabricloader": "*",
-    "minecraft": ">=1.21.2- <1.21.5"
+    "minecraft": ">=1.21- <1.21.2"
   },
   "suggests": {
     "fabric-permissions-api-v0": "*"

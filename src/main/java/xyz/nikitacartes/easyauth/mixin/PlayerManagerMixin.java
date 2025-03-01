@@ -2,6 +2,7 @@ package xyz.nikitacartes.easyauth.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
@@ -102,7 +103,7 @@ public abstract class PlayerManagerMixin {
     @Redirect(method = "respawnPlayer",
     at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;getRespawnTarget(ZLnet/minecraft/world/TeleportTarget$PostDimensionTransition;)Lnet/minecraft/world/TeleportTarget;"))
     private TeleportTarget replaceRespawnTarget(ServerPlayerEntity player, boolean alive, TeleportTarget.PostDimensionTransition postDimensionTransition) {
-        if (alive && config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
+        if (!alive && config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
             return new TeleportTarget(
                 this.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(config.worldSpawn.dimension))),
                 new Vec3d(config.worldSpawn.x, config.worldSpawn.y, config.worldSpawn.z),
@@ -110,6 +111,24 @@ public abstract class PlayerManagerMixin {
             );
         }
         return player.getRespawnTarget(alive, postDimensionTransition);
+    }
+
+    @Redirect(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;startRiding(Lnet/minecraft/entity/Entity;Z)Z"))
+    private boolean onPlayerConnectStartRiding(ServerPlayerEntity instance, Entity entity, boolean force, ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData) {
+        if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return false;
+        }
+        return instance.startRiding(entity, force);
+    }
+
+    @Redirect(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;hasVehicle()Z"))
+    private boolean onPlayerConnectStartRiding(ServerPlayerEntity instance, ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData) {
+        if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return true;
+        }
+        return instance.hasVehicle();
     }
 
     @Inject(method = "remove(Lnet/minecraft/server/network/ServerPlayerEntity;)V", at = @At("HEAD"))

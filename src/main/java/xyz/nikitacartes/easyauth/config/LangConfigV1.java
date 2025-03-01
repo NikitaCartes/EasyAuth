@@ -3,7 +3,6 @@ package xyz.nikitacartes.easyauth.config;
 import com.google.common.io.Resources;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.apache.commons.text.StringSubstitutor;
@@ -147,16 +146,6 @@ public class LangConfigV1 extends ConfigTemplate {
         }
 
         public void send(ServerCommandSource commandOutput) {
-            if (enabled && commandOutput != null) {
-                if (langConfig.enableServerSideTranslation && serverSide) {
-                    commandOutput.sendMessage(translatable(key));
-                } else {
-                    commandOutput.sendMessage(Text.literal(fallback));
-                }
-            }
-        }
-
-        public void send(ServerPlayerEntity commandOutput) {
             if (enabled && commandOutput != null) {
                 if (langConfig.enableServerSideTranslation && serverSide) {
                     commandOutput.sendMessage(translatable(key));

@@ -155,10 +155,16 @@ public class SQLite implements DbApi {
     @Override
     public void updateUserData(PlayerEntryV1 data) {
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE " + config.sqlite.sqliteTable + " SET uuid = ?, data = ? WHERE username = ?;");
-            statement.setObject(1, data.uuid);
-            statement.setString(2, data.toJson());
-            statement.setString(3, data.username);
+            PreparedStatement statement = connection.prepareStatement(
+                "UPDATE " + config.sqlite.sqliteTable + 
+                " SET username = ?, username_lower = ?, uuid = ?, data = ? " +
+                "WHERE username = ?;"
+            );
+            statement.setString(1, data.username);
+            statement.setString(2, data.usernameLowerCase);
+            statement.setObject(3, data.uuid);
+            statement.setString(4, data.toJson());
+            statement.setString(5, data.username);
             statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {

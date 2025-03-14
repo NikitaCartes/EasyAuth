@@ -1,15 +1,20 @@
 package xyz.nikitacartes.easyauth.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.UserCache;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
+import xyz.nikitacartes.easyauth.storage.database.*;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 
+import java.io.File;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
@@ -19,6 +24,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.AuthHelper.checkGlobalPassword;
 import static xyz.nikitacartes.easyauth.utils.AuthHelper.hashPassword;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
 
 public class RegisterCommand {
@@ -31,6 +37,49 @@ public class RegisterCommand {
                     .requires(Permissions.require("easyauth.commands.register", true))
                     .redirect(node));
         }
+        
+        // Регистрация команды для миграции данных
+        dispatcher.register(literal("easyauth-migrate")
+                .requires(Permissions.require("easyauth.commands.migrate", 4))
+                .executes(ctx -> migrateData(ctx.getSource())));
+    }
+
+    // Метод для миграции данных
+    private static int migrateData(ServerCommandSource source) {
+        LogInfo("Принудительная миграция данных...");
+        long now = System.currentTimeMillis();
+
+        DbApi db;
+        if (storageConfig.databaseType.equalsIgnoreCase("mysql")) {
+            db = new MySQL(storageConfig);
+        } else if (storageConfig.databaseType.equalsIgnoreCase("mongodb")) {
+            db = new MongoDB(storageConfig);
+        } else {
+            storageConfig.databaseType = "sqlite";
+            db = new SQLite(storageConfig);
+        }
+        
+        try {
+            db.connect();
+        } catch (DBApiException e) {
+            LogDebug("Ошибка подключения к базе данных: " + e.getMessage());
+            source.sendMessage(net.minecraft.text.Text.literal("Ошибка подключения к базе данных"));
+            return 0;
+        }
+
+        UserCache userCache = new UserCache(null, new File(gameDirectory + "/usercache.json"));
+        HashMap<String, String> uuids = new HashMap<>();
+        for (UserCache.Entry entry : userCache.load()) {
+            GameProfile profile = entry.getProfile();
+            uuids.put(profile.getName(), profile.getId().toString());
+        }
+        
+        db.migrateFromV1(uuids);
+        db.close();
+        
+        LogInfo("Миграция завершена за " + (System.currentTimeMillis() - now) + "мс");
+        source.sendMessage(net.minecraft.text.Text.literal("Миграция данных завершена"));
+        return 1;
     }
 
     // Registering the "/register" command
@@ -134,6 +183,7 @@ public class RegisterCommand {
             playerData.registrationDate = ZonedDateTime.now();
             playerData.lastIp = playerAuth.easyAuth$getIpAddress();
             playerData.lastAuthenticatedDate = ZonedDateTime.now();
+            playerData.uuid = player.getUuid();
             playerAuth.easyAuth$setPlayerEntryV1(playerData);
             playerData.update();
 

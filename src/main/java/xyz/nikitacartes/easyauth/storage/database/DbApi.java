@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.storage.deprecated.PlayerCacheV0;
+import net.minecraft.util.Uuids;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -86,9 +87,10 @@ public interface DbApi {
 
     default PlayerEntryV1 migrateFromV1(String data, String username) {
         String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
+        String uuid = Uuids.getOfflinePlayerUuid(lowerCaseUsername).toString();
 
         PlayerCacheV0 playerCache = PlayerCacheV0.fromJson(data);
-        PlayerEntryV1 playerEntry = new PlayerEntryV1(username, lowerCaseUsername, null, data);
+        PlayerEntryV1 playerEntry = new PlayerEntryV1(username, lowerCaseUsername, uuid, data);
 
         ZoneOffset localOffset = ZonedDateTime.now().getOffset();
         playerEntry.lastAuthenticatedDate = LocalDateTime.ofEpochSecond(playerCache.validUntil/1000 - EasyAuth.config.sessionTimeout, 0, localOffset).atZone(localOffset);

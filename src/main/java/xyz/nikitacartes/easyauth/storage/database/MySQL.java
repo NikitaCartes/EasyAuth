@@ -218,13 +218,20 @@ public class MySQL implements DbApi {
      *
      * @param data data of the player to update data for
      */
+    @Override
     public void updateUserData(PlayerEntryV1 data) {
         try {
             reConnect();
-            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("UPDATE " + config.mysql.mysqlTable + " SET uuid = ?, data = ? WHERE username = ?;");
-            preparedStatement.setString(1, data.uuid == null ? null : data.uuid.toString());
-            preparedStatement.setString(2, data.toJson());
-            preparedStatement.setString(3, data.username);
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement(
+                "UPDATE " + config.mysql.mysqlTable + 
+                " SET username = ?, username_lower = ?, uuid = ?, data = ? " +
+                "WHERE username = ?;"
+            );
+            preparedStatement.setString(1, data.username);
+            preparedStatement.setString(2, data.usernameLowerCase);
+            preparedStatement.setString(3, data.uuid == null ? null : data.uuid.toString());
+            preparedStatement.setString(4, data.toJson());
+            preparedStatement.setString(5, data.username);
             preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {

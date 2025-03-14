@@ -2,7 +2,6 @@ package xyz.nikitacartes.easyauth.config;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class TelegramConfigV1 {
     public Notifications notifications = new Notifications();
 
     public static class Database {
-        public String tableName = "easyauth_telegram";
+        public String tableName = "easyauth_links";
     }
 
     public static class Code {
@@ -71,7 +70,7 @@ public class TelegramConfigV1 {
                 telegramRootNode.node("bot-token").set("");
                 telegramRootNode.node("bot-token").comment("Telegram bot token obtained from BotFather");
 
-                telegramRootNode.node("database", "table-name").set("easyauth_telegram");
+                telegramRootNode.node("database", "table-name").set("easyauth_links");
                 telegramRootNode.node("database", "table-name").comment("Name of the table in the database");
 
                 telegramRootNode.node("code", "length").set(6);
@@ -106,7 +105,7 @@ public class TelegramConfigV1 {
             // Load values from config
             config.enabled = telegramRootNode.node("enabled").getBoolean(false);
             config.botToken = telegramRootNode.node("bot-token").getString("");
-            config.database.tableName = telegramRootNode.node("database", "table-name").getString("easyauth_telegram");
+            config.database.tableName = telegramRootNode.node("database", "table-name").getString("easyauth_links");
             config.code.length = telegramRootNode.node("code", "length").getInt(6);
             config.code.expirationMinutes = telegramRootNode.node("code", "expiration-minutes").getInt(30);
             config.code.maxDailyAttempts = telegramRootNode.node("code", "max-daily-attempts").getInt(5);

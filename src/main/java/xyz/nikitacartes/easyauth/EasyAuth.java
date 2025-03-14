@@ -15,6 +15,8 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.database.*;
 import xyz.nikitacartes.easyauth.telegram.TelegramCommands;
 import xyz.nikitacartes.easyauth.telegram.TelegramManager;
+import xyz.nikitacartes.easyauth.discord.DiscordManager;
+import xyz.nikitacartes.easyauth.commands.DiscordCommands;
 
 import java.io.File;
 import java.io.FileReader;
@@ -50,6 +52,8 @@ public class EasyAuth implements ModInitializer {
     public static StorageConfigV1 storageConfig;
     public static TelegramConfigV1 telegramConfig;
     public static TelegramManager telegramManager;
+    public static DiscordConfigV1 discordConfig;
+    public static DiscordManager discordManager;
 
     @Override
     public void onInitialize() {
@@ -97,6 +101,7 @@ public class EasyAuth implements ModInitializer {
             AuthCommand.registerCommand(dispatcher);
             AccountCommand.registerCommand(dispatcher);
             TelegramCommands.registerCommand(dispatcher);
+            DiscordCommands.registerCommand(dispatcher);
         });
 
         // From Fabric API
@@ -127,12 +132,21 @@ public class EasyAuth implements ModInitializer {
                 telegramManager = new TelegramManager(telegramConfig, DB);
                 LogInfo("Telegram integration initialized");
             }
+
+            if (discordConfig.enabled) {
+                discordManager = new DiscordManager(discordConfig, DB);
+                LogInfo("Discord integration initialized");
+            }
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             if (telegramManager != null) {
                 telegramManager.close();
                 LogInfo("Telegram integration stopped");
+            }
+            if (discordManager != null) {
+                discordManager.shutdown();
+                LogInfo("Discord integration stopped");
             }
         });
     }
@@ -184,6 +198,8 @@ public class EasyAuth implements ModInitializer {
 
                 EasyAuth.telegramConfig = TelegramConfigV1.load();
                 EasyAuth.telegramConfig.save();
+                EasyAuth.discordConfig = DiscordConfigV1.load();
+                EasyAuth.discordConfig.save();
 
                 break;
             }
@@ -194,6 +210,7 @@ public class EasyAuth implements ModInitializer {
                 EasyAuth.extendedConfig = ExtendedConfigV1.load();
                 EasyAuth.storageConfig = StorageConfigV1.load();
                 EasyAuth.telegramConfig = TelegramConfigV1.load();
+                EasyAuth.discordConfig = DiscordConfigV1.load();
                 migrateFromV1();
                 break;
             }
@@ -204,6 +221,7 @@ public class EasyAuth implements ModInitializer {
                 EasyAuth.extendedConfig = ExtendedConfigV1.load();
                 EasyAuth.storageConfig = StorageConfigV1.load();
                 EasyAuth.telegramConfig = TelegramConfigV1.load();
+                EasyAuth.discordConfig = DiscordConfigV1.load();
                 break;
             }
             default: {
@@ -214,6 +232,7 @@ public class EasyAuth implements ModInitializer {
                 EasyAuth.extendedConfig = ExtendedConfigV1.load();
                 EasyAuth.storageConfig = StorageConfigV1.load();
                 EasyAuth.telegramConfig = TelegramConfigV1.load();
+                EasyAuth.discordConfig = DiscordConfigV1.load();
                 break;
             }
         }
@@ -227,6 +246,7 @@ public class EasyAuth implements ModInitializer {
         EasyAuth.extendedConfig.save();
         EasyAuth.storageConfig.save();
         EasyAuth.telegramConfig.save();
+        EasyAuth.discordConfig.save();
     }
 
     public static ZonedDateTime getUnixZero() {

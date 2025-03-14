@@ -1,0 +1,5 @@
+[33mcommit c54d216bc954924b9470bec54f479f2f41e2b7c6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfabric-1.21.2[m[33m, [m[1;31morigin/fabric-1.21.2[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: AlexRahvalov <alex.rahvalov@gmail.com>
+Date:   Fri Mar 14 09:46:52 2025 +0300
+
+    Добавлены кликабельные элементы в сообщения Telegram-интеграции

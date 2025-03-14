@@ -89,6 +89,21 @@ dependencies {
 
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"
+
+    // Discord API
+    include modImplementation("net.dv8tion:JDA:5.0.0-beta.13")
+    // Зависимости JDA
+    include implementation("net.sf.trove4j:trove4j:3.0.3")
+    include implementation("org.apache.commons:commons-collections4:4.4")
+    include implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    include implementation("com.squareup.okio:okio:3.7.0")
+    include implementation("com.neovisionaries:nv-websocket-client:2.14")
+    include implementation("org.slf4j:slf4j-api:1.7.36")
+    include implementation("org.json:json:20230618")
+    // Kotlin для OkHttp
+    include implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
+    include implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")
+    include implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.9.22")
 }
 
 tasks.withType(JavaCompile).configureEach {

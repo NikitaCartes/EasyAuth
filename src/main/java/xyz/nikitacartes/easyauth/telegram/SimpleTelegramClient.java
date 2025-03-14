@@ -73,7 +73,7 @@ public class SimpleTelegramClient {
      */
     private void startPolling() {
         pollingExecutor = Executors.newSingleThreadScheduledExecutor();
-        pollingExecutor.scheduleAtFixedRate(this::pollUpdates, 0, 1, TimeUnit.SECONDS);
+        pollingExecutor.scheduleAtFixedRate(this::pollUpdates, 0, 3, TimeUnit.SECONDS);
         LogInfo("Started polling for Telegram updates");
     }
     
@@ -105,6 +105,14 @@ public class SimpleTelegramClient {
             if (offset > 0) {
                 endpoint += "?offset=" + (offset + 1);
             }
+            
+            // Добавляем параметры для избежания конфликтов
+            if (!endpoint.contains("?")) {
+                endpoint += "?";
+            } else {
+                endpoint += "&";
+            }
+            endpoint += "timeout=60&limit=100";
             
             JsonNode response = makeRequest("GET", endpoint, null);
             LogDebug("Polling response: " + response);
@@ -274,6 +282,15 @@ public class SimpleTelegramClient {
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     return mapper.readTree(connection.getInputStream());
+                } else if (responseCode == 409) { // Conflict - другой клиент уже получает обновления
+                    LogError("HTTP error 409: Conflict - another instance might be running. Waiting before next poll.");
+                    // При ошибке 409 делаем паузу чтобы дать другому клиенту завершить работу
+                    try {
+                        Thread.sleep(5000); // Пауза 5 секунд
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    return mapper.createObjectNode().put("ok", false).put("error_code", 409);
                 } else {
                     LogError("HTTP error: " + responseCode);
                     return mapper.createObjectNode();

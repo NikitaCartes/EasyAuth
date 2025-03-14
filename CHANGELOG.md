@@ -6,6 +6,52 @@
 5) ToDo: Check how offline player work if they tried connect with taken online account
 6) ToDo: Add default language option
 
+### 3.4.0
+##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
+#### Added
+- Created basic Discord bot implementation using REST API
+- Full integration with JDA (Java Discord API) for enhanced Discord functionality
+- Support for private messages to Discord bot
+- Improved message handling through WebSocket
+- Ability to link accounts via direct messages to the bot
+
+#### Changed
+- Migrated from REST API to JDA with WebSocket connection
+- Optimized Discord message processing
+- Improved stability of Discord API interactions
+- Added support for direct interaction with the bot
+
+#### Fixed
+- Fixed latency issues in Discord message processing
+- Eliminated the need for constant API polling to receive new messages
+- Resolved issues with mandatory public channel requirement for Discord integration
+
+### 3.3.2
+##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
+#### Added
+- Added clickable elements in Telegram integration messages
+- Improved user experience with interactive message components in Telegram
+- Fixed HTTP 409 conflict errors when multiple instances access the Telegram bot
+
+### 3.3.1
+##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
+#### Fixed
+- Optimized Telegram integration code
+- Removed unused imports
+- Fixed deprecated URL constructor
+
+### 3.3.0
+##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
+#### Added
+- Implemented Telegram bot integration for authentication code verification
+- Created SimpleTelegramClient for Telegram Bot API interaction without third-party dependencies
+- Added support for long polling updates retrieval system
+- Implemented user command processing: /start, /help, and automatic code recognition
+- Integrated code generation and verification system with database
+- Added secure linking of Minecraft accounts to Telegram IDs
+- Implemented login notifications via linked Telegram accounts
+- Added comprehensive logging for debugging
+
 ### 3.2.0
 ##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
 1) Add player display name field to database structure
@@ -242,110 +288,4 @@ Update dependencies
 ### 2.0.5
 ##### Minecraft 1.17, 1.17.1, 1.18
 
-1) `auth uuid <player>` that would give correct offline uuid fot that player nickname in lower case
-2) Add [permission](https://github.com/NikitaCartes/EasyAuth/wiki/Permissions) support
-3) Add `auth list` command to print all registered players
-4) Fix `auth update` command
-5) Temporally disable `hideUnauthenticatedPLayersFromPlayerList` by default
-6) Czech translation, thanks to @DavidCZ2051
-
-----
-### 2.0.4
-##### Minecraft 1.17.1, 1.18-pre1
-
-1) With enabled [global password](https://github.com/NikitaCartes/EasyAuth/wiki/Global-password) player can log in with global password or password set by `auth register`
-
-----
-### 2.0.3
-##### Minecraft 1.17.1, 21w37a+
-
-1) Fix problem with registration ([#14](https://github.com/NikitaCartes/EasyAuth/issues/14))
-   - argon2 library split to two libs, and I didn't include one of it
-   - Update libraries
-2) Improve hiding in TabList
-   - Now premium players shown in it
-   - As well as carpet's fake-player
-
-----
-### 2.0.2
-##### Minecraft 1.17.1
-
-1) Add setting which hide unauthenticated players from tab list
-   - `hideUnauthenticatedPLayersFromPlayerList` in `config.json`
-   - `true` by default
-
-----
-### 2.0.1
-##### Minecraft 1.17.1
-
-1) Fix problem with MongoDB ([#15](https://github.com/NikitaCartes/EasyAuth/issues/15))
-2) Change `config.json`:
-   - Delete `mongoDBCredentials` section
-   - Add `MongoDBConnectionString` and `MongoDBDatabase` in main section
-
-----
-### 1.9.7
-##### Minecraft 1.17, 1.17.1
-
-1) Fix crash on account unregistering
-2) Add alias `\l` for `\login` and setting for disabling it
-3) Allow special characters like `@,#!` in password (you will need to enclose password in quotes if you use them)
-
-----
-### 1.9.6
-##### Minecraft 1.17, 1.17.1
-
-1) Fix [#11](https://github.com/NikitaCartes/EasyAuth/issues/11)
-   - Fix `account unregister <password>` not unregistering account
-   - Fix `auth remove <uuid>` crashing server on it's stopping
-
-----
-### 1.9.5
-##### Minecraft 1.17.1
-
-1) Fix [#8](https://github.com/NikitaCartes/EasyAuth/issues/8)
-   - Add [`teleportationTimeoutInMs`](https://github.com/NikitaCartes/EasyAuth/wiki/Config#experimental-part) setting
-   - Limit number of packets server will send to unauthorized players
-   - Note: this setting is server-wide so maximum rate would be `(1000/teleportationTimeoutInMs)` per seconds for all unauthorised players
-   - Value 0 would effectively disable this setting so players will be teleported after each packet, but you can expect a lot of incoming and outgoing packets (up to 3000 and more).
-
-----
-### 1.9.3
-##### Minecraft 1.17, 1.17.1
-
-1) Server-side translation
-2) Changed implementation of supporting SimpleAuth database
-   - Now there is a [`useSimpleAuthDatabase`](https://github.com/NikitaCartes/EasyAuth/wiki/Config#experimental-part)
-   setting in config
-
-----
-### 1.9.1
-##### Minecraft 1.17.1
-
-1) Rename mod to EasyAuth
-2) Add support fot SimpleAuth database
-
-----
-### 1.9.0
-##### Minecraft 1.17.1
-
-1) Migrate from Architectury
-2) Fix GitHub actions
-
-----
-### 1.8.2
-##### Minecraft 1.17
-
-1) Fix forceOfflineUuid
-
-----
-### 1.8.1
-##### Minecraft 1.17
-
-1) Fix some bugs
-
-----
-### 1.8.0
-##### Minecraft 1.17
-
-1) First 1.17 update
+1) `auth uuid <player>`

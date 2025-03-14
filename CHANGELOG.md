@@ -6,6 +6,12 @@
 5) ToDo: Check how offline player work if they tried connect with taken online account
 6) ToDo: Add default language option
 
+### 3.2.0
+##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
+1) Add player display name field to database structure
+2) Display name is initialized with username by default
+3) This field is stored in database and can be available for use by other plugins through the mod API
+
 ### 3.1.5
 ##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
 1) Fix bug with missing translation key

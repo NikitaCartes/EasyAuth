@@ -39,6 +39,7 @@ public class PlayerListS2CPacketMixin {
         }
         return players;
     }
+    
     /* Check the other, single player arg constructor - overriding the entries field with empty if not allowed */
     @Redirect(
             method = "<init>(Lnet/minecraft/network/packet/s2c/play/PlayerListS2CPacket$Action;Lnet/minecraft/server/network/ServerPlayerEntity;)V",

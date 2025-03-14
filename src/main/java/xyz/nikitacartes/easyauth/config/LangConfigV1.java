@@ -64,6 +64,12 @@ public class LangConfigV1 extends ConfigTemplate {
     public TranslatableText markAsOnline = new TranslatableText("text.easyauth.markAsOnline", "§aPlayer %s was marked as online.");
     public TranslatableText selfMarkAsOnline = new TranslatableText("text.easyauth.selfMarkAsOnline", "§aYou marked yourself as online player. You can rejoin now.");
     public TranslatableText selfMarkAsOnlineWarning = new TranslatableText("text.easyauth.selfMarkAsOnlineWarning", "§6You want to mark yourself as online player.\n§6You will not be able to log in if you don't have an online account.\n§6Data, connected to offline uuid (villagers' discounts, pets) will be lost.\n§aIf you are want to continue, type /account online <password> true.");
+    
+    // Messages for display name feature
+    public TranslatableText enterDisplayName = new TranslatableText("text.easyauth.enterDisplayName", "§6Enter your desired display name!");
+    public TranslatableText invalidDisplayName = new TranslatableText("text.easyauth.invalidDisplayName", "§4Display name must be between 3 and 16 characters!");
+    public TranslatableText displayNameChanged = new TranslatableText("text.easyauth.displayNameChanged", "§aYour display name was updated successfully!");
+    public TranslatableText notLoggedIn = new TranslatableText("text.easyauth.notLoggedIn", "§4You need to be logged in to do this!");
 
     public LangConfigV1() {
         super("translation.conf");
@@ -122,6 +128,12 @@ public class LangConfigV1 extends ConfigTemplate {
         configValues.put("markAsOnline", wrapIfNecessary(markAsOnline));
         configValues.put("selfMarkAsOnline", wrapIfNecessary(selfMarkAsOnline));
         configValues.put("selfMarkAsOnlineWarning", wrapIfNecessary(selfMarkAsOnlineWarning));
+        
+        // Add display name messages
+        configValues.put("enterDisplayName", wrapIfNecessary(enterDisplayName));
+        configValues.put("invalidDisplayName", wrapIfNecessary(invalidDisplayName));
+        configValues.put("displayNameChanged", wrapIfNecessary(displayNameChanged));
+        configValues.put("notLoggedIn", wrapIfNecessary(notLoggedIn));
 
         String configTemplate = Resources.toString(getResource("data/easyauth/config/" + configPath), UTF_8);
         return new StringSubstitutor(configValues).replace(configTemplate);

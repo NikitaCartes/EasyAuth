@@ -7,6 +7,8 @@ import xyz.nikitacartes.easyauth.storage.deprecated.PlayerCacheV0;
 import net.minecraft.util.Uuids;
 
 import javax.annotation.Nullable;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
@@ -103,4 +105,29 @@ public interface DbApi {
 
         return playerEntry;
     }
+
+    /**
+     * Execute a raw SQL update query.
+     * 
+     * @param sql SQL update query to execute
+     * @return Number of affected rows or 0 if query failed
+     * @throws DBApiException if there's an error executing the query
+     */
+    int executeRawUpdate(String sql) throws DBApiException;
+    
+    /**
+     * Get the database connection.
+     * Primarily for use by systems that need to create tables or execute custom queries.
+     * 
+     * @return The database connection
+     * @throws DBApiException if there's an error accessing the connection
+     */
+    Connection getConnection() throws DBApiException;
+    
+    /**
+     * Get the type of database being used.
+     * 
+     * @return String representing database type (e.g., "mysql", "sqlite")
+     */
+    String getDatabaseType();
 }

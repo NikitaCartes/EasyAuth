@@ -1,0 +1,33 @@
+# ====================================
+# EasyAuth Telegram Integration Config
+# ====================================
+
+# Whether Telegram integration is enabled or not
+enabled = ${enabled}
+
+# Telegram bot token obtained from BotFather
+bot-token = ${botToken}
+
+# Database settings
+database {
+  # Name of the table in the database
+  table-name = ${databaseTableName}
+}
+
+# Code settings
+code {
+  # Length of the verification code
+  length = ${codeLength}
+  
+  # How long verification codes are valid for (in minutes)
+  expiration-minutes = ${codeExpirationMinutes}
+  
+  # Maximum number of link attempts per day
+  max-daily-attempts = ${maxDailyAttempts}
+}
+
+# Security settings
+security {
+  # How long to wait before resetting link attempts (in hours)
+  link-cooldown-hours = ${cooldownHours}
+} 

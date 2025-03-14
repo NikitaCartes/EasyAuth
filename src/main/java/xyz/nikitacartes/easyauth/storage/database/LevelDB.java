@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.HashMap;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
@@ -101,6 +102,21 @@ public class LevelDB implements DbApi {
 
     @Override
     public void migrateFromV1(HashMap<String, String> userCache) {
-        throw new UnsupportedOperationException("LevelDB is not supported anymore");
+        // LevelDB does not need any migration from v1
+    }
+    
+    @Override
+    public int executeRawUpdate(String sql) throws DBApiException {
+        throw new DBApiException("LevelDB does not support SQL queries", null);
+    }
+    
+    @Override
+    public Connection getConnection() throws DBApiException {
+        throw new DBApiException("LevelDB does not provide SQL connections", null);
+    }
+    
+    @Override
+    public String getDatabaseType() {
+        return "leveldb";
     }
 }

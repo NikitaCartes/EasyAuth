@@ -1,11 +1,13 @@
 package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
@@ -44,14 +46,10 @@ public class LoginCommand {
 
     // Method called for checking the password
     private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
-        // Getting the player who send the command
         ServerPlayerEntity player = source.getPlayerOrThrow();
         PlayerAuth playerAuth = (PlayerAuth) player;
-
-        String username = player.getNameForScoreboard();
-        LogDebug("Player " + player.getNameForScoreboard() + "{" + username + "} is trying to login");
+        
         if (playerAuth.easyAuth$isAuthenticated()) {
-            LogDebug("Player " + player.getNameForScoreboard() + "{" + username + "} is already authenticated");
             langConfig.alreadyAuthenticated.send(source);
             return 0;
         }
@@ -73,34 +71,86 @@ public class LoginCommand {
             playerData.loginTries = 0;
             playerData.lastIp = playerAuth.easyAuth$getIpAddress();
             playerData.update();
+            
+            // Отправляем уведомление в Telegram
+            final String username = player.getNameForScoreboard();
+            if (telegramManager != null && telegramManager.isEnabled() && telegramConfig.notifications.enableLoginNotifications) {
+                String ip = playerAuth.easyAuth$getIpAddress();
+                String message = String.format("🔐 Выполнен вход в аккаунт!\n\nИмя игрока: %s\nIP-адрес: %s\nВремя: %s", 
+                        username, ip, ZonedDateTime.now().toString());
+                
+                // Отправляем асинхронно
+                THREADPOOL.execute(() -> {
+                    boolean sent = telegramManager.sendNotification(username, message);
+                    if (sent) {
+                        LogDebug("Sent Telegram login notification to user: " + username);
+                    }
+                });
+            }
+            
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
             return 0;
         } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
             LogDebug("Player " + player.getNameForScoreboard() + " is not registered");
-            if (config.singleUseGlobalPassword) {
-                langConfig.registerRequiredWithGlobalPassword.send(source);
-                return 0;
-            }
             langConfig.registerRequired.send(source);
             return 0;
-        }
-        playerData.loginTries++;
-        if (playerData.loginTries >= config.maxLoginTries && config.maxLoginTries != -1) { // Player exceeded maxLoginTries
-            LogDebug("Player " + player.getNameForScoreboard() + " exceeded max login tries");
-            // Send the player a different error message if the max login tries is 1.
-            playerData.lastKickedDate = ZonedDateTime.now();
-            playerData.loginTries = 0;
-            playerData.update();
-            if (config.maxLoginTries == 1) {
-                player.networkHandler.disconnect(langConfig.wrongPassword.get());
-            } else {
+        } else {
+            LogDebug("Player " + player.getNameForScoreboard() + " provided wrong password");
+
+            playerData.loginTries++;
+            if (playerData.loginTries > config.maxLoginTries) {
+                LogDebug("Player " + player.getNameForScoreboard() + " failed during authentication too many times");
+                langConfig.loginTriesExceeded.send(source);
+                playerData.lastKickedDate = ZonedDateTime.now();
+                playerData.update();
+                
+                // Отправляем уведомление в Telegram о превышении лимита попыток входа
+                final String playerName = player.getNameForScoreboard();
+                if (telegramManager != null && telegramManager.isEnabled() && telegramConfig.notifications.enableFailedLoginNotifications) {
+                    String ip = playerAuth.easyAuth$getIpAddress();
+                    String message = String.format("⚠️ Превышен лимит попыток входа!\n\nИмя игрока: %s\nIP-адрес: %s\nВремя: %s\nКоличество попыток: %d", 
+                            playerName, ip, ZonedDateTime.now().toString(), playerData.loginTries);
+                    
+                    // Отправляем асинхронно
+                    THREADPOOL.execute(() -> {
+                        boolean sent = telegramManager.sendNotification(playerName, message);
+                        if (sent) {
+                            LogDebug("Sent Telegram login attempt limit notification to user: " + playerName);
+                        }
+                    });
+                }
+                
                 player.networkHandler.disconnect(langConfig.loginTriesExceeded.get());
+                return 0;
             }
+
+            langConfig.wrongPassword.send(source);
+            
+            // Отправляем уведомление в Telegram о неудачной попытке входа
+            boolean shouldNotify = telegramConfig.notifications.notifyOnlyOnSuspiciousAttempts
+                ? playerData.loginTries >= config.maxLoginTries - 1
+                : true;
+                
+            if (telegramManager != null && telegramManager.isEnabled() 
+                    && telegramConfig.notifications.enableFailedLoginNotifications 
+                    && shouldNotify) {
+                // Отправляем уведомление в соответствии с настройками
+                final String playerName = player.getNameForScoreboard();
+                String ip = playerAuth.easyAuth$getIpAddress();
+                String message = String.format("⚠️ Неудачная попытка входа!\n\nИмя игрока: %s\nIP-адрес: %s\nВремя: %s\nПопытка: %d из %d", 
+                        playerName, ip, ZonedDateTime.now().toString(), playerData.loginTries, config.maxLoginTries);
+                
+                // Отправляем асинхронно
+                THREADPOOL.execute(() -> {
+                    boolean sent = telegramManager.sendNotification(playerName, message);
+                    if (sent) {
+                        LogDebug("Sent Telegram failed login notification to user: " + playerName);
+                    }
+                });
+            }
+            
+            playerData.update();
             return 0;
         }
-        LogDebug("Player " + player.getNameForScoreboard() + " provided wrong password");
-        // Sending wrong pass message
-        langConfig.wrongPassword.send(source);
-        return 0;
     }
 }

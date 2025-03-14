@@ -19,6 +19,9 @@ import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.PlayersCache;
+import xyz.nikitacartes.easyauth.telegram.TelegramManager;
+import xyz.nikitacartes.easyauth.config.TelegramConfigV1;
+import xyz.nikitacartes.easyauth.EasyAuth;
 
 import java.net.SocketAddress;
 import java.time.ZonedDateTime;
@@ -136,9 +139,43 @@ public class AuthEventHandler {
 
         if (playerAuth.easyAuth$canSkipAuth()) {
             langConfig.onlinePlayerLogin.send(player);
+            
+            // Отправляем уведомление в Telegram для онлайн-игроков
+            if (EasyAuth.telegramManager != null && EasyAuth.telegramManager.isEnabled() && EasyAuth.telegramConfig.notifications.enableLoginNotifications) {
+                final String username = player.getNameForScoreboard();
+                String ip = playerAuth.easyAuth$getIpAddress();
+                String message = String.format("🔐 Вход онлайн-игрока!\n\nИмя игрока: %s\nIP-адрес: %s\nВремя: %s", 
+                        username, ip, ZonedDateTime.now().toString());
+                
+                // Отправляем асинхронно
+                THREADPOOL.execute(() -> {
+                    boolean sent = EasyAuth.telegramManager.sendNotification(username, message);
+                    if (sent) {
+                        LogDebug("Sent Telegram online player login notification to user: " + username);
+                    }
+                });
+            }
+            
             return;
         } else if (playerAuth.easyAuth$isAuthenticated()) {
             langConfig.validSession.send(player);
+            
+            // Отправляем уведомление в Telegram для игроков с действительной сессией
+            if (EasyAuth.telegramManager != null && EasyAuth.telegramManager.isEnabled() && EasyAuth.telegramConfig.notifications.enableLoginNotifications) {
+                final String username = player.getNameForScoreboard();
+                String ip = playerAuth.easyAuth$getIpAddress();
+                String message = String.format("🔐 Вход с действительной сессией!\n\nИмя игрока: %s\nIP-адрес: %s\nВремя: %s", 
+                        username, ip, ZonedDateTime.now().toString());
+                
+                // Отправляем асинхронно
+                THREADPOOL.execute(() -> {
+                    boolean sent = EasyAuth.telegramManager.sendNotification(username, message);
+                    if (sent) {
+                        LogDebug("Sent Telegram valid session login notification to user: " + username);
+                    }
+                });
+            }
+            
             return;
         } else if (extendedConfig.skipAllAuthChecks) {
             return;

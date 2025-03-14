@@ -11,6 +11,7 @@ import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.sql.Connection;
 import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -151,6 +152,21 @@ public class MongoDB implements DbApi {
             }
         });
         if (!writeList.isEmpty()) collection.bulkWrite(writeList);
+    }
+
+    @Override
+    public int executeRawUpdate(String sql) throws DBApiException {
+        throw new DBApiException("MongoDB does not support SQL queries", null);
+    }
+    
+    @Override
+    public Connection getConnection() throws DBApiException {
+        throw new DBApiException("MongoDB does not provide SQL connections", null);
+    }
+    
+    @Override
+    public String getDatabaseType() {
+        return "mongodb";
     }
 
 }

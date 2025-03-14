@@ -13,10 +13,13 @@ import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.database.*;
+import xyz.nikitacartes.easyauth.telegram.TelegramCommands;
+import xyz.nikitacartes.easyauth.telegram.TelegramManager;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -45,6 +48,8 @@ public class EasyAuth implements ModInitializer {
     public static LangConfigV1 langConfig;
     public static TechnicalConfigV1 technicalConfig;
     public static StorageConfigV1 storageConfig;
+    public static TelegramConfigV1 telegramConfig;
+    public static TelegramManager telegramManager;
 
     @Override
     public void onInitialize() {
@@ -91,6 +96,7 @@ public class EasyAuth implements ModInitializer {
             LogoutCommand.registerCommand(dispatcher);
             AuthCommand.registerCommand(dispatcher);
             AccountCommand.registerCommand(dispatcher);
+            TelegramCommands.registerCommand(dispatcher);
         });
 
         // From Fabric API
@@ -106,6 +112,29 @@ public class EasyAuth implements ModInitializer {
         Identifier earlyPhase = Identifier.of("easyauth", "early");
         ServerLoginConnectionEvents.QUERY_START.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
         ServerLoginConnectionEvents.QUERY_START.register(earlyPhase, AuthEventHandler::onPreLogin);
+
+        // Initialize Telegram integration
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            if (telegramConfig.enabled) {
+                // Проверяем, существует ли файл базы данных
+                Path dbPath = gameDirectory.resolve("config/EasyAuth/database.db");
+                if (!Files.exists(dbPath)) {
+                    LogWarn("Database file not found at: " + dbPath);
+                    LogWarn("Make sure EasyAuth is properly configured and database is initialized");
+                    LogWarn("Telegram integration might not work correctly");
+                }
+
+                telegramManager = new TelegramManager(telegramConfig, DB);
+                LogInfo("Telegram integration initialized");
+            }
+        });
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            if (telegramManager != null) {
+                telegramManager.close();
+                LogInfo("Telegram integration stopped");
+            }
+        });
     }
 
     private void onStartServer(MinecraftServer server) {
@@ -153,6 +182,9 @@ public class EasyAuth implements ModInitializer {
                 EasyAuth.storageConfig = StorageConfigV1.load();
                 EasyAuth.storageConfig.save();
 
+                EasyAuth.telegramConfig = TelegramConfigV1.load();
+                EasyAuth.telegramConfig.save();
+
                 break;
             }
             case 1: {
@@ -161,6 +193,7 @@ public class EasyAuth implements ModInitializer {
                 EasyAuth.langConfig = LangConfigV1.load();
                 EasyAuth.extendedConfig = ExtendedConfigV1.load();
                 EasyAuth.storageConfig = StorageConfigV1.load();
+                EasyAuth.telegramConfig = TelegramConfigV1.load();
                 migrateFromV1();
                 break;
             }
@@ -170,6 +203,7 @@ public class EasyAuth implements ModInitializer {
                 EasyAuth.langConfig = LangConfigV1.load();
                 EasyAuth.extendedConfig = ExtendedConfigV1.load();
                 EasyAuth.storageConfig = StorageConfigV1.load();
+                EasyAuth.telegramConfig = TelegramConfigV1.load();
                 break;
             }
             default: {
@@ -179,6 +213,7 @@ public class EasyAuth implements ModInitializer {
                 EasyAuth.langConfig = LangConfigV1.load();
                 EasyAuth.extendedConfig = ExtendedConfigV1.load();
                 EasyAuth.storageConfig = StorageConfigV1.load();
+                EasyAuth.telegramConfig = TelegramConfigV1.load();
                 break;
             }
         }
@@ -191,6 +226,7 @@ public class EasyAuth implements ModInitializer {
         EasyAuth.langConfig.save();
         EasyAuth.extendedConfig.save();
         EasyAuth.storageConfig.save();
+        EasyAuth.telegramConfig.save();
     }
 
     public static ZonedDateTime getUnixZero() {

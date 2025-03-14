@@ -230,4 +230,38 @@ public class SQLite implements DbApi {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public int executeRawUpdate(String sql) throws DBApiException {
+        try {
+            if (connection == null || connection.isClosed()) {
+                connect();
+            }
+            
+            try (Statement statement = connection.createStatement()) {
+                return statement.executeUpdate(sql);
+            }
+        } catch (SQLException e) {
+            LogError("Error executing raw SQL update", e);
+            throw new DBApiException("Error executing raw SQL update", e);
+        }
+    }
+    
+    @Override
+    public Connection getConnection() throws DBApiException {
+        try {
+            if (connection == null || connection.isClosed()) {
+                connect();
+            }
+            return connection;
+        } catch (SQLException e) {
+            LogError("Error getting database connection", e);
+            throw new DBApiException("Error getting database connection", e);
+        }
+    }
+    
+    @Override
+    public String getDatabaseType() {
+        return "sqlite";
+    }
 }

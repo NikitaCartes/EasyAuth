@@ -96,6 +96,7 @@ public class MySQL implements DbApi {
     /**
      * Closes database connection.
      */
+    @Override
     public void close() {
         try {
             if (MySQLConnection != null) {
@@ -115,10 +116,44 @@ public class MySQL implements DbApi {
      *
      * @return false if connection is open, otherwise false
      */
+    @Override
     public boolean isClosed() {
         return MySQLConnection == null;
     }
 
+    @Override
+    public int executeRawUpdate(String sql) throws DBApiException {
+        try {
+            if (MySQLConnection == null || MySQLConnection.isClosed()) {
+                connect();
+            }
+            
+            try (Statement statement = MySQLConnection.createStatement()) {
+                return statement.executeUpdate(sql);
+            }
+        } catch (SQLException e) {
+            LogError("Error executing raw SQL update", e);
+            throw new DBApiException("Error executing raw SQL update", e);
+        }
+    }
+    
+    @Override
+    public Connection getConnection() throws DBApiException {
+        try {
+            if (MySQLConnection == null || MySQLConnection.isClosed()) {
+                connect();
+            }
+            return MySQLConnection;
+        } catch (SQLException e) {
+            LogError("Error getting database connection", e);
+            throw new DBApiException("Error getting database connection", e);
+        }
+    }
+    
+    @Override
+    public String getDatabaseType() {
+        return "mysql";
+    }
 
     /**
      * Inserts the data for the player.

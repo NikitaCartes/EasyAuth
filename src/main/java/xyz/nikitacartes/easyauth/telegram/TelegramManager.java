@@ -4,19 +4,15 @@ import xyz.nikitacartes.easyauth.config.TelegramConfigV1;
 import xyz.nikitacartes.easyauth.storage.TelegramLinkV1;
 import xyz.nikitacartes.easyauth.storage.database.DbApi;
 import xyz.nikitacartes.easyauth.storage.database.DBApiException;
-import xyz.nikitacartes.easyauth.utils.EasyLogger;
 
 import java.security.SecureRandom;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
-import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
 import static xyz.nikitacartes.easyauth.EasyAuth.getUnixZero;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;

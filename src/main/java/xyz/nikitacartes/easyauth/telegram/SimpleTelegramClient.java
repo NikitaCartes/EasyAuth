@@ -7,6 +7,8 @@ import xyz.nikitacartes.easyauth.config.TelegramConfigV1;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
@@ -252,30 +254,36 @@ public class SimpleTelegramClient {
      * @throws IOException если произошла ошибка при выполнении запроса
      */
     private JsonNode makeRequest(String method, String endpoint, String jsonBody) throws IOException {
-        URL url = new URL(apiUrl + endpoint);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod(method);
-        
-        if ("POST".equals(method) && jsonBody != null) {
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/json");
-            
-            try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            }
-        }
-        
         try {
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                return mapper.readTree(connection.getInputStream());
-            } else {
-                LogError("HTTP error: " + responseCode);
-                return mapper.createObjectNode();
+            URI uri = new URI(apiUrl + endpoint);
+            URL url = uri.toURL();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod(method);
+            
+            if ("POST".equals(method) && jsonBody != null) {
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json");
+                
+                try (OutputStream os = connection.getOutputStream()) {
+                    byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
             }
-        } finally {
-            connection.disconnect();
+            
+            try {
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    return mapper.readTree(connection.getInputStream());
+                } else {
+                    LogError("HTTP error: " + responseCode);
+                    return mapper.createObjectNode();
+                }
+            } finally {
+                connection.disconnect();
+            }
+        } catch (URISyntaxException e) {
+            LogError("Invalid URI: " + apiUrl + endpoint, e);
+            return mapper.createObjectNode();
         }
     }
     

@@ -71,4 +71,17 @@ public class TelegramBotManager {
         
         return client.sendMessage(telegramId, text);
     }
+    
+    /**
+     * Gets the username of the Telegram bot
+     * 
+     * @return The username of the bot or "EasyAuthBot" if the bot is not started
+     */
+    public String getBotUsername() {
+        if (client == null) {
+            return "EasyAuthBot";
+        }
+        
+        return client.getBotUsername();
+    }
 } 

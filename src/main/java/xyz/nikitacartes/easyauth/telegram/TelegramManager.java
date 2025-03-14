@@ -521,4 +521,17 @@ public class TelegramManager {
     public boolean isEnabled() {
         return config.enabled;
     }
+    
+    /**
+     * Get the Telegram bot's username
+     * 
+     * @return The bot's username or "EasyAuthBot" if not available
+     */
+    public String getBotUsername() {
+        if (!config.enabled || botManager == null) {
+            return "EasyAuthBot";
+        }
+        
+        return botManager.getBotUsername();
+    }
 } 

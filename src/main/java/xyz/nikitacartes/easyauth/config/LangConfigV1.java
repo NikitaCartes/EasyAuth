@@ -71,7 +71,8 @@ public class LangConfigV1 extends ConfigTemplate {
     
     // Telegram integration messages
     public TranslatableText telegramDisabled = new TranslatableText("text.easyauth.telegramDisabled", "§cTelegram integration is disabled.");
-    public TranslatableText telegramLinkCodeGenerated = new TranslatableText("text.easyauth.telegramLinkCodeGenerated", "§a🔗 Your link code: §e%s§a\n§7Send this code to the Telegram bot to link your account.");
+    public TranslatableText telegramLinkCodeGenerated = new TranslatableText("text.easyauth.telegramLinkCodeGenerated", "§a🔗 Your link code: §e%s§a\n§7§n[Click to copy]§r §7Send this code to the Telegram bot to link your account.");
+    public TranslatableText telegramBotLink = new TranslatableText("text.easyauth.telegramBotLink", "§a🤖 Telegram bot: §e%s§a\n§7§n[Click to open]§r §7Open the link to connect with the bot.");
     public TranslatableText telegramAlreadyLinked = new TranslatableText("text.easyauth.telegramAlreadyLinked", "§cYour account is already linked to Telegram.");
     public TranslatableText telegramNotLinked = new TranslatableText("text.easyauth.telegramNotLinked", "§cYour account is not linked to Telegram.");
     public TranslatableText telegramUnlinkSuccess = new TranslatableText("text.easyauth.telegramUnlinkSuccess", "§aYour account was successfully unlinked from Telegram.");
@@ -145,6 +146,7 @@ public class LangConfigV1 extends ConfigTemplate {
         // Telegram integration messages
         configValues.put("telegramDisabled", wrapIfNecessary(telegramDisabled));
         configValues.put("telegramLinkCodeGenerated", wrapIfNecessary(telegramLinkCodeGenerated));
+        configValues.put("telegramBotLink", wrapIfNecessary(telegramBotLink));
         configValues.put("telegramAlreadyLinked", wrapIfNecessary(telegramAlreadyLinked));
         configValues.put("telegramNotLinked", wrapIfNecessary(telegramNotLinked));
         configValues.put("telegramUnlinkSuccess", wrapIfNecessary(telegramUnlinkSuccess));

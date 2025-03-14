@@ -64,6 +64,21 @@ public class LangConfigV1 extends ConfigTemplate {
     public TranslatableText markAsOnline = new TranslatableText("text.easyauth.markAsOnline", "§aPlayer %s was marked as online.");
     public TranslatableText selfMarkAsOnline = new TranslatableText("text.easyauth.selfMarkAsOnline", "§aYou marked yourself as online player. You can rejoin now.");
     public TranslatableText selfMarkAsOnlineWarning = new TranslatableText("text.easyauth.selfMarkAsOnlineWarning", "§6You want to mark yourself as online player.\n§6You will not be able to log in if you don't have an online account.\n§6Data, connected to offline uuid (villagers' discounts, pets) will be lost.\n§aIf you are want to continue, type /account online <password> true.");
+    public TranslatableText enterDisplayName = new TranslatableText("text.easyauth.enterDisplayName", "§6Enter your desired display name!");
+    public TranslatableText invalidDisplayName = new TranslatableText("text.easyauth.invalidDisplayName", "§4Display name must be between 3 and 16 characters!");
+    public TranslatableText displayNameChanged = new TranslatableText("text.easyauth.displayNameChanged", "§aYour display name was updated successfully!");
+    public TranslatableText notLoggedIn = new TranslatableText("text.easyauth.notLoggedIn", "§4You need to be logged in to do this!");
+    
+    // Telegram integration messages
+    public TranslatableText telegramDisabled = new TranslatableText("text.easyauth.telegramDisabled", "§cTelegram integration is disabled.");
+    public TranslatableText telegramLinkCodeGenerated = new TranslatableText("text.easyauth.telegramLinkCodeGenerated", "§a🔗 Your link code: §e%s§a\n§7§n[Click to copy]§r §7Send this code to the Telegram bot to link your account.");
+    public TranslatableText telegramBotLink = new TranslatableText("text.easyauth.telegramBotLink", "§a🤖 Telegram bot: §e%s§a\n§7§n[Click to open]§r §7Open the link to connect with the bot.");
+    public TranslatableText telegramAlreadyLinked = new TranslatableText("text.easyauth.telegramAlreadyLinked", "§cYour account is already linked to Telegram.");
+    public TranslatableText telegramNotLinked = new TranslatableText("text.easyauth.telegramNotLinked", "§cYour account is not linked to Telegram.");
+    public TranslatableText telegramUnlinkSuccess = new TranslatableText("text.easyauth.telegramUnlinkSuccess", "§aYour account was successfully unlinked from Telegram.");
+    public TranslatableText telegramStatusLinked = new TranslatableText("text.easyauth.telegramStatusLinked", "§aYour account is linked to Telegram.");
+    public TranslatableText telegramStatusNotLinked = new TranslatableText("text.easyauth.telegramStatusNotLinked", "§cYour account is not linked to Telegram. Use /telegram link to link your account.");
+    public TranslatableText telegramTooManyAttempts = new TranslatableText("text.easyauth.telegramTooManyAttempts", "§cToo many link attempts. Please try again later.");
 
     public LangConfigV1() {
         super("translation.conf");
@@ -78,8 +93,9 @@ public class LangConfigV1 extends ConfigTemplate {
         return config;
     }
 
+    @Override
     protected String handleTemplate() throws IOException {
-        Map<String, Object> configValues = new HashMap<>();
+        Map<String, String> configValues = new HashMap<>();
         configValues.put("enableServerSideTranslation", wrapIfNecessary(enableServerSideTranslation));
         configValues.put("enterPassword", wrapIfNecessary(enterPassword));
         configValues.put("enterNewPassword", wrapIfNecessary(enterNewPassword));
@@ -122,9 +138,24 @@ public class LangConfigV1 extends ConfigTemplate {
         configValues.put("markAsOnline", wrapIfNecessary(markAsOnline));
         configValues.put("selfMarkAsOnline", wrapIfNecessary(selfMarkAsOnline));
         configValues.put("selfMarkAsOnlineWarning", wrapIfNecessary(selfMarkAsOnlineWarning));
+        configValues.put("enterDisplayName", wrapIfNecessary(enterDisplayName));
+        configValues.put("invalidDisplayName", wrapIfNecessary(invalidDisplayName));
+        configValues.put("displayNameChanged", wrapIfNecessary(displayNameChanged));
+        configValues.put("notLoggedIn", wrapIfNecessary(notLoggedIn));
+        
+        // Telegram integration messages
+        configValues.put("telegramDisabled", wrapIfNecessary(telegramDisabled));
+        configValues.put("telegramLinkCodeGenerated", wrapIfNecessary(telegramLinkCodeGenerated));
+        configValues.put("telegramBotLink", wrapIfNecessary(telegramBotLink));
+        configValues.put("telegramAlreadyLinked", wrapIfNecessary(telegramAlreadyLinked));
+        configValues.put("telegramNotLinked", wrapIfNecessary(telegramNotLinked));
+        configValues.put("telegramUnlinkSuccess", wrapIfNecessary(telegramUnlinkSuccess));
+        configValues.put("telegramStatusLinked", wrapIfNecessary(telegramStatusLinked));
+        configValues.put("telegramStatusNotLinked", wrapIfNecessary(telegramStatusNotLinked));
+        configValues.put("telegramTooManyAttempts", wrapIfNecessary(telegramTooManyAttempts));
 
-        String configTemplate = Resources.toString(getResource("data/easyauth/config/" + configPath), UTF_8);
-        return new StringSubstitutor(configValues).replace(configTemplate);
+        StringSubstitutor substitutor = new StringSubstitutor(configValues);
+        return substitutor.replace(Resources.toString(getResource("data/easyauth/config/translation.conf.template"), UTF_8));
     }
 
     public static final class TranslatableText {

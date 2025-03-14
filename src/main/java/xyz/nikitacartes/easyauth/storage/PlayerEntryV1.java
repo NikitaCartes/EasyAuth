@@ -21,8 +21,27 @@ public class PlayerEntryV1 {
             .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
             .create();
 
+    /**
+     * Default username of the player (case-sensitive).
+     */
+    @Expose
+    @SerializedName("username")
     public String username;
+    
+    /**
+     * Lowercase version of the username for case-insensitive operations.
+     */
+    @Expose
+    @SerializedName("username_lowercase")
     public String usernameLowerCase;
+    
+    /**
+     * Display name of the player that can be customized.
+     */
+    @Expose
+    @SerializedName("display_name")
+    public String displayName = "";
+    
     public UUID uuid = null;
 
     /**
@@ -90,6 +109,9 @@ public class PlayerEntryV1 {
         this.username = username;
         this.usernameLowerCase = usernameLowerCase;
         this.uuid = uuid == null ? null : UUID.fromString(uuid);
+        
+        // Initialize display name with username if not present
+        this.displayName = entry.displayName == null || entry.displayName.isEmpty() ? username : entry.displayName;
 
         this.password = entry.password == null ? "" : entry.password;
         this.lastIp = entry.lastIp == null ? "" : entry.lastIp;
@@ -104,10 +126,11 @@ public class PlayerEntryV1 {
     public PlayerEntryV1(String username) {
         this.username = username;
         this.usernameLowerCase = username.toLowerCase(Locale.ENGLISH);
+        this.displayName = username; // Initialize display name with username
     }
 
     public PlayerEntryV1(String username, UUID uuid) {
-        new PlayerEntryV1(username);
+        this(username);
         this.uuid = uuid;
     }
 

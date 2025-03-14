@@ -4,8 +4,11 @@ import org.jetbrains.annotations.NotNull;
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.storage.deprecated.PlayerCacheV0;
+import net.minecraft.util.Uuids;
 
 import javax.annotation.Nullable;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
@@ -86,9 +89,10 @@ public interface DbApi {
 
     default PlayerEntryV1 migrateFromV1(String data, String username) {
         String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
+        String uuid = Uuids.getOfflinePlayerUuid(lowerCaseUsername).toString();
 
         PlayerCacheV0 playerCache = PlayerCacheV0.fromJson(data);
-        PlayerEntryV1 playerEntry = new PlayerEntryV1(username, lowerCaseUsername, null, data);
+        PlayerEntryV1 playerEntry = new PlayerEntryV1(username, lowerCaseUsername, uuid, data);
 
         ZoneOffset localOffset = ZonedDateTime.now().getOffset();
         playerEntry.lastAuthenticatedDate = LocalDateTime.ofEpochSecond(playerCache.validUntil/1000 - EasyAuth.config.sessionTimeout, 0, localOffset).atZone(localOffset);
@@ -101,4 +105,29 @@ public interface DbApi {
 
         return playerEntry;
     }
+
+    /**
+     * Execute a raw SQL update query.
+     * 
+     * @param sql SQL update query to execute
+     * @return Number of affected rows or 0 if query failed
+     * @throws DBApiException if there's an error executing the query
+     */
+    int executeRawUpdate(String sql) throws DBApiException;
+    
+    /**
+     * Get the database connection.
+     * Primarily for use by systems that need to create tables or execute custom queries.
+     * 
+     * @return The database connection
+     * @throws DBApiException if there's an error accessing the connection
+     */
+    Connection getConnection() throws DBApiException;
+    
+    /**
+     * Get the type of database being used.
+     * 
+     * @return String representing database type (e.g., "mysql", "sqlite")
+     */
+    String getDatabaseType();
 }

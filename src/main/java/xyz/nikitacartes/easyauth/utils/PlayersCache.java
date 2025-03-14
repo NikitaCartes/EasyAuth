@@ -1,6 +1,7 @@
 package xyz.nikitacartes.easyauth.utils;
 
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
+import net.minecraft.util.Uuids;
 
 import java.util.HashMap;
 
@@ -31,6 +32,7 @@ public class PlayersCache {    // PlayersCache for player data
         PlayerEntryV1 playerEntryV1 = DB.getUserData(username);
         if (playerEntryV1 == null) {
             playerEntryV1 = new PlayerEntryV1(username);
+            playerEntryV1.uuid = Uuids.getOfflinePlayerUuid(username);
             if (config.offlineByDefault) {
                 playerEntryV1.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
             }

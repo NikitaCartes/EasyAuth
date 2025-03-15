@@ -7,7 +7,7 @@
     "PlayerAdvancementTrackerMixin",
     "PlayerListS2CPacketMixin",
     "PlayerManagerMixin",
-    "PlayerSaveHandlerMixin",
+    "WorldSaveHandlerMixin",
     "ServerLoginNetworkHandlerMixin",
     "ServerPlayerEntity$1Mixin",
     "ServerPlayerEntityMixin",

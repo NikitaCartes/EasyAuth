@@ -331,7 +331,7 @@ public class AuthCommand {
                     }
                     i.getAndIncrement();
                     message.append(Text.translatable(username)
-                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(username)))
+                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, username)))
                             .formatted(Formatting.YELLOW))
                             .append(", ");
                 });

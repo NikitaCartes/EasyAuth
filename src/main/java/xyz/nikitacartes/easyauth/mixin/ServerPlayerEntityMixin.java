@@ -30,6 +30,7 @@ import xyz.nikitacartes.easyauth.utils.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -123,7 +124,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
 
         if (rootVehicle != null) {
             LogDebug(String.format("Mounting player to vehicle %s", rootVehicle));
-            player.readRootVehicle(rootVehicle);
+            player.readRootVehicle(Optional.of(rootVehicle));
         }
 
         if (player.getVehicle() == null && ridingEntityUUID != null) {

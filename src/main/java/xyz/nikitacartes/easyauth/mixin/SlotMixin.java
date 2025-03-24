@@ -25,8 +25,8 @@ public abstract class SlotMixin {
                     new ScreenHandlerSlotUpdateS2CPacket(
                             -2,
                             0,
-                            player.getInventory().getSelectedSlot(),
-                            player.getInventory().getStack(player.getInventory().getSelectedSlot()))
+                            player.getInventory().selectedSlot,
+                            player.getInventory().getStack(player.getInventory().selectedSlot))
             );
             cir.setReturnValue(false);
         }

@@ -16,13 +16,13 @@ public class ServerPlayerEntity$1Mixin {
 
     @Final
     @Shadow
-    ServerPlayerEntity field_58075;
+    ServerPlayerEntity field_29182;
 
-    @Inject(method = "updateState(Lnet/minecraft/screen/ScreenHandler;Ljava/util/List;Lnet/minecraft/item/ItemStack;[I)V",
+    @Inject(method = "updateState(Lnet/minecraft/screen/ScreenHandler;Lnet/minecraft/util/collection/DefaultedList;Lnet/minecraft/item/ItemStack;[I)V",
             at = @At("HEAD"),
             cancellable = true)
     private void updateStateMixin(CallbackInfo ci) {
-        if (extendedConfig.hideInventory && !((PlayerAuth) field_58075).easyAuth$isAuthenticated()) {
+        if (extendedConfig.hideInventory && !((PlayerAuth) field_29182).easyAuth$isAuthenticated()) {
             ci.cancel();
         }
     }

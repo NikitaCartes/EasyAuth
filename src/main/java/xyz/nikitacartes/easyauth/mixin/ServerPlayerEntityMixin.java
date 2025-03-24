@@ -29,6 +29,7 @@ import xyz.nikitacartes.easyauth.utils.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -127,7 +128,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
         if (rootVehicle != null) {
             LogDebug(String.format("Mounting player to vehicle %s", rootVehicle));
             leavingServer = true;
-            player.readRootVehicle(rootVehicle);
+            player.readRootVehicle(Optional.of(rootVehicle));
             leavingServer = false;
         }
 
@@ -261,7 +262,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
         }
     }
 
-    @Redirect(method = "readRootVehicle(Lnet/minecraft/nbt/NbtCompound;)V",
+    @Redirect(method = "readRootVehicle(Ljava/util/Optional;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;startRiding(Lnet/minecraft/entity/Entity;Z)Z"))
     private boolean onPlayerConnectStartRiding(ServerPlayerEntity instance, Entity entity, boolean force) {
         if (!leavingServer && config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {
@@ -270,7 +271,7 @@ public abstract class ServerPlayerEntityMixin implements PlayerAuth {
         return instance.startRiding(entity, force);
     }
 
-    @Redirect(method = "readRootVehicle(Lnet/minecraft/nbt/NbtCompound;)V",
+    @Redirect(method = "readRootVehicle(Ljava/util/Optional;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;hasVehicle()Z"))
     private boolean onPlayerConnectStartRiding(ServerPlayerEntity instance) {
         if (!leavingServer && config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {

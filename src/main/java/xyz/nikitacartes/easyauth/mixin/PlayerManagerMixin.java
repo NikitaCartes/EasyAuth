@@ -70,16 +70,18 @@ public abstract class PlayerManagerMixin {
         if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
             ((PlayerAuth) player).easyAuth$saveTrueLocation();
 
-            playerManager.loadPlayerData(player).flatMap(compound -> compound.getCompound("RootVehicle")).ifPresent(rootVehicle -> {
+            Optional<NbtCompound> nbtCompound = playerManager.loadPlayerData(player);
+            if(nbtCompound.isPresent() && nbtCompound.get().contains("RootVehicle", 10)) {
+                NbtCompound rootVehicle = nbtCompound.get().getCompound("RootVehicle");
                 NbtCompound rootRootVehicle = new NbtCompound();
                 rootRootVehicle.put("RootVehicle", rootVehicle);
                 ((PlayerAuth) player).easyAuth$setRootVehicle(rootRootVehicle);
 
-                rootVehicle.get("Attach", Uuids.INT_STREAM_CODEC).ifPresent(uUID -> {
-                    ((PlayerAuth) player).easyAuth$setRidingEntityUUID(uUID);
-                    LogDebug(String.format("Saving vehicle of player %s as %s", player.getNameForScoreboard(), uUID));
-                });
-            });
+                if (rootVehicle.containsUuid("Attach")) {
+                    ((PlayerAuth) player).easyAuth$setRidingEntityUUID(rootVehicle.getUuid("Attach"));
+                    LogDebug(String.format("Saving vehicle of player %s as %s", player.getNameForScoreboard(), rootVehicle.getUuid("Attach")));
+                }
+            }
 
             LogDebug(String.format("Teleporting player %s", player.getNameForScoreboard()));
             LogDebug(String.format("Spawn position of player %s is %s", player.getNameForScoreboard(), config.worldSpawn));

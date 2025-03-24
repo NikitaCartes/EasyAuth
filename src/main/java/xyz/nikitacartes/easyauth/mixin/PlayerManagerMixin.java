@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.File;
 import java.net.SocketAddress;
+import java.util.Optional;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -71,16 +72,18 @@ public abstract class PlayerManagerMixin {
         if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
             ((PlayerAuth) player).easyAuth$saveTrueLocation();
 
-            playerManager.loadPlayerData(player).flatMap(compound -> compound.getCompound("RootVehicle")).ifPresent(rootVehicle -> {
+            Optional<NbtCompound> nbtCompound = playerManager.loadPlayerData(player);
+            if(nbtCompound.isPresent() && nbtCompound.get().contains("RootVehicle", 10)) {
+                NbtCompound rootVehicle = nbtCompound.get().getCompound("RootVehicle");
                 NbtCompound rootRootVehicle = new NbtCompound();
                 rootRootVehicle.put("RootVehicle", rootVehicle);
                 ((PlayerAuth) player).easyAuth$setRootVehicle(rootRootVehicle);
 
-                rootVehicle.get("Attach", Uuids.INT_STREAM_CODEC).ifPresent(uUID -> {
-                    ((PlayerAuth) player).easyAuth$setRidingEntityUUID(uUID);
-                    LogDebug(String.format("Saving vehicle of player %s as %s", player.getNameForScoreboard(), uUID));
-                });
-            });
+                if (rootVehicle.containsUuid("Attach")) {
+                    ((PlayerAuth) player).easyAuth$setRidingEntityUUID(rootVehicle.getUuid("Attach"));
+                    LogDebug(String.format("Saving vehicle of player %s as %s", player.getNameForScoreboard(), rootVehicle.getUuid("Attach")));
+                }
+            }
 
             LogDebug(String.format("Teleporting player %s", player.getNameForScoreboard()));
             LogDebug(String.format("Spawn position of player %s is %s", player.getNameForScoreboard(), config.worldSpawn));
@@ -159,12 +162,12 @@ public abstract class PlayerManagerMixin {
         }
     }
 
-    @WrapOperation(method = "method_68176(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/nbt/NbtCompound;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;readRootVehicle(Lnet/minecraft/nbt/NbtCompound;)V"))
-    private static void doNotMountPlayerToVehicle(ServerPlayerEntity serverPlayerEntity, NbtCompound nbtCompound, Operation<Void> original) {
-        if (config.hidePlayerCoords && !((PlayerAuth) serverPlayerEntity).easyAuth$isAuthenticated()) {
+    @WrapOperation(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;readRootVehicle(Ljava/util/Optional;)V"))
+    private void doNotMountPlayerToVehicle(ServerPlayerEntity instance, Optional<NbtCompound> nbt, Operation<Void> original) {
+        if (config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {
             return;
         }
-        original.call(serverPlayerEntity, nbtCompound);
+        original.call(instance, nbt);
     }
 }

@@ -15,6 +15,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
+import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.utils.PlayerAuth;
@@ -122,6 +123,11 @@ public class AuthEventHandler {
 
         if (extendedConfig.skipAllAuthChecks) {
             playerAuth.easyAuth$setAuthenticated(true);
+        }
+
+        if (config.vanishUntilAuth && technicalConfig.vanishLoaded) {
+            ((PlayerAuth) player).easyAuth$wasVanished(VanishIntegration.isVanished(player));
+            VanishIntegration.setVanished(player, true);
         }
     }
 

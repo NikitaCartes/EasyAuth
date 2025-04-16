@@ -15,6 +15,7 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 @ConfigSerializable
 public class MainConfigV1 extends ConfigTemplate {
     public boolean premiumAutoLogin = true;
+    public boolean requireRegistrationForPremium = false;
     public boolean offlineByDefault = false;
     public boolean floodgateAutoLogin = true;
     public long maxLoginTries = 3;
@@ -53,6 +54,7 @@ public class MainConfigV1 extends ConfigTemplate {
     protected String handleTemplate() throws IOException {
         Map<String, String> configValues = new HashMap<>();
         configValues.put("premiumAutologin", wrapIfNecessary(premiumAutoLogin));
+        configValues.put("requireRegistrationForPremium", wrapIfNecessary(requireRegistrationForPremium));
         configValues.put("offlineByDefault", wrapIfNecessary(offlineByDefault));
         configValues.put("floodgateAutologin", wrapIfNecessary(floodgateAutoLogin));
         configValues.put("maxLoginTries", wrapIfNecessary(maxLoginTries));

@@ -2,8 +2,9 @@ plugins {
     id "java"
     id "java-library"
     id "fabric-loom" version "1.10-SNAPSHOT"
-    id ("com.modrinth.minotaur") version "2.+"
-    id ("com.matthewprenger.cursegradle") version "1.4.0"
+    id "com.modrinth.minotaur" version "2.+"
+    id "com.matthewprenger.cursegradle" version "1.4.0"
+    id "com.gradleup.shadow" version "9.0.0-beta13"
 }
 
 repositories {
@@ -71,15 +72,21 @@ dependencies {
     include implementation("org.xerial:sqlite-jdbc:${sqlite_version}")
 
     // Hocon config
-    include implementation("org.spongepowered:configurate-core:${hocon_version}")
-    include implementation("org.spongepowered:configurate-hocon:${hocon_version}")
-    include implementation("org.apache.commons:commons-text:${commons_text_version}")
-    include implementation("com.typesafe:config:${typesafe_config_version}")
-    include implementation("io.leangen.geantyref:geantyref:${geantyref_version}")
-    include implementation("net.kyori:option:${option_version}")
+    implementation shadow("org.spongepowered:configurate-core:${hocon_version}")
+    implementation shadow("org.spongepowered:configurate-hocon:${hocon_version}")
+    implementation shadow("org.apache.commons:commons-text:${commons_text_version}")
+    implementation shadow("com.typesafe:config:${typesafe_config_version}")
+    implementation shadow("io.leangen.geantyref:geantyref:${geantyref_version}")
+    implementation shadow("net.kyori:option:${option_version}")
 
     // JNA lib
     include "net.java.dev.jna:jna:${jna_version}"
+}
+
+shadowJar {
+    minimize()
+    configurations = [project.configurations.shadow]
+    from sourceSets.main.output
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -93,6 +100,11 @@ java {
 
 jar {
     from "LICENCE"
+}
+
+remapJar {
+    dependsOn(shadowJar)
+    inputFile = shadowJar.archiveFile
 }
 
 processResources {

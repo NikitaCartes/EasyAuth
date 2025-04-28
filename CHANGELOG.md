@@ -8,6 +8,13 @@
 - Check how offline players work if they try to connect with a taken online account
 
 ----
+### 3.2.2
+##### Minecraft 1.21-1.21.1, 1.21.5
+#### Fix
+- Fix unexpected error with spawn position outside of world height limit
+- Relocate libs to be compatible with other mods
+
+----
 ### 3.2.1
 ##### Minecraft 1.20[.1], 1.20.2, 1.20.3-1.20.4, 1.20.5-1.20.6, 1.21-1.21.1, 1.21.2-1.21.4, 1.21.5
 #### Fixes

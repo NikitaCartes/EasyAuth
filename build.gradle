@@ -84,6 +84,13 @@ dependencies {
 }
 
 shadowJar {
+    relocate "org.spongepowered.configurate", "xyz.nikitacartes.shadow.configurate"
+    relocate "org.apache.commons.text", "xyz.nikitacartes.shadow.commons_text"
+    relocate "org.apache.commons.lang3", "xyz.nikitacartes.shadow.commons_lang3"
+    relocate "com.typesafe.config", "xyz.nikitacartes.shadow.config"
+    relocate "io.leangen.geantyref", "xyz.nikitacartes.shadow.geantyref"
+    relocate "net.kyori.option", "xyz.nikitacartes.shadow.option"
+
     minimize()
     configurations = [project.configurations.shadow]
     from sourceSets.main.output

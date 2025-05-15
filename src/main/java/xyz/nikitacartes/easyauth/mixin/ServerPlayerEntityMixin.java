@@ -151,10 +151,14 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     @Override
     public void easyAuth$sendAuthMessage() {
         if ((!config.enableGlobalPassword || config.singleUseGlobalPassword) && (playerEntryV1 == null || playerEntryV1.password.isEmpty())) {
-            if (config.singleUseGlobalPassword) {
-                langConfig.registerRequiredWithGlobalPassword.send(player);
+            if (config.allowSelfRegister) {
+                if (config.singleUseGlobalPassword) {
+                    langConfig.registerRequiredWithGlobalPassword.send(player);
+                } else {
+                    langConfig.registerRequired.send(player);
+                }
             } else {
-                langConfig.registerRequired.send(player);
+                langConfig.registerOperatorOnly.send(player);
             }
         } else {
             langConfig.loginRequired.send(player);

@@ -24,6 +24,7 @@ public class MainConfigV1 extends ConfigTemplate {
     public boolean enableGlobalPassword = false;
     public boolean singleUseGlobalPassword = false;
     public boolean hidePlayerCoords = false;
+    public boolean allowSelfRegister = true;
     public boolean vanishUntilAuth = true;
     public boolean debug = false;
     public long configVersion = 2;
@@ -63,6 +64,7 @@ public class MainConfigV1 extends ConfigTemplate {
         configValues.put("enableGlobalPassword", wrapIfNecessary(enableGlobalPassword));
         configValues.put("singleUseGlobalPassword", wrapIfNecessary(singleUseGlobalPassword));
         configValues.put("hidePlayerCoords", wrapIfNecessary(hidePlayerCoords));
+        configValues.put("allowSelfRegister", wrapIfNecessary(allowSelfRegister));
         configValues.put("vanishUntilAuth", wrapIfNecessary(vanishUntilAuth));
         configValues.put("worldSpawn.dimension", wrapIfNecessary(worldSpawn.dimension));
         configValues.put("worldSpawn.x", wrapIfNecessary(worldSpawn.x));

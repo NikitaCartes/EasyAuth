@@ -63,6 +63,15 @@ public class AuthCommand {
                                 )
                         )
                 )
+                .then(literal("selfRegister")
+                        .requires(Permissions.require("easyauth.commands.auth.selfRegister", 3))
+                        .executes(ctx -> selfRegister(ctx.getSource()))
+                        .then(argument("enabled", bool())
+                                .executes(ctx -> selfRegister(
+                                        ctx.getSource(), getBool(ctx, "enabled"))
+                                )
+                        )
+                )
                 .then(literal("setSpawn")
                         .requires(Permissions.require("easyauth.commands.auth.setSpawn", 3))
                         .executes(ctx -> setSpawn(
@@ -217,6 +226,51 @@ public class AuthCommand {
         });
 
         langConfig.globalPasswordSet.send(source);
+        return 1;
+    }
+
+    /**
+     * Displays the current self-registration status.
+     * <p>
+     * This command tells the sender whether players are currently allowed
+     * to register themselves using the /register command.
+     * <p>
+     * When self-registration is disabled, only server operators (OPs)
+     * can create accounts manually for players.
+     *
+     * @param source the source executing the command (for example, player or console)
+     * @return command result status
+     */
+    private static int selfRegister(ServerCommandSource source) {
+        if (config.allowSelfRegister) {
+            langConfig.selfRegisterEnabled.send(source);
+        } else {
+            langConfig.selfRegisterDisabled.send(source);
+        }
+
+        return 1;
+    }
+
+    /**
+     * Enables or disables self-registration, then displays the updated status.
+     * <p>
+     * When enabled, new players can register themselves using /register.
+     * When disabled, only server operators (OPs) can register accounts,
+     * preventing unauthorized access or account claimed by strangers.
+     * <p>
+     * This setting is stored in the configuration and saved asynchronously.
+     *
+     * @param source the source executing the command
+     * @param enabled true to allow self-registration, false to disable it
+     * @return command result status
+     */
+    private static int selfRegister(ServerCommandSource source, boolean enabled) {
+        THREADPOOL.submit(() -> {
+            config.allowSelfRegister = enabled;
+            config.save();
+            selfRegister(source);
+        });
+
         return 1;
     }
 

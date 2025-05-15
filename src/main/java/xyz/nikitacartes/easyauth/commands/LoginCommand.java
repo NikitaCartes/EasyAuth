@@ -76,11 +76,15 @@ public class LoginCommand {
             return 0;
         } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
             LogLogin("Player " + player.getNameForScoreboard() + " is not registered");
-            if (config.singleUseGlobalPassword) {
-                langConfig.registerRequiredWithGlobalPassword.send(source);
-                return 0;
+            if (config.allowSelfRegister) {
+                if (config.singleUseGlobalPassword) {
+                    langConfig.registerRequiredWithGlobalPassword.send(source);
+                    return 0;
+                }
+                langConfig.registerRequired.send(source);
+            } else {
+                langConfig.registerOperatorOnly.send(source);
             }
-            langConfig.registerRequired.send(source);
             return 0;
         }
         playerData.loginTries++;

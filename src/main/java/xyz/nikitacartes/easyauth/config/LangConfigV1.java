@@ -41,6 +41,9 @@ public class LangConfigV1 extends ConfigTemplate {
     public TranslatableText registerRequired = new TranslatableText("text.easyauth.registerRequired", "§6Type /register <password> <password> to claim this account.");
     public TranslatableText alreadyRegistered = new TranslatableText("text.easyauth.alreadyRegistered", "§6This account name is already registered!");
     public TranslatableText registerSuccess = new TranslatableText("text.easyauth.registerSuccess", "§aYou are now authenticated.");
+    public TranslatableText registerOperatorOnly = new TranslatableText("text.easyauth.registerOperatorOnly", "§6Please ask the operator to set your password.");
+    public TranslatableText selfRegisterDisabled = new TranslatableText("text.easyauth.selfRegisterDisabled", "§6Self registration is disabled.");
+    public TranslatableText selfRegisterEnabled = new TranslatableText("text.easyauth.selfRegisterEnabled", "§6Self registration is enabled.");
     public TranslatableText userdataDeleted = new TranslatableText("text.easyauth.userdataDeleted", "§aUserdata deleted.");
     public TranslatableText userdataUpdated = new TranslatableText("text.easyauth.userdataUpdated", "§aUserdata updated.");
     public TranslatableText accountDeleted = new TranslatableText("text.easyauth.accountDeleted", "§aYour account was successfully deleted!");
@@ -107,6 +110,9 @@ public class LangConfigV1 extends ConfigTemplate {
         configValues.put("registerRequired", wrapIfNecessary(registerRequired));
         configValues.put("alreadyRegistered", wrapIfNecessary(alreadyRegistered));
         configValues.put("registerSuccess", wrapIfNecessary(registerSuccess));
+        configValues.put("registerOperatorOnly", wrapIfNecessary(registerOperatorOnly));
+        configValues.put("selfRegisterDisabled", wrapIfNecessary(selfRegisterDisabled));
+        configValues.put("selfRegisterEnabled", wrapIfNecessary(selfRegisterEnabled));
         configValues.put("userdataDeleted", wrapIfNecessary(userdataDeleted));
         configValues.put("userdataUpdated", wrapIfNecessary(userdataUpdated));
         configValues.put("accountDeleted", wrapIfNecessary(accountDeleted));

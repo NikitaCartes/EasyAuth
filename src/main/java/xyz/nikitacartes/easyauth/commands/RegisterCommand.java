@@ -100,6 +100,13 @@ public class RegisterCommand {
         ServerPlayerEntity player = source.getPlayerOrThrow();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
+        // If self-registration is disabled in the config,
+        // prevent players from registering themselves.
+        if (!config.allowSelfRegister) {
+            langConfig.registerOperatorOnly.send(source);
+            return 0;
+        }
+
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
             langConfig.loginRequired.send(source);
             return 0;

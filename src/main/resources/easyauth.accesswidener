@@ -5,4 +5,3 @@ accessible field net/minecraft/server/network/ServerLoginNetworkHandler profile 
 accessible field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
 mutable field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
 accessible class net/minecraft/util/UserCache$Entry
-accessible field net/minecraft/storage/NbtReadView nbt Lnet/minecraft/nbt/NbtCompound;

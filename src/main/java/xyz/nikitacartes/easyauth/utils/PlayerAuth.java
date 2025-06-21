@@ -4,7 +4,6 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.storage.ReadView;
 import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Unique;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
 import java.util.UUID;

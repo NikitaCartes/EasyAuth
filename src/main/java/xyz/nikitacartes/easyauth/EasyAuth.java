@@ -12,7 +12,6 @@ import net.minecraft.util.Identifier;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
-import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.storage.database.*;
 import xyz.nikitacartes.easyauth.utils.LuckPermsIntegration;
 
@@ -118,9 +117,6 @@ public class EasyAuth implements ModInitializer {
         // Register LuckPerms integration if it's loaded
         if (technicalConfig.luckPermsLoaded) {
             LuckPermsIntegration.register();
-        }
-        if (technicalConfig.vanishLoaded) {
-            VanishIntegration.listenJoinEvent();
         }
     }
 

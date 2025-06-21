@@ -230,8 +230,8 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
 
             player.currentScreenHandler.syncState();
 
-            if (!wasVanished && technicalConfig.vanishLoaded) {
-                VanishIntegration.setVanished(player, false);
+            if (technicalConfig.vanishLoaded) {
+                VanishIntegration.setVanished(player, wasVanished);
             }
         } else {
             if (config.vanishUntilAuth && technicalConfig.vanishLoaded) {

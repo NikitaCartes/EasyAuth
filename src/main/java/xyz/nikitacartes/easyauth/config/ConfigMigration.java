@@ -131,9 +131,14 @@ public class ConfigMigration {
         DbApi db;
         if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mysql")) {
             db = new MySQL(EasyAuth.storageConfig);
-        } else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mongodb")) {
+        }
+        else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mongodb")) {
             db = new MongoDB(EasyAuth.storageConfig);
-        } else {
+        }
+        else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("postgresql")) {
+            db = new MongoDB(EasyAuth.storageConfig);
+        }
+        else {
             EasyAuth.storageConfig.databaseType = "sqlite";
 
             db = new SQLite(EasyAuth.storageConfig);

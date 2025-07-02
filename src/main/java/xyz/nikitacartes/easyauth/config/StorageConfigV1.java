@@ -25,6 +25,11 @@ public class StorageConfigV1 extends ConfigTemplate {
             MongoDB configuration.""")
     public MongoDBConfig mongodb = new MongoDBConfig();
 
+    @Comment("""
+            
+            PostgreSQL configuration.""")
+    public PostgreSQLConfig postgresql = new PostgreSQLConfig();
+
     public StorageConfigV1() {
         super("storage.conf", """
                 ##                          ##
@@ -109,5 +114,28 @@ public class StorageConfigV1 extends ConfigTemplate {
                 
                 SQLite table name.""")
         public String sqliteTable = "easyauth";
+    }
+
+    @ConfigSerializable
+    public static class PostgreSQLConfig {
+        @Comment("""                
+                PostgreSQL host and port (e.g. localhost:5432).""")
+        public String pgHost = "localhost:5432";
+
+        @Comment("""                
+                PostgreSQL user.""")
+        public String pgUser = "postgres";
+
+        @Comment("""                
+                PostgreSQL password.""")
+        public String pgPassword = "password";
+
+        @Comment("""                
+                PostgreSQL database name.""")
+        public String pgDatabase = "easyauth";
+
+        @Comment("""                
+                PostgreSQL table name.""")
+        public String pgTable = "easyauth";
     }
 }

@@ -95,7 +95,8 @@ public class AuthEventHandler {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         // Create in case of Carpet player
-        PlayerEntryV1 cache = PlayersCache.getCarpet(player.getNameForScoreboard());
+        String username = player.getNameForScoreboard();
+        PlayerEntryV1 cache = PlayersCache.getCarpet(username);
         boolean update = false;
         if (cache.uuid == null) {
             cache.uuid = player.getUuid();
@@ -195,13 +196,14 @@ public class AuthEventHandler {
             return ActionResult.PASS;
         }
         if (!((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            String username = player.getNameForScoreboard();
             for (String allowedCommand : extendedConfig.allowedCommands) {
                 if (command.startsWith(allowedCommand)) {
-                    LogDebug("Player " + player.getNameForScoreboard() + " executed command " + command + " without being authenticated.");
+                    LogDebug("Player " + username + " executed command " + command + " without being authenticated.");
                     return ActionResult.PASS;
                 }
             }
-            LogDebug("Player " + player.getNameForScoreboard() + " tried to execute command " + command + " without being authenticated.");
+            LogDebug("Player " + username + " tried to execute command " + command + " without being authenticated.");
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return ActionResult.FAIL;
         }

@@ -5,15 +5,42 @@
 #### Fix
 - Check how offline players work if they try to connect with a taken online account
 
+---
+### 3.3.5
+##### Minecraft 1.20[.X], 1.21[.X]
+#### Changes
+- Build EasyAuth against Java 17 [#199](https:
+- Improve readability of es_mx language
+
+----
+### 3.3.4
+##### Minecraft 1.20[.X], 1.21[.X]
+##### Add
+- Disable register command if `enable-global-password` enabled with `single-use-global-password` disabled
+
+#### Fix
+- Re-register `register` command if `single-use-global-password` was changed
+- Wrong log-in message with enabled `single-use-global-password` and disabled `enable-global-password`
+- Double login required message on login
+
+----
+### 3.3.3
+##### Minecraft 1.20.3-1.20.4, 1.20.5-1.20.6, 1.21-1.21.1, 1.21.2-1.21.4, 1.21.5, 1.21.6
+#### Add
+- Vietnamese translation, thanks to @Toibithieunang123
+
+#### Fix
+- Player joins vanished with enabled `vanish-until-auth` and valid session
+
 ----
 ### 3.3.2
-##### Minecraft 1.20[.1], 1.20.2, 1.20.3-1.20.4, 1.20.5-1.20.6, 1.21-1.21.1, 1.21.2-1.21.4, 1.21.5, 1.21.6
+##### Minecraft 1.21.2-1.21.4, 1.21.5, 1.21.6
 #### Add
 - `auth setSpawn` command only with coordinates, without yaw and pitch
 
 #### Fix
 - Not being invulnerable and invisible upon logging in
-- Auth markAsOnline doesn't work if a user is on server [#216](https://github.com/NikitaCartes/EasyAuth/issues/216)
+- Auth markAsOnline doesn't work if a user is on server [#216](https:
 - Check for account existence before marking player as online
 - Fix a problem with loading new language config
 
@@ -24,7 +51,7 @@
 ### 3.3.0
 ##### Minecraft 1.21.5
 #### Add
-- Option `vanish-until-auth` to vanish players until they authenticate using [Vanish mod](https://github.com/DrexHD/Vanish)
+- Option `vanish-until-auth` to vanish players until they authenticate using [Vanish mod](https:
 - Option `default-language` to set default language with disabled server-side translation
 
 #### Remove
@@ -32,8 +59,8 @@
 
 #### Fix
 - Fix unexpected error with spawn position outside of world height limit
-- Fix EasyAuth not sending minPasswordLength and maxPasswordLength to players [#205](https://github.com/NikitaCartes/EasyAuth/issues/205)
-- Fix detecting fake players [#207](https://github.com/NikitaCartes/EasyAuth/issues/207)
+- Fix EasyAuth not sending minPasswordLength and maxPasswordLength to players [#205](https:
+- Fix detecting fake players [#207](https:
 - Relocate libs to be compatible with other mods
 
 #### Changes
@@ -59,9 +86,9 @@
 - Add command `auth getOnlinePlayers` to get info about online players
 
 #### Fixes
-- Build EasyAuth against Java 17 [#199](https://github.com/NikitaCartes/EasyAuth/issues/199)
+- Build EasyAuth against Java 17 [#199](https:
 - Fix incompatibilities with mods by getting rid of @Redirect
-- Fix duplicate config files [#196](https://github.com/NikitaCartes/EasyAuth/issues/196)
+- Fix duplicate config files [#196](https:
 
 #### Changes
 - Update brazilian Portuguese translation, thanks to @guigiffoni
@@ -70,8 +97,8 @@
 ### 3.1.11
 ##### Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2, 1.19, 1.19.1-1.19.2, 1.19.3, 1.19.4, 1.20[.1], 1.20.2, 1.20.3-1.20.4, 1.20.5-1.20.6, 1.21-1.21.1, 1.21.2-1.21.4, 1.21.5
 #### Fixes
-- Fix server-side translation, fix [#163](https://github.com/NikitaCartes/EasyAuth/issues/163)
-- Fix vehicle disappear if player log out in different dimension with hide-player-coords, fix [#141](https://github.com/NikitaCartes/EasyAuth/issues/141)
+- Fix server-side translation, fix [#163](https:
+- Fix vehicle disappear if player log out in different dimension with hide-player-coords, fix [#141](https:
 
 ----
 ### 3.1.10
@@ -126,7 +153,7 @@
 ### 3.1.4
 ##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
 #### Fixes
-- Fix [#188](https://github.com/NikitaCartes/EasyAuth/issues/188), bug with Carpet fake players
+- Fix [#188](https:
 
 ----
 ### 3.1.3
@@ -139,13 +166,13 @@
 ##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
 #### Fixes
 - Fix bug with missing translation key
-- Fix [#186](https://github.com/NikitaCartes/EasyAuth/issues/186), bug with linked Floodgate players
+- Fix [#186](https:
 
 ----
 ### 3.1.1
 ##### Minecraft 1.21 - 1.21.1, 1.21.2 - 1.21.4
 #### Fixes
-- Fix [#178](https://github.com/NikitaCartes/EasyAuth/issues/178), when min-password-chars and max-password-chars weren't sent to players
+- Fix [#178](https:
 - Fix a few bugs with MySQL connection
 
 ----
@@ -187,7 +214,7 @@
 ### 3.0.28
 ##### Minecraft 1.21.2 - 1.21.4
 
-1) Fix [#164](https://github.com/NikitaCartes/EasyAuth/issues/164), incompatibility with C2ME and hide player coords
+1) Fix [#164](https:
 
 ----
 ### 3.0.27
@@ -286,7 +313,7 @@ Update dependencies
 ##### Minecraft 1.17, 1.17.1, 1.18[.1], 1.18.2, 1.19, 1.19.1-1.19.2, 1.19.3, 1.19.4, 1.20
 
 1) Add Polish translation, thanks to @LimakXRobczuk
-2) Fix [#51](https://github.com/NikitaCartes/EasyAuth/issues/51) that sometimes online player treated as offline 
+2) Fix [#51](https:
 3) Fix blank uuid in console log
 4) Improve logging
 
@@ -309,7 +336,7 @@ Update dependencies
 7) Add Ukrainian translation, thanks to @txlbr
 8) Fix fall through half-blocks on login
 9) Add AutoSave for DB
-10) Fix [#83](https://github.com/NikitaCartes/EasyAuth/issues/83) for new Mojang's API, thanks to @martinszelcel
+10) Fix [#83](https:
 
 ----
 ### 3.0.0-8
@@ -322,8 +349,8 @@ Update dependencies
 ### 3.0.0-7
 ##### Minecraft 1.19
 
-1) Probably fix missing server side translation [#36](https://github.com/NikitaCartes/EasyAuth/issues/36) with updating server translation
-2) Fix using command before login [#52](https://github.com/NikitaCartes/EasyAuth/issues/52), [#56](https://github.com/NikitaCartes/EasyAuth/issues/56), thanks to @were491
+1) Probably fix missing server side translation [#36](https:
+2) Fix using command before login [#52](https:
 
 ----
 ### 3.0.0-6
@@ -349,8 +376,8 @@ Update dependencies
 ##### Minecraft 1.18.x
 
 1) Fix Turkish translation
-2) Mod was trying to create two different folder for DB (`levelDBStore` and `leveldbStore`) [#29](https://github.com/NikitaCartes/EasyAuth/issues/29). Sometimes this resulted in an error [#6](https://github.com/NikitaCartes/EasyAuth/issues/6).
-3) Remove lag spike on first connection of player [#31](https://github.com/NikitaCartes/EasyAuth/issues/31)
+2) Mod was trying to create two different folder for DB (`levelDBStore` and `leveldbStore`) [#29](https:
+3) Remove lag spike on first connection of player [#31](https:
 4) Temporarily disabled `hideUnauthenticatedPLayersFromPlayerList` feature
 
 ----
@@ -359,7 +386,7 @@ Update dependencies
 
 1) Add `auth addToForcedOffline <player>` command to add player in `forcedOfflinePlayers` list
 2) Change default op-level for `auth *` from 4 to level 3 (except for `setGlobalPassword`)
-3) Fix [#23](https://github.com/NikitaCartes/EasyAuth/issues/23) when players sometimes stays invulnerable after login
+3) Fix [#23](https:
 4) Turkish translation, thanks to @egeesin
 5) New option `enableServerSideTranslation` to disable server-side translation
 
@@ -368,7 +395,7 @@ Update dependencies
 ##### Minecraft 1.17, 1.17.1, 1.18
 
 1) `auth uuid <player>` that would give correct offline uuid fot that player nickname in lower case
-2) Add [permission](https://github.com/NikitaCartes/EasyAuth/wiki/Permissions) support
+2) Add [permission](https:
 3) Add `auth list` command to print all registered players
 4) Fix `auth update` command
 5) Temporally disable `hideUnauthenticatedPLayersFromPlayerList` by default
@@ -378,13 +405,13 @@ Update dependencies
 ### 2.0.4
 ##### Minecraft 1.17.1, 1.18-pre1
 
-1) With enabled [global password](https://github.com/NikitaCartes/EasyAuth/wiki/Global-password) player can log in with global password or password set by `auth register`
+1) With enabled [global password](https:
 
 ----
 ### 2.0.3
 ##### Minecraft 1.17.1, 21w37a+
 
-1) Fix problem with registration ([#14](https://github.com/NikitaCartes/EasyAuth/issues/14))
+1) Fix problem with registration ([#14](https:
    - argon2 library split to two libs, and I didn't include one of it
    - Update libraries
 2) Improve hiding in TabList
@@ -403,7 +430,7 @@ Update dependencies
 ### 2.0.1
 ##### Minecraft 1.17.1
 
-1) Fix problem with MongoDB ([#15](https://github.com/NikitaCartes/EasyAuth/issues/15))
+1) Fix problem with MongoDB ([#15](https:
 2) Change `config.json`:
    - Delete `mongoDBCredentials` section
    - Add `MongoDBConnectionString` and `MongoDBDatabase` in main section
@@ -420,7 +447,7 @@ Update dependencies
 ### 1.9.6
 ##### Minecraft 1.17, 1.17.1
 
-1) Fix [#11](https://github.com/NikitaCartes/EasyAuth/issues/11)
+1) Fix [#11](https:
    - Fix `account unregister <password>` not unregistering account
    - Fix `auth remove <uuid>` crashing server on it's stopping
 
@@ -428,8 +455,8 @@ Update dependencies
 ### 1.9.5
 ##### Minecraft 1.17.1
 
-1) Fix [#8](https://github.com/NikitaCartes/EasyAuth/issues/8)
-   - Add [`teleportationTimeoutInMs`](https://github.com/NikitaCartes/EasyAuth/wiki/Config#experimental-part) setting
+1) Fix [#8](https:
+   - Add [`teleportationTimeoutInMs`](https:
    - Limit number of packets server will send to unauthorized players
    - Note: this setting is server-wide so maximum rate would be `(1000/teleportationTimeoutInMs)` per seconds for all unauthorised players
    - Value 0 would effectively disable this setting so players will be teleported after each packet, but you can expect a lot of incoming and outgoing packets (up to 3000 and more).
@@ -440,7 +467,7 @@ Update dependencies
 
 1) Server-side translation
 2) Changed implementation of supporting SimpleAuth database
-   - Now there is a [`useSimpleAuthDatabase`](https://github.com/NikitaCartes/EasyAuth/wiki/Config#experimental-part)
+   - Now there is a [`useSimpleAuthDatabase`](https:
    setting in config
 
 ----

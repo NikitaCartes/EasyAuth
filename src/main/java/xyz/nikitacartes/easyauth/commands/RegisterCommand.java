@@ -25,6 +25,9 @@ public class RegisterCommand {
 
     // Registering the "/reg" alias
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+        if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
+            return;
+        }
         LiteralCommandNode<ServerCommandSource> node = registerRegister(dispatcher);
         if (extendedConfig.aliases.register) {
             dispatcher.register(literal("reg")
@@ -73,6 +76,11 @@ public class RegisterCommand {
         ServerPlayerEntity player = source.getPlayerOrThrow();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
+        if (playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.alreadyAuthenticated.send(source);
+            return 0;
+        }
+
         if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
             if (checkGlobalPassword(globalPassword.toCharArray())) {
                 return register(source, pass1, pass2);
@@ -81,7 +89,8 @@ public class RegisterCommand {
 
                 playerData.loginTries++;
                 if (playerData.loginTries >= config.maxLoginTries && config.maxLoginTries != -1) { // Player exceeded maxLoginTries
-                    LogRegister("Player " + player.getNameForScoreboard() + " exceeded global password tries limit.");
+                    String username = player.getNameForScoreboard();
+                    LogRegister("Player " + username + " exceeded global password tries limit.");
                     playerData.lastKickedDate = ZonedDateTime.now();
                     playerData.loginTries = 0;
                     playerData.update();
@@ -137,7 +146,8 @@ public class RegisterCommand {
             playerAuth.easyAuth$setPlayerEntryV1(playerData);
             playerData.update();
 
-            LogRegister("Player " + player.getNameForScoreboard() + "{" + player.getUuidAsString() + "} successfully registered with password: " + playerData.password);
+            String username = player.getNameForScoreboard();
+            LogRegister("Player " + username + "{" + player.getUuidAsString() + "} successfully registered with password: " + playerData.password);
         });
         return 0;
     }

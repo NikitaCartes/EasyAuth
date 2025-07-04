@@ -162,8 +162,9 @@ public class AccountCommand {
 
         THREADPOOL.submit(() -> {
             if (AuthHelper.checkPassword(playerAuth, password.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
+                String username = player.getNameForScoreboard();
                 try {
-                    if (!isValidUsername(player.getNameForScoreboard())) {
+                    if (!isValidUsername(username)) {
                         langConfig.accountNotFound.send(source);
                         return;
                     }

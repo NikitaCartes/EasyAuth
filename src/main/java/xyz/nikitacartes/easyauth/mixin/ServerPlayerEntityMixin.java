@@ -87,9 +87,10 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
 
         ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
         wasDead = player.isDead();
-        LogDebug(String.format("Saving position of player %s as %s", player.getNameForScoreboard(), lastLocation));
+        String username = player.getNameForScoreboard();
+        LogDebug(String.format("Saving position of player %s as %s", username, lastLocation));
         if (ridingEntityUUID != null) {
-            LogDebug(String.format("Saving vehicle of player %s as %s", player.getNameForScoreboard(), ridingEntityUUID));
+            LogDebug(String.format("Saving vehicle of player %s as %s", username, ridingEntityUUID));
         }
     }
 
@@ -121,7 +122,8 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
                 lastLocation.yaw,
                 lastLocation.pitch,
                 true);
-        LogDebug(String.format("Teleported player %s to %s", player.getNameForScoreboard(), lastLocation));
+        String username = player.getNameForScoreboard();
+        LogDebug(String.format("Teleported player %s to %s", username, lastLocation));
 
         if (rootVehicle != null) {
             LogDebug(String.format("Mounting player to vehicle %s", rootVehicle));
@@ -137,7 +139,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
             if (entity != null) {
                 player.startRiding(entity, true);
             } else {
-                LogDebug("Could not find vehicle for player " + player.getNameForScoreboard());
+                LogDebug("Could not find vehicle for player " + username);
             }
         }
     }
@@ -150,15 +152,19 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
      */
     @Override
     public void easyAuth$sendAuthMessage() {
-        if ((!config.enableGlobalPassword || config.singleUseGlobalPassword) && (playerEntryV1 == null || playerEntryV1.password.isEmpty())) {
-            if (config.singleUseGlobalPassword) {
-                langConfig.registerRequiredWithGlobalPassword.send(player);
-            } else {
-                langConfig.registerRequired.send(player);
-            }
-        } else {
+        if (playerEntryV1 != null && !playerEntryV1.password.isEmpty()) {
             langConfig.loginRequired.send(player);
+            return;
         }
+        if (!config.enableGlobalPassword) {
+            langConfig.registerRequired.send(player);
+            return;
+        }
+        if (config.singleUseGlobalPassword) {
+            langConfig.registerRequiredWithGlobalPassword.send(player);
+            return;
+        }
+        langConfig.loginRequired.send(player);
     }
 
     /**

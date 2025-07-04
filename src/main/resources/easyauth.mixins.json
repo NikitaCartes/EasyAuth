@@ -12,7 +12,8 @@
     "ServerPlayerEntity$1Mixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
-    "SlotMixin"
+    "SlotMixin",
+    "CommandNodeAccessor"
   ],
   "minVersion": "0.8",
   "injectors": {

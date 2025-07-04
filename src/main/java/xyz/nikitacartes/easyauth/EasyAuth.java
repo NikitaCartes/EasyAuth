@@ -1,5 +1,7 @@
 package xyz.nikitacartes.easyauth;
 
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;
@@ -8,12 +10,16 @@ import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.mixin.CommandNodeAccessor;
 import xyz.nikitacartes.easyauth.storage.database.*;
-import xyz.nikitacartes.easyauth.utils.LuckPermsIntegration;
+import xyz.nikitacartes.easyauth.integrations.LuckPermsIntegration;
 
 import java.io.File;
 import java.io.FileReader;
@@ -21,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -90,7 +97,10 @@ public class EasyAuth implements ModInitializer {
         UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
         AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
         UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> AuthCommand.reloadConfig(server));
+        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> {
+            reloadConfigs(server);
+            langConfig.configurationReloaded.send(server);
+        });
         ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
 
@@ -186,6 +196,47 @@ public class EasyAuth implements ModInitializer {
         EasyAuth.langConfig.save();
         EasyAuth.extendedConfig.save();
         EasyAuth.storageConfig.save();
+    }
+
+    public static void reloadConfigs(MinecraftServer server) {
+        DB.close();
+
+        boolean regAlias = extendedConfig.aliases.register;
+        boolean loginAlias = extendedConfig.aliases.login;
+
+        EasyAuth.loadConfigs();
+
+        try {
+            DB.connect();
+        } catch (DBApiException e) {
+            LogError("onInitialize error: ", e);
+        }
+
+        CommandManager serverCommandManager = server.getCommandManager();
+
+        CommandNode <ServerCommandSource> rootNode = serverCommandManager.getDispatcher().getRoot();
+        Map<String, LiteralCommandNode<?>> literals = ((CommandNodeAccessor)(rootNode)).getLiterals();
+        literals.remove("register");
+        literals.remove("login");
+        if (regAlias) {
+            literals.remove("reg");
+        }
+        if (loginAlias) {
+            literals.remove("log");
+        }
+
+        rootNode.getChildren().removeIf(node ->
+                node.getName().equals("register") ||
+                node.getName().equals("login") ||
+                (regAlias && node.getName().equals("reg")) ||
+                (loginAlias && node.getName().equals("log")));
+
+        RegisterCommand.registerCommand(serverCommandManager.getDispatcher());
+        LoginCommand.registerCommand(serverCommandManager.getDispatcher());
+
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            serverCommandManager.sendCommandTree(player);
+        }
     }
 
     public static ZonedDateTime getUnixZero() {

@@ -183,31 +183,11 @@ public class AuthCommand {
      * @return 0
      */
     public static int reloadConfig(ServerCommandSource sender) {
-        DB.close();
-        EasyAuth.loadConfigs();
-
-        try {
-            DB.connect();
-        } catch (DBApiException e) {
-            LogError("onInitialize error: ", e);
-        }
+        reloadConfigs(sender.getServer());
 
         langConfig.configurationReloaded.send(sender);
 
         return Command.SINGLE_SUCCESS;
-    }
-
-    public static void reloadConfig(MinecraftServer sender) {
-        DB.close();
-        EasyAuth.loadConfigs();
-
-        try {
-            DB.connect();
-        } catch (DBApiException e) {
-            LogError("onInitialize error: ", e);
-        }
-
-        langConfig.configurationReloaded.send(sender);
     }
 
     /**
@@ -219,15 +199,14 @@ public class AuthCommand {
      * @return 0
      */
     private static int setGlobalPassword(ServerCommandSource source, String password, boolean singleUse) {
-        // Different thread to avoid lag spikes
-        THREADPOOL.submit(() -> {
-            // Writing the global pass to config
-            technicalConfig.globalPassword = AuthHelper.hashPassword(password.toCharArray());
-            config.enableGlobalPassword = true;
-            config.singleUseGlobalPassword = singleUse;
-            technicalConfig.save();
-            config.save();
-        });
+
+        technicalConfig.globalPassword = AuthHelper.hashPassword(password.toCharArray());
+        config.enableGlobalPassword = true;
+        config.singleUseGlobalPassword = singleUse;
+        technicalConfig.save();
+        config.save();
+
+        reloadConfigs(source.getServer());
 
         langConfig.globalPasswordSet.send(source);
         return 1;
@@ -435,10 +414,11 @@ public class AuthCommand {
         THREADPOOL.submit(() -> {
             MutableText message = Text.literal("");
             source.getServer().getPlayerManager().getPlayerList().forEach(player -> {
-                PlayerEntryV1 playerData = DB.getUserData(player.getNameForScoreboard());
+                String username = player.getNameForScoreboard();
+                PlayerEntryV1 playerData = DB.getUserData(username);
                 PlayerAuth playerAuth = (PlayerAuth) player;
 
-                message.append(Text.translatable(player.getNameForScoreboard()).formatted(Formatting.YELLOW)).append(": ");
+                message.append(Text.translatable(username).formatted(Formatting.YELLOW)).append(": ");
                 if (playerData == null) {
                     message.append(Text.literal("No data found\n"));
                     return;

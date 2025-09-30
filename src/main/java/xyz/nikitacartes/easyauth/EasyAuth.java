@@ -72,6 +72,8 @@ public class EasyAuth implements ModInitializer {
             DB = new MySQL(EasyAuth.storageConfig);
         } else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mongodb")) {
             DB = new MongoDB(EasyAuth.storageConfig);
+        } else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("postgresql")) {
+            DB = new PostgreSQL(EasyAuth.storageConfig);
         } else {
             DB = new SQLite(EasyAuth.storageConfig);
         }

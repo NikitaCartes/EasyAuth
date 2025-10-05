@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "easyauth-mixin-test",
+  "version": "0.0.0",
+  "name": "EasyAuth Mixin Test",
+  "environment": "server",
+  "entrypoints": {
+    "fabric-gametest": [
+      "xyz.nikitacartes.easyauth.EasyAuthMixinTest"
+    ]
+  }
+}

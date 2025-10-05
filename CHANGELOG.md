@@ -1,13 +1,36 @@
 ### ToDo
 #### Add
 - Add support for a changing "invalid session" message when offline player connects with online nickname
+- Gamemode switching on login
 
 #### Fix
 - Check how offline players work if they try to connect with a taken online account
+- Fix hide-cords with dimension change: move mixin to PrepareSpawnTask mixin
+
+---
+### 3.4.0
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X]
+#### Fix
+- Not sending register prompt on login if coordinates hiding is disabled [#237](https://github.com/NikitaCartes/EasyAuth/issues/237)
+- Fix false-positive UUID mismatch
+
+---
+### 3.3.6
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X]
+#### Add
+- Add `prevent-offline-players-with-online-usernames` option to prevent offline players from joining with online usernames
+- Add `check-offline-players-with-online-usernames` option to check offline players with online usernames every time they join the server for an online account
+
+#### Fix
+- Command reloading
+- Detection of offline players that join using an online account
+
+#### Changes
+- Update Turkish translation, thanks to @MemoKing34
 
 ---
 ### 3.3.5
-##### Minecraft 1.20[.X], 1.21[.X]
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X]
 #### Changes
 - Build EasyAuth against Java 17 [#199](https:
 - Improve readability of es_mx language
@@ -15,7 +38,7 @@
 ----
 ### 3.3.4
 ##### Minecraft 1.20[.X], 1.21[.X]
-##### Add
+#### Add
 - Disable register command if `enable-global-password` enabled with `single-use-global-password` disabled
 
 #### Fix

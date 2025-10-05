@@ -32,6 +32,8 @@
   "suggests": {
     "luckperms": "*",
     "fabric-permissions-api-v0": "*",
-    "melius-vanish": "*"
+    "melius-vanish": "*",
+    "skinrestorer": "*",
+    "nochatreports": "*"
   }
 }

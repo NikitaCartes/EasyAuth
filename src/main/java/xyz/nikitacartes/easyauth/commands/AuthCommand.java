@@ -69,7 +69,11 @@ public class AuthCommand {
                         .requires(Permissions.require("easyauth.commands.auth.setSpawn", 3))
                         .executes(ctx -> setSpawn(
                                 ctx.getSource(),
-                                ctx.getSource().getEntityOrThrow().getWorld().getRegistryKey().getValue(),
+                                //? if >= 1.21.9 {
+                                ctx.getSource().getEntityOrThrow().getEntityWorld().getRegistryKey().getValue(),
+                                //?} else {
+                                /*ctx.getSource().getEntityOrThrow().getWorld().getRegistryKey().getValue(),
+                                *///?}
                                 ctx.getSource().getEntityOrThrow().getX(),
                                 ctx.getSource().getEntityOrThrow().getY(),
                                 ctx.getSource().getEntityOrThrow().getZ(),

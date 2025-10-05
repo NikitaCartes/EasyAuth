@@ -1,16 +1,14 @@
 ### Release notes:
 #### Add
-- Disable register command if `enable-global-password` enabled with `single-use-global-password` disabled
+- Add `prevent-offline-players-with-online-usernames` option to prevent offline players from joining with online usernames
+- Add `check-offline-players-with-online-usernames` option to check offline players with online usernames every time they join the server for an online account
 
 #### Fix
-- Re-register `register` command if `single-use-global-password` was changed
-- Wrong log-in message with enabled `single-use-global-password` and disabled `enable-global-password`
-- Double login required message on login
+- Command reloading
+- Detection of offline players that join using an online account
 
 #### Changes
-- Build EasyAuth against Java 17 [#199](https://github.com/NikitaCartes/EasyAuth/issues/199)
-- Improve readability of es_mx language
-
+- Update Turkish translation, thanks to @MemoKing34
 ---
 
 ### Full Changelog:

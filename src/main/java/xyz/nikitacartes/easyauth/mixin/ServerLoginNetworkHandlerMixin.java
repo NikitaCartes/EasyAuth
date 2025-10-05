@@ -12,16 +12,17 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.PlayersCache;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static xyz.nikitacartes.easyauth.integrations.MojangApi.isValidUsername;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
+import static xyz.nikitacartes.easyauth.integrations.MojangApi.getUuid;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 @Mixin(ServerLoginNetworkHandler.class)
 public abstract class ServerLoginNetworkHandlerMixin {
@@ -57,6 +58,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
     private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
         String username = packet.name();
 
+        LogDebug("UUID of player " + username + " is " + packet.profileId());
+
         PlayerEntryV1 playerData = PlayersCache.getOrRegister(username);
 
         if (server.isOnlineMode()) {
@@ -85,17 +88,25 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
                     ci.cancel();
                 } else {
-                    if (isValidUsername(username)) {
+                    UUID onlineUuid = getUuid(username);
+                    if ((EasyAuth.extendedConfig.preventOfflinePlayersWithOnlineUsernames && onlineUuid != null) || packet.profileId().equals(onlineUuid)) {
                         // Caches the request
                         playerData.onlineAccount = PlayerEntryV1.OnlineAccount.TRUE;
                         playerData.update();
                         // Authentication continues in the original method
                     } else {
+                        if (onlineUuid == null) {
+                            LogDebug("Player " + username + " doesn't have a Mojang account");
+                            playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
+                            playerData.update();
+                        } else {
+                            LogInfo("Player " + username + " has a Mojang account, but UUID mismatch: expected " + onlineUuid + ", got " + packet.profileId());
+                            if (!EasyAuth.extendedConfig.checkOfflinePlayersWithOnlineUsernames) {
+                                playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
+                                playerData.update();
+                            }
+                        }
                         state = ServerLoginNetworkHandler.State.VERIFYING;
-
-                        playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
-                        playerData.update();
-
                         this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
                         ci.cancel();
                     }

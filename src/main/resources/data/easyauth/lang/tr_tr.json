@@ -14,7 +14,7 @@
 	"text.easyauth.successfullyAuthenticated": "§aŞimdi kimliğin doğrulandı.",
 	"text.easyauth.successfulLogout": "§aBaşarılı bir şekilde çıkış yapıldı.",
 	"text.easyauth.timeExpired": "§cKimlik doğrulama zamanı aşıldı.",
-	"text.easyauth.registerRequired": "§6Bu hesabı sahiplenmek için /register <parola> <parola> yazın.",
+	"text.easyauth.registerRequired": "§6Bu hesabı sahiplenmek için /register \u003cparola\u003e \u003cparola\u003e yazın.",
 	"text.easyauth.alreadyRegistered": "§6Bu hesap ismi zaten kayıtlı!",
 	"text.easyauth.registerSuccess": "§aKimlik kaydı başarılı",
 	"text.easyauth.userdataDeleted": "§aKullanıcı verisi silindi.",
@@ -35,9 +35,11 @@
 	"text.easyauth.onlinePlayerLogin": "§aÇevrimiçi bir hesap kullanıyorsun. Giriş yapmana gerek yok.",
 	"text.easyauth.differentUsernameCase": "§6Kullanıcı adının farklı yazılmış hallini kullanıyorsun. Lütfen doğrusunu kullan.",
 	"text.easyauth.wrongGlobalPassword": "§4Yanlış global parola!",
-	"text.easyauth.registerRequiredWithGlobalPassword": "§6Bu hesabı sahiplenmek için /register <global password> <password> <password> yazın.",
+	"text.easyauth.registerRequiredWithGlobalPassword": "§6Bu hesabı sahiplenmek için /register \u003cglobal password\u003e \u003cpassword\u003e \u003cpassword\u003e yazın.",
 	"text.easyauth.markAsOffline": "§aOyuncu %s çevrimdışı oyuncu olarak ayarlandı.",
 	"text.easyauth.markAsOnline": "§aOyuncu %s çevrimiçi oyuncu olarak ayarlandı.",
 	"text.easyauth.selfMarkAsOnline": "§aKendini çevrimiçi oyuncu olarak ayarladın.",
-	"text.easyauth.selfMarkAsOnlineWarning": "§6Kendini çevrimdışı oyuncu olarak ayarlamak istiyorsun.\n§6Eğer çevrimiçi hesabın yoksa giriş yapamayacaksın.\n§6Çevrimdışı uuid'ye başlı veri (köylüler, indirimler, evcil hayvanlar) kaybolacak.\n§aDevam etmek istiyorsanız /account online <parola> true yazın."
+	"text.easyauth.selfMarkAsOnlineWarning": "§6Kendini çevrimdışı oyuncu olarak ayarlamak istiyorsun.\n§6Eğer çevrimiçi hesabın yoksa giriş yapamayacaksın.\n§6Çevrimdışı uuid'ye başlı veri (köylüler, indirimler, evcil hayvanlar) kaybolacak.\n§aDevam etmek istiyorsanız /account online \u003cparola\u003e true yazın.",
+	"text.easyauth.accountNotFound": "§cÇevrimiçi hesap bulunamadı.",
+	"text.easyauth.accountCheckFailed": "§cMojang sunucularına erişilemiyor. Lütfen daha sonra tekrar deneyin"
 }

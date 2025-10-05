@@ -33,7 +33,11 @@ public class PlayerAdvancementTrackerMixin {
     private void startMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
         if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) this.owner).easyAuth$isUsingMojangAccount() && !this.filePath.toFile().isFile()) {
             // Migrate
-            String playername = owner.getGameProfile().getName();
+            //? if >= 1.21.9 {
+            String playername = owner.getGameProfile().name();
+            //?} else {
+            /*String playername = owner.getGameProfile().getName();
+            *///?}
             this.filePath = this.filePath.getParent().resolve(Uuids.getOfflinePlayerUuid(playername) + ".json");
         }
     }

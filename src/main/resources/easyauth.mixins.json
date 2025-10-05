@@ -4,16 +4,17 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "CommandManagerMixin",
+    "CommandNodeAccessor",
     "EntityMixin",
     "PlayerAdvancementTrackerMixin",
     "PlayerManagerMixin",
     "PlayerSaveHandlerMixin",
+    "PrepareSpawnTask$PlayerSpawnMixin",
     "ServerLoginNetworkHandlerMixin",
     "ServerPlayerEntity$1Mixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
-    "SlotMixin",
-    "CommandNodeAccessor"
+    "SlotMixin"
   ],
   "minVersion": "0.8",
   "injectors": {

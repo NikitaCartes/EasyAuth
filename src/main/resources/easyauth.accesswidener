@@ -6,3 +6,5 @@ accessible field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
 mutable field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
 accessible class net/minecraft/util/UserCache$Entry
 accessible field net/minecraft/storage/NbtReadView nbt Lnet/minecraft/nbt/NbtCompound;
+accessible method net/minecraft/util/UserCache load ()Ljava/util/List;
+accessible field net/minecraft/world/PlayerSaveHandler playerDataDir Ljava/io/File;

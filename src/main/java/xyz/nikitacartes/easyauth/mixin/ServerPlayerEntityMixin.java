@@ -81,11 +81,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         if (lastLocation == null) {
             lastLocation = new LastLocation();
         }
-        //? if >= 1.21.9 {
         lastLocation.position = player.getEntityPos();
-        //?} else {
-        /*lastLocation.position = player.getPos();
-        *///?}
         lastLocation.yaw = player.getYaw();
         lastLocation.pitch = player.getPitch();
 
@@ -141,11 +137,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
             if (world == null) return;
             Entity entity = world.getEntity(ridingEntityUUID);
             if (entity != null) {
-                //? if >= 1.21.9 {
                 player.startRiding(entity, true, false);
-                //?} else {
-                /*player.startRiding(entity, true);
-                *///?}
             } else {
                 LogDebug("Could not find vehicle for player " + username);
             }
@@ -230,6 +222,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         if (authenticated) {
             kickTimer = config.kickTimeout * 20;
             // Updating blocks if needed (in case if portal rescue action happened)
+            World world = player.getEntityWorld();
             BlockPos pos = player.getBlockPos();
 
             // Sending updates to portal blocks

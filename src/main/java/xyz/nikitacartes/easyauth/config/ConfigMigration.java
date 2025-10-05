@@ -1,10 +1,6 @@
 package xyz.nikitacartes.easyauth.config;
 
-//? if >= 1.21.9 {
 import net.minecraft.server.PlayerConfigEntry;
-//?} else {
-/*import com.mojang.authlib.GameProfile;
-*///?}
 import net.minecraft.util.UserCache;
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
@@ -151,13 +147,8 @@ public class ConfigMigration {
         UserCache userCache = new UserCache(null, new File(gameDirectory + "/usercache.json"));
         HashMap<String, String> uuids = new HashMap<>();
         for (UserCache.Entry entry : userCache.load()) {
-            //? if >= 1.21.9 {
             PlayerConfigEntry playerConfigEntry = entry.getPlayer();
             uuids.put(playerConfigEntry.name(), playerConfigEntry.id().toString());
-            //?} else {
-            /*GameProfile profile = entry.getProfile();
-            uuids.put(profile.getName(), profile.getId().toString());
-            *///?}
         }
         db.migrateFromV1(uuids);
 

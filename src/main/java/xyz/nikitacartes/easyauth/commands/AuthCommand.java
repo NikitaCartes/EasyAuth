@@ -33,7 +33,6 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.isValidUsername;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 public class AuthCommand {
     /**
@@ -69,11 +68,7 @@ public class AuthCommand {
                         .requires(Permissions.require("easyauth.commands.auth.setSpawn", 3))
                         .executes(ctx -> setSpawn(
                                 ctx.getSource(),
-                                //? if >= 1.21.9 {
                                 ctx.getSource().getEntityOrThrow().getEntityWorld().getRegistryKey().getValue(),
-                                //?} else {
-                                /*ctx.getSource().getEntityOrThrow().getWorld().getRegistryKey().getValue(),
-                                *///?}
                                 ctx.getSource().getEntityOrThrow().getX(),
                                 ctx.getSource().getEntityOrThrow().getY(),
                                 ctx.getSource().getEntityOrThrow().getZ(),
@@ -203,7 +198,7 @@ public class AuthCommand {
      * @return 0
      */
     private static int setGlobalPassword(ServerCommandSource source, String password, boolean singleUse) {
-
+        // Writing the global pass to config
         technicalConfig.globalPassword = AuthHelper.hashPassword(password.toCharArray());
         config.enableGlobalPassword = true;
         config.singleUseGlobalPassword = singleUse;

@@ -5,9 +5,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
-//? if >= 1.21.9 {
 import net.minecraft.server.PlayerConfigEntry;
-//?}
 import net.minecraft.util.Uuids;
 import net.minecraft.world.PlayerSaveHandler;
 import org.spongepowered.asm.mixin.Final;
@@ -38,28 +36,16 @@ public class PlayerSaveHandlerMixin {
      * @param mixinFile
      */
     @Inject(
-            //? if >= 1.21.9 {
             method = "loadPlayerData(Lnet/minecraft/server/PlayerConfigEntry;Ljava/lang/String;)Ljava/util/Optional;",
-            //?} else {
-            /*method = "loadPlayerData(Lnet/minecraft/entity/player/PlayerEntity;Ljava/lang/String;)Ljava/util/Optional;",
-            *///?}
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/io/File;exists()Z"
             ),
             cancellable = true
     )
-    //? if >= 1.21.9 {
     private void fileExists(PlayerConfigEntry playerConfigEntry, String extension, CallbackInfoReturnable<Optional<NbtCompound>> cir, @Local File mixinFile) {
-    //?} else {
-    /*private void fileExists(PlayerEntity player, String extension, CallbackInfoReturnable<Optional<NbtCompound>> cir, @Local File mixinFile) {
-    *///?}
         if (!(mixinFile.exists() && mixinFile.isFile())) {
-            //? if >= 1.21.9 {
             String playerName = playerConfigEntry.name();
-            //?} else {
-            /*String playerName = player.getGameProfile().getName();
-            *///?}
             if (Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
                 LogDebug(String.format("Migrating data for %s", playerName));
                 File file = new File(this.playerDataDir, Uuids.getOfflinePlayerUuid(playerName) + extension);

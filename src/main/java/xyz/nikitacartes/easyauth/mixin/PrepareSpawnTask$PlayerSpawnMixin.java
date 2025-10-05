@@ -1,4 +1,3 @@
-//? if >= 1.21.9 {
 package xyz.nikitacartes.easyauth.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -24,4 +23,3 @@ public abstract class PrepareSpawnTask$PlayerSpawnMixin {
         original.call(instance, view);
     }
 }
-//?}

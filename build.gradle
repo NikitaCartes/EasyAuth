@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "java-library"
-    id "fabric-loom" version "1.10-SNAPSHOT"
+    id "fabric-loom" version "1.11-SNAPSHOT"
     id "com.modrinth.minotaur" version "2.+"
     id "com.matthewprenger.cursegradle" version "1.4.0"
     id "com.gradleup.shadow" version "9.0.0-beta13"

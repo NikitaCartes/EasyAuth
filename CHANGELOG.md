@@ -12,7 +12,8 @@
 ##### Minecraft 1.19.4, 1.20[.X], 1.21[.X]
 #### Fix
 - Not sending register prompt on login if coordinates hiding is disabled [#237](https://github.com/NikitaCartes/EasyAuth/issues/237)
-- Fix false-positive UUID mismatch
+- False-positive UUID mismatch
+- Not preventing "Kick from another location" disconnection
 
 ---
 ### 3.3.6

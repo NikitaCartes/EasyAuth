@@ -1,6 +1,5 @@
 package xyz.nikitacartes.easyauth.event;
 
-import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking;
 import net.minecraft.block.Blocks;
@@ -79,7 +78,7 @@ public class AuthEventHandler {
         }
         // If the player name and registered name are different, kick the player if differentUsernameCase is enabled
         // Create in case of Floodgate player
-        PlayerEntryV1 playerEntryV1 = PlayersCache.getFloodgate(incomingPlayerUsername);
+        PlayerEntryV1 playerEntryV1 = PlayersCache.getOrLoadOrRegister(incomingPlayerUsername);
 
         if (!extendedConfig.allowCaseInsensitiveUsername && !playerEntryV1.username.equals(incomingPlayerUsername)) {
             return langConfig.differentUsernameCase.getNonTranslatable(incomingPlayerUsername);
@@ -97,7 +96,7 @@ public class AuthEventHandler {
 
         // Create in case of Carpet player
         String username = player.getNameForScoreboard();
-        PlayerEntryV1 cache = PlayersCache.getCarpet(username);
+        PlayerEntryV1 cache = PlayersCache.getOrCreate(username);
         boolean update = false;
         if (cache.uuid == null) {
             cache.uuid = player.getUuid();

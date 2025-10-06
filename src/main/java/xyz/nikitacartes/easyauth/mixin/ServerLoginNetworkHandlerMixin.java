@@ -60,7 +60,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
         LogDebug("UUID of player " + username + " is " + packet.profileId());
 
-        PlayerEntryV1 playerData = PlayersCache.getOrRegister(username);
+        PlayerEntryV1 playerData = PlayersCache.loadOrRegister(username);
 
         if (server.isOnlineMode()) {
             try {

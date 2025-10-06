@@ -1,7 +1,6 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;

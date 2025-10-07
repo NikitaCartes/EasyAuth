@@ -168,9 +168,9 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     }
 
     /**
-     * Checks whether player can skip authentication process.
+     * Checks whether player can skip an authentication process (Online Player or Fake one).
      *
-     * @return true if player can skip authentication process, otherwise false
+     * @return true if a player can skip an authentication process, otherwise false
      */
     @Override
     public boolean easyAuth$canSkipAuth() {
@@ -181,8 +181,8 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     public void easyAuth$setSkipAuth() {
         easyAuth$setUsingMojangAccount();
         canSkipAuth = (this.player.getClass() != ServerPlayerEntity.class) ||
-                (config.floodgateAutoLogin && technicalConfig.floodgateLoaded && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
-                (easyAuth$isUsingMojangAccount() && config.premiumAutoLogin);
+                (config.floodgateAutoLogin && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
+                (config.premiumAutoLogin && easyAuth$isUsingMojangAccount());
     }
 
     /**
@@ -236,11 +236,9 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
 
             player.currentScreenHandler.syncState();
 
-            if (technicalConfig.vanishLoaded) {
-                VanishIntegration.setVanished(player, wasVanished);
-            }
+            VanishIntegration.setVanished(player, wasVanished);
         } else {
-            if (config.vanishUntilAuth && technicalConfig.vanishLoaded) {
+            if (config.vanishUntilAuth) {
                 wasVanished = VanishIntegration.isVanished(player);
                 VanishIntegration.setVanished(player, true);
             }

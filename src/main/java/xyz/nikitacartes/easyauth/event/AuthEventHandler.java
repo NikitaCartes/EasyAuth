@@ -73,7 +73,7 @@ public class AuthEventHandler {
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
         Matcher matcher = usernamePattern.matcher(incomingPlayerUsername);
 
-        if (!(matcher.matches() || (technicalConfig.floodgateLoaded && extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(profile.id())))) {
+        if (!(matcher.matches() || (extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(profile.id())))) {
             return langConfig.disallowedUsername.getNonTranslatable(extendedConfig.usernameRegexp);
         }
         // If the player name and registered name are different, kick the player if differentUsernameCase is enabled
@@ -107,7 +107,7 @@ public class AuthEventHandler {
         playerAuth.easyAuth$setIpAddress(connection);
         playerAuth.easyAuth$setSkipAuth();
 
-        if (config.vanishUntilAuth && technicalConfig.vanishLoaded) {
+        if (config.vanishUntilAuth) {
             ((PlayerAuth) player).easyAuth$wasVanished(VanishIntegration.isVanished(player));
         }
 
@@ -130,7 +130,7 @@ public class AuthEventHandler {
             playerAuth.easyAuth$setAuthenticated(true);
         }
 
-        if (config.vanishUntilAuth && technicalConfig.vanishLoaded && !playerAuth.easyAuth$isAuthenticated()) {
+        if (config.vanishUntilAuth && !playerAuth.easyAuth$isAuthenticated()) {
             VanishIntegration.setVanished(player, true);
         }
     }

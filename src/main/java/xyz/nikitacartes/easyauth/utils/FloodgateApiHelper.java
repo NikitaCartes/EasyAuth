@@ -5,6 +5,8 @@ import org.geysermc.floodgate.api.FloodgateApi;
 
 import java.util.UUID;
 
+import static xyz.nikitacartes.easyauth.EasyAuth.technicalConfig;
+
 public class FloodgateApiHelper{
     /**
      * Checks if player is a floodgate one.
@@ -25,6 +27,7 @@ public class FloodgateApiHelper{
      */
 
     public static boolean isFloodgatePlayer(UUID uuid) {
+        if (technicalConfig.floodgateLoaded) return false;
         FloodgateApi floodgateApi = FloodgateApi.getInstance();
         return floodgateApi.isFloodgatePlayer(uuid);
     }

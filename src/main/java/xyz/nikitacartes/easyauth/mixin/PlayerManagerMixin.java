@@ -121,7 +121,7 @@ public abstract class PlayerManagerMixin {
         if (playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()) {
             return;
         }
-        if (config.vanishUntilAuth && technicalConfig.vanishLoaded) {
+        if (config.vanishUntilAuth) {
             VanishIntegration.setVanished(player, playerAuth.easyAuth$wasVanished());
         }
     }

@@ -44,7 +44,7 @@ public interface PlayerAuth {
     void easyAuth$sendAuthMessage();
 
     /**
-     * Checks whether player is a fake player (from CarpetMod).
+     * Checks whether player can skip an authentication process (Online Player or Fake one).
      *
      * @return true if player is fake (can skip authentication process), otherwise false
      * @see <a href="https://samolego.github.io/SimpleAuth/org/samo_lego/simpleauth/mixin/MixinPlayerEntity.html">See implementation</a>

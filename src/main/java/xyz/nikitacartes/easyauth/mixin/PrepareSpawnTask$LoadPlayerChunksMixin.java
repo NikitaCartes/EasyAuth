@@ -37,7 +37,11 @@ public abstract class PrepareSpawnTask$LoadPlayerChunksMixin {
     private Vec3d saveRealCoordinates(Vec3d original) {
         PrepareSpawnTaskInterface field_61135 = (PrepareSpawnTaskInterface) this.field_61135;
 
-        if (config.hidePlayerCoords && !field_61135.easyAuth$getAuthenticated() && field_61135.easyAuth$getSpawnData() == null) {
+        if (config.hidePlayerCoords && !field_61135.easyAuth$getAuthenticated()) {
+            if (field_61135.easyAuth$getSpawnData() != null) {
+                return new Vec3d(config.worldSpawn.x, config.worldSpawn.y, config.worldSpawn.z);
+            }
+
             LastLocation lastLocation = new LastLocation(world.getRegistryKey(), original, rotation);
             field_61135.easyAuth$setSpawnData(lastLocation);
 

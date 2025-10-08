@@ -4,7 +4,6 @@ import com.google.common.net.InetAddresses;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,7 +21,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.integrations.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
+import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.*;
 
@@ -77,29 +78,13 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     private boolean wasVanished = false;
 
     @Override
-    public void easyAuth$saveTrueLocation() {
-        if (lastLocation == null) {
-            lastLocation = new LastLocation();
-        }
-        lastLocation.position = player.getEntityPos();
-        lastLocation.yaw = player.getYaw();
-        lastLocation.pitch = player.getPitch();
-
+    public void easyAuth$savePlayerInfo() {
         ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
         wasDead = player.isDead();
         String username = player.getNameForScoreboard();
-        LogDebug(String.format("Saving position of player %s as %s", username, lastLocation));
         if (ridingEntityUUID != null) {
             LogDebug(String.format("Saving vehicle of player %s as %s", username, ridingEntityUUID));
         }
-    }
-
-    @Override
-    public void easyAuth$saveTrueDimension(RegistryKey<World> registryKey) {
-        if (lastLocation == null) {
-            lastLocation = new LastLocation();
-        }
-        lastLocation.dimension = this.server.getWorld(registryKey);
     }
 
     @Override
@@ -114,7 +99,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         }
         // Puts player to last saved position
         player.teleport(
-                lastLocation.dimension == null ? server.getWorld(World.OVERWORLD) : lastLocation.dimension,
+                lastLocation.dimension == null ? server.getWorld(World.OVERWORLD) : server.getWorld(lastLocation.dimension),
                 lastLocation.position.getX(),
                 lastLocation.position.getY(),
                 lastLocation.position.getZ(),
@@ -133,7 +118,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         if (player.getVehicle() == null && ridingEntityUUID != null) {
             LogDebug(String.format("Mounting player to vehicle %s", ridingEntityUUID));
             if (lastLocation.dimension == null) return;
-            ServerWorld world = server.getWorld(lastLocation.dimension.getRegistryKey());
+            ServerWorld world = server.getWorld(lastLocation.dimension);
             if (world == null) return;
             Entity entity = world.getEntity(ridingEntityUUID);
             if (entity != null) {

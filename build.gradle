@@ -24,8 +24,14 @@ java {
 }
 
 loom {
+    splitEnvironmentSourceSets()
+    mods {
+        "${project.mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+
     accessWidenerPath = file("src/main/resources/easyauth.accesswidener")
-    serverOnlyMinecraftJar()
     log4jConfigs.from(file("log4j.xml"))
 }
 

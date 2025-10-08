@@ -1,5 +1,6 @@
 package xyz.nikitacartes.easyauth.utils;
 
+import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.hashing.HasherArgon2;
 import xyz.nikitacartes.easyauth.utils.hashing.HasherBCrypt;

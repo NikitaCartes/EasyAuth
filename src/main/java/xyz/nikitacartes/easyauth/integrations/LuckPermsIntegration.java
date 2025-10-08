@@ -9,7 +9,7 @@ import net.luckperms.api.context.ImmutableContextSet;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
-import xyz.nikitacartes.easyauth.utils.PlayerAuth;
+import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 
 public class LuckPermsIntegration implements ContextCalculator<ServerPlayerEntity> {
 

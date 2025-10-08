@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
-import xyz.nikitacartes.easyauth.utils.PlayerAuth;
+import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -54,16 +54,8 @@ public abstract class PlayerManagerMixin {
     @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V", at = @At("HEAD"))
     private void onPlayerConnectHead(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
         AuthEventHandler.loadPlayerData(player, connection);
-    }
 
-
-    @ModifyArgs(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;requestTeleport(DDDFF)V"))
-    private void onPlayerConnect(Args args, ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData) {
         if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
-            ((PlayerAuth) player).easyAuth$saveTrueLocation();
-
-            String username = player.getNameForScoreboard();
             try (ErrorReporter.Logging logging = new ErrorReporter.Logging(player.getErrorReporterContext(), LOGGER)) {
 
                 playerManager.loadPlayerData(new PlayerConfigEntry(player.getGameProfile())).flatMap(compound -> compound.getCompound("RootVehicle")).ifPresent(rootVehicle -> {
@@ -78,18 +70,9 @@ public abstract class PlayerManagerMixin {
                     });
                 });
             }
-
-            ((PlayerAuth) player).easyAuth$setSkipAuth();
-
-            LogDebug(String.format("Teleporting player %s", username));
-            LogDebug(String.format("Spawn position of player %s is %s", username, config.worldSpawn));
-
-            args.set(0, config.worldSpawn.x);
-            args.set(1, config.worldSpawn.y);
-            args.set(2, config.worldSpawn.z);
-            args.set(3, config.worldSpawn.yaw);
-            args.set(4, config.worldSpawn.pitch);
         }
+
+        ((PlayerAuth) player).easyAuth$setSkipAuth();
     }
 
     @Inject(method = "onPlayerConnect(Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V", at = @At("RETURN"))

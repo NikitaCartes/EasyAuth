@@ -17,8 +17,8 @@ import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
-import xyz.nikitacartes.easyauth.utils.FloodgateApiHelper;
-import xyz.nikitacartes.easyauth.utils.PlayerAuth;
+import xyz.nikitacartes.easyauth.integrations.FloodgateApiHelper;
+import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.PlayersCache;
 
 import java.net.SocketAddress;

@@ -26,7 +26,7 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
 public class PlayerSaveHandlerMixin {
     @Final
     @Shadow
-    private File playerDataDir;
+    public File playerDataDir;
 
     /**
      * Loads offline-uuid player data to compoundTag in order to migrate from offline to online.

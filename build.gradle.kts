@@ -168,7 +168,7 @@ tasks.processTestResources {
 }
 
 tasks.named<Copy>("processGametestResources") {
-    // duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn("kspTestKotlin")
 }
 

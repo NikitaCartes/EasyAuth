@@ -48,14 +48,14 @@ java {
 }
 
 loom {
-    //splitEnvironmentSourceSets()
-    serverOnlyMinecraftJar()
+    splitEnvironmentSourceSets()
+    //serverOnlyMinecraftJar()
     accessWidenerPath = rootProject.file("src/main/resources/accesswidener/$awFile")
-    //mods {
-    //    create("easyauth") {
-    //        sourceSet(sourceSets["main"])
-    //    }
-    //}
+    mods {
+        create("easyauth") {
+            sourceSet(sourceSets["main"])
+        }
+    }
     log4jConfigs.from(file("log4j.xml"))
 
     runConfigs.all {
@@ -168,7 +168,7 @@ tasks.processTestResources {
 }
 
 tasks.named<Copy>("processGametestResources") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    // duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     dependsOn("kspTestKotlin")
 }
 

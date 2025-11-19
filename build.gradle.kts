@@ -145,6 +145,10 @@ tasks.jar {
     from("LICENCE")
 }
 
+tasks.withType<ProcessResources>().configureEach {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 tasks.processResources {
     filesMatching("fabric.mod.json") {
         expand(

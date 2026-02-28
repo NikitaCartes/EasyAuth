@@ -25,6 +25,7 @@
   - `/auth setUuid`
   - `/auth clearUuid`
   - `/auth getUuid`
+- PostgreSQL support, thanks to @DanielTrejoBorjas
 
 #### Fix
 - `/auth update` to also refresh cached online player data [#244](https://github.com/NikitaCartes/EasyAuth/issues/244)

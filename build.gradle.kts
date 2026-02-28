@@ -129,6 +129,8 @@ dependencies {
     implementAndInclude("com.mysql:mysql-connector-j:${property("mysql_version")}")
     implementAndInclude("org.xerial:sqlite-jdbc:${property("sqlite_version")}")
 
+    implementAndInclude("org.postgresql:postgresql:${property("postgresql_version")}")
+
     implementation("org.spongepowered:configurate-hocon:${property("hocon_version")}")
     shadow("org.spongepowered:configurate-hocon:${property("hocon_version")}")
 

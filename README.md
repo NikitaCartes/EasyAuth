@@ -76,3 +76,4 @@ A Total of 53 strings are used in the mod
 * Thanks to @martinszelcel for updating for new Mojang's API
 * Thanks to @Gamecraft007 for 1.21 support
 * Thanks to @virgil698 for implementing IP-limit and UUID management features
+* Thanks to @DanielTrejoBorjas for PostgreSQL support

@@ -1,13 +1,16 @@
 package xyz.nikitacartes.easyauth.config;
 
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
+import xyz.nikitacartes.easyauth.EasyAuth;
+import xyz.nikitacartes.easyauth.storage.database.*;
 
 @ConfigSerializable
 public class StorageConfigV1 extends ConfigTemplate {
 
     @Comment("""
-            Database type. Can be sqlite, mysql or mongodb. SQLite is set by default.""")
+            Database type. Can be sqlite, mysql, mongodb or postgresql. SQLite is set by default.""")
     public String databaseType = "sqlite";
 
     @Comment("""
@@ -24,6 +27,11 @@ public class StorageConfigV1 extends ConfigTemplate {
             
             MongoDB configuration.""")
     public MongoDBConfig mongodb = new MongoDBConfig();
+
+    @Comment("""
+            
+            PostgreSQL configuration.""")
+    public PostgreSQLConfig postgresql = new PostgreSQLConfig();
 
     public StorageConfigV1() {
         super("storage.conf", """
@@ -109,5 +117,47 @@ public class StorageConfigV1 extends ConfigTemplate {
                 
                 SQLite table name.""")
         public String sqliteTable = "easyauth";
+    }
+
+    @ConfigSerializable
+    public static class PostgreSQLConfig {
+        @Comment("""
+                
+                PostgreSQL host and port (e.g. localhost:5432).""")
+        public String pgHost = "localhost:5432";
+
+        @Comment("""
+                
+                PostgreSQL user.""")
+        public String pgUser = "postgres";
+
+        @Comment("""
+                
+                PostgreSQL password.""")
+        public String pgPassword = "password";
+
+        @Comment("""
+                
+                PostgreSQL database name.""")
+        public String pgDatabase = "easyauth";
+
+        @Comment("""
+                
+                PostgreSQL table name.""")
+        public String pgTable = "easyauth";
+    }
+
+    public static @NotNull DbApi getDbApi() {
+        DbApi db;
+        if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mysql")) {
+            db = new MySQL(EasyAuth.storageConfig);
+        } else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mongodb")) {
+            db = new MongoDB(EasyAuth.storageConfig);
+        } else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("postgresql")) {
+            db = new PostgreSQL(EasyAuth.storageConfig);
+        } else {
+            db = new SQLite(EasyAuth.storageConfig);
+        }
+        return db;
     }
 }

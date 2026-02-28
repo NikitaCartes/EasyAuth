@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.gameDirectory;
+import static xyz.nikitacartes.easyauth.config.StorageConfigV1.getDbApi;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 import static xyz.nikitacartes.easyauth.config.LangConfigV1.TranslatableText;
@@ -192,14 +193,7 @@ public class ConfigMigration {
         LogInfo("Migrating DB from v4 to v5");
         long now = System.currentTimeMillis();
 
-        DbApi db;
-        if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mysql")) {
-            db = new MySQL(EasyAuth.storageConfig);
-        } else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mongodb")) {
-            db = new MongoDB(EasyAuth.storageConfig);
-        } else {
-            db = new SQLite(EasyAuth.storageConfig);
-        }
+        DbApi db = getDbApi();
         try {
             db.connect();
         } catch (DBApiException e) {
@@ -218,6 +212,15 @@ public class ConfigMigration {
         LogInfo("Migration completed in " + (System.currentTimeMillis() - now) + "ms");
     }
 
+    public static void migrateFromV5() {
+        LogInfo("Migrating config from v5 to v6");
+
+        EasyAuth.storageConfig.save();
+
+        EasyAuth.config.configVersion = 6;
+        EasyAuth.config.save();
+    }
+
     public static void configMigration(int configVersion) {
         // Apply migrations sequentially
         if (configVersion < 2) {
@@ -231,6 +234,9 @@ public class ConfigMigration {
         }
         if (configVersion < 5) {
             migrateFromV4();
+        }
+        if (configVersion < 6) {
+            migrateFromV5();
         }
     }
 

@@ -6,7 +6,7 @@ import org.spongepowered.configurate.objectmapping.meta.Comment;
 @ConfigSerializable
 public class MainConfigV1 extends ConfigTemplate {
 
-    public static final int CURRENT_CONFIG_VERSION = 5;
+    public static final int CURRENT_CONFIG_VERSION = 6;
 
     @Comment("""
             Whether online players should skip the authentication process.

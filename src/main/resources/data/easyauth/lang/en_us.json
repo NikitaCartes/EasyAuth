@@ -51,5 +51,8 @@
   "text.easyauth.uuidCleared": "§aForced UUID for player §e%s §ahas been cleared. The player will use the default UUID on next login.",
   "text.easyauth.uuidChanged": "§6Your UUID has been changed by an administrator. Please reconnect.",
   "text.easyauth.invalidUuid": "§cInvalid UUID format: §e%s§c. Please use the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "text.easyauth.noForcedUuid": "§cPlayer §e%s §cdoes not have a forced UUID set."
+  "text.easyauth.noForcedUuid": "§cPlayer §e%s §cdoes not have a forced UUID set.",
+  "text.easyauth.forceLoginPlayerOffline": "§cPlayer §e%s §cis offline!",
+  "text.easyauth.forceLoginIsAuthenticated": "§cPlayer §e%s §calready logged in.",
+  "text.easyauth.forceLoginSuccess": " §aSuccessfully forced player %s §ato log in."
 }

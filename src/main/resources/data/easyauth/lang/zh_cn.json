@@ -49,5 +49,8 @@
   "text.easyauth.uuidCleared": "§a玩家 §e%s §a的强制UUID已清除。玩家下次登录将使用默认UUID。",
   "text.easyauth.uuidChanged": "§6管理员已更改您的UUID。请重新连接。",
   "text.easyauth.invalidUuid": "§c无效的UUID格式: §e%s§c。请使用格式: 12345678-1234-1234-1234-123456789abc",
-  "text.easyauth.noForcedUuid": "§c玩家 §e%s §c没有设置强制UUID。"
+  "text.easyauth.noForcedUuid": "§c玩家 §e%s §c没有设置强制UUID。",
+  "text.easyauth.forceLoginPlayerOffline": "§c玩家 §e%s §c不在线。",
+  "text.easyauth.forceLoginIsAuthenticated": "§c玩家 §e%s §c已经登录。",
+  "text.easyauth.forceLoginSuccess": " §a已强制玩家 %s §a登录。"
 }

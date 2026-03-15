@@ -93,6 +93,9 @@ public class LangConfigV1 extends ConfigTemplate {
     public TranslatableText uuidChanged = new TranslatableText("uuidChanged");
     public TranslatableText invalidUuid = new TranslatableText("invalidUuid");
     public TranslatableText noForcedUuid = new TranslatableText("noForcedUuid");
+    public TranslatableText forceLoginPlayerOffline = new TranslatableText("forceLoginPlayerOffline");
+    public TranslatableText forceLoginIsAuthenticated = new TranslatableText("forceLoginIsAuthenticated");
+    public TranslatableText forceLoginSuccess = new TranslatableText("forceLoginSuccess");
 
     private static Map<String, String> translations = new HashMap<>();
 

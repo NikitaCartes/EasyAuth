@@ -19,6 +19,7 @@ import xyz.nikitacartes.easyauth.integrations.Permissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.IpLimitManager;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.isValidUsername;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogLogin;
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getUsername;
 
 public class AuthCommand {
@@ -208,9 +210,18 @@ public class AuthCommand {
                                 ))
                         )
                 )
+                .then(literal("forceLogin")
+                        .requires(Permissions.require("easyauth.commands.auth.forceLogin", 3))
+                        .then(argument("username", word())
+                                .executes(ctx -> forceLogin(
+                                        ctx.getSource(),
+                                        getString(ctx, "username")
+                                ))
+                        )
+                )
         );
     }
-
+    
     /**
      * Reloads the config file.
      *
@@ -228,8 +239,8 @@ public class AuthCommand {
     /**
      * Sets global password.
      *
-     * @param source   executioner of the command
-     * @param password password that will be set
+     * @param source    executioner of the command
+     * @param password  password that will be set
      * @param singleUse whether the global password is single-use
      * @return 0
      */
@@ -347,7 +358,7 @@ public class AuthCommand {
             String newPasswordHash = AuthHelper.hashPassword(password.toCharArray());
             playerData.password = newPasswordHash;
             playerData.update();
-            
+
             // Also update the cached PlayerEntryV1 if the player is online
             ServerPlayerEntity player = source.getServer().getPlayerManager().getPlayer(username);
             if (player != null) {
@@ -356,7 +367,7 @@ public class AuthCommand {
                     cachedEntry.password = newPasswordHash;
                 }
             }
-            
+
             langConfig.userdataUpdated.send(source);
         });
         return 0;
@@ -379,12 +390,12 @@ public class AuthCommand {
                     }
                     i.getAndIncrement();
                     message.append(Text.translatable(username)
-                            //? if >= 1.21.5 {
-                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(username)))
-                            //?} else {
-                            /*.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, username)))
-                            *///?}
-                            .formatted(Formatting.YELLOW))
+                                    //? if >= 1.21.5 {
+                                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(username)))
+                                    //?} else {
+                                    /*.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, username)))
+                                     *///?}
+                                    .formatted(Formatting.YELLOW))
                             .append(", ");
                 });
                 source.sendMessage(message);
@@ -569,58 +580,111 @@ public class AuthCommand {
     private static int getUuid(ServerCommandSource source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 entry = DB.getUserData(username);
-            
+
             UUID offlineUuid = Uuids.getOfflinePlayerUuid(username);
-            
+
             MutableText message = Text.literal("");
             message.append(Text.literal("UUID info for ").formatted(Formatting.GRAY));
             message.append(Text.literal(username).formatted(Formatting.YELLOW));
             message.append(Text.literal(":\n").formatted(Formatting.GRAY));
-            
+
             // Offline UUID
             message.append(Text.literal("  Offline UUID: ").formatted(Formatting.GRAY));
             message.append(Text.literal(offlineUuid.toString()).formatted(Formatting.WHITE)
-                    //? if >= 1.21.5 {
-                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(offlineUuid.toString())))
+                            //? if >= 1.21.5 {
+                            .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(offlineUuid.toString())))
                     //?} else {
                     /*.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, offlineUuid.toString())))
-                    *///?}
+                     *///?}
             );
             message.append(Text.literal("\n"));
-            
+
             // Forced UUID
             message.append(Text.literal("  Forced UUID: ").formatted(Formatting.GRAY));
             if (entry != null && entry.forcedUuid != null && !entry.forcedUuid.isEmpty()) {
                 message.append(Text.literal(entry.forcedUuid).formatted(Formatting.GREEN)
-                        //? if >= 1.21.5 {
-                        .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(entry.forcedUuid)))
+                                //? if >= 1.21.5 {
+                                .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(entry.forcedUuid)))
                         //?} else {
                         /*.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, entry.forcedUuid)))
-                        *///?}
+                         *///?}
                 );
             } else {
                 message.append(Text.literal("(none)").formatted(Formatting.DARK_GRAY));
             }
             message.append(Text.literal("\n"));
-            
+
             // Current UUID (if online)
             ServerPlayerEntity player = source.getServer().getPlayerManager().getPlayer(username);
             message.append(Text.literal("  Current UUID: ").formatted(Formatting.GRAY));
             if (player != null) {
                 String currentUuid = player.getUuidAsString();
                 message.append(Text.literal(currentUuid).formatted(Formatting.AQUA)
-                        //? if >= 1.21.5 {
-                        .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(currentUuid)))
+                                //? if >= 1.21.5 {
+                                .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(currentUuid)))
                         //?} else {
                         /*.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, currentUuid)))
-                        *///?}
+                         *///?}
                 );
             } else {
                 message.append(Text.literal("(player offline)").formatted(Formatting.DARK_GRAY));
             }
-            
+
             source.sendMessage(message);
         });
         return 1;
+    }
+
+    /**
+     * Forces a player to login.
+     * @param sender executioner of the command
+     * @param username username of the player
+     * @return 1 on success
+     */
+    public static int forceLogin(ServerCommandSource sender, String username) {
+        ServerPlayerEntity player = sender.getServer().getPlayerManager().getPlayer(username);
+        if (player == null) {
+            langConfig.forceLoginPlayerOffline.send(sender, username);
+            return 0;
+        }
+        PlayerAuth playerAuth = (PlayerAuth) player;
+        LogLogin("Admin " + sender.getName() + " attempted to bypass the password login for player " + username);
+        if (playerAuth.easyAuth$isAuthenticated()) {
+            LogLogin("Player " + username + " is already authenticated");
+            langConfig.alreadyAuthenticated.send(sender);
+            return 0;
+        }
+        PlayerEntryV1 playerData = playerAuth.easyAuth$getPlayerEntryV1();
+        AuthHelper.PasswordOptions passwordResult = AuthHelper.canForceLogin(playerAuth);
+        switch (passwordResult) {
+            case CORRECT -> {
+                playerAuth.easyAuth$setAuthenticated(true);
+                playerAuth.easyAuth$restoreTrueLocation();
+                playerData.lastAuthenticatedDate = ZonedDateTime.now();
+                playerData.loginTries = 0;
+                String oldIp = playerData.lastIp;
+                playerData.lastIp = playerAuth.easyAuth$getIpAddress();
+                playerData.update();
+
+                // Invalidate IP cache if IP changed
+                if (!oldIp.equals(playerData.lastIp)) {
+                    IpLimitManager.invalidateCache(oldIp);
+                    IpLimitManager.invalidateCache(playerData.lastIp);
+                }
+
+                langConfig.forceLoginSuccess.send(sender, username);
+                langConfig.successfullyAuthenticated.send(player);
+                return 1;
+            }
+            case WRONG -> { // Indicates the player has been authenticated
+                langConfig.forceLoginIsAuthenticated.send(sender, username);
+                return 0;
+            }
+            case NOT_REGISTERED -> {
+                langConfig.userNotRegistered.send(sender);
+                return 0;
+            }
+        }
+        return 0;
     }
 }

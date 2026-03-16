@@ -221,7 +221,7 @@ public class AuthCommand {
                 )
         );
     }
-    
+
     /**
      * Reloads the config file.
      *
@@ -637,54 +637,53 @@ public class AuthCommand {
 
     /**
      * Forces a player to login.
-     * @param sender executioner of the command
+     *
+     * @param sender   executioner of the command
      * @param username username of the player
      * @return 1 on success
      */
     public static int forceLogin(ServerCommandSource sender, String username) {
-        ServerPlayerEntity player = sender.getServer().getPlayerManager().getPlayer(username);
-        if (player == null) {
-            langConfig.forceLoginPlayerOffline.send(sender, username);
-            return 0;
-        }
-        PlayerAuth playerAuth = (PlayerAuth) player;
-        LogLogin("Admin " + sender.getName() + " attempted to bypass the password login for player " + username);
-        if (playerAuth.easyAuth$isAuthenticated()) {
-            LogLogin("Player " + username + " is already authenticated");
-            langConfig.alreadyAuthenticated.send(sender);
-            return 0;
-        }
-        PlayerEntryV1 playerData = playerAuth.easyAuth$getPlayerEntryV1();
-        AuthHelper.PasswordOptions passwordResult = AuthHelper.canForceLogin(playerAuth);
-        switch (passwordResult) {
-            case CORRECT -> {
-                playerAuth.easyAuth$setAuthenticated(true);
-                playerAuth.easyAuth$restoreTrueLocation();
-                playerData.lastAuthenticatedDate = ZonedDateTime.now();
-                playerData.loginTries = 0;
-                String oldIp = playerData.lastIp;
-                playerData.lastIp = playerAuth.easyAuth$getIpAddress();
-                playerData.update();
+        THREADPOOL.submit(() -> {
+            ServerPlayerEntity player = sender.getServer().getPlayerManager().getPlayer(username);
+            if (player == null) {
+                langConfig.forceLoginPlayerOffline.send(sender, username);
+                return;
+            }
+            PlayerAuth playerAuth = (PlayerAuth) player;
+            LogLogin("Admin " + sender.getName() + " attempted to bypass the password login for player " + username);
+            if (playerAuth.easyAuth$isAuthenticated()) {
+                LogLogin("Player " + username + " is already authenticated");
+                langConfig.alreadyAuthenticated.send(sender);
+                return;
+            }
+            PlayerEntryV1 playerData = playerAuth.easyAuth$getPlayerEntryV1();
+            AuthHelper.PasswordOptions passwordResult = AuthHelper.canForceLogin(playerAuth);
+            switch (passwordResult) {
+                case CORRECT -> {
+                    playerAuth.easyAuth$setAuthenticated(true);
+                    playerAuth.easyAuth$restoreTrueLocation();
+                    playerData.lastAuthenticatedDate = ZonedDateTime.now();
+                    playerData.loginTries = 0;
+                    String oldIp = playerData.lastIp;
+                    playerData.lastIp = playerAuth.easyAuth$getIpAddress();
+                    playerData.update();
 
-                // Invalidate IP cache if IP changed
-                if (!oldIp.equals(playerData.lastIp)) {
-                    IpLimitManager.invalidateCache(oldIp);
-                    IpLimitManager.invalidateCache(playerData.lastIp);
+                    // Invalidate IP cache if IP changed
+                    if (!oldIp.equals(playerData.lastIp)) {
+                        IpLimitManager.invalidateCache(oldIp);
+                        IpLimitManager.invalidateCache(playerData.lastIp);
+                    }
+
+                    langConfig.forceLoginSuccess.send(sender, username);
+                    langConfig.successfullyAuthenticated.send(player);
                 }
-
-                langConfig.forceLoginSuccess.send(sender, username);
-                langConfig.successfullyAuthenticated.send(player);
-                return 1;
+                case WRONG ->  // Indicates the player has been authenticated
+                    langConfig.forceLoginIsAuthenticated.send(sender, username);
+                
+                case NOT_REGISTERED -> 
+                    langConfig.userNotRegistered.send(sender);
             }
-            case WRONG -> { // Indicates the player has been authenticated
-                langConfig.forceLoginIsAuthenticated.send(sender, username);
-                return 0;
-            }
-            case NOT_REGISTERED -> {
-                langConfig.userNotRegistered.send(sender);
-                return 0;
-            }
-        }
+        });
         return 0;
     }
 }

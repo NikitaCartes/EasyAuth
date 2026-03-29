@@ -21,7 +21,7 @@ public abstract class PrepareSpawnTask$PreparingMixin {
 
     @Final
     @Shadow
-    PrepareSpawnTask field_61135;
+    PrepareSpawnTask this$0;
 
     @Final
     @Mutable
@@ -35,20 +35,20 @@ public abstract class PrepareSpawnTask$PreparingMixin {
 
     @ModifyVariable(method = "tick()Lnet/minecraft/server/network/config/PrepareSpawnTask$Ready;", at = @At("STORE"), ordinal = 0)
     private Vec3 saveRealCoordinates(Vec3 original) {
-        PrepareSpawnTaskInterface field_61135 = (PrepareSpawnTaskInterface) this.field_61135;
+        PrepareSpawnTaskInterface prepareSpawnTask = (PrepareSpawnTaskInterface) this.this$0;
 
-        if (config.hidePlayerCoords && !field_61135.easyAuth$getAuthenticated()) {
-            if (field_61135.easyAuth$getSpawnData() != null) {
+        if (config.hidePlayerCoords && !prepareSpawnTask.easyAuth$getAuthenticated()) {
+            if (prepareSpawnTask.easyAuth$getSpawnData() != null) {
                 return new Vec3(config.worldSpawn.x, config.worldSpawn.y, config.worldSpawn.z);
             }
 
             LastLocation lastLocation = new LastLocation(spawnLevel.dimension(), original, spawnAngle);
-            field_61135.easyAuth$setSpawnData(lastLocation);
+            prepareSpawnTask.easyAuth$setSpawnData(lastLocation);
 
-            spawnLevel = field_61135.easyAuth$getServer().getLevel(ResourceKey.create(Registries.DIMENSION, Identifier.parse(config.worldSpawn.dimension)));
+            spawnLevel = prepareSpawnTask.easyAuth$getServer().getLevel(ResourceKey.create(Registries.DIMENSION, Identifier.parse(config.worldSpawn.dimension)));
             spawnAngle = new Vec2(config.worldSpawn.yaw, config.worldSpawn.pitch);
 
-            LogDebug(String.format("Saving position of player %s as %s", field_61135.easyAuth$getPlayer().name(), lastLocation));
+            LogDebug(String.format("Saving position of player %s as %s", prepareSpawnTask.easyAuth$getPlayer().name(), lastLocation));
 
             return new Vec3(config.worldSpawn.x, config.worldSpawn.y, config.worldSpawn.z);
         } else {

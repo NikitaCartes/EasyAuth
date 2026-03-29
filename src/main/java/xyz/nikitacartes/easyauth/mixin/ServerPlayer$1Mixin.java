@@ -16,14 +16,13 @@ public class ServerPlayer$1Mixin {
 
     @Final
     @Shadow
-    ServerPlayer field_58075;
+    ServerPlayer this$0;
 
-    // TODO(Ravel): target method updateState with the signature not found
     @Inject(method = "sendInitialData(Lnet/minecraft/world/inventory/AbstractContainerMenu;Ljava/util/List;Lnet/minecraft/world/item/ItemStack;[I)V",
             at = @At("HEAD"),
             cancellable = true)
     private void updateStateMixin(CallbackInfo ci) {
-        if (extendedConfig.hideInventory && !((PlayerAuth) field_58075).easyAuth$isAuthenticated()) {
+        if (extendedConfig.hideInventory && !((PlayerAuth) this$0).easyAuth$isAuthenticated()) {
             ci.cancel();
         }
     }

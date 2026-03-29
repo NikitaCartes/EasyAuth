@@ -1,9 +1,9 @@
 plugins {
     id("java")
     id("java-library")
-    kotlin("jvm") version "2.2.0"
-    id("fabric-loom") version "1.14-SNAPSHOT"
-    id("com.google.devtools.ksp") version "2.2.0-2.0.2"
+    kotlin("jvm") version "2.3.20"
+    id("net.fabricmc.fabric-loom") version "1.15-SNAPSHOT"
+    id("com.google.devtools.ksp") version "2.3.6"
     id("com.gradleup.shadow") version "9.3.0"
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
@@ -34,8 +34,8 @@ base.archivesName = "${property("mod_id")}-mc${property("minecraft_version")}"
 val awFile = "easyauth.accesswidener"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 loom {
@@ -83,22 +83,21 @@ dependencies {
 
     // Fabric
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
-    mappings(loom.officialMojangMappings())
 
-    modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
+    implementation("net.fabricmc:fabric-loader:${property("loader_version")}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
     // Translations
     include("xyz.nucleoid:server-translations-api:${property("server_translations_version")}")
-    modImplementation("xyz.nucleoid:server-translations-api:${property("server_translations_version")}")
+    implementation("xyz.nucleoid:server-translations-api:${property("server_translations_version")}")
 
     // Permissions
-    modImplementation("me.lucko:fabric-permissions-api:${property("fabric_permissions_version")}")
+    implementation("me.lucko:fabric-permissions-api:${property("fabric_permissions_version")}")
     compileOnly("net.luckperms:api:${property("luckperms_version")}")
 
     // Mods
-    modCompileOnly("org.geysermc.floodgate:api:${property("floodgate_api_version")}")
-    modCompileOnly("maven.modrinth:vanish:${property("vanish_version")}")
+    compileOnly("org.geysermc.floodgate:api:${property("floodgate_api_version")}")
+    compileOnly("maven.modrinth:vanish:${property("vanish_version")}")
 
     // Password hashing
     implementAndInclude("de.mkammerer:argon2-jvm:${property("argon2_version")}")
@@ -138,13 +137,19 @@ tasks.shadowJar {
     from(sourceSets.main.get().output)
 }
 
-tasks.remapJar {
-    dependsOn(tasks.shadowJar)
-    inputFile.set(tasks.shadowJar.get().archiveFile)
-}
-
 tasks.jar {
     from("LICENCE")
+    dependsOn(tasks.shadowJar)
+    from(zipTree(tasks.shadowJar.get().archiveFile)) {
+        exclude("META-INF/**")
+    }
+    // Exclude .class files from the default compile output (sourceSets.main)
+    // so that the shadow jar's relocated versions are used instead
+    val mainClassesDirs = sourceSets.main.get().output.classesDirs.files
+    exclude { element ->
+        element.file.extension == "class" && mainClassesDirs.any { element.file.toPath().startsWith(it.toPath()) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType<ProcessResources>().configureEach {
@@ -180,12 +185,12 @@ tasks.named<Copy>("processGametestResources") {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
-    options.release.set(21)
+    options.release.set(25)
 }
 
 tasks.register<Copy>("collectJars") {
     group = "build"
-    from(tasks.remapJar.map { it.archiveFile })
+    from(tasks.jar.map { it.archiveFile })
     into(rootProject.layout.buildDirectory.file("libs"))
     dependsOn("build")
 }
@@ -198,7 +203,7 @@ publishMods {
     val modrinthToken = System.getenv("MODRINTH_TOKEN") ?: ""
     val curseforgeToken = System.getenv("CURSEFORGE_TOKEN") ?: ""
 
-    file = tasks.remapJar.get().archiveFile
+    file = tasks.jar.get().archiveFile
     dryRun = modrinthToken.isEmpty() || curseforgeToken.isEmpty()
 
     displayName = "${property("display_name")} $dynamicVersion"

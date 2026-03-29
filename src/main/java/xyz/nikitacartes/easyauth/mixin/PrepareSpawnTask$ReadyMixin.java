@@ -20,9 +20,9 @@ public abstract class PrepareSpawnTask$ReadyMixin {
 
     @Final
     @Shadow
-    PrepareSpawnTask field_61141;
+    PrepareSpawnTask this$0;
 
-    @WrapOperation(method = "method_72303(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/storage/ValueInput;)V",
+    @WrapOperation(method = "lambda$spawn$1(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/storage/ValueInput;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;loadAndSpawnParentVehicle(Lnet/minecraft/world/level/storage/ValueInput;)V"))
     private static void doNotMountPlayerToVehicle(ServerPlayer instance, ValueInput view, Operation<Void> original) {
         if (config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {
@@ -36,7 +36,7 @@ public abstract class PrepareSpawnTask$ReadyMixin {
     private ServerPlayer saveRealCoordinates(ServerPlayer original) {
         PlayerAuth player = (PlayerAuth) original;
 
-        player.easyAuth$setLastLocation(((PrepareSpawnTaskInterface) field_61141).easyAuth$getSpawnData());
+        player.easyAuth$setLastLocation(((PrepareSpawnTaskInterface) this$0).easyAuth$getSpawnData());
         player.easyAuth$setSkipAuth();
         player.easyAuth$savePlayerInfo();
 

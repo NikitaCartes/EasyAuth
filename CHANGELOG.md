@@ -10,7 +10,7 @@
 
 ---
 ### 3.4.3
-##### Minecraft 1.19.4, 1.20[.X], 1.21[.X]
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.1
 #### Add
 - IP limit controls [#200](https://github.com/NikitaCartes/EasyAuth/issues/200), thanks to @virgil698 [#252](https://github.com/NikitaCartes/EasyAuth/pull/252)
 - New config options for IP limit in `extended.conf`:

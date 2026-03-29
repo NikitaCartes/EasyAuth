@@ -41,5 +41,15 @@
   "text.easyauth.selfMarkAsOnline": "§aВы пометили себя как онлайн-игрока.",
   "text.easyauth.selfMarkAsOnlineWarning": "§6Вы собираетесь пометить себя как онлайн-игрока.\n§6Вы не сможете войти, если у вас нет онлайн-аккаунта.\n§6Данные, связанные с оффлайн UUID (скидки у жителей, питомцы и т.д.), будут утеряны.\n§aЕсли вы хотите продолжить, введите /account online \u003cпароль\u003e true.",
   "text.easyauth.accountNotFound": "§cОнлайн-аккаунт не найден.",
-  "text.easyauth.accountCheckFailed": "§cСервер Mojang недоступен. Повторите попытку позже."
+  "text.easyauth.accountCheckFailed": "§cСервер Mojang недоступен. Повторите попытку позже.",
+  "text.easyauth.unknownError": "§4Произошла неизвестная ошибка.",
+  "text.easyauth.databaseError": "§4Ошибка базы данных, подробности в консоли.",
+  "text.easyauth.ipLimitExceeded": "§4Слишком много аккаунтов с вашего IP-адреса. Максимально допустимо: %d аккаунтов на один IP.",
+  "text.easyauth.ipLimitAdminNotify": "§e[EasyAuth] §cПревышение лимита IP: §fИгрок §e%s §fс IP §e%s §fпревысил лимит в §e%d §fаккаунтов. Существующие аккаунты: §e%s",
+  "text.easyauth.sessionLimitExceeded": "§4Слишком много подключений с вашего IP-адреса. Попробуйте позже.",
+  "text.easyauth.uuidSet": "§aПринудительный UUID для игрока §e%s §aустановлен на §e%s§a. Игрок будет кикнут для применения изменений.",
+  "text.easyauth.uuidCleared": "§aПринудительный UUID для игрока §e%s §aсброшен. При следующем входе будет использован UUID по умолчанию.",
+  "text.easyauth.uuidChanged": "§6Ваш UUID был изменён администратором. Пожалуйста, переподключитесь.",
+  "text.easyauth.invalidUuid": "§cНеверный формат UUID: §e%s§c. Используйте формат: 12345678-1234-1234-1234-123456789abc",
+  "text.easyauth.noForcedUuid": "§cУ игрока §e%s §cнет принудительно установленного UUID."
 }

@@ -1,8 +1,10 @@
 package xyz.nikitacartes.easyauth.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
@@ -13,7 +15,6 @@ import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.storage.NbtReadView;
 import net.minecraft.storage.ReadView;
 import net.minecraft.text.Text;
@@ -26,20 +27,20 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.io.File;
 import java.net.SocketAddress;
-import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
+import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getName;
 
 @Mixin(PlayerManager.class)
 public abstract class PlayerManagerMixin {
@@ -110,9 +111,9 @@ public abstract class PlayerManagerMixin {
     }
 
     @Inject(method = "checkCanJoin(Ljava/net/SocketAddress;Lnet/minecraft/server/PlayerConfigEntry;)Lnet/minecraft/text/Text;", at = @At("HEAD"), cancellable = true)
-    private void checkCanJoin(SocketAddress address, PlayerConfigEntry configEntry, CallbackInfoReturnable<Text> cir) {
+    private void checkCanJoin(SocketAddress address, PlayerConfigEntry profile, CallbackInfoReturnable<Text> cir) {
         // Getting the player that is trying to join the server
-        Text returnText = AuthEventHandler.checkCanPlayerJoinServer(configEntry, playerManager, address);
+        Text returnText = AuthEventHandler.checkCanPlayerJoinServer(profile, playerManager, address);
 
         if (returnText != null) {
             // Canceling player joining with the returnText message
@@ -120,24 +121,32 @@ public abstract class PlayerManagerMixin {
         }
     }
 
-    @Inject(method = "createStatHandler(Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/stat/ServerStatHandler;",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
-            )
+    @ModifyReturnValue(method = "locateStatFilePath(Lcom/mojang/authlib/GameProfile;)Ljava/nio/file/Path;",
+            at = @At("RETURN")
     )
-    private void migrateOfflineStats(PlayerEntity player, CallbackInfoReturnable<ServerStatHandler> cir, @Local UUID uUID, @Local ServerStatHandler serverStatHandler, @Local(ordinal = 0) File serverStatsDir) {
-        File onlineFile = new File(serverStatsDir, uUID + ".json");
-        if (server.isOnlineMode() && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) player).easyAuth$isUsingMojangAccount() && !onlineFile.exists()) {
-            String playername = player.getGameProfile().name();
-            File offlineFile = new File(onlineFile.getParent(), Uuids.getOfflinePlayerUuid(playername) + ".json");
-            if (!offlineFile.renameTo(onlineFile)) {
-                LogWarn("Failed to migrate offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
-            } else {
-                LogDebug("Migrated offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
-            }
-
-            serverStatHandler.file = onlineFile;
+    private Path migrateOfflineStats(Path original, @Local(ordinal = 0) Path parentPath, @Local(ordinal = 1) Path onlinePath, @Local(argsOnly = true) GameProfile profile) {
+        if (!server.isOnlineMode() || extendedConfig.forcedOfflineUuid || Files.exists(onlinePath)) {
+            return original;
         }
+
+        PlayerEntity player = server.getPlayerManager().getPlayer(profile.id());
+        if (player != null && ((PlayerAuth) player).easyAuth$isUsingMojangAccount()) {
+            String playername = getName(profile);
+            Path offlinePath = parentPath.resolve(Uuids.getOfflinePlayerUuid(playername) + ".json");
+            if (!Files.exists(offlinePath)) {
+                return original;
+            }
+            try {
+                Files.move(offlinePath, onlinePath);
+                LogDebug("Migrated offline stats (" + offlinePath.getFileName() + ") for player " + playername + " to online stats (" + onlinePath.getFileName() + ")");
+            } catch (Exception e) {
+                LogWarn("Failed to migrate offline stats (" + offlinePath.getFileName() + ") for player " + playername + " to online stats (" + onlinePath.getFileName() + "): " + e.getMessage());
+                return original;
+            }
+            return onlinePath;
+        }
+
+        return original;
     }
+
 }

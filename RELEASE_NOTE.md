@@ -1,14 +1,9 @@
 ### Release notes:
-#### Add
-- Add `prevent-offline-players-with-online-usernames` option to prevent offline players from joining with online usernames
-- Add `check-offline-players-with-online-usernames` option to check offline players with online usernames every time they join the server for an online account
-
 #### Fix
-- Command reloading
-- Detection of offline players that join using an online account
+- It wasn't possible to join the server using an online account if `forced-offline-uuid` was enabled
+- `hide-player-coords` not working for players with `ONLINE` status on `online-mode` servers [#251](https://github.com/NikitaCartes/EasyAuth/issues/251)
+- Packets are being handled for not authenticated players (#230)(https://github.com/NikitaCartes/EasyAuth/issues/230)
 
-#### Changes
-- Update Turkish translation, thanks to @MemoKing34
 ---
 
 ### Full Changelog:

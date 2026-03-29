@@ -68,9 +68,9 @@ public abstract class ServerLoginNetworkHandlerMixin {
 
                 if (playerData.onlineAccount == PlayerEntryV1.OnlineAccount.FALSE) {
                     LogDebug("Player " + username + " is forced to be offline");
-                    state = ServerLoginNetworkHandler.State.VERIFYING;
 
-                    this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
+                    state = getReadyState();
+                    this.profile = getGameProfile(packet.name());
                     ci.cancel();
                     return;
                 }
@@ -81,15 +81,17 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 if (!matcher.matches()) {
                     // Player definitely doesn't have a mojang account
                     LogDebug("Player " + username + " doesn't have a valid username for Mojang account");
-                    state = ServerLoginNetworkHandler.State.VERIFYING;
+
+                    state = getReadyState();
                     playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
                     playerData.update();
 
-                    this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
+                    this.profile = getGameProfile(packet.name());
                     ci.cancel();
                 } else {
                     UUID onlineUuid = getUuid(username);
-                    if ((EasyAuth.extendedConfig.preventOfflinePlayersWithOnlineUsernames && onlineUuid != null) || packet.profileId().equals(onlineUuid)) {
+
+                    if ((EasyAuth.extendedConfig.preventOfflinePlayersWithOnlineUsernames && onlineUuid != null) || checkUuid(packet.profileId(), onlineUuid)) {
                         // Caches the request
                         playerData.onlineAccount = PlayerEntryV1.OnlineAccount.TRUE;
                         playerData.update();
@@ -106,8 +108,8 @@ public abstract class ServerLoginNetworkHandlerMixin {
                                 playerData.update();
                             }
                         }
-                        state = ServerLoginNetworkHandler.State.VERIFYING;
-                        this.profile = new GameProfile(Uuids.getOfflinePlayerUuid(packet.name()), packet.name());
+                        state = getReadyState();
+                        this.profile = getGameProfile(packet.name());
                         ci.cancel();
                     }
                 }
@@ -116,4 +118,31 @@ public abstract class ServerLoginNetworkHandlerMixin {
             }
         }
     }
+
+    @Unique
+    private GameProfile getGameProfile(String name) {
+        // Check if player has a forced UUID set
+        PlayerEntryV1 playerData = PlayersCache.get(name);
+        if (playerData != null && playerData.forcedUuid != null && !playerData.forcedUuid.isEmpty()) {
+            try {
+                UUID forcedUuid = UUID.fromString(playerData.forcedUuid);
+                LogInfo("Using forced UUID " + forcedUuid + " for player " + name);
+                return new GameProfile(forcedUuid, name);
+            } catch (IllegalArgumentException e) {
+                LogError("Invalid forced UUID for player " + name + ": " + playerData.forcedUuid, e);
+            }
+        }
+        return new GameProfile(Uuids.getOfflinePlayerUuid(name), name);
+    }
+
+    @Unique
+    private ServerLoginNetworkHandler.State getReadyState() {
+        return ServerLoginNetworkHandler.State.VERIFYING;
+    }
+
+    @Unique
+    private boolean checkUuid(UUID uuid, UUID onlineUuid) {
+        return uuid.equals(onlineUuid);
+    }
+
 }

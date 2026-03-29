@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.*;
 import xyz.nikitacartes.easyauth.interfaces.PrepareSpawnTaskInterface;
 import xyz.nikitacartes.easyauth.utils.LastLocation;
 
-
 @Mixin(PrepareSpawnTask.class)
 public abstract class PrepareSpawnTaskMixin implements PrepareSpawnTaskInterface {
 

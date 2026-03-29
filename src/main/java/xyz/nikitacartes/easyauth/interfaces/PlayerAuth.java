@@ -1,7 +1,10 @@
 package xyz.nikitacartes.easyauth.interfaces;
 
-import net.minecraft.network.ClientConnection;
 import net.minecraft.storage.ReadView;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.world.World;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.LastLocation;
 
@@ -12,6 +15,10 @@ import java.util.UUID;
  */
 public interface PlayerAuth {
     void easyAuth$savePlayerInfo();
+
+    void easyAuth$saveTrueLocation();
+
+    void easyAuth$saveTrueDimension(RegistryKey<World> registryKey);
 
     void easyAuth$restoreTrueLocation();
 

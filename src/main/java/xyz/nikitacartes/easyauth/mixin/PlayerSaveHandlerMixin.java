@@ -21,6 +21,7 @@ import java.util.Optional;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
+import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getName;
 
 @Mixin(PlayerSaveHandler.class)
 public class PlayerSaveHandlerMixin {
@@ -42,9 +43,9 @@ public class PlayerSaveHandlerMixin {
             ),
             cancellable = true
     )
-    private void fileExists(PlayerConfigEntry playerConfigEntry, String extension, CallbackInfoReturnable<Optional<NbtCompound>> cir, @Local File mixinFile) {
+    private void fileExists(PlayerConfigEntry player, String extension, CallbackInfoReturnable<Optional<NbtCompound>> cir, @Local File mixinFile) {
         if (!(mixinFile.exists() && mixinFile.isFile())) {
-            String playerName = playerConfigEntry.name();
+            String playerName = getName(player);
             if (Boolean.parseBoolean(serverProp.getProperty("online-mode"))) {
                 LogDebug(String.format("Migrating data for %s", playerName));
                 File file = new File(this.playerDataDir, Uuids.getOfflinePlayerUuid(playerName) + extension);

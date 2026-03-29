@@ -21,6 +21,7 @@ import static net.minecraft.text.Text.translatable;
 import static net.minecraft.text.Text.translatableWithFallback;
 import static net.minecraft.text.TranslatableTextContent.EMPTY_ARGUMENTS;
 import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
 @ConfigSerializable
 public class LangConfigV1 extends ConfigTemplate {
@@ -82,6 +83,16 @@ public class LangConfigV1 extends ConfigTemplate {
     public TranslatableText selfMarkAsOnlineWarning = new TranslatableText("selfMarkAsOnlineWarning");
     public TranslatableText accountNotFound = new TranslatableText("accountNotFound");
     public TranslatableText accountCheckFailed = new TranslatableText("accountCheckFailed");
+    public TranslatableText databaseError = new TranslatableText("databaseError");
+    public TranslatableText unknownError = new TranslatableText("unknownError");
+    public TranslatableText ipLimitExceeded = new TranslatableText("ipLimitExceeded");
+    public TranslatableText ipLimitAdminNotify = new TranslatableText("ipLimitAdminNotify");
+    public TranslatableText sessionLimitExceeded = new TranslatableText("sessionLimitExceeded");
+    public TranslatableText uuidSet = new TranslatableText("uuidSet");
+    public TranslatableText uuidCleared = new TranslatableText("uuidCleared");
+    public TranslatableText uuidChanged = new TranslatableText("uuidChanged");
+    public TranslatableText invalidUuid = new TranslatableText("invalidUuid");
+    public TranslatableText noForcedUuid = new TranslatableText("noForcedUuid");
 
     private static Map<String, String> translations = new HashMap<>();
 
@@ -98,7 +109,6 @@ public class LangConfigV1 extends ConfigTemplate {
         if (config == null) {
             config = new LangConfigV1();
             config.save();
-            config = loadConfig(LangConfigV1.class, "translation.conf");
         }
         return config;
     }
@@ -106,14 +116,16 @@ public class LangConfigV1 extends ConfigTemplate {
     public static LangConfigV1 load() {
         LangConfigV1 config = loadConfig(LangConfigV1.class, "translation.conf");
         if (config == null) {
-            throw new RuntimeException("Failed to load translation.conf");
+            LogError("translation.conf was not found, creating new one with default values");
+            config = new LangConfigV1();
+            config.save();
         }
 
         ClassLoader classLoader = LangConfigV1.class.getClassLoader();
         InputStream defaultLanguage = classLoader.getResourceAsStream("data/easyauth/lang/" + config.defaultLanguage + ".json");
 
         if (defaultLanguage == null) {
-            EasyLogger.LogError("Failed to load default language " + config.defaultLanguage + ".json. Using en_us.json instead.");
+            LogError("Failed to load default language " + config.defaultLanguage + ".json. Using en_us.json instead.");
             defaultLanguage = classLoader.getResourceAsStream("data/easyauth/lang/en_us.json");
         }
 

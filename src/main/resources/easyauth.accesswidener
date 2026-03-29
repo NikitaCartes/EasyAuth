@@ -2,11 +2,14 @@ accessWidener	v1	named
 
 accessible class net/minecraft/server/network/ServerLoginNetworkHandler$State
 accessible field net/minecraft/server/network/ServerLoginNetworkHandler profile Lcom/mojang/authlib/GameProfile;
-accessible field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
-mutable field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
+accessible field net/minecraft/stat/ServerStatHandler path Ljava/nio/file/Path;
+mutable field net/minecraft/stat/ServerStatHandler path Ljava/nio/file/Path;
 accessible class net/minecraft/util/UserCache$Entry
 accessible field net/minecraft/storage/NbtReadView nbt Lnet/minecraft/nbt/NbtCompound;
 accessible method net/minecraft/util/UserCache load ()Ljava/util/List;
 accessible field net/minecraft/world/PlayerSaveHandler playerDataDir Ljava/io/File;
+accessible field net/minecraft/entity/player/PlayerInventory selectedSlot I
 accessible field net/minecraft/server/network/ServerCommonNetworkHandler connection Lnet/minecraft/network/ClientConnection;
 accessible class net/minecraft/server/network/PrepareSpawnTask$PlayerSpawn
+accessible field net/minecraft/server/network/ServerPlayerEntity server Lnet/minecraft/server/MinecraftServer;
+accessible field net/minecraft/server/network/ServerPlayNetworkHandler requestedTeleportId I

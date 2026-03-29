@@ -2,15 +2,15 @@ package xyz.nikitacartes.easyauth.storage.database;
 
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nikitacartes.easyauth.EasyAuth;
-import xyz.nikitacartes.easyauth.config.StorageConfigV1;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
@@ -18,13 +18,11 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 public class LevelDB implements DbApi {
     private DB levelDBStore;
-    private final StorageConfigV1 config;
 
     /**
      * Prepares connection to the LevelDB.
      */
-    public LevelDB(StorageConfigV1 config) {
-        this.config = config;
+    public LevelDB() {
     }
 
     /**
@@ -87,15 +85,15 @@ public class LevelDB implements DbApi {
         throw new UnsupportedOperationException("LevelDB is not supported anymore");
     }
 
-    public @Nonnull PlayerEntryV1 getUserDataOrCreate(String username) {
+    public @NotNull PlayerEntryV1 getUserDataOrCreate(String username) {
         throw new UnsupportedOperationException("LevelDB is not supported anymore");
     }
 
-    public void deleteUserData(String uuid) {
+    public boolean deleteUserData(String uuid) {
         throw new UnsupportedOperationException("LevelDB is not supported anymore");
     }
 
-    public void updateUserData(PlayerEntryV1 data) {
+    public boolean updateUserData(PlayerEntryV1 data) {
         throw new UnsupportedOperationException("LevelDB is not supported anymore");
     }
 
@@ -104,7 +102,22 @@ public class LevelDB implements DbApi {
     }
 
     @Override
+    public int countAccountsByIp(String ipAddress) {
+        throw new UnsupportedOperationException("LevelDB is not supported anymore");
+    }
+
+    @Override
+    public List<String> getUsernamesByIp(String ipAddress) {
+        throw new UnsupportedOperationException("LevelDB is not supported anymore");
+    }
+
+    @Override
     public void migrateFromV1(HashMap<String, String> userCache) {
+        throw new UnsupportedOperationException("LevelDB is not supported anymore");
+    }
+
+    @Override
+    public void migrateFromV4() {
         throw new UnsupportedOperationException("LevelDB is not supported anymore");
     }
 }

@@ -17,7 +17,7 @@
   "environment": "server",
   "entrypoints": {
     "main": [
-      "xyz.nikitacartes.easyauth.EasyAuth"
+      "xyz.nikitacartes.easyauth.EasyAuthFabric"
     ]
   },
   "accessWidener": "easyauth.accesswidener",
@@ -27,7 +27,7 @@
   "depends": {
     "fabric-api": "*",
     "fabricloader": "*",
-    "minecraft": ">=1.21.9-"
+    "minecraft": ">=1.21.11-"
   },
   "suggests": {
     "luckperms": "*",

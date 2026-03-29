@@ -7,6 +7,8 @@ EasyAuth disallows players who aren't authenticated to do actions like placing b
 - Auto login players that have purchased Minecraft
 - Online UUIDs for online players
 - Sessions for auto login if they connect from the same IP
+- IP-based account and session limits with exemptions and admin notifications
+- UUID management commands: set custom UUID
 - Coordinate protection
 - Prevents "Logged in from another location"
 - Server-side translation
@@ -34,33 +36,34 @@ Build all supported versions at once:
 ./gradlew build
 ```
 
-If you want to add new feature, you can make pull request against `fabric-1.21.6` branch as it contains the latest changes from `stonecutter` branch:
+If you want to add new feature, you can make pull request against `fabric-1.21.11` branch as it contains the latest changes from `stonecutter` branch:
 ```bash
-git checkout fabric-1.21.6
+git checkout fabric-1.21.11
 ./gradlew build
 ```
 ### Languages
 This mod supports multiple languages.
 
-| Language                                                                | Missing Strings |                        Contributors                         |
-|-------------------------------------------------------------------------|:---------------:|:-----------------------------------------------------------:|
-| Czech <br/>(cs_cz)                                                      |       11        |                  @DavidCZ2051, @Thewest123                  |
-| German <br/>(de_de)                                                     |       14        |                           @X00LA                            |
-| English <br/>(en_gb, en_us)                                             |        0        |                  @samolego, @NikitaCartes                   |
-| Spanish <br/>(es_ar, es_cl, es_ec, <br/>es_es, es_mx, es_uy,<br/>es_ve) |       14        |                @Zailer43, @DanielTrejoBorjas                |
-| French <br/>(fr_fr)                                                     |        9        |                    @Uxzylon, @Sky-NiniKo                    |
-| Hungarian <br/>(hu_hu)                                                  |       14        |                       @Bendimester23                        |
-| Italian <br/>(it_it)                                                    |       11        |                         @Rizzo1812                          |
-| Polish <br/>(pl_pl)                                                     |       11        |                       @LimakXRobczuk                        |
-| Brazilian Portuguese <br/>(pt_br)                                       |        2        |                   @luizffgv, @guigiffoni                    |
-| Russian <br/>(ru_ru)                                                    |        0        |               @alphatoasterous, @NikitaCartes               |
-| Slovenian <br/>(sl_si)                                                  |       14        |                          @Kljunas2                          |
-| Turkish <br/>(tr_tr)                                                    |        0        |                    @egeesin, @MemoKing34                    |
-| Ukrainian <br/>(uk_ua)                                                  |        9        |                     @txlbr, @Y0shioSato                     |
-| Vietnamese <br/>(vi_vn)                                                 |        0        |                     @Toibithieunang123                      |
-| Chinese <br/>(zh_cn, zh_tw)                                             |        9        | @Neubulae, @GodGun968, @Sam5440,<br/>@CMJNB, @MyBlueHorizon |
+| Language                                                                | Missing Strings |                              Contributors                               |
+|-------------------------------------------------------------------------|:---------------:|:-----------------------------------------------------------------------:|
+| Czech <br/>(cs_cz)                                                      |       21        |                        @DavidCZ2051, @Thewest123                        |
+| German <br/>(de_de)                                                     |       24        |                                 @X00LA                                  |
+| English <br/>(en_gb, en_us)                                             |        0        |                        @samolego, @NikitaCartes                         |
+| Spanish <br/>(es_ar, es_cl, es_ec, <br/>es_es, es_mx, es_uy,<br/>es_ve) |        8        |             @Zailer43, @DanielTrejoBorjas, @danielospina-b              |
+| French <br/>(fr_fr)                                                     |       19        |                          @Uxzylon, @Sky-NiniKo                          |
+| Hungarian <br/>(hu_hu)                                                  |       24        |                             @Bendimester23                              |
+| Italian <br/>(it_it)                                                    |       21        |                               @Rizzo1812                                |
+| Polish <br/>(pl_pl)                                                     |       21        |                             @LimakXRobczuk                              |
+| Brazilian Portuguese <br/>(pt_br)                                       |       12        |                         @luizffgv, @guigiffoni                          |
+| Russian <br/>(ru_ru)                                                    |        0        |                     @alphatoasterous, @NikitaCartes                     |
+| Slovenian <br/>(sl_si)                                                  |       24        |                                @Kljunas2                                |
+| Turkish <br/>(tr_tr)                                                    |        8        |                          @egeesin, @MemoKing34                          |
+| Ukrainian <br/>(uk_ua)                                                  |       19        |                           @txlbr, @Y0shioSato                           |
+| Vietnamese <br/>(vi_vn)                                                 |        8        |                           @Toibithieunang123                            |
+| Chinese <br/>(zh_cn)                                                    |        0        | @Neubulae, @GodGun968, @Sam5440,<br/>@CMJNB, @MyBlueHorizon, @ShadyLeaf |
+| Taiwanese Chinese <br/>(zh_tw)                                          |       16        |       @Neubulae, @GodGun968, @Sam5440,<br/>@CMJNB, @MyBlueHorizon       |
 
-A Total of 43 strings are used in the mod
+A Total of 53 strings are used in the mod
 
 ### Contributors
 
@@ -72,3 +75,5 @@ A Total of 43 strings are used in the mod
 * Thanks to @Wereii for 1.19.3 support
 * Thanks to @martinszelcel for updating for new Mojang's API
 * Thanks to @Gamecraft007 for 1.21 support
+* Thanks to @virgil698 for implementing IP-limit and UUID management features
+* Thanks to @DanielTrejoBorjas for PostgreSQL support

@@ -1,15 +1,16 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.storage.deprecated.PlayerCacheV0;
 
-import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.getUnixZero;
@@ -29,7 +30,7 @@ public interface DbApi {
     /**
      * Tells whether DbApi connection is closed.
      *
-     * @return false if connection is open, otherwise false
+     * @return false if connection is open, otherwise true
      */
     boolean isClosed();
 
@@ -62,15 +63,17 @@ public interface DbApi {
      * Deletes data for the provided username.
      *
      * @param username username of player to delete data for
+     * @return true if player data was deleted, otherwise false
      */
-    void deleteUserData(String username);
+    boolean deleteUserData(String username);
 
     /**
      * Updates player's data.
      *
      * @param data data to put inside database
+     * @return true if player data was updated, otherwise false
      */
-    void updateUserData(PlayerEntryV1 data);
+    boolean updateUserData(PlayerEntryV1 data);
 
     /**
      * Get all data from DbApi.
@@ -83,6 +86,22 @@ public interface DbApi {
      * @param userCache HashMap of usernames and UUIDs.
      */
     void migrateFromV1(HashMap<String, String> userCache);
+
+    /**
+     * Counts the number of registered accounts associated with the given IP address.
+     *
+     * @param ipAddress the IP address to check
+     * @return the number of accounts registered with this IP
+     */
+    int countAccountsByIp(String ipAddress);
+
+    /**
+     * Gets all usernames associated with the given IP address.
+     *
+     * @param ipAddress the IP address to check
+     * @return list of usernames registered with this IP
+     */
+    List<String> getUsernamesByIp(String ipAddress);
 
     default PlayerEntryV1 migrateFromV1(String data, String username) {
         String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
@@ -101,4 +120,9 @@ public interface DbApi {
 
         return playerEntry;
     }
+
+    /**
+     * Migrates IP addresses from JSON to column.
+     */
+    void migrateFromV4();
 }

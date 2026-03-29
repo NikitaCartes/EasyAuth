@@ -3,8 +3,7 @@ package xyz.nikitacartes.easyauth.mixin;
 import com.google.common.net.InetAddresses;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.scoreboard.ScoreboardCriterion;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -19,7 +18,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.integrations.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
@@ -29,11 +27,11 @@ import xyz.nikitacartes.easyauth.utils.*;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.EnumSet;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.*;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends EntityMixin implements PlayerAuth {
@@ -42,7 +40,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
 
     @Final
     @Shadow
-    private MinecraftServer server;
+    public MinecraftServer server;
 
     @Unique
     private long kickTimer = config.kickTimeout * 20;
@@ -63,13 +61,13 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     private boolean wasDead = false;
 
     @Unique
-    PlayerEntryV1 playerEntryV1 = new PlayerEntryV1(player.getNameForScoreboard());
+    PlayerEntryV1 playerEntryV1 = new PlayerEntryV1(getUsername(player));
 
     @Unique
     private boolean canSkipAuth = this.player.getClass() != ServerPlayerEntity.class;
 
     @Unique
-    private boolean isAuthenticated = this.player.getClass() != ServerPlayerEntity.class;
+    private volatile boolean isAuthenticated = this.player.getClass() != ServerPlayerEntity.class;
 
     @Unique
     private boolean isUsingMojangAccount = false;
@@ -88,31 +86,48 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     }
 
     @Override
+    public void easyAuth$saveTrueLocation() {
+        if (lastLocation == null) {
+            lastLocation = new LastLocation();
+        }
+        lastLocation.position = getPosition(player);
+        lastLocation.yaw = player.getYaw();
+        lastLocation.pitch = player.getPitch();
+
+        ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
+        wasDead = player.isDead();
+        String username = getUsername(player);
+        LogDebug(String.format("Saving position of player %s as %s", username, lastLocation));
+        if (ridingEntityUUID != null) {
+            LogDebug(String.format("Saving vehicle of player %s as %s", username, ridingEntityUUID));
+        }
+    }
+
+    @Override
+    public void easyAuth$saveTrueDimension(RegistryKey<World> registryKey) {
+        if (lastLocation == null) {
+            lastLocation = new LastLocation();
+        }
+        lastLocation.dimension = registryKey;
+    }
+
+    @Override
     public void easyAuth$restoreTrueLocation() {
         if (lastLocation == null) {
             return;
         }
         if (wasDead) {
-            player.kill(player.getEntityWorld());
-            player.getEntityWorld().getScoreboard().forEachScore(ScoreboardCriterion.DEATH_COUNT, player, (score) -> score.setScore(score.getScore() - 1));
+            StoneCutterUtils.killPlayer(player);
             return;
         }
         // Puts player to last saved position
-        player.teleport(
-                lastLocation.dimension == null ? server.getWorld(World.OVERWORLD) : server.getWorld(lastLocation.dimension),
-                lastLocation.position.getX(),
-                lastLocation.position.getY(),
-                lastLocation.position.getZ(),
-                EnumSet.noneOf(PositionFlag.class),
-                lastLocation.yaw,
-                lastLocation.pitch,
-                true);
-        String username = player.getNameForScoreboard();
+        teleport(player, lastLocation, server.getWorld(World.OVERWORLD));
+        String username = getUsername(player);
         LogDebug(String.format("Teleported player %s to %s", username, lastLocation));
 
         if (rootVehicle != null) {
             LogDebug(String.format("Mounting player to vehicle %s", rootVehicle));
-            player.readRootVehicle(rootVehicle);
+            readRootVehicle(player, rootVehicle);
         }
 
         if (player.getVehicle() == null && ridingEntityUUID != null) {
@@ -122,7 +137,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
             if (world == null) return;
             Entity entity = world.getEntity(ridingEntityUUID);
             if (entity != null) {
-                player.startRiding(entity, true, false);
+                startRiding(player, entity);
             } else {
                 LogDebug("Could not find vehicle for player " + username);
             }
@@ -133,7 +148,6 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
      * Gets the text which tells the player
      * to login or register, depending on account status.
      *
-     * @return Text with appropriate string (login or register)
      */
     @Override
     public void easyAuth$sendAuthMessage() {
@@ -207,7 +221,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         if (authenticated) {
             kickTimer = config.kickTimeout * 20;
             // Updating blocks if needed (in case if portal rescue action happened)
-            World world = player.getEntityWorld();
+            World world = StoneCutterUtils.getServerWorld(player);
             BlockPos pos = player.getBlockPos();
 
             // Sending updates to portal blocks
@@ -248,12 +262,12 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     }
 
     // Player item dropping
-    @Inject(method = "dropSelectedItem(Z)Z", at = @At("HEAD"), cancellable = true)
-    private void dropSelectedItem(boolean dropEntireStack, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "dropSelectedItem(Z)V", at = @At("HEAD"), cancellable = true)
+    private void dropSelectedItem(boolean entireStack, CallbackInfo ci) {
         ActionResult result = AuthEventHandler.onDropItem(player);
 
         if (result == ActionResult.FAIL) {
-            cir.setReturnValue(false);
+            ci.cancel();
         }
     }
 
@@ -357,4 +371,3 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     }
 
 }
-

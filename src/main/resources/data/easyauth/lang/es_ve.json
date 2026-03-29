@@ -27,5 +27,21 @@
   "text.easyauth.playerAlreadyOnline": "§c¡El jugador %s ya se encuentra conectado!",
   "text.easyauth.worldSpawnSet": "§aSpawn para iniciar sesión se estableció correctamente.",
   "text.easyauth.corruptedPlayerData": "§cSus datos probablemente estén dañados. Póngase en contacto con el administrador.",
-  "text.easyauth.userNotRegistered": "§c¡Este jugador no está registrado!"
+  "text.easyauth.userNotRegistered": "§c¡Este jugador no está registrado!",
+  "text.easyauth.cannotLogout": "§c¡No puedes cerrar sesión!",
+  "text.easyauth.offlineUuid": "UUID offline para el jugador %s (click para copiar):\n%s",
+  "text.easyauth.registeredPlayers": "Lista de jugadores registrados:",
+  "text.easyauth.validSession": "§aTienes una sesión válida. No es necesario autenticarte.",
+  "text.easyauth.onlinePlayerLogin": "§aEstás usando una cuenta en línea. No necesitas iniciar sesión.",
+  "text.easyauth.differentUsernameCase": "§6Estás usando una mayúscula/minúscula diferente en tu nombre de usuario. Por favor usa la correcta.",
+  "text.easyauth.wrongGlobalPassword": "§4¡Contraseña global incorrecta!",
+  "text.easyauth.registerRequiredWithGlobalPassword": "§6Escribe /register \u003ccontraseña global\u003e \u003ccontraseña\u003e \u003ccontraseña\u003e para reclamar esta cuenta.",
+  "text.easyauth.markAsOffline": "§aEl jugador %s se ha marcado como offline.",
+  "text.easyauth.markAsOnline": "§aEl jugador %s se ha marcado como online.",
+  "text.easyauth.selfMarkAsOnline": "§aTe has marcado como jugador online.",
+  "text.easyauth.selfMarkAsOnlineWarning": "§6Estás a punto de marcarte como jugador online.\n§6No podrás autenticarte a menos que tengas una cuenta online.\n§6Todos los datos vinculados al UUID offline (como descuentos de aldeanos, mascotas) se perderán.\n§aPara proceder, escribe /account online \u003ccontraseña\u003e true.",
+  "text.easyauth.accountNotFound": "§cCuenta online no encontrada.",
+  "text.easyauth.accountCheckFailed": "§cEl servidor de Mojang no está disponible. Por favor, inténtalo de nuevo más tarde.",
+  "text.easyauth.unknownError": "§4Ha ocurrido un error desconocido.",
+  "text.easyauth.databaseError": "§4Error en base de datos, mira la consola para más detalles."
 }

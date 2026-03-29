@@ -9,6 +9,8 @@ import xyz.nikitacartes.easyauth.integrations.Permissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
+import xyz.nikitacartes.easyauth.utils.IpLimitManager;
 
 import java.time.ZonedDateTime;
 
@@ -48,7 +50,7 @@ public class LoginCommand {
         ServerPlayerEntity player = source.getPlayerOrThrow();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
-        String username = player.getNameForScoreboard();
+        String username = StoneCutterUtils.getUsername(player);
         LogLogin("Player " + username + " is trying to login");
         if (playerAuth.easyAuth$isAuthenticated()) {
             LogLogin("Player " + username + " is already authenticated");
@@ -71,8 +73,15 @@ public class LoginCommand {
             playerAuth.easyAuth$restoreTrueLocation();
             playerData.lastAuthenticatedDate = ZonedDateTime.now();
             playerData.loginTries = 0;
+            String oldIp = playerData.lastIp;
             playerData.lastIp = playerAuth.easyAuth$getIpAddress();
             playerData.update();
+            
+            // Invalidate IP cache if IP changed
+            if (!oldIp.equals(playerData.lastIp)) {
+                IpLimitManager.invalidateCache(oldIp);
+                IpLimitManager.invalidateCache(playerData.lastIp);
+            }
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
             return 0;
         } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {

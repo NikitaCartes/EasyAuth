@@ -30,5 +30,13 @@
     "text.easyauth.userNotRegistered": "§c該玩家未注冊！",
     "text.easyauth.cannotLogout": "§c你不能登出！",
     "text.easyauth.offlineUuid": "玩家%s的離線UUID是（點擊以複製）\n%s",
-    "text.easyauth.registeredPlayers": "已注冊玩家列表："
+    "text.easyauth.registeredPlayers": "已注冊玩家列表：",
+    "text.easyauth.ipLimitExceeded": "§4您的IP地址註冊帳戶數量已達上限。每個IP最多允許 %d 個帳戶。",
+    "text.easyauth.ipLimitAdminNotify": "§e[EasyAuth] §cIP限制警告: §f玩家 §e%s §f來自IP §e%s §f超出了 §e%d §f個帳戶的限制。已有帳戶: §e%s",
+    "text.easyauth.sessionLimitExceeded": "§4您的IP地址連線數過多。請稍後再試。",
+    "text.easyauth.uuidSet": "§a玩家 §e%s §a的強制UUID已設置為 §e%s§a。玩家將被踢出以應用更改。",
+    "text.easyauth.uuidCleared": "§a玩家 §e%s §a的強制UUID已清除。玩家下次登入將使用預設UUID。",
+    "text.easyauth.uuidChanged": "§6管理員已更改您的UUID。請重新連接。",
+    "text.easyauth.invalidUuid": "§c無效的UUID格式: §e%s§c。請使用格式: 12345678-1234-1234-1234-123456789abc",
+    "text.easyauth.noForcedUuid": "§c玩家 §e%s §c沒有設置強制UUID。"
 }

@@ -2,8 +2,13 @@ package xyz.nikitacartes.easyauth.config;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
+import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static java.util.Arrays.asList;
 
 @ConfigSerializable
 public class ExtendedConfigV1 extends ConfigTemplate {
@@ -64,6 +69,31 @@ public class ExtendedConfigV1 extends ConfigTemplate {
 
     @Comment("""
             
+            Allow custom payload and custom click action packets to be processed by non-op players (op level 0 or 1) while not logged in.""")
+    public boolean allowCustomPacketsForNonOp = false;
+
+    @Comment("""
+            
+            Allow custom payload and custom click action packets to be processed by all players while not logged in.
+            Note: this setting overrides allowCustomPacketsForNonOp.""")
+    public boolean allowCustomPackets = false;
+
+    @Comment("""
+            
+            List of allowed custom packet identifiers for players who are not logged in.
+            Works similarly to allowedCommands by checking packet identifier prefix.
+            For custom payload packets, use channel identifiers (e.g. voicechat:request_secret).
+            With debug logging enabled, you can see declined custom packets in the console with their identifiers.""")
+    public List<String> allowedCustomPackets = new ArrayList<>();
+
+    @Comment("""
+            
+            Allow all packets to be processed while not logged in.
+            Note: this setting overrides allowCustomPackets.""")
+    public boolean allowAllPackets = false;
+
+    @Comment("""
+            
             Hide player's inventory from them while not logged in.""")
     public boolean hideInventory = true;
 
@@ -81,7 +111,7 @@ public class ExtendedConfigV1 extends ConfigTemplate {
             
             Cancellation of packets with player's movement and teleportation back leads to an increase number of these packets.
             That setting limits players teleportation.
-            This setting is server-wide so maximum rate would be (1000/teleportation-timeout-ms) per seconds for all unauthorised players.
+            This setting is per-player so maximum rate would be (1000/teleportation-timeout-ms) per seconds for each unauthorised player.
             Value 0 would effectively disable this setting so players will be teleported after each packet.""")
     public long teleportationTimeoutMs = 20;
 
@@ -144,6 +174,16 @@ public class ExtendedConfigV1 extends ConfigTemplate {
 
     @Comment("""
             
+            If true, 'skipAllAuthChecks' does not apply to registered players.""")
+    public boolean skipAllAuthChecksNotForRegisteredPlayers = true;
+
+    @Comment("""
+            
+            If true, 'skipAllAuthChecks' does not apply to operator (op level >=2) players.""")
+    public boolean skipAllAuthChecksNotForOperators = true;
+
+    @Comment("""
+            
             Allow players to join the server with same username as previously registered player, but in different case.""")
     public boolean allowCaseInsensitiveUsername = false;
 
@@ -177,6 +217,11 @@ public class ExtendedConfigV1 extends ConfigTemplate {
             Check offline players with online usernames every time they join the server for online account.""")
     public boolean checkOfflinePlayersWithOnlineUsernames = false;
 
+    @Comment("""
+            
+            IP Limit Settings - Restrict the number of accounts that can be registered/logged in from the same IP address.""")
+    public IpLimitSettings ipLimit = new IpLimitSettings();
+
     public ExtendedConfigV1() {
         super("extended.conf", """
                 ##                          ##
@@ -191,14 +236,16 @@ public class ExtendedConfigV1 extends ConfigTemplate {
             config = new ExtendedConfigV1();
             config.save();
         }
+        AuthEventHandler.usernamePattern = Pattern.compile(config.usernameRegexp);
         return config;
     }
 
     public static ExtendedConfigV1 load() {
         ExtendedConfigV1 config = loadConfig(ExtendedConfigV1.class, "extended.conf");
         if (config == null) {
-            throw new RuntimeException("Failed to load extended.conf");
+            throw new RuntimeException("extended.conf was not found. To regenerate the config files, delete the existing main.conf");
         }
+        AuthEventHandler.usernamePattern = Pattern.compile(config.usernameRegexp);
         return config;
     }
 
@@ -244,5 +291,55 @@ public class ExtendedConfigV1 extends ConfigTemplate {
             
             Read timeout in milliseconds.""")
         public int readTimeout = 5000;
+    }
+
+    @ConfigSerializable
+    public static final class IpLimitSettings {
+        @Comment("""
+            
+            Enable IP-based account limit.
+            When enabled, limits the number of accounts that can be registered/logged in from the same IP address.""")
+        public boolean enabled = false;
+
+        @Comment("""
+            
+            Maximum number of accounts allowed per IP address.
+            Set to -1 to disable the limit.""")
+        public int maxAccountsPerIp = 2;
+
+        @Comment("""
+            
+            Block registration attempts when the IP limit is exceeded.
+            If false, players can still register but admins will be notified.""")
+        public boolean blockExcessRegistration = true;
+
+        @Comment("""
+            
+            Notify admins (players with op level >=3) when a new IP address attempts to exceed the account limit.""")
+        public boolean notifyAdmins = true;
+
+        @Comment("""
+            
+            List of IP addresses that are exempt from the limit (e.g., localhost, trusted IPs).""")
+        public ArrayList<String> exemptIps = new ArrayList<>(asList("127.0.0.1", "localhost"));
+
+        @Comment("""
+            
+            Cache expiry time in seconds for IP account count cache.
+            Lower values mean more frequent database queries but more accurate counts.""")
+        public int cacheExpirySeconds = 300;
+
+        @Comment("""
+            
+            Maximum number of concurrent online sessions allowed from the same IP address.
+            Set to -1 to disable the limit.
+            This check is performed at player join time.""")
+        public int maxConcurrentSessionsPerIp = -1;
+
+        @Comment("""
+            
+            Whether online (premium) players are exempt from the concurrent session limit.
+            If true, premium players that auto-login will not be blocked by the session limit.""")
+        public boolean exemptOnlinePlayers = false;
     }
 }

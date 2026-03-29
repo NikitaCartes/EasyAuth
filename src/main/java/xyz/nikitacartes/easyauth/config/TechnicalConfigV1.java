@@ -1,11 +1,12 @@
 package xyz.nikitacartes.easyauth.config;
 
-import net.fabricmc.loader.api.FabricLoader;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
+
+import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.isModLoaded;
 
 @ConfigSerializable
 public class TechnicalConfigV1 extends ConfigTemplate {
@@ -65,25 +66,20 @@ public class TechnicalConfigV1 extends ConfigTemplate {
     }
 
     public static TechnicalConfigV1 load() {
-        TechnicalConfigV1 config = loadConfig(TechnicalConfigV1.class, "technical.conf");
-        if (config == null) {
-            throw new RuntimeException("Failed to load technical.conf");
-        }
-        config.loadedMods();
-        return config;
+        return create();
     }
 
     private void loadedMods() {
-        if (FabricLoader.getInstance().isModLoaded("floodgate")) {
+        if (isModLoaded("floodgate")) {
             floodgateLoaded = true;
         }
-        if (FabricLoader.getInstance().isModLoaded("luckperms")) {
+        if (isModLoaded("luckperms")) {
             luckPermsLoaded = true;
         }
-        if (FabricLoader.getInstance().isModLoaded("melius-vanish")) {
+        if (isModLoaded("melius-vanish")) {
             vanishLoaded = true;
         }
-        if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
+        if (isModLoaded("fabric-permissions-api-v0")) {
             permissionsLoaded = true;
         }
     }

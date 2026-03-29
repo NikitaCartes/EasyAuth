@@ -1,21 +1,12 @@
 package xyz.nikitacartes.easyauth;
 
 import com.mojang.brigadier.tree.CommandNode;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.player.*;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.*;
-import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.storage.database.*;
 import xyz.nikitacartes.easyauth.integrations.LuckPermsIntegration;
 
@@ -31,12 +22,13 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
-import static xyz.nikitacartes.easyauth.config.ConfigMigration.migrateFromV1;
+import static xyz.nikitacartes.easyauth.config.ConfigMigration.*;
+import static xyz.nikitacartes.easyauth.config.MainConfigV1.CURRENT_CONFIG_VERSION;
+import static xyz.nikitacartes.easyauth.config.StorageConfigV1.getDbApi;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
-public class EasyAuth implements ModInitializer {
+public class EasyAuth {
     public static DbApi DB = null;
 
     public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
@@ -53,11 +45,17 @@ public class EasyAuth implements ModInitializer {
     public static TechnicalConfigV1 technicalConfig;
     public static StorageConfigV1 storageConfig;
 
-    @Override
-    public void onInitialize() {
-        gameDirectory = FabricLoader.getInstance().getGameDir();
-        LogInfo("EasyAuth mod by NikitaCartes");
 
+    public static void loadDatabase() {
+        DB = getDbApi();
+        try {
+            DB.connect();
+        } catch (DBApiException e) {
+            LogError("Error while set up database connection", e);
+        }
+    }
+
+    public static void migrateConfigs() {
         File file = new File(gameDirectory + "/config/EasyAuth");
         if (!file.exists()) {
             if (!file.mkdirs()) {
@@ -65,50 +63,9 @@ public class EasyAuth implements ModInitializer {
             }
             ConfigMigration.migrateFromV0();
         }
-
-        loadConfigs();
-
-        if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mysql")) {
-            DB = new MySQL(EasyAuth.storageConfig);
-        } else if (EasyAuth.storageConfig.databaseType.equalsIgnoreCase("mongodb")) {
-            DB = new MongoDB(EasyAuth.storageConfig);
-        } else {
-            DB = new SQLite(EasyAuth.storageConfig);
-        }
-        try {
-            DB.connect();
-        } catch (DBApiException e) {
-            LogError("Error while set up database connection", e);
-        }
-
-        // Registering the commands
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, environment) -> {
-            RegisterCommand.registerCommand(dispatcher);
-            LoginCommand.registerCommand(dispatcher);
-            LogoutCommand.registerCommand(dispatcher);
-            AuthCommand.registerCommand(dispatcher);
-            AccountCommand.registerCommand(dispatcher);
-        });
-
-        // From Fabric API
-        PlayerBlockBreakEvents.BEFORE.register((world, player, blockPos, blockState, blockEntity) -> AuthEventHandler.onBreakBlock(player));
-        UseBlockCallback.EVENT.register((player, world, hand, blockHitResult) -> AuthEventHandler.onUseBlock(player));
-        UseItemCallback.EVENT.register((player, world, hand) -> AuthEventHandler.onUseItem(player));
-        AttackEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onAttackEntity(player));
-        UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
-        ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> {
-            reloadConfigs(server);
-            langConfig.configurationReloaded.send(server);
-        });
-        ServerLifecycleEvents.SERVER_STARTED.register(this::onStartServer);
-        ServerLifecycleEvents.SERVER_STOPPED.register(this::onStopServer);
-
-        Identifier earlyPhase = Identifier.of("easyauth", "early");
-        ServerLoginConnectionEvents.QUERY_START.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
-        ServerLoginConnectionEvents.QUERY_START.register(earlyPhase, AuthEventHandler::onPreLogin);
     }
 
-    private void onStartServer(MinecraftServer server) {
+    static void onStartServer(MinecraftServer server) {
         try {
             serverProp.load(new FileReader(gameDirectory + "/server.properties"));
             if (Boolean.parseBoolean(serverProp.getProperty("enforce-secure-profile"))) {
@@ -129,7 +86,7 @@ public class EasyAuth implements ModInitializer {
         }
     }
 
-    private void onStopServer(MinecraftServer server) {
+    static void onStopServer(MinecraftServer server) {
         LogInfo("Shutting down EasyAuth.");
 
         // Closing threads
@@ -148,45 +105,30 @@ public class EasyAuth implements ModInitializer {
     }
 
     public static void loadConfigs() {
-        VersionConfig version = VersionConfig.load();
+        int configVersion = VersionConfig.load().configVersion;
 
-        switch (version.configVersion) {
-            case -1: {
-                EasyAuth.config = MainConfigV1.create();
-                EasyAuth.technicalConfig = TechnicalConfigV1.create();
-                EasyAuth.langConfig = LangConfigV1.create();
-                EasyAuth.extendedConfig = ExtendedConfigV1.create();
-                EasyAuth.storageConfig = StorageConfigV1.create();
-                break;
-            }
-            case 1: {
-                EasyAuth.config = MainConfigV1.load();
-                EasyAuth.technicalConfig = TechnicalConfigV1.load();
-                EasyAuth.langConfig = LangConfigV1.load();
-                EasyAuth.extendedConfig = ExtendedConfigV1.load();
-                EasyAuth.storageConfig = StorageConfigV1.load();
-                migrateFromV1();
-                break;
-            }
-            case 2: {
-                EasyAuth.config = MainConfigV1.load();
-                EasyAuth.technicalConfig = TechnicalConfigV1.load();
-                EasyAuth.langConfig = LangConfigV1.load();
-                EasyAuth.extendedConfig = ExtendedConfigV1.load();
-                EasyAuth.storageConfig = StorageConfigV1.load();
-                break;
-            }
-            default: {
-                LogError("Unknown config version: " + version.configVersion + "\n Using last known version");
-                EasyAuth.config = MainConfigV1.load();
-                EasyAuth.technicalConfig = TechnicalConfigV1.load();
-                EasyAuth.langConfig = LangConfigV1.load();
-                EasyAuth.extendedConfig = ExtendedConfigV1.load();
-                EasyAuth.storageConfig = StorageConfigV1.load();
-                break;
-            }
+        if (configVersion == -1) {
+            // Fresh install - create default configs
+            EasyAuth.config = MainConfigV1.create();
+            EasyAuth.technicalConfig = TechnicalConfigV1.create();
+            EasyAuth.langConfig = LangConfigV1.create();
+            EasyAuth.extendedConfig = ExtendedConfigV1.create();
+            EasyAuth.storageConfig = StorageConfigV1.create();
+            return;
         }
-        AuthEventHandler.usernamePattern = Pattern.compile(EasyAuth.extendedConfig.usernameRegexp);
+
+        if (configVersion > CURRENT_CONFIG_VERSION) {
+            LogError("Unknown config version: " + configVersion + "\n Using last known version");
+        }
+
+        // Load existing configs
+        EasyAuth.config = MainConfigV1.load();
+        EasyAuth.technicalConfig = TechnicalConfigV1.load();
+        EasyAuth.langConfig = LangConfigV1.load();
+        EasyAuth.extendedConfig = ExtendedConfigV1.load();
+        EasyAuth.storageConfig = StorageConfigV1.load();
+
+        configMigration(configVersion);
     }
 
     public static void saveConfigs() {
@@ -242,6 +184,9 @@ public class EasyAuth implements ModInitializer {
         RegisterCommand.registerCommand(serverCommandManager.getDispatcher());
         LoginCommand.registerCommand(serverCommandManager.getDispatcher());
 
+        if (server.getPlayerManager() == null) {
+            return;
+        }
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             serverCommandManager.sendCommandTree(player);
         }

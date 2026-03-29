@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 public class PlayerEntryV1 {
 
@@ -82,6 +81,15 @@ public class PlayerEntryV1 {
     @SerializedName("data_version")
     public int dataVersion = 1;
 
+    /**
+     * Forced UUID for the player.
+     * When set, this UUID will be used instead of the default offline/online UUID.
+     * Useful for preserving player data when switching between online/offline modes.
+     */
+    @Expose
+    @SerializedName("forced_uuid")
+    public String forcedUuid = null;
+
 
     public PlayerEntryV1(String username, String usernameLowerCase, String uuid, String json) {
         PlayerEntryV1 entry = gson.fromJson(json, PlayerEntryV1.class);
@@ -99,6 +107,7 @@ public class PlayerEntryV1 {
         this.lastKickedDate = entry.lastKickedDate == null ? startOfTime : entry.lastKickedDate;
         this.registrationDate = entry.registrationDate == null ? startOfTime : entry.registrationDate;
         this.dataVersion = entry.dataVersion;
+        this.forcedUuid = entry.forcedUuid;
     }
 
     public PlayerEntryV1(String username) {
@@ -107,7 +116,7 @@ public class PlayerEntryV1 {
     }
 
     public PlayerEntryV1(String username, UUID uuid) {
-        new PlayerEntryV1(username);
+        this(username);
         this.uuid = uuid;
     }
 
@@ -119,7 +128,6 @@ public class PlayerEntryV1 {
      * Update entry in database.
      */
     public void update() {
-        LogDebug("Updating player data for " + username + " in database: " + toJson());
         THREADPOOL.execute(() -> DB.updateUserData(this));
     }
 

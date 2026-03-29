@@ -1,10 +1,10 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.packet.c2s.login.LoginHelloC2SPacket;
+import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
-import net.minecraft.util.Uuids;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.core.UUIDUtil;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,13 +24,13 @@ import java.util.regex.Pattern;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.getUuid;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
-@Mixin(ServerLoginNetworkHandler.class)
-public abstract class ServerLoginNetworkHandlerMixin {
+@Mixin(ServerLoginPacketListenerImpl.class)
+public abstract class ServerLoginPacketListenerImplMixin {
     @Shadow
-    public GameProfile profile;
+    public GameProfile authenticatedProfile;
 
     @Shadow
-    private ServerLoginNetworkHandler.State state;
+    private ServerLoginPacketListenerImpl.State state;
 
     @Final
     @Shadow
@@ -48,21 +48,21 @@ public abstract class ServerLoginNetworkHandlerMixin {
      * @param ci
      */
     @Inject(
-            method = "onHello(Lnet/minecraft/network/packet/c2s/login/LoginHelloC2SPacket;)V",
+            method = "handleHello(Lnet/minecraft/network/protocol/login/ServerboundHelloPacket;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/MinecraftServer;isOnlineMode()Z"
+                    target = "Lnet/minecraft/server/MinecraftServer;usesAuthentication()Z"
             ),
             cancellable = true
     )
-    private void checkPremium(LoginHelloC2SPacket packet, CallbackInfo ci) {
+    private void checkPremium(ServerboundHelloPacket packet, CallbackInfo ci) {
         String username = packet.name();
 
         LogDebug("UUID of player " + username + " is " + packet.profileId());
 
         PlayerEntryV1 playerData = PlayersCache.loadOrRegister(username);
 
-        if (server.isOnlineMode()) {
+        if (server.usesAuthentication()) {
             try {
                 Matcher matcher = pattern.matcher(username);
 
@@ -70,7 +70,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     LogDebug("Player " + username + " is forced to be offline");
 
                     state = getReadyState();
-                    this.profile = getGameProfile(packet.name());
+                    this.authenticatedProfile = getGameProfile(packet.name());
                     ci.cancel();
                     return;
                 }
@@ -86,7 +86,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                     playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
                     playerData.update();
 
-                    this.profile = getGameProfile(packet.name());
+                    this.authenticatedProfile = getGameProfile(packet.name());
                     ci.cancel();
                 } else {
                     UUID onlineUuid = getUuid(username);
@@ -109,7 +109,7 @@ public abstract class ServerLoginNetworkHandlerMixin {
                             }
                         }
                         state = getReadyState();
-                        this.profile = getGameProfile(packet.name());
+                        this.authenticatedProfile = getGameProfile(packet.name());
                         ci.cancel();
                     }
                 }
@@ -132,12 +132,12 @@ public abstract class ServerLoginNetworkHandlerMixin {
                 LogError("Invalid forced UUID for player " + name + ": " + playerData.forcedUuid, e);
             }
         }
-        return new GameProfile(Uuids.getOfflinePlayerUuid(name), name);
+        return new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name);
     }
 
     @Unique
-    private ServerLoginNetworkHandler.State getReadyState() {
-        return ServerLoginNetworkHandler.State.VERIFYING;
+    private ServerLoginPacketListenerImpl.State getReadyState() {
+        return ServerLoginPacketListenerImpl.State.VERIFYING;
     }
 
     @Unique

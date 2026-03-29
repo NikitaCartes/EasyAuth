@@ -6,15 +6,15 @@ import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 
-public class LuckPermsIntegration implements ContextCalculator<ServerPlayerEntity> {
+public class LuckPermsIntegration implements ContextCalculator<ServerPlayer> {
 
     @Override
-    public void calculate(@NonNull ServerPlayerEntity playerEntity, @NonNull ContextConsumer contextConsumer) {
+    public void calculate(@NonNull ServerPlayer playerEntity, @NonNull ContextConsumer contextConsumer) {
         contextConsumer.accept("easyauth:authenticated", Boolean.toString(((PlayerAuth)playerEntity).easyAuth$isAuthenticated()));
         contextConsumer.accept("easyauth:online_account", Boolean.toString(((PlayerAuth)playerEntity).easyAuth$isUsingMojangAccount()));
     }

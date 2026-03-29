@@ -2,9 +2,9 @@ package xyz.nikitacartes.easyauth;
 
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.*;
 import xyz.nikitacartes.easyauth.storage.database.*;
@@ -77,7 +77,7 @@ public class EasyAuth {
         }
         if (DB.isClosed()) {
             LogError("Couldn't connect to database. Stopping server");
-            server.stop(false);
+            server.halt(false);
         }
 
         // Register LuckPerms integration if it's loaded
@@ -153,7 +153,7 @@ public class EasyAuth {
             LogError("onInitialize error: ", e);
         }
 
-        CommandManager serverCommandManager = server.getCommandManager();
+        Commands serverCommandManager = server.getCommands();
         try {
             Field literalsField = CommandNode.class.getDeclaredField("literals");
             literalsField.setAccessible(true);
@@ -169,7 +169,7 @@ public class EasyAuth {
                 literals.remove("log");
             }
 
-            CommandNode<ServerCommandSource> rootNode = serverCommandManager.getDispatcher().getRoot();
+            CommandNode<CommandSourceStack> rootNode = serverCommandManager.getDispatcher().getRoot();
 
             rootNode.getChildren().removeIf(node ->
                     node.getName().equals("register") ||
@@ -184,11 +184,11 @@ public class EasyAuth {
         RegisterCommand.registerCommand(serverCommandManager.getDispatcher());
         LoginCommand.registerCommand(serverCommandManager.getDispatcher());
 
-        if (server.getPlayerManager() == null) {
+        if (server.getPlayerList() == null) {
             return;
         }
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            serverCommandManager.sendCommandTree(player);
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            serverCommandManager.sendCommands(player);
         }
     }
 

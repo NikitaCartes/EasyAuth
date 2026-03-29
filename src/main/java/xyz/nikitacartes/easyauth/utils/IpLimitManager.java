@@ -1,8 +1,8 @@
 package xyz.nikitacartes.easyauth.utils;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
@@ -147,16 +147,16 @@ public class IpLimitManager {
         List<String> existingAccounts = getUsernamesForIp(ipAddress);
         String accountList = String.join(", ", existingAccounts);
 
-        Text message = langConfig.ipLimitAdminNotify.get(username, ipAddress,
+        Component message = langConfig.ipLimitAdminNotify.get(username, ipAddress,
                 extendedConfig.ipLimit.maxAccountsPerIp, accountList);
 
         LogInfo("IP limit exceeded: " + username + " from IP " + ipAddress +
                 " (existing accounts: " + accountList + ")");
 
         // Notify all players with admin permission (op level 3+)
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            if (StoneCutterUtils.isOperator(server.getPlayerManager(), player)) {
-                player.sendMessage(message);
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (StoneCutterUtils.isOperator(server.getPlayerList(), player)) {
+                player.sendSystemMessage(message);
             }
         }
     }
@@ -187,7 +187,7 @@ public class IpLimitManager {
      */
     public static int countConcurrentSessions(MinecraftServer server, String ipAddress) {
         int count = 0;
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             PlayerAuth playerAuth = (PlayerAuth) player;
             if (ipAddress.equals(playerAuth.easyAuth$getIpAddress())) {
                 count++;

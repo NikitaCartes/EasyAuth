@@ -6,7 +6,7 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
 import com.mongodb.client.model.InsertOneModel;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
 import org.bson.Document;
 import org.bson.UuidRepresentation;
 import org.jetbrains.annotations.NotNull;
@@ -208,7 +208,7 @@ public class MongoDB implements DbApi {
                 data = findIterable.next().toJson();
             } else {
                 String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
-                String lowerCaseUuid = Uuids.getOfflinePlayerUuid(lowerCaseUsername).toString();
+                String lowerCaseUuid = UUIDUtil.createOfflinePlayerUUID(lowerCaseUsername).toString();
                 findIterable = collection.find(eq("UUID", lowerCaseUuid)).iterator();
                 if (findIterable.hasNext()) {
                     data = findIterable.next().toJson();

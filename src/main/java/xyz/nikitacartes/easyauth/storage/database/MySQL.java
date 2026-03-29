@@ -1,7 +1,7 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nikitacartes.easyauth.config.StorageConfigV1;
@@ -350,7 +350,7 @@ public class MySQL implements DbApi {
                         data = resultSet.getString("data");
                     } else {
                         String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
-                        String lowerCaseUuid = Uuids.getOfflinePlayerUuid(lowerCaseUsername).toString();
+                        String lowerCaseUuid = UUIDUtil.createOfflinePlayerUUID(lowerCaseUsername).toString();
                         statement.setString(1,lowerCaseUuid);
                         resultSet = statement.executeQuery();
                         if (resultSet.next()) {

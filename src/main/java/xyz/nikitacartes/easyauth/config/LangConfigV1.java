@@ -2,11 +2,11 @@ package xyz.nikitacartes.easyauth.config;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import xyz.nikitacartes.easyauth.utils.EasyLogger;
@@ -17,9 +17,9 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.minecraft.text.Text.translatable;
-import static net.minecraft.text.Text.translatableWithFallback;
-import static net.minecraft.text.TranslatableTextContent.EMPTY_ARGUMENTS;
+import static net.minecraft.network.chat.Component.translatable;
+import static net.minecraft.network.chat.Component.translatableWithFallback;
+import static net.minecraft.network.chat.contents.TranslatableContents.NO_ARGS;
 import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
@@ -180,51 +180,51 @@ public class LangConfigV1 extends ConfigTemplate {
             this.serverSide = serverSide;
         }
 
-        public void send(ServerCommandSource commandOutput) {
+        public void send(CommandSourceStack commandOutput) {
             if (enabled && commandOutput != null) {
-                commandOutput.sendMessage(getTranslation());
+                commandOutput.sendSystemMessage(getTranslation());
             }
         }
 
-        public void send(ServerPlayerEntity commandOutput) {
+        public void send(ServerPlayer commandOutput) {
             if (enabled && commandOutput != null) {
-                commandOutput.sendMessage(getTranslation());
+                commandOutput.sendSystemMessage(getTranslation());
             }
         }
 
-        public <T extends CommandOutput> void send(T commandOutput) {
+        public <T extends CommandSource> void send(T commandOutput) {
             if (enabled && commandOutput != null) {
-                commandOutput.sendMessage(getTranslation());
+                commandOutput.sendSystemMessage(getTranslation());
             }
         }
 
-        public void send(ServerCommandSource commandOutput, Object... args) {
+        public void send(CommandSourceStack commandOutput, Object... args) {
             if (enabled && commandOutput != null) {
-                commandOutput.sendMessage(getTranslation(args));
+                commandOutput.sendSystemMessage(getTranslation(args));
             }
         }
 
-        public MutableText get() {
+        public MutableComponent get() {
             if (enabled) {
                 return getTranslation();
             } else {
-                return Text.literal("");
+                return Component.literal("");
             }
         }
 
-        public MutableText get(Object... args) {
+        public MutableComponent get(Object... args) {
             if (enabled) {
                 return getTranslation(args);
             } else {
-                return Text.literal("");
+                return Component.literal("");
             }
         }
 
-        public MutableText getNonTranslatable() {
-            return getNonTranslatable(EMPTY_ARGUMENTS);
+        public MutableComponent getNonTranslatable() {
+            return getNonTranslatable(NO_ARGS);
         }
 
-        public MutableText getNonTranslatable(Object... args) {
+        public MutableComponent getNonTranslatable(Object... args) {
             if (enabled) {
                 if (!fallback.isEmpty()) {
                     return translatableWithFallback(key, fallback, args);
@@ -232,15 +232,15 @@ public class LangConfigV1 extends ConfigTemplate {
                     return translatableWithFallback(key, translations.get(key), args);
                 }
             } else {
-                return Text.literal("");
+                return Component.literal("");
             }
         }
 
-        private MutableText getTranslation() {
-            return getTranslation(EMPTY_ARGUMENTS);
+        private MutableComponent getTranslation() {
+            return getTranslation(NO_ARGS);
         }
 
-        private MutableText getTranslation(Object... args) {
+        private MutableComponent getTranslation(Object... args) {
             if (langConfig.enableServerSideTranslation && serverSide) {
                 return translatable(key, args);
             } if (!fallback.isEmpty()) {

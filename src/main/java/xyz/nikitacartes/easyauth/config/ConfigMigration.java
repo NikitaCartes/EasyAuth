@@ -1,8 +1,8 @@
 package xyz.nikitacartes.easyauth.config;
 
-import net.minecraft.server.PlayerConfigEntry;
+import net.minecraft.server.players.NameAndId;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.util.UserCache;
+import net.minecraft.server.players.CachedUserNameToIdResolver;
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.database.*;
@@ -147,10 +147,10 @@ public class ConfigMigration {
             LogError("onInitialize error: ", e);
         }
 
-        UserCache userCache = new UserCache(null, new File(gameDirectory + "/usercache.json"));
+        CachedUserNameToIdResolver userCache = new CachedUserNameToIdResolver(null, new File(gameDirectory + "/usercache.json"));
         HashMap<String, String> uuids = new HashMap<>();
-        for (UserCache.Entry entry : userCache.load()) {
-            PlayerConfigEntry playerConfigEntry = entry.getPlayer();
+        for (CachedUserNameToIdResolver.GameProfileInfo entry : userCache.load()) {
+            NameAndId playerConfigEntry = entry.nameAndId();
             uuids.put(playerConfigEntry.name(), playerConfigEntry.id().toString());
         }
         db.migrateFromV1(uuids);

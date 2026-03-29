@@ -2,60 +2,60 @@ package xyz.nikitacartes.easyauth.utils;
 
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.command.permission.LeveledPermissionPredicate;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.scoreboard.ScoreboardCriterion;
-import net.minecraft.server.OperatorEntry;
-import net.minecraft.server.PlayerConfigEntry;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Relative;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import net.minecraft.server.players.ServerOpListEntry;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 import java.util.EnumSet;
 import java.util.UUID;
 
 public class StoneCutterUtils {
 
-    public static String getUsername(ServerPlayerEntity player) {
-        return player.getNameForScoreboard();
+    public static String getUsername(ServerPlayer player) {
+        return player.getScoreboardName();
     }
 
-    public static Vec3d getPosition(ServerPlayerEntity player) {
-        return player.getEntityPos();
+    public static Vec3 getPosition(ServerPlayer player) {
+        return player.position();
     }
 
-    public static void teleport(ServerPlayerEntity player, LastLocation lastLocation, ServerWorld fallbackWorld) {
-        player.teleport(
-                lastLocation.dimension == null ? fallbackWorld : player.server.getWorld(lastLocation.dimension),
-                lastLocation.position.getX(),
-                lastLocation.position.getY(),
-                lastLocation.position.getZ(),
-                EnumSet.noneOf(PositionFlag.class),
+    public static void teleport(ServerPlayer player, LastLocation lastLocation, ServerLevel fallbackWorld) {
+        player.teleportTo(
+                lastLocation.dimension == null ? fallbackWorld : player.server.getLevel(lastLocation.dimension),
+                lastLocation.position.x(),
+                lastLocation.position.y(),
+                lastLocation.position.z(),
+                EnumSet.noneOf(Relative.class),
                 lastLocation.yaw,
                 lastLocation.pitch,
                 true);
     }
 
-    public static World getWorld(Entity entity) {
-        return entity.getEntityWorld();
+    public static Level getWorld(Entity entity) {
+        return entity.level();
     }
 
-    public static ServerWorld getServerWorld(ServerPlayerEntity player) {
-        return player.getEntityWorld();
+    public static ServerLevel getServerWorld(ServerPlayer player) {
+        return player.level();
     }
 
-    public static void killPlayer(ServerPlayerEntity player) {
+    public static void killPlayer(ServerPlayer player) {
         player.kill(StoneCutterUtils.getServerWorld(player));
 
-        StoneCutterUtils.getServerWorld(player).getScoreboard().forEachScore(ScoreboardCriterion.DEATH_COUNT, player, (score) -> score.setScore(score.getScore() - 1));
+        StoneCutterUtils.getServerWorld(player).getScoreboard().forAllObjectives(ObjectiveCriteria.DEATH_COUNT, player, (score) -> score.set(score.get() - 1));
     }
 
-    public static String getName(PlayerConfigEntry profile) {
+    public static String getName(NameAndId profile) {
         return profile.name();
     }
 
@@ -63,11 +63,11 @@ public class StoneCutterUtils {
         return profile.name();
     }
 
-    public static String getName(PlayerEntity player) {
+    public static String getName(Player player) {
         return getName(player.getGameProfile());
     }
 
-    public static UUID getId(PlayerConfigEntry profile) {
+    public static UUID getId(NameAndId profile) {
         return profile.id();
     }
 
@@ -75,10 +75,10 @@ public class StoneCutterUtils {
         return profile.id();
     }
 
-    public static void readRootVehicle(ServerPlayerEntity player, ReadView rootVehicle) {
-        player.readRootVehicle(rootVehicle);
+    public static void readRootVehicle(ServerPlayer player, ValueInput rootVehicle) {
+        player.loadAndSpawnParentVehicle(rootVehicle);
     }
-    public static void startRiding(ServerPlayerEntity player, Entity entity) {
+    public static void startRiding(ServerPlayer player, Entity entity) {
         player.startRiding(entity, true, false);
     }
 
@@ -86,38 +86,38 @@ public class StoneCutterUtils {
         return FabricLoader.getInstance().isModLoaded(modId);
     }
 
-    public static boolean isAdministrator(PlayerManager playerManager, ServerPlayerEntity player) {
+    public static boolean isAdministrator(PlayerList playerManager, ServerPlayer player) {
         return isAdministrator(playerManager, player.getGameProfile());
     }
 
-    public static boolean isAdministrator(PlayerManager playerManager, GameProfile profile) {
-        OperatorEntry operatorEntry = playerManager.getOpList().get(new PlayerConfigEntry(profile));
+    public static boolean isAdministrator(PlayerList playerManager, GameProfile profile) {
+        ServerOpListEntry operatorEntry = playerManager.getOps().get(new NameAndId(profile));
         return isAdministrator(operatorEntry);
     }
 
-    private static boolean isAdministrator(OperatorEntry operatorEntry) {
+    private static boolean isAdministrator(ServerOpListEntry operatorEntry) {
         if (operatorEntry == null) {
             return false;
         }
-        return operatorEntry.getLevel() == LeveledPermissionPredicate.GAMEMASTERS ||
-                operatorEntry.getLevel() == LeveledPermissionPredicate.ADMINS ||
-                operatorEntry.getLevel() == LeveledPermissionPredicate.OWNERS;
+        return operatorEntry.permissions() == LevelBasedPermissionSet.GAMEMASTER ||
+                operatorEntry.permissions() == LevelBasedPermissionSet.ADMIN ||
+                operatorEntry.permissions() == LevelBasedPermissionSet.OWNER;
     }
 
-    public static boolean isOperator(PlayerManager playerManager, ServerPlayerEntity player) {
+    public static boolean isOperator(PlayerList playerManager, ServerPlayer player) {
         return isOperator(playerManager, player.getGameProfile());
     }
 
-    public static boolean isOperator(PlayerManager playerManager, GameProfile profile) {
-        OperatorEntry operatorEntry = playerManager.getOpList().get(new PlayerConfigEntry(profile));
+    public static boolean isOperator(PlayerList playerManager, GameProfile profile) {
+        ServerOpListEntry operatorEntry = playerManager.getOps().get(new NameAndId(profile));
         return isOperator(operatorEntry);
     }
 
-    private static boolean isOperator(OperatorEntry operatorEntry) {
+    private static boolean isOperator(ServerOpListEntry operatorEntry) {
         if (operatorEntry == null) {
             return false;
         }
-        return operatorEntry.getLevel() == LeveledPermissionPredicate.ADMINS ||
-                operatorEntry.getLevel() == LeveledPermissionPredicate.OWNERS;
+        return operatorEntry.permissions() == LevelBasedPermissionSet.ADMIN ||
+                operatorEntry.permissions() == LevelBasedPermissionSet.OWNER;
     }
 }

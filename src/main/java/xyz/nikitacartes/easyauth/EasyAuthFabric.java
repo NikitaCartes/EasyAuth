@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
@@ -54,7 +54,7 @@ public class EasyAuthFabric implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(EasyAuth::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(EasyAuth::onStopServer);
 
-        Identifier earlyPhase = Identifier.of("easyauth", "early");
+        Identifier earlyPhase = Identifier.fromNamespaceAndPath("easyauth", "early");
         ServerLoginConnectionEvents.QUERY_START.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
         ServerLoginConnectionEvents.QUERY_START.register(earlyPhase, (netHandler, server, packetSender, sync) -> AuthEventHandler.onPreLogin(netHandler));
     }

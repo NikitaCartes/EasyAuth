@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,7 +18,7 @@ public class PlayerCacheV0 {
     // public final LastLocation lastLocation = new LastLocation();
     /**
      * Whether player is authenticated.
-     * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayerEntity) session validation}.
+     * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayer) session validation}.
      */
     // @Expose
     // @SerializedName("is_authenticated")
@@ -43,7 +43,7 @@ public class PlayerCacheV0 {
     public long lastKicked = 0;
     /**
      * Last recorded IP of player.
-     * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayerEntity) sessions}.
+     * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayer) sessions}.
      */
     @Expose
     @SerializedName("last_ip")

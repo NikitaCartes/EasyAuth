@@ -1,7 +1,7 @@
 package xyz.nikitacartes.easyauth.interfaces;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerConfigEntry;
+import net.minecraft.server.players.NameAndId;
 import xyz.nikitacartes.easyauth.utils.LastLocation;
 
 public interface PrepareSpawnTaskInterface {
@@ -15,7 +15,7 @@ public interface PrepareSpawnTaskInterface {
 
     boolean easyAuth$getAuthenticated();
 
-    PlayerConfigEntry easyAuth$getPlayer();
+    NameAndId easyAuth$getPlayer();
 
     MinecraftServer easyAuth$getServer();
 }

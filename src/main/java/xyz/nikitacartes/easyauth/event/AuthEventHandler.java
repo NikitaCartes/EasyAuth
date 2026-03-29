@@ -1,21 +1,51 @@
 package xyz.nikitacartes.easyauth.event;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.network.packet.c2s.common.*;
-import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
-import net.minecraft.server.PlayerConfigEntry;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomClickActionPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
+import net.minecraft.network.protocol.common.ServerboundPongPacket;
+import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
+import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
+import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandSignedPacket;
+import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
+import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundClientTickEndPacket;
+import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
+import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedPacket;
+import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.BlockPos;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.integrations.FloodgateApiHelper;
@@ -47,90 +77,90 @@ public class AuthEventHandler {
     private static final Map<UUID, Long> lastAcceptedPacketByPlayer = new ConcurrentHashMap<>();
     private static final Map<UUID, Boolean> administratorCache = new ConcurrentHashMap<>();
 
-    public static boolean isAllowedPacket(ServerPlayerEntity player, Packet<?> packet) {
-        if (packet instanceof KeepAliveC2SPacket
-                || packet instanceof ResourcePackStatusC2SPacket
-                || packet instanceof TeleportConfirmC2SPacket
-                || packet instanceof PlayerSessionC2SPacket
-                || packet instanceof MessageAcknowledgmentC2SPacket
-                || packet instanceof ClientStatusC2SPacket
-                || packet instanceof RequestCommandCompletionsC2SPacket
-                || packet instanceof CommandExecutionC2SPacket
-                || packet instanceof QueryPingC2SPacket
-                || packet instanceof PlayerLoadedC2SPacket
-                || packet instanceof ClientTickEndC2SPacket
-                || packet instanceof CookieResponseC2SPacket
-                || packet instanceof ChatCommandSignedC2SPacket
-                || packet instanceof CommonPongC2SPacket
-                || packet instanceof ClientOptionsC2SPacket
-                || packet instanceof AcknowledgeChunksC2SPacket
-                || packet instanceof AcknowledgeReconfigurationC2SPacket
+    public static boolean isAllowedPacket(ServerPlayer player, Packet<?> packet) {
+        if (packet instanceof ServerboundKeepAlivePacket
+                || packet instanceof ServerboundResourcePackPacket
+                || packet instanceof ServerboundAcceptTeleportationPacket
+                || packet instanceof ServerboundChatSessionUpdatePacket
+                || packet instanceof ServerboundChatAckPacket
+                || packet instanceof ServerboundClientCommandPacket
+                || packet instanceof ServerboundCommandSuggestionPacket
+                || packet instanceof ServerboundChatCommandPacket
+                || packet instanceof ServerboundPingRequestPacket
+                || packet instanceof ServerboundPlayerLoadedPacket
+                || packet instanceof ServerboundClientTickEndPacket
+                || packet instanceof ServerboundCookieResponsePacket
+                || packet instanceof ServerboundChatCommandSignedPacket
+                || packet instanceof ServerboundPongPacket
+                || packet instanceof ServerboundClientInformationPacket
+                || packet instanceof ServerboundChunkBatchReceivedPacket
+                || packet instanceof ServerboundConfigurationAcknowledgedPacket
         ) {
             return true;
         }
 
         // Movement packets are handled separately
-        if (packet instanceof PlayerMoveC2SPacket ||
-                packet instanceof PlayerMoveC2SPacket.Full ||
-                packet instanceof PlayerMoveC2SPacket.LookAndOnGround ||
-                packet instanceof PlayerMoveC2SPacket.OnGroundOnly ||
-                packet instanceof PlayerMoveC2SPacket.PositionAndOnGround ||
-                packet instanceof VehicleMoveC2SPacket ||
-                packet instanceof PlayerInputC2SPacket) {
+        if (packet instanceof ServerboundMovePlayerPacket ||
+                packet instanceof ServerboundMovePlayerPacket.PosRot ||
+                packet instanceof ServerboundMovePlayerPacket.Rot ||
+                packet instanceof ServerboundMovePlayerPacket.StatusOnly ||
+                packet instanceof ServerboundMovePlayerPacket.Pos ||
+                packet instanceof ServerboundMoveVehiclePacket ||
+                packet instanceof ServerboundPlayerInputPacket) {
             return true;
         }
 
-        if (extendedConfig.allowChat && packet instanceof ChatMessageC2SPacket) {
+        if (extendedConfig.allowChat && packet instanceof ServerboundChatPacket) {
             return true;
         }
 
-        if (extendedConfig.allowBlockInteraction && packet instanceof PlayerInteractBlockC2SPacket) {
+        if (extendedConfig.allowBlockInteraction && packet instanceof ServerboundUseItemOnPacket) {
             return true;
         }
 
-        if (extendedConfig.allowEntityInteraction && packet instanceof PlayerInteractEntityC2SPacket) {
+        if (extendedConfig.allowEntityInteraction && packet instanceof ServerboundInteractPacket) {
             return true;
         }
 
-        if (extendedConfig.allowItemUsing && packet instanceof PlayerInteractItemC2SPacket) {
+        if (extendedConfig.allowItemUsing && packet instanceof ServerboundUseItemPacket) {
             return true;
         }
 
-        if (packet instanceof HandSwingC2SPacket) {
+        if (packet instanceof ServerboundSwingPacket) {
             return extendedConfig.allowBlockInteraction || extendedConfig.allowEntityInteraction || extendedConfig.allowEntityAttacking;
         }
         
-        if (packet instanceof PlayerActionC2SPacket actionPacket) {
+        if (packet instanceof ServerboundPlayerActionPacket actionPacket) {
             var action = actionPacket.getAction();
-            if (action == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK ||
-                    action == PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK ||
-                    action == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
+            if (action == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK ||
+                    action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK ||
+                    action == ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK) {
                 return extendedConfig.allowBlockBreaking;
             }
-            if (action == PlayerActionC2SPacket.Action.DROP_ALL_ITEMS ||
-                    action == PlayerActionC2SPacket.Action.DROP_ITEM) {
+            if (action == ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS ||
+                    action == ServerboundPlayerActionPacket.Action.DROP_ITEM) {
                 return extendedConfig.allowItemDropping;
             }
-            if (action == PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND) {
+            if (action == ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND) {
                 return extendedConfig.allowItemMoving;
             }
-            if (action == PlayerActionC2SPacket.Action.RELEASE_USE_ITEM) {
+            if (action == ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM) {
                 return extendedConfig.allowItemUsing;
             }
             return false;
         }
 
         if (extendedConfig.allowItemMoving && (
-                packet instanceof ClickSlotC2SPacket ||
-                packet instanceof CreativeInventoryActionC2SPacket ||
-                packet instanceof UpdateSelectedSlotC2SPacket ||
-                packet instanceof CloseHandledScreenC2SPacket ||
-                packet instanceof ButtonClickC2SPacket
+                packet instanceof ServerboundContainerClickPacket ||
+                packet instanceof ServerboundSetCreativeModeSlotPacket ||
+                packet instanceof ServerboundSetCarriedItemPacket ||
+                packet instanceof ServerboundContainerClosePacket ||
+                packet instanceof ServerboundContainerButtonClickPacket
         )) {
             return true;
         }
 
-        if (packet instanceof CustomPayloadC2SPacket) {
+        if (packet instanceof ServerboundCustomPayloadPacket) {
             if (extendedConfig.allowCustomPackets) {
                 return true;
             }
@@ -139,7 +169,7 @@ public class AuthEventHandler {
                 return true;
             }
 
-            String customPacketIdentifier = ((CustomPayloadC2SPacket) packet).payload().getId().id().toString();
+            String customPacketIdentifier = ((ServerboundCustomPayloadPacket) packet).payload().type().id().toString();
 
             if (isAllowedCustomPacket(customPacketIdentifier)) {
                 return true;
@@ -150,7 +180,7 @@ public class AuthEventHandler {
             }
         }
 
-        if (packet instanceof CustomClickActionC2SPacket) {
+        if (packet instanceof ServerboundCustomClickActionPacket) {
             if (extendedConfig.allowCustomPackets) {
                 return true;
             }
@@ -161,9 +191,9 @@ public class AuthEventHandler {
         return false;
     }
 
-    public static boolean isAdministratorCached(ServerPlayerEntity player) {
-        UUID playerUuid = player.getUuid();
-        return administratorCache.computeIfAbsent(playerUuid, ignored -> StoneCutterUtils.isAdministrator(player.server.getPlayerManager(), player));
+    public static boolean isAdministratorCached(ServerPlayer player) {
+        UUID playerUuid = player.getUUID();
+        return administratorCache.computeIfAbsent(playerUuid, ignored -> StoneCutterUtils.isAdministrator(player.server.getPlayerList(), player));
     }
 
     private static boolean isAllowedCustomPacket(String packetIdentifier) {
@@ -188,10 +218,10 @@ public class AuthEventHandler {
      * @param manager PlayerManager
      * @return Text if player should be disconnected
      */
-    public static Text checkCanPlayerJoinServer(PlayerConfigEntry profile, PlayerManager manager, SocketAddress socketAddress) {
+    public static Component checkCanPlayerJoinServer(NameAndId profile, PlayerList manager, SocketAddress socketAddress) {
         // Getting the player. By this point, the player's game profile has been authenticated so the UUID is legitimate.
         String incomingPlayerUsername = StoneCutterUtils.getName(profile);
-        PlayerEntity onlinePlayer = manager.getPlayer(incomingPlayerUsername);
+        Player onlinePlayer = manager.getPlayerByName(incomingPlayerUsername);
 
         String ip = socketAddress.toString();
         if (ip.contains("/")) {
@@ -241,11 +271,11 @@ public class AuthEventHandler {
         return null;
     }
 
-    public static void loadPlayerData(ServerPlayerEntity player, ClientConnection connection) {
+    public static void loadPlayerData(ServerPlayer player, Connection connection) {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
-        UUID playerUuid = player.getUuid();
-        PlayerManager playerManager = player.server.getPlayerManager();
+        UUID playerUuid = player.getUUID();
+        PlayerList playerManager = player.server.getPlayerList();
         administratorCache.put(playerUuid, StoneCutterUtils.isAdministrator(playerManager, player));
 
         // Create in case of Carpet player
@@ -253,7 +283,7 @@ public class AuthEventHandler {
         PlayerEntryV1 cache = PlayersCache.getOrCreate(username);
         boolean update = false;
         if (cache.uuid == null) {
-            cache.uuid = player.getUuid();
+            cache.uuid = player.getUUID();
             update = true;
         }
         playerAuth.easyAuth$setPlayerEntryV1(cache);
@@ -290,7 +320,7 @@ public class AuthEventHandler {
     }
 
     // Player joining the server
-    public static void onPlayerJoin(ServerPlayerEntity player) {
+    public static void onPlayerJoin(ServerPlayer player) {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (playerAuth.easyAuth$canSkipAuth()) {
@@ -305,21 +335,21 @@ public class AuthEventHandler {
 
         // Tries to rescue player from nether portal
         if (extendedConfig.tryPortalRescue) {
-            BlockPos pos = player.getBlockPos();
-            player.teleport(pos.getX() + 0.5, player.getY(), pos.getZ() + 0.5, false);
-            if (player.getBlockStateAtPos().getBlock().equals(Blocks.NETHER_PORTAL) || StoneCutterUtils.getServerWorld(player).getBlockState(player.getBlockPos().up()).getBlock().equals(Blocks.NETHER_PORTAL)) {
+            BlockPos pos = player.blockPosition();
+            player.randomTeleport(pos.getX() + 0.5, player.getY(), pos.getZ() + 0.5, false);
+            if (player.getInBlockState().getBlock().equals(Blocks.NETHER_PORTAL) || StoneCutterUtils.getServerWorld(player).getBlockState(player.blockPosition().above()).getBlock().equals(Blocks.NETHER_PORTAL)) {
                 // Faking portal blocks to be air
-                BlockUpdateS2CPacket feetPacket = new BlockUpdateS2CPacket(pos, Blocks.AIR.getDefaultState());
-                player.networkHandler.sendPacket(feetPacket);
+                ClientboundBlockUpdatePacket feetPacket = new ClientboundBlockUpdatePacket(pos, Blocks.AIR.defaultBlockState());
+                player.connection.send(feetPacket);
 
-                BlockUpdateS2CPacket headPacket = new BlockUpdateS2CPacket(pos.up(), Blocks.AIR.getDefaultState());
-                player.networkHandler.sendPacket(headPacket);
+                ClientboundBlockUpdatePacket headPacket = new ClientboundBlockUpdatePacket(pos.above(), Blocks.AIR.defaultBlockState());
+                player.connection.send(headPacket);
             }
         }
     }
 
-    public static void onPlayerLeave(ServerPlayerEntity player) {
-        UUID playerUuid = player.getUuid();
+    public static void onPlayerLeave(ServerPlayer player) {
+        UUID playerUuid = player.getUUID();
         administratorCache.remove(playerUuid);
         lastAcceptedPacketByPlayer.remove(playerUuid);
 
@@ -338,7 +368,7 @@ public class AuthEventHandler {
         }
     }
 
-    public static boolean isSkipAllAuthChecksApplicable(ServerPlayerEntity player) {
+    public static boolean isSkipAllAuthChecksApplicable(ServerPlayer player) {
         if (!extendedConfig.skipAllAuthChecks) {
             return false;
         }
@@ -356,26 +386,26 @@ public class AuthEventHandler {
     }
 
     // Player execute command
-    public static ActionResult onPlayerCommand(ServerPlayerEntity player, String command) {
+    public static InteractionResult onPlayerCommand(ServerPlayer player, String command) {
         // Getting the message to then be able to check it
         if (extendedConfig.allowCommands) {
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         }
         if (player == null) {
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         }
         if (command == null) {
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         }
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         }
 
         if (command.startsWith("login ")
                 || command.startsWith("register ")
                 || (extendedConfig.aliases.login && command.startsWith("l "))
                 || (extendedConfig.aliases.register && command.startsWith("reg "))) {
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         }
 
         String normalizedCommand = command.trim();
@@ -399,51 +429,51 @@ public class AuthEventHandler {
         for (String allowedCommand : extendedConfig.allowedCommands) {
             if (command.startsWith(allowedCommand)) {
                 LogDebug("Player " + username + " executed command " + command + " without being authenticated.");
-                return ActionResult.PASS;
+                return InteractionResult.PASS;
             }
         }
         LogDebug("Player " + username + " tried to execute command " + command + " without being authenticated.");
         ((PlayerAuth) player).easyAuth$sendAuthMessage();
-        return ActionResult.FAIL;
+        return InteractionResult.FAIL;
     }
 
     // Player chatting
-    public static ActionResult onPlayerChat(ServerPlayerEntity player) {
+    public static InteractionResult onPlayerChat(ServerPlayer player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowChat) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     // Player movement
-    public static ActionResult onPlayerMove(ServerPlayerEntity player) {
+    public static InteractionResult onPlayerMove(ServerPlayer player) {
         // Player will fall if enabled (prevent fly kick)
         // Otherwise, movement should be disabled
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowMovement) {
-            UUID playerUuid = player.getUuid();
+            UUID playerUuid = player.getUUID();
             long now = System.nanoTime();
             long lastAcceptedPacket = lastAcceptedPacketByPlayer.getOrDefault(playerUuid, 0L);
             if (now >= lastAcceptedPacket + extendedConfig.teleportationTimeoutMs * 1_000_000L) {
-                player.networkHandler.requestTeleport(player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
+                player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
                 lastAcceptedPacketByPlayer.put(playerUuid, now);
             }
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     // Using a block (right-click function)
-    public static ActionResult onUseBlock(PlayerEntity player) {
+    public static InteractionResult onUseBlock(Player player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowBlockInteraction) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     // Breaking a block
-    public static boolean onBreakBlock(PlayerEntity player) {
+    public static boolean onBreakBlock(Player player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowBlockBreaking) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
             return false;
@@ -452,57 +482,57 @@ public class AuthEventHandler {
     }
 
     // Using an item
-    public static ActionResult onUseItem(PlayerEntity player) {
+    public static InteractionResult onUseItem(Player player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowItemUsing) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     // Dropping an item
-    public static ActionResult onDropItem(PlayerEntity player) {
+    public static InteractionResult onDropItem(Player player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowItemDropping) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     // Changing inventory (item moving etc.)
-    public static ActionResult onTakeItem(ServerPlayerEntity player) {
+    public static InteractionResult onTakeItem(ServerPlayer player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowItemMoving) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     // Attacking an entity
-    public static ActionResult onAttackEntity(PlayerEntity player) {
+    public static InteractionResult onAttackEntity(Player player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowEntityAttacking) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     // Interacting with entity
-    public static ActionResult onUseEntity(PlayerEntity player) {
+    public static InteractionResult onUseEntity(Player player) {
         if (!((PlayerAuth) player).easyAuth$isAuthenticated() && !extendedConfig.allowEntityInteraction) {
             ((PlayerAuth) player).easyAuth$sendAuthMessage();
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
-    public static void onPreLogin(ServerLoginNetworkHandler netHandler) {
-        if (extendedConfig.forcedOfflineUuid && netHandler.profile != null) {
-            netHandler.profile = Uuids.getOfflinePlayerProfile(netHandler.profile.name());
+    public static void onPreLogin(ServerLoginPacketListenerImpl netHandler) {
+        if (extendedConfig.forcedOfflineUuid && netHandler.authenticatedProfile != null) {
+            netHandler.authenticatedProfile = UUIDUtil.createOfflineProfile(netHandler.authenticatedProfile.name());
         }
     }
 

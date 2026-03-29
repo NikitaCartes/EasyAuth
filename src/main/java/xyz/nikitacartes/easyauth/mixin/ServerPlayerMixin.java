@@ -1,16 +1,17 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import com.google.common.net.InetAddresses;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.Connection;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,10 +34,10 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.*;
 
-@Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends EntityMixin implements PlayerAuth {
+@Mixin(ServerPlayer.class)
+public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAuth {
     @Unique
-    private final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
+    private final ServerPlayer player = (ServerPlayer) (Object) this;
 
     @Final
     @Shadow
@@ -55,7 +56,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     private UUID ridingEntityUUID = null;
 
     @Unique
-    private ReadView rootVehicle = null;
+    private ValueInput rootVehicle = null;
 
     @Unique
     private boolean wasDead = false;
@@ -64,10 +65,10 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     PlayerEntryV1 playerEntryV1 = new PlayerEntryV1(getUsername(player));
 
     @Unique
-    private boolean canSkipAuth = this.player.getClass() != ServerPlayerEntity.class;
+    private boolean canSkipAuth = this.player.getClass() != ServerPlayer.class;
 
     @Unique
-    private volatile boolean isAuthenticated = this.player.getClass() != ServerPlayerEntity.class;
+    private volatile boolean isAuthenticated = this.player.getClass() != ServerPlayer.class;
 
     @Unique
     private boolean isUsingMojangAccount = false;
@@ -77,9 +78,9 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
 
     @Override
     public void easyAuth$savePlayerInfo() {
-        ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
-        wasDead = player.isDead();
-        String username = player.getNameForScoreboard();
+        ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUUID() : null;
+        wasDead = player.isDeadOrDying();
+        String username = player.getScoreboardName();
         if (ridingEntityUUID != null) {
             LogDebug(String.format("Saving vehicle of player %s as %s", username, ridingEntityUUID));
         }
@@ -91,11 +92,11 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
             lastLocation = new LastLocation();
         }
         lastLocation.position = getPosition(player);
-        lastLocation.yaw = player.getYaw();
-        lastLocation.pitch = player.getPitch();
+        lastLocation.yaw = player.getYRot();
+        lastLocation.pitch = player.getXRot();
 
-        ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUuid() : null;
-        wasDead = player.isDead();
+        ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUUID() : null;
+        wasDead = player.isDeadOrDying();
         String username = getUsername(player);
         LogDebug(String.format("Saving position of player %s as %s", username, lastLocation));
         if (ridingEntityUUID != null) {
@@ -104,7 +105,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     }
 
     @Override
-    public void easyAuth$saveTrueDimension(RegistryKey<World> registryKey) {
+    public void easyAuth$saveTrueDimension(ResourceKey<@NotNull Level> registryKey) {
         if (lastLocation == null) {
             lastLocation = new LastLocation();
         }
@@ -121,7 +122,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
             return;
         }
         // Puts player to last saved position
-        teleport(player, lastLocation, server.getWorld(World.OVERWORLD));
+        teleport(player, lastLocation, server.getLevel(Level.OVERWORLD));
         String username = getUsername(player);
         LogDebug(String.format("Teleported player %s to %s", username, lastLocation));
 
@@ -133,7 +134,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         if (player.getVehicle() == null && ridingEntityUUID != null) {
             LogDebug(String.format("Mounting player to vehicle %s", ridingEntityUUID));
             if (lastLocation.dimension == null) return;
-            ServerWorld world = server.getWorld(lastLocation.dimension);
+            ServerLevel world = server.getLevel(lastLocation.dimension);
             if (world == null) return;
             Entity entity = world.getEntity(ridingEntityUUID);
             if (entity != null) {
@@ -179,7 +180,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     @Override
     public void easyAuth$setSkipAuth() {
         easyAuth$setUsingMojangAccount();
-        canSkipAuth = (this.player.getClass() != ServerPlayerEntity.class) ||
+        canSkipAuth = (this.player.getClass() != ServerPlayer.class) ||
                 (config.floodgateAutoLogin && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
                 (config.premiumAutoLogin && easyAuth$isUsingMojangAccount());
     }
@@ -196,7 +197,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
 
     @Override
     public void easyAuth$setUsingMojangAccount() {
-        isUsingMojangAccount = server.isOnlineMode() && playerEntryV1.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE;
+        isUsingMojangAccount = server.usesAuthentication() && playerEntryV1.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE;
     }
 
     /**
@@ -221,19 +222,19 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         if (authenticated) {
             kickTimer = config.kickTimeout * 20;
             // Updating blocks if needed (in case if portal rescue action happened)
-            World world = StoneCutterUtils.getServerWorld(player);
-            BlockPos pos = player.getBlockPos();
+            Level world = StoneCutterUtils.getServerWorld(player);
+            BlockPos pos = player.blockPosition();
 
             // Sending updates to portal blocks
             // This is technically not needed, but it cleans the "messed portal" on the client
-            if (world.isInBuildLimit(pos)) {
-                world.updateListeners(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
+            if (world.isInWorldBounds(pos)) {
+                world.sendBlockUpdated(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
             }
-            if (world.isInBuildLimit(pos.up())) {
-                world.updateListeners(pos.up(), world.getBlockState(pos.up()), world.getBlockState(pos.up()), 3);
+            if (world.isInWorldBounds(pos.above())) {
+                world.sendBlockUpdated(pos.above(), world.getBlockState(pos.above()), world.getBlockState(pos.above()), 3);
             }
 
-            player.currentScreenHandler.syncState();
+            player.containerMenu.sendAllDataToRemote();
 
             VanishIntegration.setVanished(player, wasVanished);
         } else {
@@ -244,12 +245,12 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         }
     }
 
-    @Inject(method = "playerTick()V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "doTick()V", at = @At("HEAD"), cancellable = true)
     private void playerTick(CallbackInfo ci) {
         if (!this.easyAuth$isAuthenticated()) {
             // Checking player timer
-            if (kickTimer <= 0 && player.networkHandler.isConnectionOpen()) {
-                player.networkHandler.disconnect(langConfig.timeExpired.get());
+            if (kickTimer <= 0 && player.connection.isAcceptingMessages()) {
+                player.connection.disconnect(langConfig.timeExpired.get());
             } else {
                 // Sending authentication prompt every 10 seconds
                 if (kickTimer % (extendedConfig.authenticationPromptInterval * 20) == 0) {
@@ -262,17 +263,17 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     }
 
     // Player item dropping
-    @Inject(method = "dropSelectedItem(Z)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "drop(Z)V", at = @At("HEAD"), cancellable = true)
     private void dropSelectedItem(boolean entireStack, CallbackInfo ci) {
-        ActionResult result = AuthEventHandler.onDropItem(player);
+        InteractionResult result = AuthEventHandler.onDropItem(player);
 
-        if (result == ActionResult.FAIL) {
+        if (result == InteractionResult.FAIL) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "copyFrom(Lnet/minecraft/server/network/ServerPlayerEntity;Z)V", at = @At("RETURN"))
-    private void copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
+    @Inject(method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V", at = @At("RETURN"))
+    private void copyFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
         PlayerAuth oldPlayerAuth = (PlayerAuth) oldPlayer;
         PlayerAuth newPlayerAuth = (PlayerAuth) player;
         newPlayerAuth.easyAuth$setKickTimer(oldPlayerAuth.easyAuth$getKickTimer());
@@ -325,11 +326,11 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         this.ridingEntityUUID = ridingEntityUUID;
     }
 
-    public ReadView easyAuth$getRootVehicle() {
+    public ValueInput easyAuth$getRootVehicle() {
         return rootVehicle;
     }
 
-    public void easyAuth$setRootVehicle(ReadView rootVehicle) {
+    public void easyAuth$setRootVehicle(ValueInput rootVehicle) {
         this.rootVehicle = rootVehicle;
     }
 
@@ -349,8 +350,8 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
         return ipAddress;
     }
 
-    public void easyAuth$setIpAddress(ClientConnection connection) {
-        SocketAddress socketAddress = connection.getAddress();
+    public void easyAuth$setIpAddress(Connection connection) {
+        SocketAddress socketAddress = connection.getRemoteAddress();
         ipAddress = socketAddress instanceof InetSocketAddress inetSocketAddress ? InetAddresses.toAddrString(inetSocketAddress.getAddress()) : "<unknown>";
     }
 

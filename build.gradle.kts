@@ -1,19 +1,17 @@
+import java.util.concurrent.TimeUnit
+
 plugins {
     id("java")
     id("java-library")
-    kotlin("jvm") version "2.3.20"
-    id("net.fabricmc.fabric-loom") version "1.15-SNAPSHOT"
-    id("com.google.devtools.ksp") version "2.3.6"
+    id("net.neoforged.moddev") version "2.0.141"
     id("com.gradleup.shadow") version "9.3.0"
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
 val baseVersion = property("mod_version").toString()
 val dynamicVersion = if (baseVersion.endsWith("-SNAPSHOT")) {
-    // Match only plain release tags like 1.2.3
     val lastReleaseTag = runGit("describe", "--tags", "--match", "[0-9]*.[0-9]*.[0-9]*", "--abbrev=0")
     if (lastReleaseTag != null) {
-        // Count commits since last release tag
         val countStr = runGit("rev-list", "$lastReleaseTag..HEAD", "--count")
         val count = countStr?.toIntOrNull() ?: 0
         if (count > 0) "$baseVersion.$count" else baseVersion
@@ -21,111 +19,79 @@ val dynamicVersion = if (baseVersion.endsWith("-SNAPSHOT")) {
 } else baseVersion
 version = dynamicVersion
 
+base.archivesName = "${property("mod_id")}-neoforge-mc${property("minecraft_version")}"
+
 repositories {
-    maven(url = "https://maven.nucleoid.xyz")
-    maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
-    maven(url = "https://repo.opencollab.dev/main")
-    maven(url = "https://api.modrinth.com/maven")
-    //mavenLocal()
+    mavenCentral()
+    maven("https://maven.neoforged.net/releases")
+    maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
-
-base.archivesName = "${property("mod_id")}-mc${property("minecraft_version")}"
-
-val awFile = "easyauth.accesswidener"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
+    withSourcesJar()
 }
 
-loom {
-    splitEnvironmentSourceSets()
-    accessWidenerPath = rootProject.file("src/main/resources/$awFile")
-    mods {
-        create("easyauth") {
-            sourceSet(sourceSets["main"])
-            sourceSet(sourceSets["client"])
+neoForge {
+    version = property("neoforge_version").toString()
+
+    accessTransformers.from("src/main/resources/META-INF/accesstransformer.cfg")
+
+    runs {
+        create("server") {
+            server()
+            gameDirectory.set(file("run"))
         }
     }
 
-    decompilerOptions.named("vineflower") {
-        options.put("mark-corresponding-synthetics", "1") // Adds names to lambdas - useful for mixins
-    }
-
-    runConfigs.all {
-        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
-        runDir = "run" // Use a separate run directory for all configurations
+    mods {
+        create("easyauth") {
+            sourceSet(sourceSets.main.get())
+        }
     }
 }
 
-fabricApi.configureTests {
-    createSourceSet = true
-    modId = "${property("mod_id")}-mixin-test"
-    eula = true
-    enableClientGameTests = false
-    enableGameTests = true
+val shaded: Configuration by configurations.creating
+
+configurations {
+    compileOnly { extendsFrom(shaded) }
+    runtimeOnly { extendsFrom(shaded) }
 }
 
-tasks.named("runGameTest") {
-    usesService(semaphore)
+fun DependencyHandlerScope.implementAndJarJar(notation: String, version: String) {
+    implementation(notation)
+    jarJar(notation) {
+        version { strictly("[$version,)"); prefer(version) }
+    }
 }
 
 dependencies {
-    fun implementAndInclude(name: String) {
-        implementation(name)
-        include(name)
-    }
-
-    fun implementAndShadow(name: String) {
-        implementation(name)
-        shadow(name)
-    }
-
-    // Fabric
-    minecraft("com.mojang:minecraft:${property("minecraft_version")}")
-
-    implementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    implementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
-
-    // Translations
-    include("xyz.nucleoid:server-translations-api:${property("server_translations_version")}")
-    implementation("xyz.nucleoid:server-translations-api:${property("server_translations_version")}")
-
-    // Permissions
-    implementation("me.lucko:fabric-permissions-api:${property("fabric_permissions_version")}")
     compileOnly("net.luckperms:api:${property("luckperms_version")}")
 
-    // Mods
-    compileOnly("org.geysermc.floodgate:api:${property("floodgate_api_version")}")
-    compileOnly("maven.modrinth:vanish:${property("vanish_version")}")
+    implementAndJarJar("de.mkammerer:argon2-jvm:${property("argon2_version")}", property("argon2_version").toString())
+    implementAndJarJar("de.mkammerer:argon2-jvm-nolibs:${property("argon2_version")}", property("argon2_version").toString())
+    implementAndJarJar("net.java.dev.jna:jna:${property("jna_version")}", property("jna_version").toString())
+    implementAndJarJar("at.favre.lib:bcrypt:${property("bcrypt_version")}", property("bcrypt_version").toString())
+    implementAndJarJar("at.favre.lib:bytes:${property("bytes_version")}", property("bytes_version").toString())
+    implementAndJarJar("org.iq80.leveldb:leveldb:${property("leveldb_version")}", property("leveldb_version").toString())
+    implementAndJarJar("org.iq80.leveldb:leveldb-api:${property("leveldb_version")}", property("leveldb_version").toString())
+    implementAndJarJar("com.mysql:mysql-connector-j:${property("mysql_version")}", property("mysql_version").toString())
+    implementAndJarJar("org.xerial:sqlite-jdbc:${property("sqlite_version")}", property("sqlite_version").toString())
+    implementAndJarJar("org.postgresql:postgresql:${property("postgresql_version")}", property("postgresql_version").toString())
 
-    // Password hashing
-    implementAndInclude("de.mkammerer:argon2-jvm:${property("argon2_version")}")
-    implementAndInclude("de.mkammerer:argon2-jvm-nolibs:${property("argon2_version")}")
+    shaded("org.mongodb:mongodb-driver-sync:${property("mongodb_version")}")
+    shaded("org.mongodb:mongodb-driver-core:${property("mongodb_version")}")
+    shaded("org.mongodb:bson:${property("mongodb_version")}")
 
-    implementAndInclude("at.favre.lib:bcrypt:${property("bcrypt_version")}")
-    implementAndInclude("at.favre.lib:bytes:${property("bytes_version")}")
-
-    // Storage
-    implementAndInclude("org.iq80.leveldb:leveldb:${property("leveldb_version")}")
-    implementAndInclude("org.iq80.leveldb:leveldb-api:${property("leveldb_version")}")
-
-    implementAndShadow("org.mongodb:mongodb-driver-sync:${property("mongodb_version")}")
-    implementAndShadow("org.mongodb:mongodb-driver-core:${property("mongodb_version")}")
-    implementAndShadow("org.mongodb:bson:${property("mongodb_version")}")
-
-    implementAndInclude("com.mysql:mysql-connector-j:${property("mysql_version")}")
-    implementAndInclude("org.xerial:sqlite-jdbc:${property("sqlite_version")}")
-
-    implementAndInclude("org.postgresql:postgresql:${property("postgresql_version")}")
-
-    implementation("org.spongepowered:configurate-hocon:${property("hocon_version")}")
-    shadow("org.spongepowered:configurate-hocon:${property("hocon_version")}")
-
-    include("net.java.dev.jna:jna:${property("jna_version")}")
+    shaded("org.spongepowered:configurate-hocon:${property("hocon_version")}")
 }
 
 tasks.shadowJar {
+    archiveClassifier.set("dev-shadow")
+    configurations = listOf(shaded)
+
     relocate("org.spongepowered.configurate", "xyz.nikitacartes.shadow.configurate")
     relocate("com.typesafe.config", "xyz.nikitacartes.shadow.config")
     relocate("io.leangen.geantyref", "xyz.nikitacartes.shadow.geantyref")
@@ -133,18 +99,15 @@ tasks.shadowJar {
     relocate("org.bson", "xyz.nikitacartes.shadow.bson")
     relocate("com.mongodb", "xyz.nikitacartes.shadow.mongodb")
 
-    configurations = listOf(project.configurations.shadow.get())
     from(sourceSets.main.get().output)
 }
 
 tasks.jar {
-    from("LICENCE")
+    from("LICENSE")
     dependsOn(tasks.shadowJar)
     from(zipTree(tasks.shadowJar.get().archiveFile)) {
-        exclude("META-INF/**")
+        exclude("META-INF/MANIFEST.MF", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
     }
-    // Exclude .class files from the default compile output (sourceSets.main)
-    // so that the shadow jar's relocated versions are used instead
     val mainClassesDirs = sourceSets.main.get().output.classesDirs.files
     exclude { element ->
         element.file.extension == "class" && mainClassesDirs.any { element.file.toPath().startsWith(it.toPath()) }
@@ -152,35 +115,22 @@ tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType<ProcessResources>().configureEach {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
-
 tasks.processResources {
-    filesMatching("fabric.mod.json") {
-        expand(
-            mapOf(
-                "version" to dynamicVersion,
-                "supported_minecraft_version" to project.property("supported_minecraft_version"),
-                "accessWidener" to awFile
-            )
-        )
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    val expansions = mapOf(
+        "version" to dynamicVersion,
+        "supported_minecraft_version" to project.property("supported_minecraft_version"),
+        "minecraft_version" to project.property("minecraft_version"),
+        "neoforge_version" to project.property("neoforge_version"),
+        "java_version" to 25,
+        "mod_id" to project.property("mod_id"),
+        "mod_name" to project.property("mod_name")
+    )
+    inputs.properties(expansions)
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand(expansions)
     }
-
-    filesMatching("easyauth.mixins.json") {
-        filter {
-            it.replace("\${refmap}", "${base.archivesName.get()}-refmap.json")
-        }
-    }
-}
-
-tasks.processTestResources {
-    dependsOn("kspGametestKotlin")
-}
-
-tasks.named<Copy>("processGametestResources") {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    dependsOn("kspTestKotlin")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -195,10 +145,6 @@ tasks.register<Copy>("collectJars") {
     dependsOn("build")
 }
 
-java {
-    withSourcesJar()
-}
-
 publishMods {
     val modrinthToken = System.getenv("MODRINTH_TOKEN") ?: ""
     val curseforgeToken = System.getenv("CURSEFORGE_TOKEN") ?: ""
@@ -211,36 +157,23 @@ publishMods {
 
     changelog = file("RELEASE_NOTE.md").readText()
     type = STABLE
-    modLoaders.add("fabric")
+    modLoaders.add("neoforge")
 
     val targets = property("supported_versions").toString().split(",")
 
     modrinth {
         projectId = "aZj58GfX"
         accessToken = modrinthToken
-
         targets.forEach(minecraftVersions::add)
-        requires("fabric-api")
         optional("luckperms")
-        optional("vanish")
     }
 
     curseforge {
         projectId = "503866"
         accessToken = curseforgeToken
-
         targets.forEach(minecraftVersions::add)
-        requires("fabric-api")
-        embeds("server-translation-api")
         optional("luckperms")
-        optional("meliusvanish")
     }
-}
-
-private abstract class ServerRunSemaphore : BuildService<BuildServiceParameters.None>
-
-private val semaphore = gradle.sharedServices.registerIfAbsent("semaphore", ServerRunSemaphore::class.java) {
-    maxParallelUsages.set(1)
 }
 
 fun runGit(vararg args: String): String? = try {

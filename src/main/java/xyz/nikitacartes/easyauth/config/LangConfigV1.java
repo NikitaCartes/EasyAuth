@@ -17,10 +17,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.minecraft.network.chat.Component.translatable;
 import static net.minecraft.network.chat.Component.translatableWithFallback;
 import static net.minecraft.network.chat.contents.TranslatableContents.NO_ARGS;
-import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
 @ConfigSerializable
@@ -241,13 +239,10 @@ public class LangConfigV1 extends ConfigTemplate {
         }
 
         private MutableComponent getTranslation(Object... args) {
-            if (langConfig.enableServerSideTranslation && serverSide) {
-                return translatable(key, args);
-            } if (!fallback.isEmpty()) {
+            if (!fallback.isEmpty()) {
                 return translatableWithFallback(key, fallback, args);
-            } else {
-                return translatableWithFallback(key, translations.get(key), args);
             }
+            return translatableWithFallback(key, translations.get(key), args);
         }
     }
 

@@ -1,7 +1,7 @@
 package xyz.nikitacartes.easyauth.utils;
 
 import com.mojang.authlib.GameProfile;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.ModList;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -83,7 +83,11 @@ public class StoneCutterUtils {
     }
 
     public static boolean isModLoaded(String modId) {
-        return FabricLoader.getInstance().isModLoaded(modId);
+        try {
+            return ModList.get() != null && ModList.get().isLoaded(modId);
+        } catch (Throwable t) {
+            return false;
+        }
     }
 
     public static boolean isAdministrator(PlayerList playerManager, ServerPlayer player) {

@@ -76,10 +76,10 @@ public class TechnicalConfigV1 extends ConfigTemplate {
         if (isModLoaded("luckperms")) {
             luckPermsLoaded = true;
         }
-        if (isModLoaded("melius-vanish")) {
+        if (isModLoaded("melius-vanish") || isModLoaded("vanish")) {
             vanishLoaded = true;
         }
-        if (isModLoaded("fabric-permissions-api-v0")) {
+        if (isModLoaded("luckperms")) {
             permissionsLoaded = true;
         }
     }

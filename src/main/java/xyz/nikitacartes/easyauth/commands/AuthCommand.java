@@ -2,20 +2,24 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.command.argument.DimensionArgumentType;
-import net.minecraft.command.argument.RotationArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Uuids;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+//? if >= 1.21.11 {
+import net.minecraft.resources.Identifier;
+//?} else {
+/*import net.minecraft.resources.ResourceLocation;
+*///?}
+import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
-import xyz.nikitacartes.easyauth.integrations.Permissions;
+import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -29,8 +33,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.isValidUsername;
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getUsername;
@@ -41,15 +45,15 @@ public class AuthCommand {
      *
      * @param dispatcher
      */
-    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("auth")
-                .requires(Permissions.require("easyauth.commands.auth.root", 3))
+                .requires(FabricPermissions.require("easyauth.commands.auth.root", 3))
                 .then(literal("reload")
-                        .requires(Permissions.require("easyauth.commands.auth.reload", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.reload", 3))
                         .executes(ctx -> reloadConfig(ctx.getSource()))
                 )
                 .then(literal("setGlobalPassword")
-                        .requires(Permissions.require("easyauth.commands.auth.setGlobalPassword", 4))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.setGlobalPassword", 4))
                         .then(argument("password", string())
                                 .executes(ctx -> setGlobalPassword(
                                         ctx.getSource(),
@@ -66,43 +70,55 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("setSpawn")
-                        .requires(Permissions.require("easyauth.commands.auth.setSpawn", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.setSpawn", 3))
                         .executes(ctx -> setSpawn(
                                 ctx.getSource(),
-                                StoneCutterUtils.getWorld(ctx.getSource().getEntityOrThrow()).getRegistryKey().getValue(),
-                                ctx.getSource().getEntityOrThrow().getX(),
-                                ctx.getSource().getEntityOrThrow().getY(),
-                                ctx.getSource().getEntityOrThrow().getZ(),
-                                ctx.getSource().getEntityOrThrow().getYaw(),
-                                ctx.getSource().getEntityOrThrow().getPitch()
+                                //? if >= 1.21.11 {
+                                StoneCutterUtils.getWorld(ctx.getSource().getEntityOrException()).dimension().identifier(),
+                                //?} else {
+                                /*StoneCutterUtils.getWorld(ctx.getSource().getEntityOrException()).dimension().location(),
+                                *///?}
+                                ctx.getSource().getEntityOrException().getX(),
+                                ctx.getSource().getEntityOrException().getY(),
+                                ctx.getSource().getEntityOrException().getZ(),
+                                ctx.getSource().getEntityOrException().getYRot(),
+                                ctx.getSource().getEntityOrException().getXRot()
                         ))
-                        .then(argument("dimension", DimensionArgumentType.dimension())
-                                .then(argument("position", BlockPosArgumentType.blockPos())
+                            .then(argument("dimension", DimensionArgument.dimension())
+                                .then(argument("position", BlockPosArgument.blockPos())
                                         .executes(ctx -> setSpawn(
                                                         ctx.getSource(),
-                                                        DimensionArgumentType.getDimensionArgument(ctx, "dimension").getRegistryKey().getValue(),
-                                                        BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
+                                                        //? if >= 1.21.11 {
+                                                        DimensionArgument.getDimension(ctx, "dimension").dimension().identifier(),
+                                                        //?} else {
+                                                        /*DimensionArgument.getDimension(ctx, "dimension").dimension().location(),
+                                                        *///?}
+                                                        BlockPosArgument.getLoadedBlockPos(ctx, "position").getX(),
                                                         // +1 to not spawn player in ground
-                                                        BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY(),
-                                                        BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ(),
+                                                        BlockPosArgument.getLoadedBlockPos(ctx, "position").getY(),
+                                                        BlockPosArgument.getLoadedBlockPos(ctx, "position").getZ(),
                                                         90,
                                                         0
                                                 )
                                         )
-                                        .then(argument("angle", RotationArgumentType.rotation())
+                                    .then(argument("angle", RotationArgument.rotation())
                                                 .executes(ctx -> setSpawn(
                                                                 ctx.getSource(),
-                                                                DimensionArgumentType.getDimensionArgument(ctx, "dimension").getRegistryKey().getValue(),
-                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getX(),
-                                                                // +1 to not spawn player in ground
-                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getY(),
-                                                                BlockPosArgumentType.getLoadedBlockPos(ctx, "position").getZ(),
-                                                                //? if >= 1.21.2 {
-                                                                RotationArgumentType.getRotation(ctx, "angle").getRotation(ctx.getSource()).y,
-                                                                RotationArgumentType.getRotation(ctx, "angle").getRotation(ctx.getSource()).x
+                                                                //? if >= 1.21.11 {
+                                                                DimensionArgument.getDimension(ctx, "dimension").dimension().identifier(),
                                                                 //?} else {
-                                                                /*RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).y,
-                                                                RotationArgumentType.getRotation(ctx, "angle").toAbsoluteRotation(ctx.getSource()).x
+                                                                /*DimensionArgument.getDimension(ctx, "dimension").dimension().location(),
+                                                                *///?}
+                                                                 BlockPosArgument.getLoadedBlockPos(ctx, "position").getX(),
+                                                                // +1 to not spawn player in ground
+                                                                BlockPosArgument.getLoadedBlockPos(ctx, "position").getY(),
+                                                                BlockPosArgument.getLoadedBlockPos(ctx, "position").getZ(),
+                                                                //? if >= 1.21.2 {
+                                                                RotationArgument.getRotation(ctx, "angle").getRotation(ctx.getSource()).y,
+                                                                RotationArgument.getRotation(ctx, "angle").getRotation(ctx.getSource()).x
+                                                                //?} else {
+                                                                /*RotationArgument.getRotation(ctx, "angle").getRotation(ctx.getSource()).y,
+                                                                RotationArgument.getRotation(ctx, "angle").getRotation(ctx.getSource()).x
                                                                 *///?}
                                                         )
                                                 )
@@ -111,7 +127,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("remove")
-                        .requires(Permissions.require("easyauth.commands.auth.remove", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.remove", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> removeAccount(
                                         ctx.getSource(),
@@ -120,7 +136,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("register")
-                        .requires(Permissions.require("easyauth.commands.auth.register", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.register", 3))
                         .then(argument("username", word())
                                 .then(argument("password", string())
                                         .executes(ctx -> registerUser(
@@ -132,7 +148,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("update")
-                        .requires(Permissions.require("easyauth.commands.auth.update", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.update", 3))
                         .then(argument("username", word())
                                 .then(argument("password", string())
                                         .executes(ctx -> updatePassword(
@@ -144,11 +160,11 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("list")
-                        .requires(Permissions.require("easyauth.commands.auth.list", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.list", 3))
                         .executes(ctx -> getRegisteredPlayers(ctx.getSource()))
                 )
                 .then(literal("markAsOffline")
-                        .requires(Permissions.require("easyauth.commands.auth.markAsOffline", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.markAsOffline", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> markAsOffline(
                                         ctx.getSource(),
@@ -157,7 +173,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("markAsOnline")
-                        .requires(Permissions.require("easyauth.commands.auth.markAsOnline", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.markAsOnline", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> markAsOnline(
                                         ctx.getSource(),
@@ -166,7 +182,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("getPlayerInfo")
-                        .requires(Permissions.require("easyauth.commands.auth.getPlayerInfo", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.getPlayerInfo", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> getPlayerInfo(
                                         ctx.getSource(),
@@ -175,11 +191,11 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("getOnlinePlayers")
-                        .requires(Permissions.require("easyauth.commands.auth.getOnlinePlayers", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.getOnlinePlayers", 3))
                         .executes(ctx -> getOnlinePlayers(ctx.getSource()))
                 )
                 .then(literal("setUuid")
-                        .requires(Permissions.require("easyauth.commands.auth.setUuid", 4))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.setUuid", 4))
                         .then(argument("username", word())
                                 .then(argument("uuid", string())
                                         .executes(ctx -> setUuid(
@@ -191,7 +207,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("clearUuid")
-                        .requires(Permissions.require("easyauth.commands.auth.clearUuid", 4))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.clearUuid", 4))
                         .then(argument("username", word())
                                 .executes(ctx -> clearUuid(
                                         ctx.getSource(),
@@ -200,7 +216,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("getUuid")
-                        .requires(Permissions.require("easyauth.commands.auth.getUuid", 3))
+                        .requires(FabricPermissions.require("easyauth.commands.auth.getUuid", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> getUuid(
                                         ctx.getSource(),
@@ -217,7 +233,7 @@ public class AuthCommand {
      * @param sender executioner of the command
      * @return 0
      */
-    public static int reloadConfig(ServerCommandSource sender) {
+    public static int reloadConfig(CommandSourceStack sender) {
         reloadConfigs(sender.getServer());
 
         langConfig.configurationReloaded.send(sender);
@@ -233,7 +249,7 @@ public class AuthCommand {
      * @param singleUse whether the global password is single-use
      * @return 0
      */
-    private static int setGlobalPassword(ServerCommandSource source, String password, boolean singleUse) {
+    private static int setGlobalPassword(CommandSourceStack source, String password, boolean singleUse) {
         // Writing the global pass to config
         technicalConfig.globalPassword = AuthHelper.hashPassword(password.toCharArray());
         config.enableGlobalPassword = true;
@@ -259,7 +275,11 @@ public class AuthCommand {
      * @param pitch  player pitch (x rotation)
      * @return 0
      */
-    private static int setSpawn(ServerCommandSource source, Identifier world, double x, double y, double z, float yaw, float pitch) {
+    //? if >= 1.21.11 {
+    private static int setSpawn(CommandSourceStack source, Identifier world, double x, double y, double z, float yaw, float pitch) {
+    //?} else {
+    /*private static int setSpawn(CommandSourceStack source, ResourceLocation world, double x, double y, double z, float yaw, float pitch) {
+    *///?}
         // Setting config values and saving
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
@@ -284,7 +304,7 @@ public class AuthCommand {
      * @param username username of the player to delete account for
      * @return 0
      */
-    private static int removeAccount(ServerCommandSource source, String username) {
+    private static int removeAccount(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerEntry = DB.getUserData(username);
             if (playerEntry == null) {
@@ -299,11 +319,11 @@ public class AuthCommand {
             }
         });
 
-        ServerPlayerEntity playerEntity = source.getServer().getPlayerManager().getPlayer(username);
+        ServerPlayer playerEntity = source.getServer().getPlayerList().getPlayerByName(username);
         if (playerEntity != null && getUsername(playerEntity).equals(username)) {
             ((PlayerAuth) playerEntity).easyAuth$setAuthenticated(false);
             ((PlayerAuth) playerEntity).easyAuth$setPlayerEntryV1(new PlayerEntryV1(username));
-            playerEntity.networkHandler.disconnect(langConfig.userdataDeleted.get());
+            playerEntity.connection.disconnect(langConfig.userdataDeleted.get());
         }
 
         return 1; // Success
@@ -317,7 +337,7 @@ public class AuthCommand {
      * @param password new password for the player account
      * @return 0
      */
-    private static int registerUser(ServerCommandSource source, String username, String password) {
+    private static int registerUser(CommandSourceStack source, String username, String password) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserDataOrCreate(username);
             playerData.password = AuthHelper.hashPassword(password.toCharArray());
@@ -337,7 +357,7 @@ public class AuthCommand {
      * @param password new password for the player
      * @return 0
      */
-    private static int updatePassword(ServerCommandSource source, String username, String password) {
+    private static int updatePassword(CommandSourceStack source, String username, String password) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
             if (playerData == null || playerData.password.isEmpty()) {
@@ -349,7 +369,7 @@ public class AuthCommand {
             playerData.update();
             
             // Also update the cached PlayerEntryV1 if the player is online
-            ServerPlayerEntity player = source.getServer().getPlayerManager().getPlayer(username);
+            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
             if (player != null) {
                 PlayerEntryV1 cachedEntry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
                 if (cachedEntry != null) {
@@ -368,26 +388,26 @@ public class AuthCommand {
      * @param source executioner of the command
      * @return 0
      */
-    public static int getRegisteredPlayers(ServerCommandSource source) {
+    public static int getRegisteredPlayers(CommandSourceStack source) {
         THREADPOOL.submit(() -> {
             if (langConfig.registeredPlayers.enabled) {
                 AtomicInteger i = new AtomicInteger();
-                MutableText message = langConfig.registeredPlayers.get();
+                MutableComponent message = langConfig.registeredPlayers.get();
                 DB.getAllData().forEach((username, playerData) -> {
                     if (playerData == null || playerData.password == null) {
                         return;
                     }
                     i.getAndIncrement();
-                    message.append(Text.translatable(username)
+                    message.append(Component.translatable(username)
                             //? if >= 1.21.5 {
                             .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(username)))
                             //?} else {
                             /*.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, username)))
                             *///?}
-                            .formatted(Formatting.YELLOW))
+                            .withStyle(ChatFormatting.YELLOW))
                             .append(", ");
                 });
-                source.sendMessage(message);
+                source.sendSystemMessage(message);
             }
         });
         return 1;
@@ -400,7 +420,7 @@ public class AuthCommand {
      * @param username player to add in list
      * @return 0
      */
-    private static int markAsOffline(ServerCommandSource source, String username) {
+    private static int markAsOffline(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 entry = DB.getUserDataOrCreate(username);
             entry.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
@@ -418,7 +438,7 @@ public class AuthCommand {
      * @param username player to add in list
      * @return 0
      */
-    private static int markAsOnline(ServerCommandSource source, String username) {
+    private static int markAsOnline(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             try {
                 if (!isValidUsername(username)) {
@@ -430,7 +450,7 @@ public class AuthCommand {
                 return;
             }
 
-            ServerPlayerEntity player = source.getServer().getPlayerManager().getPlayer(username);
+            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
             PlayerEntryV1 entry;
             if (player != null) {
                 entry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
@@ -452,7 +472,7 @@ public class AuthCommand {
      * @param username username of the player to get information for
      * @return 0
      */
-    private static int getPlayerInfo(ServerCommandSource source, String username) {
+    private static int getPlayerInfo(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
             if (playerData == null) {
@@ -460,7 +480,7 @@ public class AuthCommand {
                 return;
             }
             // Send player information to the source
-            source.sendMessage(Text.literal("Player Info: " + playerData.toJson()));
+            source.sendSystemMessage(Component.literal("Player Info: " + playerData.toJson()));
         });
         return 1;
     }
@@ -470,22 +490,22 @@ public class AuthCommand {
      *
      * @param source executioner of the command
      */
-    private static int getOnlinePlayers(ServerCommandSource source) {
+    private static int getOnlinePlayers(CommandSourceStack source) {
         THREADPOOL.submit(() -> {
-            MutableText message = Text.literal("");
-            source.getServer().getPlayerManager().getPlayerList().forEach(player -> {
+            MutableComponent message = Component.literal("");
+            source.getServer().getPlayerList().getPlayers().forEach(player -> {
                 String username = getUsername(player);
                 PlayerEntryV1 playerData = DB.getUserData(username);
                 PlayerAuth playerAuth = (PlayerAuth) player;
 
-                message.append(Text.translatable(username).formatted(Formatting.YELLOW)).append(": ");
+                message.append(Component.translatable(username).withStyle(ChatFormatting.YELLOW)).append(": ");
                 if (playerData == null) {
-                    message.append(Text.literal("No data found\n"));
+                    message.append(Component.literal("No data found\n"));
                     return;
                 }
-                message.append(Text.literal("authenticated: " + playerAuth.easyAuth$isAuthenticated() + "; Mojang account: " + playerAuth.easyAuth$isUsingMojangAccount() + "\n"));
+                message.append(Component.literal("authenticated: " + playerAuth.easyAuth$isAuthenticated() + "; Mojang account: " + playerAuth.easyAuth$isUsingMojangAccount() + "\n"));
             });
-            source.sendMessage(message);
+            source.sendSystemMessage(message);
         });
         return 1;
     }
@@ -499,7 +519,7 @@ public class AuthCommand {
      * @param uuidStr  the UUID to force for this player
      * @return 1 on success
      */
-    private static int setUuid(ServerCommandSource source, String username, String uuidStr) {
+    private static int setUuid(CommandSourceStack source, String username, String uuidStr) {
         THREADPOOL.submit(() -> {
             // Validate UUID format
             UUID uuid;
@@ -517,9 +537,9 @@ public class AuthCommand {
             langConfig.uuidSet.send(source, username, uuid.toString());
 
             // Kick the player if online so they rejoin with the new UUID
-            ServerPlayerEntity player = source.getServer().getPlayerManager().getPlayer(username);
+            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
             if (player != null) {
-                player.networkHandler.disconnect(langConfig.uuidChanged.get());
+                player.connection.disconnect(langConfig.uuidChanged.get());
             }
         });
         return 1;
@@ -532,7 +552,7 @@ public class AuthCommand {
      * @param username username of the player
      * @return 1 on success
      */
-    private static int clearUuid(ServerCommandSource source, String username) {
+    private static int clearUuid(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 entry = DB.getUserData(username);
             if (entry == null) {
@@ -551,9 +571,9 @@ public class AuthCommand {
             langConfig.uuidCleared.send(source, username);
 
             // Kick the player if online so they rejoin with the default UUID
-            ServerPlayerEntity player = source.getServer().getPlayerManager().getPlayer(username);
+            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
             if (player != null) {
-                player.networkHandler.disconnect(langConfig.uuidChanged.get());
+                player.connection.disconnect(langConfig.uuidChanged.get());
             }
         });
         return 1;
@@ -566,32 +586,32 @@ public class AuthCommand {
      * @param username username of the player
      * @return 1 on success
      */
-    private static int getUuid(ServerCommandSource source, String username) {
+    private static int getUuid(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 entry = DB.getUserData(username);
             
-            UUID offlineUuid = Uuids.getOfflinePlayerUuid(username);
+            UUID offlineUuid = UUIDUtil.createOfflinePlayerUUID(username);
             
-            MutableText message = Text.literal("");
-            message.append(Text.literal("UUID info for ").formatted(Formatting.GRAY));
-            message.append(Text.literal(username).formatted(Formatting.YELLOW));
-            message.append(Text.literal(":\n").formatted(Formatting.GRAY));
+            MutableComponent message = Component.literal("");
+            message.append(Component.literal("UUID info for ").withStyle(ChatFormatting.GRAY));
+            message.append(Component.literal(username).withStyle(ChatFormatting.YELLOW));
+            message.append(Component.literal(":\n").withStyle(ChatFormatting.GRAY));
             
             // Offline UUID
-            message.append(Text.literal("  Offline UUID: ").formatted(Formatting.GRAY));
-            message.append(Text.literal(offlineUuid.toString()).formatted(Formatting.WHITE)
+            message.append(Component.literal("  Offline UUID: ").withStyle(ChatFormatting.GRAY));
+            message.append(Component.literal(offlineUuid.toString()).withStyle(ChatFormatting.WHITE)
                     //? if >= 1.21.5 {
                     .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(offlineUuid.toString())))
                     //?} else {
                     /*.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, offlineUuid.toString())))
                     *///?}
             );
-            message.append(Text.literal("\n"));
+            message.append(Component.literal("\n"));
             
             // Forced UUID
-            message.append(Text.literal("  Forced UUID: ").formatted(Formatting.GRAY));
+            message.append(Component.literal("  Forced UUID: ").withStyle(ChatFormatting.GRAY));
             if (entry != null && entry.forcedUuid != null && !entry.forcedUuid.isEmpty()) {
-                message.append(Text.literal(entry.forcedUuid).formatted(Formatting.GREEN)
+                message.append(Component.literal(entry.forcedUuid).withStyle(ChatFormatting.GREEN)
                         //? if >= 1.21.5 {
                         .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(entry.forcedUuid)))
                         //?} else {
@@ -599,16 +619,16 @@ public class AuthCommand {
                         *///?}
                 );
             } else {
-                message.append(Text.literal("(none)").formatted(Formatting.DARK_GRAY));
+                message.append(Component.literal("(none)").withStyle(ChatFormatting.DARK_GRAY));
             }
-            message.append(Text.literal("\n"));
+            message.append(Component.literal("\n"));
             
             // Current UUID (if online)
-            ServerPlayerEntity player = source.getServer().getPlayerManager().getPlayer(username);
-            message.append(Text.literal("  Current UUID: ").formatted(Formatting.GRAY));
+            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
+            message.append(Component.literal("  Current UUID: ").withStyle(ChatFormatting.GRAY));
             if (player != null) {
-                String currentUuid = player.getUuidAsString();
-                message.append(Text.literal(currentUuid).formatted(Formatting.AQUA)
+                String currentUuid = player.getStringUUID();
+                message.append(Component.literal(currentUuid).withStyle(ChatFormatting.AQUA)
                         //? if >= 1.21.5 {
                         .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(currentUuid)))
                         //?} else {
@@ -616,10 +636,10 @@ public class AuthCommand {
                         *///?}
                 );
             } else {
-                message.append(Text.literal("(player offline)").formatted(Formatting.DARK_GRAY));
+                message.append(Component.literal("(player offline)").withStyle(ChatFormatting.DARK_GRAY));
             }
             
-            source.sendMessage(message);
+            source.sendSystemMessage(message);
         });
         return 1;
     }

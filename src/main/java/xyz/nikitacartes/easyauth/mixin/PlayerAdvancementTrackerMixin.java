@@ -1,9 +1,9 @@
 package xyz.nikitacartes.easyauth.mixin;
 
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.server.ServerAdvancementLoader;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,31 +19,31 @@ import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 import java.nio.file.Path;
 
-@Mixin(PlayerAdvancementTracker.class)
+@Mixin(PlayerAdvancements.class)
 public class PlayerAdvancementTrackerMixin {
 
     @Mutable
     @Shadow
     @Final
-    private Path filePath;
+    private Path playerSavePath;
 
     @Shadow
-    private ServerPlayerEntity owner;
+    private ServerPlayer player;
 
-    @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V", at = @At("HEAD"))
-    private void startMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) this.owner).easyAuth$isUsingMojangAccount() && !this.filePath.toFile().isFile()) {
+    @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementManager;)V", at = @At("HEAD"))
+    private void startMigratingOfflineAdvancements(ServerAdvancementManager advancementLoader, CallbackInfo ci) {
+        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) this.player).easyAuth$isUsingMojangAccount() && !this.playerSavePath.toFile().isFile()) {
             // Migrate
-            String playername = StoneCutterUtils.getName(owner.getGameProfile());
-            this.filePath = this.filePath.getParent().resolve(Uuids.getOfflinePlayerUuid(playername) + ".json");
+            String playername = StoneCutterUtils.getName(player.getGameProfile());
+            this.playerSavePath = this.playerSavePath.getParent().resolve(UUIDUtil.createOfflinePlayerUUID(playername) + ".json");
         }
     }
 
-    @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementLoader;)V", at = @At("TAIL"))
-    private void endMigratingOfflineAdvancements(ServerAdvancementLoader advancementLoader, CallbackInfo ci) {
-        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) this.owner).easyAuth$isUsingMojangAccount()) {
+    @Inject(method = "load(Lnet/minecraft/server/ServerAdvancementManager;)V", at = @At("TAIL"))
+    private void endMigratingOfflineAdvancements(ServerAdvancementManager advancementLoader, CallbackInfo ci) {
+        if (Boolean.parseBoolean(serverProp.getProperty("online-mode")) && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) this.player).easyAuth$isUsingMojangAccount()) {
             // Changes the file name to use online UUID
-            this.filePath = this.filePath.getParent().resolve(owner.getUuid() + ".json");
+            this.playerSavePath = this.playerSavePath.getParent().resolve(player.getUUID() + ".json");
         }
     }
 }

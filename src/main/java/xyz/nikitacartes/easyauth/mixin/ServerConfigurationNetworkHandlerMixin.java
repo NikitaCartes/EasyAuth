@@ -3,12 +3,12 @@ package xyz.nikitacartes.easyauth.mixin;
 
 import com.google.common.net.InetAddresses;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.ClientConnection;
+import net.minecraft.network.Connection;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ConnectedClientData;
-import net.minecraft.server.network.PrepareSpawnTask;
-import net.minecraft.server.network.ServerCommonNetworkHandler;
-import net.minecraft.server.network.ServerConfigurationNetworkHandler;
+import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.network.config.PrepareSpawnTask;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,54 +29,63 @@ import java.time.ZonedDateTime;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.Utils.getIp;
 
-@Mixin(ServerConfigurationNetworkHandler.class)
-public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommonNetworkHandler {
+@Mixin(ServerConfigurationPacketListenerImpl.class)
+public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommonPacketListenerImpl {
 
     @Shadow
     private PrepareSpawnTask prepareSpawnTask;
 
     @Final
     @Shadow
-    private GameProfile profile;
+    private GameProfile gameProfile;
 
-    @Inject(method = "endConfiguration()V",
+    @Inject(method = "returnToWorld()V",
             at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z", ordinal = 0))
     private void determineAuthenticationStatus(CallbackInfo ci) {
         PrepareSpawnTaskInterface spawnTask = (PrepareSpawnTaskInterface) prepareSpawnTask;
 
-        PlayerEntryV1 entry = PlayersCache.get(profile.name());
+        PlayerEntryV1 entry = PlayersCache.get(gameProfile.name());
         if ((entry == null) ||
-                (this.server.isOnlineMode() && config.premiumAutoLogin && entry.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE) ||
-                (config.floodgateAutoLogin && FloodgateApiHelper.isFloodgatePlayer(profile.id())) ||
+                (this.server.usesAuthentication() && config.premiumAutoLogin && entry.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE) ||
+                (config.floodgateAutoLogin && FloodgateApiHelper.isFloodgatePlayer(gameProfile.id())) ||
                 easyAuth$isSkipAllAuthChecksApplicable(entry)) {
             spawnTask.easyAuth$setAuthenticated(true);
-            LogDebug(String.format("Player %s is considered authenticated by default", profile.name()));
+            LogDebug(String.format("Player %s is considered authenticated by default", gameProfile.name()));
 
             return;
         }
 
         if (entry.lastIp.isEmpty()) {
             spawnTask.easyAuth$setAuthenticated(false);
-            LogDebug(String.format("Player %s is not authenticated: no IP", profile.name()));
+            LogDebug(String.format("Player %s is not authenticated: no IP", gameProfile.name()));
 
             return;
         }
 
-        SocketAddress socketAddress = ((ServerConfigurationNetworkHandler)(Object)this).connection.getAddress();
-        String ipAddress = socketAddress instanceof InetSocketAddress inetSocketAddress ? InetAddresses.toAddrString(inetSocketAddress.getAddress()) : "<unknown>";
+        SocketAddress socketAddress = ((ServerConfigurationPacketListenerImpl)(Object)this).connection.getRemoteAddress();
+
+        String ipAddress = getIp(socketAddress);
+        if (ipAddress == null) {
+            spawnTask.easyAuth$setAuthenticated(false);
+            LogDebug(String.format("Player %s is not authenticated: no IP", gameProfile.name()));
+
+            return;
+        }
+
         if (entry.lastIp.equals(ipAddress) && entry.lastAuthenticatedDate.plusSeconds(config.sessionTimeout).isAfter(ZonedDateTime.now())) {
             spawnTask.easyAuth$setAuthenticated(true);
-            LogDebug(String.format("Player %s is authenticated by alive session", profile.name()));
+            LogDebug(String.format("Player %s is authenticated by alive session", gameProfile.name()));
 
             return;
         }
 
         spawnTask.easyAuth$setAuthenticated(false);
-        LogDebug(String.format("Player %s is not authenticated", profile.name()));
+        LogDebug(String.format("Player %s is not authenticated", gameProfile.name()));
     }
 
-    public ServerConfigurationNetworkHandlerMixin(MinecraftServer server, ClientConnection connection, ConnectedClientData clientData) {
+    public ServerConfigurationNetworkHandlerMixin(MinecraftServer server, Connection connection, CommonListenerCookie clientData) {
         super(server, connection, clientData);
     }
 
@@ -90,7 +99,7 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
             return false;
         }
 
-        if (extendedConfig.skipAllAuthChecksNotForOperators && StoneCutterUtils.isAdministrator(this.server.getPlayerManager(), this.profile)) {
+        if (extendedConfig.skipAllAuthChecksNotForOperators && StoneCutterUtils.isAdministrator(this.server.getPlayerList(), this.gameProfile)) {
             return false;
         }
 

@@ -1,6 +1,6 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nikitacartes.easyauth.EasyAuth;
@@ -272,7 +272,7 @@ public class SQLite implements DbApi {
                     String data = levelDB.getPlayerCache0(uuid);
                     if (data == null) {
                         String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
-                        String lowerCaseUuid = Uuids.getOfflinePlayerUuid(lowerCaseUsername).toString();
+                        String lowerCaseUuid = UUIDUtil.createOfflinePlayerUUID(lowerCaseUsername).toString();
                         data = levelDB.getPlayerCache0(lowerCaseUuid);
                     }
                     if (data != null) {

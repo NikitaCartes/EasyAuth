@@ -2,8 +2,8 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerConfigEntry;
-import net.minecraft.server.network.PrepareSpawnTask;
+import net.minecraft.server.network.config.PrepareSpawnTask;
+import net.minecraft.server.players.NameAndId;
 import org.spongepowered.asm.mixin.*;
 import xyz.nikitacartes.easyauth.interfaces.PrepareSpawnTaskInterface;
 import xyz.nikitacartes.easyauth.utils.LastLocation;
@@ -20,7 +20,7 @@ public abstract class PrepareSpawnTaskMixin implements PrepareSpawnTaskInterface
 
     @Final
     @Shadow
-    PlayerConfigEntry player;
+    NameAndId nameAndId;
 
     @Final
     @Shadow
@@ -47,8 +47,8 @@ public abstract class PrepareSpawnTaskMixin implements PrepareSpawnTaskInterface
     }
 
     @Override
-    public PlayerConfigEntry easyAuth$getPlayer() {
-        return this.player;
+    public NameAndId easyAuth$getPlayer() {
+        return this.nameAndId;
     }
 
     @Override

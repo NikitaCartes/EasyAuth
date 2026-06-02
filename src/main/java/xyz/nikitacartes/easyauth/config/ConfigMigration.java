@@ -1,10 +1,12 @@
 package xyz.nikitacartes.easyauth.config;
 
 //? if >= 1.21.9 {
-import net.minecraft.server.PlayerConfigEntry;
-//?}
-import com.mojang.authlib.GameProfile;
-import net.minecraft.util.UserCache;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.CachedUserNameToIdResolver;
+//?} else {
+/*import com.mojang.authlib.GameProfile;
+import net.minecraft.server.players.GameProfileCache;
+*///?}
 import xyz.nikitacartes.easyauth.EasyAuth;
 import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.storage.database.*;
@@ -129,6 +131,7 @@ public class ConfigMigration {
         EasyAuth.storageConfig.save();
     }
 
+    @SuppressWarnings("null")
     public static void migrateFromV1() {
         LogInfo("Migrating config and DB from v1 to v2");
         long now = System.currentTimeMillis();
@@ -149,16 +152,21 @@ public class ConfigMigration {
             LogError("onInitialize error: ", e);
         }
 
-        UserCache userCache = new UserCache(null, new File(gameDirectory + "/usercache.json"));
+        //? if >= 1.21.9 {
+        CachedUserNameToIdResolver userCache = new CachedUserNameToIdResolver(null, new File(gameDirectory + "/usercache.json"));
+        //?} else {
+        /*GameProfileCache userCache = new GameProfileCache(null, new File(gameDirectory + "/usercache.json"));
+        *///?}
         HashMap<String, String> uuids = new HashMap<>();
-        for (UserCache.Entry entry : userCache.load()) {
-            //? if >= 1.21.9 {
-            PlayerConfigEntry playerConfigEntry = entry.getPlayer();
+        //? if >= 1.21.9 {
+        for (CachedUserNameToIdResolver.GameProfileInfo entry : userCache.load()) {
+            NameAndId playerConfigEntry = entry.nameAndId();
             uuids.put(playerConfigEntry.name(), playerConfigEntry.id().toString());
-            //?} else {
-            /*GameProfile profile = entry.getProfile();
+        //?} else {
+        /*for (GameProfileCache.GameProfileInfo entry : userCache.load()) {
+            GameProfile profile = entry.getProfile();
             uuids.put(profile.getName(), profile.getId().toString());
-            *///?}
+        *///?}
         }
         db.migrateFromV1(uuids);
 

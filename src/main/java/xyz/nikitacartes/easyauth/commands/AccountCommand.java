@@ -2,9 +2,9 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import xyz.nikitacartes.easyauth.integrations.Permissions;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -16,18 +16,18 @@ import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.isValidUsername;
 
 public class AccountCommand {
 
-    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("account")
-                .requires(Permissions.require("easyauth.commands.account.root", true))
+                .requires(FabricPermissions.require("easyauth.commands.account.root", true))
                 .then(literal("unregister")
-                        .requires(Permissions.require("easyauth.commands.account.unregister", true))
+                        .requires(FabricPermissions.require("easyauth.commands.account.unregister", true))
                         .executes(ctx -> {
                             langConfig.enterPassword.send(ctx.getSource());
                             return 1;
@@ -41,7 +41,7 @@ public class AccountCommand {
                         )
                 )
                 .then(literal("changePassword")
-                        .requires(Permissions.require("easyauth.commands.account.changePassword", true))
+                        .requires(FabricPermissions.require("easyauth.commands.account.changePassword", true))
                         .then(argument("old password", string())
                                 .executes(ctx -> {
                                     langConfig.enterNewPassword.send(ctx.getSource());
@@ -58,7 +58,7 @@ public class AccountCommand {
                         )
                 )
                 .then(literal("online")
-                        .requires(Permissions.require("easyauth.commands.account.online", true))
+                        .requires(FabricPermissions.require("easyauth.commands.account.online", true))
                         .then(argument("password", string())
                                 .executes(ctx -> markAsOnline(
                                         ctx.getSource(),
@@ -80,9 +80,9 @@ public class AccountCommand {
     }
 
     // Method called for checking the password and then removing user's account from db
-    private static int unregister(ServerCommandSource source, String pass) throws CommandSyntaxException {
+    private static int unregister(CommandSourceStack source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
@@ -117,7 +117,7 @@ public class AccountCommand {
                 langConfig.accountDeleted.send(source);
                 playerAuth.easyAuth$setAuthenticated(false);
                 playerAuth.easyAuth$setPlayerEntryV1(new PlayerEntryV1(username));
-                player.networkHandler.disconnect(langConfig.accountDeleted.get());
+                player.connection.disconnect(langConfig.accountDeleted.get());
                 return;
             }
             langConfig.wrongPassword.send(source);
@@ -126,9 +126,9 @@ public class AccountCommand {
     }
 
     // Method called for checking the password and then changing it
-    private static int changePassword(ServerCommandSource source, String oldPass, String newPass) throws CommandSyntaxException {
+    private static int changePassword(CommandSourceStack source, String oldPass, String newPass) throws CommandSyntaxException {
         // Getting the player who send the command
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
@@ -166,8 +166,8 @@ public class AccountCommand {
      * @param password password of the player
      * @return 0
      */
-    private static int markAsOnline(ServerCommandSource source, String password) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+    private static int markAsOnline(CommandSourceStack source, String password) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         THREADPOOL.submit(() -> {
@@ -196,7 +196,7 @@ public class AccountCommand {
         return 1;
     }
 
-    private static int markAsOnline(ServerCommandSource source, String password, boolean confirm) throws CommandSyntaxException {
+    private static int markAsOnline(CommandSourceStack source, String password, boolean confirm) throws CommandSyntaxException {
         if (!confirm) {
             langConfig.selfMarkAsOnlineWarning.send(source);
             return 0;

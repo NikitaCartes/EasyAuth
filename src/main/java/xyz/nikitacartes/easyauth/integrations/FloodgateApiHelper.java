@@ -1,6 +1,6 @@
 package xyz.nikitacartes.easyauth.integrations;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.geysermc.floodgate.api.FloodgateApi;
 
 import java.util.UUID;
@@ -15,8 +15,8 @@ public class FloodgateApiHelper{
      * @return true if it's fake, otherwise false
      */
 
-    public static boolean isFloodgatePlayer(PlayerEntity player) {
-        return isFloodgatePlayer(player.getUuid());
+    public static boolean isFloodgatePlayer(Player player) {
+        return isFloodgatePlayer(player.getUUID());
     }
 
     /**

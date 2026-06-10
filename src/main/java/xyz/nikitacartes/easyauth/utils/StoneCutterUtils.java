@@ -1,7 +1,11 @@
 package xyz.nikitacartes.easyauth.utils;
 
 import com.mojang.authlib.GameProfile;
+//? if neoforge {
+/*import net.neoforged.fml.ModList;
+*///?} else {
 import net.fabricmc.loader.api.FabricLoader;
+//?}
 //? if >= 1.21.11 {
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 //?}
@@ -202,7 +206,15 @@ public class StoneCutterUtils {
     }
 
     public static boolean isModLoaded(String modId) {
+        //? if neoforge {
+        /*try {
+            return ModList.get() != null && ModList.get().isLoaded(modId);
+        } catch (Throwable t) {
+            return false;
+        }
+        *///?} else {
         return FabricLoader.getInstance().isModLoaded(modId);
+        //?}
     }
 
     public static boolean isAdministrator(PlayerList playerManager, ServerPlayer player) {

@@ -30,7 +30,7 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getName;
 
 @Mixin(PlayerDataStorage.class)
-public class PlayerSaveHandlerMixin {
+public class PlayerDataStorageMixin {
     @Final
     @Shadow
     public File playerDir;

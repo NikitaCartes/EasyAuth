@@ -1,5 +1,6 @@
 package xyz.nikitacartes.easyauth;
 
+//? if fabric {
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;
@@ -69,3 +70,4 @@ public class EasyAuthFabric implements ModInitializer {
         ServerLoginConnectionEvents.QUERY_START.register(earlyPhase, (netHandler, server, packetSender, sync) -> AuthEventHandler.onPreLogin(netHandler));
     }
 }
+//?}

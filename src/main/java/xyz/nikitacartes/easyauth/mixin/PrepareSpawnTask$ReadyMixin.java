@@ -17,13 +17,21 @@ import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 
 @Mixin(targets = "net.minecraft.server.network.config.PrepareSpawnTask$Ready")
-public abstract class PrepareSpawnTask$PlayerSpawnMixin {
+public abstract class PrepareSpawnTask$ReadyMixin {
 
+    // NeoForge (and Fabric 26.1+) name the synthetic outer-class reference `this$0`;
+    // older Fabric uses the intermediary `field_61141`. The alias lets one declaration match both.
     @Final
-    @Shadow(remap = false)
+    @Shadow(remap = false, aliases = {"this$0"})
     PrepareSpawnTask field_61141;
 
+    // NeoForge (always Mojmap) and deobfuscated Fabric 26.1 use the official lambda name;
+    // only obfuscated Fabric (<26.1) uses the intermediary lambda name.
+    //? if neoforge || >=26.1 {
+    /*@WrapOperation(method = "lambda$spawn$1(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/storage/ValueInput;)V",
+    *///?} else {
     @WrapOperation(method = "method_72303(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/storage/ValueInput;)V",
+    //?}
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;loadAndSpawnParentVehicle(Lnet/minecraft/world/level/storage/ValueInput;)V"))
     private static void doNotMountPlayerToVehicle(ServerPlayer instance, ValueInput view, Operation<Void> original) {
         if (config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {

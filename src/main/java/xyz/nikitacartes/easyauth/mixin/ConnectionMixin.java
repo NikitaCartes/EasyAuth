@@ -15,7 +15,7 @@ import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 @Mixin(Connection.class)
-public abstract class ClientConnectionMixin {
+public abstract class ConnectionMixin {
     @Inject(method = "genericsFtw", at = @At("HEAD"), cancellable = true)
     private static void easyAuth$onHandlePacket(Packet<?> packet, PacketListener listener, CallbackInfo ci) {
         boolean isServerPlayNetworkHandler = listener instanceof ServerGamePacketListenerImpl;

@@ -43,7 +43,7 @@ import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.*;
 import static xyz.nikitacartes.easyauth.utils.Utils.getIp;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerEntityMixin extends EntityMixin implements PlayerAuth {
+public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAuth {
     @Unique
     private final ServerPlayer player = (ServerPlayer) (Object) this;
 

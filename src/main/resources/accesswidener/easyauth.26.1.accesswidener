@@ -1,0 +1,15 @@
+accessWidener	v1	official
+
+accessible class net/minecraft/server/network/ServerLoginPacketListenerImpl$State
+accessible field net/minecraft/server/network/ServerLoginPacketListenerImpl authenticatedProfile Lcom/mojang/authlib/GameProfile;
+accessible field net/minecraft/stats/ServerStatsCounter file Ljava/nio/file/Path;
+mutable field net/minecraft/stats/ServerStatsCounter file Ljava/nio/file/Path;
+accessible class net/minecraft/server/players/CachedUserNameToIdResolver$GameProfileInfo
+accessible field net/minecraft/world/level/storage/TagValueInput input Lnet/minecraft/nbt/CompoundTag;
+accessible method net/minecraft/server/players/CachedUserNameToIdResolver load ()Ljava/util/List;
+accessible field net/minecraft/world/level/storage/PlayerDataStorage playerDir Ljava/io/File;
+accessible field net/minecraft/world/entity/player/Inventory selected I
+accessible field net/minecraft/server/network/ServerCommonPacketListenerImpl connection Lnet/minecraft/network/Connection;
+accessible class net/minecraft/server/network/config/PrepareSpawnTask$Ready
+accessible field net/minecraft/server/level/ServerPlayer server Lnet/minecraft/server/MinecraftServer;
+accessible field net/minecraft/server/network/ServerGamePacketListenerImpl awaitingTeleport I

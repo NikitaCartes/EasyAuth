@@ -32,7 +32,7 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.Utils.getIp;
 
 @Mixin(ServerConfigurationPacketListenerImpl.class)
-public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommonPacketListenerImpl {
+public abstract class ServerConfigurationPacketListenerImplMixin extends ServerCommonPacketListenerImpl {
 
     @Shadow
     private PrepareSpawnTask prepareSpawnTask;
@@ -85,7 +85,7 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
         LogDebug(String.format("Player %s is not authenticated", gameProfile.name()));
     }
 
-    public ServerConfigurationNetworkHandlerMixin(MinecraftServer server, Connection connection, CommonListenerCookie clientData) {
+    public ServerConfigurationPacketListenerImplMixin(MinecraftServer server, Connection connection, CommonListenerCookie clientData) {
         super(server, connection, clientData);
     }
 

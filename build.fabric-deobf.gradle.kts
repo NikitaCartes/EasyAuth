@@ -1,8 +1,10 @@
+import java.util.concurrent.TimeUnit
+
 plugins {
     id("java")
     id("java-library")
-    kotlin("jvm") version "2.2.10"
-    id("fabric-loom") version "1.17-SNAPSHOT"
+    kotlin("jvm") version "2.4.0"
+    id("net.fabricmc.fabric-loom") version "1.17-SNAPSHOT"
     id("com.google.devtools.ksp") version "2.3.9"
     id("dev.kikugie.fletching-table.fabric") version "0.1.0-alpha.22"
     id("com.gradleup.shadow") version "9.4.2"
@@ -11,10 +13,8 @@ plugins {
 
 val baseVersion = property("mod_version").toString()
 val dynamicVersion = if (baseVersion.endsWith("-SNAPSHOT")) {
-    // Match only plain release tags like 1.2.3
     val lastReleaseTag = runGit("describe", "--tags", "--match", "[0-9]*.[0-9]*.[0-9]*", "--abbrev=0")
     if (lastReleaseTag != null) {
-        // Count commits since last release tag
         val countStr = runGit("rev-list", "$lastReleaseTag..HEAD", "--count")
         val count = countStr?.toIntOrNull() ?: 0
         if (count > 0) "$baseVersion.$count" else baseVersion
@@ -27,21 +27,13 @@ repositories {
     maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
     maven(url = "https://repo.opencollab.dev/main")
     maven(url = "https://api.modrinth.com/maven")
-    //mavenLocal()
 }
 
 base.archivesName = "${property("mod_id")}-mc${property("minecraft_version")}"
 
-val awFile = when {
-    stonecutter.eval(stonecutter.current.version, ">=1.21.11") -> "easyauth.1.21.11.accesswidener"
-    stonecutter.eval(stonecutter.current.version, ">=1.21.9") -> "easyauth.1.21.9.accesswidener"
-    stonecutter.eval(stonecutter.current.version, ">=1.21.6") -> "easyauth.1.21.6.accesswidener"
-    stonecutter.eval(stonecutter.current.version, ">=1.21.5") -> "easyauth.1.21.5.accesswidener"
-    stonecutter.eval(stonecutter.current.version, ">=1.20.3") -> "easyauth.1.20.3.accesswidener"
-    stonecutter.eval(stonecutter.current.version, ">=1.20.2") -> "easyauth.1.20.2.accesswidener"
-    stonecutter.eval(stonecutter.current.version, ">=1.19.4") -> "easyauth.1.19.4.accesswidener"
-    else -> throw GradleException("Access widener is missing for Minecraft ${stonecutter.current.version})")
-}
+// 26.1 uses the same access-widener surface as 1.21.11, but with the `official` namespace
+// (deobfuscated MC) instead of `named`.
+val awFile = "easyauth.26.1.accesswidener"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -59,12 +51,12 @@ loom {
     }
 
     decompilerOptions.named("vineflower") {
-        options.put("mark-corresponding-synthetics", "1") // Adds names to lambdas - useful for mixins
+        options.put("mark-corresponding-synthetics", "1")
     }
 
     runConfigs.all {
-        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
-        runDir = "run" // Use a separate run directory for all configurations
+        ideConfigGenerated(true)
+        runDir = "run"
     }
 }
 
@@ -91,29 +83,25 @@ dependencies {
         shadow(name)
     }
 
-    // Fabric
+    // Fabric — deobfuscated MC 26.1+, no mappings() (loom skips remapping).
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
-    mappings(loom.officialMojangMappings())
 
-    modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
+    implementation("net.fabricmc:fabric-loader:${property("loader_version")}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
     // Translations
     include("xyz.nucleoid:server-translations-api:${property("server_translations_version")}")
-    modImplementation("xyz.nucleoid:server-translations-api:${property("server_translations_version")}")
+    implementation("xyz.nucleoid:server-translations-api:${property("server_translations_version")}")
 
     // Permissions
-    modImplementation("me.lucko:fabric-permissions-api:${property("fabric_permissions_version")}")
+    implementation("me.lucko:fabric-permissions-api:${property("fabric_permissions_version")}")
     compileOnly("net.luckperms:api:${property("luckperms_version")}")
 
     // Mods
-    modCompileOnly("org.geysermc.floodgate:api:${property("floodgate_api_version")}")
-    modCompileOnly("maven.modrinth:vanish:${property("vanish_version")}")
+    compileOnly("org.geysermc.floodgate:api:${property("floodgate_api_version")}")
+    compileOnly("maven.modrinth:vanish:${property("vanish_version")}")
 
     // Password hashing
-    implementAndInclude("de.mkammerer:argon2-jvm:${property("argon2_version")}")
-    implementAndInclude("de.mkammerer:argon2-jvm-nolibs:${property("argon2_version")}")
-
     implementAndInclude("at.favre.lib:bcrypt:${property("bcrypt_version")}")
     implementAndInclude("at.favre.lib:bytes:${property("bytes_version")}")
 
@@ -132,11 +120,10 @@ dependencies {
 
     implementation("org.spongepowered:configurate-hocon:${property("hocon_version")}")
     shadow("org.spongepowered:configurate-hocon:${property("hocon_version")}")
-
-    include("net.java.dev.jna:jna:${property("jna_version")}")
 }
 
 tasks.shadowJar {
+    archiveClassifier.set("dev-shadow")
     relocate("org.spongepowered.configurate", "xyz.nikitacartes.shadow.configurate")
     relocate("com.typesafe.config", "xyz.nikitacartes.shadow.config")
     relocate("io.leangen.geantyref", "xyz.nikitacartes.shadow.geantyref")
@@ -148,13 +135,15 @@ tasks.shadowJar {
     from(sourceSets.main.get().output)
 }
 
-tasks.remapJar {
-    dependsOn(tasks.shadowJar)
-    inputFile.set(tasks.shadowJar.get().archiveFile)
-}
-
+// Unobfuscated loom has no remapJar; the `jar` task (with loom's access-widener + jar-in-jar
+// includes) is the final mod jar. Merge the relocated shadow output into it.
 tasks.jar {
     from("LICENCE")
+    dependsOn(tasks.shadowJar)
+    from(zipTree(tasks.shadowJar.get().archiveFile)) {
+        exclude("META-INF/MANIFEST.MF", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType<ProcessResources>().configureEach {
@@ -172,9 +161,10 @@ tasks.processResources {
         )
     }
 
+    // Deobfuscated MC needs no mixin refmap (names already match runtime).
     filesMatching("easyauth.mixins.json") {
         filter {
-            it.replace("\${refmap}", "${base.archivesName.get()}-refmap.json")
+            it.replace("\${refmap}", "")
         }
     }
 }
@@ -195,7 +185,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.register<Copy>("collectJars") {
     group = "build"
-    from(tasks.remapJar.map { it.archiveFile })
+    from(tasks.jar.map { it.archiveFile })
     into(rootProject.layout.buildDirectory.file("libs"))
     dependsOn("build")
 }
@@ -208,7 +198,7 @@ publishMods {
     val modrinthToken = System.getenv("MODRINTH_TOKEN") ?: ""
     val curseforgeToken = System.getenv("CURSEFORGE_TOKEN") ?: ""
 
-    file = tasks.remapJar.get().archiveFile
+    file = tasks.jar.get().archiveFile
     dryRun = modrinthToken.isEmpty() || curseforgeToken.isEmpty()
 
     displayName = "${property("display_name")} $dynamicVersion"
@@ -223,7 +213,6 @@ publishMods {
     modrinth {
         projectId = "aZj58GfX"
         accessToken = modrinthToken
-
         targets.forEach(minecraftVersions::add)
         requires("fabric-api")
         optional("luckperms")
@@ -233,7 +222,6 @@ publishMods {
     curseforge {
         projectId = "503866"
         accessToken = curseforgeToken
-
         targets.forEach(minecraftVersions::add)
         requires("fabric-api")
         embeds("server-translation-api")
@@ -243,8 +231,7 @@ publishMods {
 }
 
 fletchingTable {
-    mixins.create("main") { // Name should match an existing source set
-        // Default matches the default value in the annotation
+    mixins.create("main") {
         mixin("default", "easyauth.mixins.json")
     }
 }

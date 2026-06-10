@@ -241,6 +241,15 @@ public class LangConfigV1 extends ConfigTemplate {
         }
 
         private MutableComponent getTranslation(Object... args) {
+            //? if neoforge {
+            /*// server-translations-api has no NeoForge port, so per-player server-side
+            // translation is unavailable; always emit a fallback-aware component
+            // (all players see the `defaultLanguage`). See NEOFORGE_NOTES.md.
+            if (!fallback.isEmpty()) {
+                return translatableWithFallback(key, fallback, args);
+            }
+            return translatableWithFallback(key, translations.get(key), args);
+            *///?} else {
             if (langConfig.enableServerSideTranslation && serverSide) {
                 return translatable(key, args);
             } if (!fallback.isEmpty()) {
@@ -248,6 +257,7 @@ public class LangConfigV1 extends ConfigTemplate {
             } else {
                 return translatableWithFallback(key, translations.get(key), args);
             }
+            //?}
         }
     }
 

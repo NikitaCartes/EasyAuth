@@ -12,11 +12,13 @@ import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 @Mixin(targets = "net.minecraft.server.level.ServerPlayer$1")
-public class ServerPlayerEntity$1Mixin {
+public class ServerPlayer$1Mixin {
 
     //? if >= 1.21.5 {
     @Final
-    @Shadow(remap = false)
+    // NeoForge (and Fabric 26.1+) name the synthetic outer-class reference `this$0`;
+    // older Fabric uses the intermediary `field_58075`. The alias lets one declaration match both.
+    @Shadow(remap = false, aliases = {"this$0"})
     ServerPlayer field_58075;
 
     @Inject(method = "sendInitialData(Lnet/minecraft/world/inventory/AbstractContainerMenu;Ljava/util/List;Lnet/minecraft/world/item/ItemStack;[I)V",
@@ -30,7 +32,7 @@ public class ServerPlayerEntity$1Mixin {
     //?} else {
 
     /*@Final
-    @Shadow(remap = false)
+    @Shadow(remap = false, aliases = {"this$0"})
     ServerPlayer field_29182;
 
     @Inject(method = "sendInitialData(Lnet/minecraft/world/inventory/AbstractContainerMenu;Lnet/minecraft/core/NonNullList;Lnet/minecraft/world/item/ItemStack;[I)V",

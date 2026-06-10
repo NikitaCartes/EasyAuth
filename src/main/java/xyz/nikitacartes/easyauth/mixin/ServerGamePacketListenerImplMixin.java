@@ -18,7 +18,7 @@ import static net.minecraft.network.protocol.game.ServerboundPlayerActionPacket.
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerPlayNetworkHandlerMixin {
+public abstract class ServerGamePacketListenerImplMixin {
     @Shadow
     public ServerPlayer player;
 

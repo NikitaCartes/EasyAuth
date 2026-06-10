@@ -20,7 +20,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 import java.nio.file.Path;
 
 @Mixin(PlayerAdvancements.class)
-public class PlayerAdvancementTrackerMixin {
+public class PlayerAdvancementsMixin {
 
     @Mutable
     @Shadow

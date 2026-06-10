@@ -28,7 +28,7 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
 
 @Mixin(PlayerDataStorage.class)
-public class WorldSaveHandlerMixin {
+public class PlayerDataStorageLegacyMixin {
     @Final
     @Shadow
     private File playerDir;

@@ -90,7 +90,7 @@ import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getName;
 *///?}
 
 @Mixin(PlayerList.class)
-public abstract class PlayerManagerMixin {
+public abstract class PlayerListMixin {
 
     @Unique
     private final PlayerList playerManager = (PlayerList) (Object) this;

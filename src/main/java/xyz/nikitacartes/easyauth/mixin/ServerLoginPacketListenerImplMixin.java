@@ -26,7 +26,7 @@ import static xyz.nikitacartes.easyauth.integrations.MojangApi.getUuid;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
-public abstract class ServerLoginNetworkHandlerMixin {
+public abstract class ServerLoginPacketListenerImplMixin {
     //? if >= 1.20.2 {
     @Shadow
     public GameProfile authenticatedProfile;

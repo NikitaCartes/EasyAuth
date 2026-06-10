@@ -14,7 +14,7 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 
 @Mixin(Commands.class)
-public class CommandManagerMixin {
+public class CommandsMixin {
     //? if >= 1.20.3 {
     @Inject(method = "performCommand(Lcom/mojang/brigadier/ParseResults;Ljava/lang/String;)V", at = @At("HEAD"), cancellable = true)
     private void checkCanUseCommands(ParseResults<CommandSourceStack> parseResults, String command, CallbackInfo ci) {

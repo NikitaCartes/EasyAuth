@@ -26,10 +26,12 @@ import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 
 @Mixin(targets = "net.minecraft.server.network.config.PrepareSpawnTask$Preparing")
-public abstract class PrepareSpawnTask$LoadPlayerChunksMixin {
+public abstract class PrepareSpawnTask$PreparingMixin {
 
+    // NeoForge (and Fabric 26.1+) name the synthetic outer-class reference `this$0`;
+    // older Fabric uses the intermediary `field_61135`. The alias lets one declaration match both.
     @Final
-    @Shadow(remap = false)
+    @Shadow(remap = false, aliases = {"this$0"})
     PrepareSpawnTask field_61135;
 
     @Final

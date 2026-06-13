@@ -1,0 +1,244 @@
+# Central Stonecutter properties — replaces the per-node versions/*/gradle.properties files.
+# Top-level keys apply to every node; [<loader>."<version>"] sections apply to that node only.
+# Build scripts read these via property("...") after calling properties.tags(version, loader).
+
+# Mod
+mod_name = "EasyAuth"
+mod_id = "easyauth"
+mod_version = "3.4.3"
+
+# Shared dependencies
+luckperms_version = "5.4"
+bcrypt_version = "0.10.2"
+bytes_version = "1.6.1"
+leveldb_version = "0.12"
+mongodb_version = "5.3.1"
+mysql_version = "9.2.0"
+sqlite_version = "3.49.1.0"
+postgresql_version = "42.7.10"
+hocon_version = "4.2.0"
+
+# ---------------------------------------------------------------------------
+# Fabric (build.fabric-obf.gradle.kts: fabric-loom + officialMojangMappings; 26.1
+# deobf uses build.fabric-deobf.gradle.kts). Dependency links:
+#   server_translations_version  https://github.com/NucleoidMC/Server-Translations/releases
+#   fabric_permissions_version   https://github.com/lucko/fabric-permissions-api/releases
+#   vanish_version               https://github.com/DrexHD/Vanish/releases
+# ---------------------------------------------------------------------------
+
+[fabric."1.19.4"]
+minecraft_version = "1.19.4"
+loader_version = "0.18.1"
+fabric_version = "0.76.0+1.19.4"
+server_translations_version = "2.0.0-beta.2+1.19.4-pre2"
+fabric_permissions_version = "0.2-SNAPSHOT"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.4.1+1.19.4"
+display_name = "[1.19.4]"
+supported_versions = "1.19.4"
+supported_minecraft_version = ">=1.19.4- <1.20"
+
+[fabric."1.20"]
+minecraft_version = "1.20"
+loader_version = "0.18.1"
+fabric_version = "0.83.0+1.20"
+server_translations_version = "2.0.0+1.20"
+fabric_permissions_version = "0.2-SNAPSHOT"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.5+1.20.1"
+display_name = "[1.20, 1.20.1]"
+supported_versions = "1.20,1.20.1"
+supported_minecraft_version = ">=1.20- <1.20.2"
+
+[fabric."1.20.2"]
+minecraft_version = "1.20.2"
+loader_version = "0.18.1"
+fabric_version = "0.89.1+1.20.2"
+server_translations_version = "2.1.0+1.20.2-rc2"
+fabric_permissions_version = "0.2-SNAPSHOT"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.0+1.20.2"
+display_name = "[1.20.2]"
+supported_versions = "1.20.2"
+supported_minecraft_version = ">=1.20.2- <1.20.3"
+
+[fabric."1.20.3"]
+minecraft_version = "1.20.4"
+loader_version = "0.18.1"
+fabric_version = "0.91.3+1.20.4"
+server_translations_version = "2.2.0+1.20.3-rc1"
+fabric_permissions_version = "0.2-SNAPSHOT"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.4+1.20.4"
+display_name = "[1.20.3, 1.20.4]"
+supported_versions = "1.20.3,1.20.4"
+supported_minecraft_version = ">=1.20.3- <1.20.5"
+
+[fabric."1.20.5"]
+minecraft_version = "1.20.6"
+loader_version = "0.18.1"
+fabric_version = "0.97.8+1.20.6"
+server_translations_version = "2.3.0+1.20.5-rc2"
+fabric_permissions_version = "0.3.1"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.5+1.20.6"
+display_name = "[1.20.5, 1.20.6]"
+supported_versions = "1.20.5,1.20.6"
+supported_minecraft_version = ">=1.20.5- <1.21"
+
+[fabric."1.21"]
+minecraft_version = "1.21"
+loader_version = "0.18.1"
+fabric_version = "0.100.1+1.21"
+server_translations_version = "2.3.1+1.21-pre2"
+fabric_permissions_version = "0.3.1"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.17+1.21.1"
+display_name = "[1.21, 1.21.1]"
+supported_versions = "1.21,1.21.1"
+supported_minecraft_version = ">=1.21- <1.21.2"
+
+[fabric."1.21.2"]
+minecraft_version = "1.21.2"
+loader_version = "0.18.1"
+fabric_version = "0.107.0+1.21.3"
+server_translations_version = "2.4.0+1.21.2-rc1"
+fabric_permissions_version = "0.3.3"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.7+1.21.2-rc2"
+display_name = "[1.21.2 - 1.21.3]"
+supported_versions = "1.21.2,1.21.3"
+supported_minecraft_version = ">=1.21.2- <1.21.4"
+
+[fabric."1.21.4"]
+minecraft_version = "1.21.4"
+loader_version = "0.18.1"
+fabric_version = "0.119.4+1.21.4"
+server_translations_version = "2.4.0+1.21.2-rc1"
+fabric_permissions_version = "0.3.3"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.7+1.21.2-rc2"
+display_name = "[1.21.4]"
+supported_versions = "1.21.4"
+supported_minecraft_version = "~1.21.4"
+
+[fabric."1.21.5"]
+minecraft_version = "1.21.5"
+loader_version = "0.18.1"
+fabric_version = "0.119.2+1.21.5"
+server_translations_version = "2.5.1+1.21.5"
+fabric_permissions_version = "0.3.3"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.14+1.21.5"
+display_name = "[1.21.5]"
+supported_versions = "1.21.5"
+supported_minecraft_version = ">=1.21.5- <1.21.6"
+
+[fabric."1.21.6"]
+minecraft_version = "1.21.6"
+loader_version = "0.18.1"
+fabric_version = "0.126.1+1.21.6"
+server_translations_version = "2.5.1+1.21.5"
+fabric_permissions_version = "0.4.0"
+floodgate_api_version = "2.2.0-SNAPSHOT"
+vanish_version = "1.5.18+1.21.6-rc1"
+display_name = "[1.21.6, 1.21.7, 1.21.8]"
+supported_versions = "1.21.6,1.21.7,1.21.8"
+supported_minecraft_version = ">=1.21.6- <1.21.9"
+
+[fabric."1.21.9"]
+minecraft_version = "1.21.9"
+loader_version = "0.18.1"
+fabric_version = "0.134.0+1.21.9"
+server_translations_version = "2.5.2+1.21.9-pre3"
+fabric_permissions_version = "0.5.0"
+floodgate_api_version = "2.2.4-SNAPSHOT"
+vanish_version = "1.6.1+1.21.9-rc1"
+display_name = "[1.21.9, 1.21.10]"
+supported_versions = "1.21.9,1.21.10"
+supported_minecraft_version = ">=1.21.9- <1.21.11"
+
+[fabric."1.21.11"]
+minecraft_version = "1.21.11"
+loader_version = "0.18.1"
+fabric_version = "0.139.4+1.21.11"
+server_translations_version = "2.5.2+1.21.9-pre3"
+fabric_permissions_version = "0.6.1"
+floodgate_api_version = "2.2.4-SNAPSHOT"
+vanish_version = "1.6.2+1.21.11-rc2"
+display_name = "[1.21.11]"
+supported_versions = "1.21.11"
+supported_minecraft_version = ">=1.21.11- <26.1"
+
+[fabric."26.1"]
+minecraft_version = "26.1"
+loader_version = "0.18.5"
+fabric_version = "0.144.3+26.1"
+server_translations_version = "3.0.1+26.1"
+fabric_permissions_version = "0.7.0"
+floodgate_api_version = "2.2.4-SNAPSHOT"
+vanish_version = "1.6.8+26.1"
+display_name = "[26.1]"
+supported_versions = "26.1"
+supported_minecraft_version = ">=26.1-"
+
+# ---------------------------------------------------------------------------
+# NeoForge (build.neoforge.gradle.kts: ModDevGradle).
+#   neoforge_version  https://projects.neoforged.net/neoforged/neoforge
+# ---------------------------------------------------------------------------
+
+[neoforge."1.21"]
+minecraft_version = "1.21"
+neoforge_version = "21.0.167"
+display_name = "[NeoForge 1.21, 1.21.1]"
+supported_versions = "1.21,1.21.1"
+supported_minecraft_version = "[1.21,1.21.2)"
+
+[neoforge."1.21.2"]
+minecraft_version = "1.21.2"
+neoforge_version = "21.2.1-beta"
+display_name = "[NeoForge 1.21.2 - 1.21.3]"
+supported_versions = "1.21.2,1.21.3"
+supported_minecraft_version = "[1.21.2,1.21.4)"
+
+[neoforge."1.21.4"]
+minecraft_version = "1.21.4"
+neoforge_version = "21.4.157"
+display_name = "[NeoForge 1.21.4]"
+supported_versions = "1.21.4"
+supported_minecraft_version = "[1.21.4,1.21.5)"
+
+[neoforge."1.21.5"]
+minecraft_version = "1.21.5"
+neoforge_version = "21.5.97"
+display_name = "[NeoForge 1.21.5]"
+supported_versions = "1.21.5"
+supported_minecraft_version = "[1.21.5,1.21.6)"
+
+[neoforge."1.21.6"]
+minecraft_version = "1.21.6"
+neoforge_version = "21.6.20-beta"
+display_name = "[NeoForge 1.21.6, 1.21.7, 1.21.8]"
+supported_versions = "1.21.6,1.21.7,1.21.8"
+supported_minecraft_version = "[1.21.6,1.21.9)"
+
+[neoforge."1.21.9"]
+minecraft_version = "1.21.9"
+neoforge_version = "21.9.16-beta"
+display_name = "[NeoForge 1.21.9, 1.21.10]"
+supported_versions = "1.21.9,1.21.10"
+supported_minecraft_version = "[1.21.9,1.21.11)"
+
+[neoforge."1.21.11"]
+minecraft_version = "1.21.11"
+neoforge_version = "21.11.42"
+display_name = "[NeoForge 1.21.11]"
+supported_versions = "1.21.11"
+supported_minecraft_version = "[1.21.11,26.1)"
+
+[neoforge."26.1"]
+minecraft_version = "26.1"
+neoforge_version = "26.1.2.75"
+display_name = "[NeoForge 26.1]"
+supported_versions = "26.1"
+supported_minecraft_version = "[26.1,)"

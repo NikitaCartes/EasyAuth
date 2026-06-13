@@ -15,18 +15,20 @@ plugins {
 
 stonecutter {
     create(rootProject) {
-        // Obfuscated Fabric nodes (default build.gradle.kts: fabric-loom + officialMojangMappings).
-        versions("1.19.4", "1.20", "1.20.2", "1.20.3", "1.20.5", "1.21", "1.21.2", "1.21.4", "1.21.5", "1.21.6", "1.21.9", "1.21.11")
-        // Deobfuscated Fabric (26.1+ ships unobfuscated): net.fabricmc.fabric-loom, no remapping, no mappings.
-        versions("26.1" to "26.1").buildscript("build.fabric-deobf.gradle.kts")
-        // NeoForge nodes (build.neoforge.gradle.kts, ModDevGradle). The "<mc>-neoforge" to "<mc>"
-        // mapping keeps the logical version correct for `//? if >=...` checks.
-        // NB: ModDevGradle 2.x can only consume NeoForge 21.0.x+ (plus the backported 20.4/20.6 lines).
-        // MC 1.20.2/1.20.3/1.20.5 (NeoForge 20.2/20.3/20.5) never published the `neoforge-moddev-bundle`
-        // variant MDG requires, so they cannot be built here (Fabric still covers those MC versions).
+        // Every node is "<mc>-<loader>"; the second element of each pair is the logical
+        // version used by `//? if >=...` checks (see stonecutter.properties.toml sections).
+
+        // Obfuscated Fabric (build.fabric-obf.gradle.kts: fabric-loom + officialMojangMappings).
+        listOf("1.19.4", "1.20", "1.20.2", "1.20.3", "1.20.5", "1.21", "1.21.2", "1.21.4", "1.21.5", "1.21.6", "1.21.9", "1.21.11").forEach { mc ->
+            versions("$mc-fabric" to mc).buildscript("build.fabric-obf.gradle.kts")
+        }
+        // Deobfuscated Fabric (26.1+ ships unobfuscated): no remapping, no mappings.
+        versions("26.1-fabric" to "26.1").buildscript("build.fabric-deobf.gradle.kts")
+        // NeoForge (build.neoforge.gradle.kts, ModDevGradle). MDG 2.x only consumes NeoForge
+        // 21.0.x+ (plus backported 20.4/20.6), so MC 1.20.2/1.20.3/1.20.5 have no NeoForge node.
         listOf("1.21", "1.21.2", "1.21.4", "1.21.5", "1.21.6", "1.21.9", "1.21.11", "26.1").forEach { mc ->
             versions("$mc-neoforge" to mc).buildscript("build.neoforge.gradle.kts")
         }
-        vcsVersion = "1.21.11"
+        vcsVersion = "1.21.11-fabric"
     }
 }

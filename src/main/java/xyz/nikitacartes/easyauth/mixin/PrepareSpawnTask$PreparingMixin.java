@@ -1,12 +1,9 @@
+//~ resource_location
 //? if >= 1.21.9 {
 package xyz.nikitacartes.easyauth.mixin;
 
 import net.minecraft.core.registries.Registries;
-//? if >= 1.21.11 {
 import net.minecraft.resources.Identifier;
-//?} else {
-/*import net.minecraft.resources.ResourceLocation;
-*///?}
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.config.PrepareSpawnTask;
@@ -58,11 +55,7 @@ public abstract class PrepareSpawnTask$PreparingMixin {
 
             ResourceKey<Level> worldKey = ResourceKey.create(
                 Registries.DIMENSION,
-                //? if >= 1.21.11 {
                 Identifier.parse(config.worldSpawn.dimension)
-                //?} else {
-                /*ResourceLocation.parse(config.worldSpawn.dimension)
-                *///?}
             );
             spawnLevel = prepareSpawnTask.easyAuth$getServer().getLevel(worldKey);
             spawnAngle = new Vec2(config.worldSpawn.yaw, config.worldSpawn.pitch);

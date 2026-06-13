@@ -25,4 +25,5 @@ bin/
 # fabric
 
 run/
-/versions/*/src/
+# Stonecutter generates the version subprojects; nothing under versions/ is tracked.
+/versions/

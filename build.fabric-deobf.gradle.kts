@@ -1,5 +1,3 @@
-import java.util.concurrent.TimeUnit
-
 plugins {
     id("java")
     id("java-library")
@@ -11,16 +9,15 @@ plugins {
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
-val baseVersion = property("mod_version").toString()
-val dynamicVersion = if (baseVersion.endsWith("-SNAPSHOT")) {
-    val lastReleaseTag = runGit("describe", "--tags", "--match", "[0-9]*.[0-9]*.[0-9]*", "--abbrev=0")
-    if (lastReleaseTag != null) {
-        val countStr = runGit("rev-list", "$lastReleaseTag..HEAD", "--count")
-        val count = countStr?.toIntOrNull() ?: 0
-        if (count > 0) "$baseVersion.$count" else baseVersion
-    } else baseVersion
-} else baseVersion
-version = dynamicVersion
+// Tag this node's loader and version so the per-node values in stonecutter.properties.toml
+// (e.g. [fabric."26.1"]) resolve to bare property("...") names.
+stonecutter {
+    val (version, loader) = current.project.split('-', limit = 2)
+    properties.tags(version, loader)
+}
+
+apply(from = rootProject.file("gradle/mod-version.gradle.kts"))
+val dynamicVersion = project.extra["dynamicVersion"] as String
 
 repositories {
     maven(url = "https://maven.nucleoid.xyz")
@@ -241,9 +238,3 @@ private abstract class ServerRunSemaphore : BuildService<BuildServiceParameters.
 private val semaphore = gradle.sharedServices.registerIfAbsent("semaphore", ServerRunSemaphore::class.java) {
     maxParallelUsages.set(1)
 }
-
-fun runGit(vararg args: String): String? = try {
-    val proc = ProcessBuilder("git", *args).redirectErrorStream(true).start()
-    proc.waitFor(5, TimeUnit.SECONDS)
-    if (proc.exitValue() == 0) proc.inputStream.bufferedReader().readText().trim().takeIf { it.isNotBlank() } else null
-} catch (_: Exception) { null }

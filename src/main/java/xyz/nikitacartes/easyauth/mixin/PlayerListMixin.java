@@ -1,3 +1,4 @@
+//~ resource_location
 package xyz.nikitacartes.easyauth.mixin;
 
 //? if = 1.21.6 {
@@ -17,11 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-//? if >= 1.21.11 {
 import net.minecraft.resources.Identifier;
-//?} else {
-/*import net.minecraft.resources.ResourceLocation;
-*///?}
 import net.minecraft.server.MinecraftServer;
 //? if >= 1.21.9 {
 import net.minecraft.server.players.NameAndId;
@@ -155,7 +152,7 @@ public abstract class PlayerListMixin {
     private Optional<ResourceKey<Level>> onPlayerConnect(Optional<ResourceKey<Level>> original, @Local(argsOnly = true) ServerPlayer player) {
         if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
             ((PlayerAuth) player).easyAuth$saveTrueDimension(original.orElse(Level.OVERWORLD));
-            return Optional.of(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(config.worldSpawn.dimension)));
+            return Optional.of(ResourceKey.create(Registries.DIMENSION, Identifier.parse(config.worldSpawn.dimension)));
         }
         return original;
     }
@@ -165,7 +162,7 @@ public abstract class PlayerListMixin {
     private ResourceKey<Level> onPlayerConnect(ResourceKey<Level> world, Connection connection, ServerPlayer player, CommonListenerCookie clientData) {
         if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
             ((PlayerAuth) player).easyAuth$saveTrueDimension(world);
-            return ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(config.worldSpawn.dimension));
+            return ResourceKey.create(Registries.DIMENSION, Identifier.parse(config.worldSpawn.dimension));
         }
         return world;
     }
@@ -175,7 +172,7 @@ public abstract class PlayerListMixin {
         private ResourceKey<Level> onPlayerConnect(ResourceKey<Level> world, Connection connection, ServerPlayer player, CommonListenerCookie clientData) {
             if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
                 ((PlayerAuth) player).easyAuth$saveTrueDimension(world);
-                return ResourceKey.create(Registries.DIMENSION, new ResourceLocation(config.worldSpawn.dimension));
+                return ResourceKey.create(Registries.DIMENSION, new Identifier(config.worldSpawn.dimension));
             }
             return world;
         }
@@ -185,7 +182,7 @@ public abstract class PlayerListMixin {
     private ResourceKey<Level> onPlayerConnect(ResourceKey<Level> world, Connection connection, ServerPlayer player) {
         if (config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
             ((PlayerAuth) player).easyAuth$saveTrueDimension(world);
-            return ResourceKey.create(Registries.DIMENSION, new ResourceLocation(config.worldSpawn.dimension));
+            return ResourceKey.create(Registries.DIMENSION, new Identifier(config.worldSpawn.dimension));
         }
         return world;
     }
@@ -313,11 +310,7 @@ public abstract class PlayerListMixin {
         if (alive && config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {
             ResourceKey<Level> worldKey = ResourceKey.create(
                 Registries.DIMENSION,
-                //? if >= 1.21.11 {
                 Identifier.parse(config.worldSpawn.dimension)
-                //?} else {
-                /*ResourceLocation.parse(config.worldSpawn.dimension)
-                *///?}
             );
             ServerLevel serverLevel = this.server.getLevel(worldKey);
             return new TeleportTransition(
@@ -335,7 +328,7 @@ public abstract class PlayerListMixin {
         if (!alive && config.hidePlayerCoords && !((PlayerAuth) instance).easyAuth$isAuthenticated()) {
             ResourceKey<Level> worldKey = ResourceKey.create(
                 Registries.DIMENSION,
-                ResourceLocation.parse(config.worldSpawn.dimension)
+                Identifier.parse(config.worldSpawn.dimension)
             );
             ServerLevel serverLevel = this.server.getLevel(worldKey);
             return new DimensionTransition(
@@ -369,7 +362,7 @@ public abstract class PlayerListMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getRespawnDimension()Lnet/minecraft/resources/ResourceKey;"))
     private ResourceKey<Level> respawnPlayerDimension(ServerPlayer instance, Operation<ResourceKey<Level>> original, ServerPlayer player, boolean alive) {
         if (!alive && config.hidePlayerCoords && !((PlayerAuth) player).easyAuth$isAuthenticated()) {
-            return ResourceKey.create(Registries.DIMENSION, new ResourceLocation(config.worldSpawn.dimension));
+            return ResourceKey.create(Registries.DIMENSION, new Identifier(config.worldSpawn.dimension));
         }
         return original.call(instance);
     }

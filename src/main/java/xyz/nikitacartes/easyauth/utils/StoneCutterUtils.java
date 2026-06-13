@@ -55,11 +55,7 @@ public class StoneCutterUtils {
     }
 
     public static Vec3 getPosition(ServerPlayer player) {
-        //? if >= 1.21.9 {
         return player.position();
-        //?} else {
-        /*return player.position();
-         *///?}
     }
 
     public static void teleport(ServerPlayer player, LastLocation lastLocation, ServerLevel fallbackWorld) {
@@ -95,11 +91,9 @@ public class StoneCutterUtils {
     }
 
     public static ServerLevel getServerWorld(ServerPlayer player) {
-        //? if >= 1.21.9 {
+        //? if >= 1.21.6 {
         return player.level();
-        //?} else if >= 1.21.6 {
-         /*return player.level();
-        *///?} else if >= 1.20 {
+        //?} else if >= 1.20 {
          /*return player.serverLevel();
         *///?} else {
          /*return player.getLevel();

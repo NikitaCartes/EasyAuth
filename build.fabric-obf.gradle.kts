@@ -1,7 +1,7 @@
 plugins {
     id("java")
     id("java-library")
-    kotlin("jvm") version "2.2.10"
+    kotlin("jvm") version "2.4.0"
     id("fabric-loom") version "1.17-SNAPSHOT"
     id("com.google.devtools.ksp") version "2.3.9"
     id("dev.kikugie.fletching-table.fabric") version "0.1.0-alpha.22"
@@ -9,18 +9,15 @@ plugins {
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
-val baseVersion = property("mod_version").toString()
-val dynamicVersion = if (baseVersion.endsWith("-SNAPSHOT")) {
-    // Match only plain release tags like 1.2.3
-    val lastReleaseTag = runGit("describe", "--tags", "--match", "[0-9]*.[0-9]*.[0-9]*", "--abbrev=0")
-    if (lastReleaseTag != null) {
-        // Count commits since last release tag
-        val countStr = runGit("rev-list", "$lastReleaseTag..HEAD", "--count")
-        val count = countStr?.toIntOrNull() ?: 0
-        if (count > 0) "$baseVersion.$count" else baseVersion
-    } else baseVersion
-} else baseVersion
-version = dynamicVersion
+// Tag this node's loader and version so the per-node values in stonecutter.properties.toml
+// (e.g. [fabric."1.21.11"]) resolve to bare property("...") names.
+stonecutter {
+    val (version, loader) = current.project.split('-', limit = 2)
+    properties.tags(version, loader)
+}
+
+apply(from = rootProject.file("gradle/mod-version.gradle.kts"))
+val dynamicVersion = project.extra["dynamicVersion"] as String
 
 repositories {
     maven(url = "https://maven.nucleoid.xyz")
@@ -249,9 +246,3 @@ private abstract class ServerRunSemaphore : BuildService<BuildServiceParameters.
 private val semaphore = gradle.sharedServices.registerIfAbsent("semaphore", ServerRunSemaphore::class.java) {
     maxParallelUsages.set(1)
 }
-
-fun runGit(vararg args: String): String? = try {
-    val proc = ProcessBuilder("git", *args).redirectErrorStream(true).start()
-    proc.waitFor(5, TimeUnit.SECONDS)
-    if (proc.exitValue() == 0) proc.inputStream.bufferedReader().readText().trim().takeIf { it.isNotBlank() } else null
-} catch (_: Exception) { null }

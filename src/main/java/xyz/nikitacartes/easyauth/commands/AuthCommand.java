@@ -1,3 +1,4 @@
+//~ resource_location
 package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.Command;
@@ -12,11 +13,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-//? if >= 1.21.11 {
 import net.minecraft.resources.Identifier;
-//?} else {
-/*import net.minecraft.resources.ResourceLocation;
-*///?}
 import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
@@ -73,11 +70,7 @@ public class AuthCommand {
                         .requires(FabricPermissions.require("easyauth.commands.auth.setSpawn", 3))
                         .executes(ctx -> setSpawn(
                                 ctx.getSource(),
-                                //? if >= 1.21.11 {
                                 StoneCutterUtils.getWorld(ctx.getSource().getEntityOrException()).dimension().identifier(),
-                                //?} else {
-                                /*StoneCutterUtils.getWorld(ctx.getSource().getEntityOrException()).dimension().location(),
-                                *///?}
                                 ctx.getSource().getEntityOrException().getX(),
                                 ctx.getSource().getEntityOrException().getY(),
                                 ctx.getSource().getEntityOrException().getZ(),
@@ -88,11 +81,7 @@ public class AuthCommand {
                                 .then(argument("position", BlockPosArgument.blockPos())
                                         .executes(ctx -> setSpawn(
                                                         ctx.getSource(),
-                                                        //? if >= 1.21.11 {
                                                         DimensionArgument.getDimension(ctx, "dimension").dimension().identifier(),
-                                                        //?} else {
-                                                        /*DimensionArgument.getDimension(ctx, "dimension").dimension().location(),
-                                                        *///?}
                                                         BlockPosArgument.getLoadedBlockPos(ctx, "position").getX(),
                                                         // +1 to not spawn player in ground
                                                         BlockPosArgument.getLoadedBlockPos(ctx, "position").getY(),
@@ -104,11 +93,7 @@ public class AuthCommand {
                                     .then(argument("angle", RotationArgument.rotation())
                                                 .executes(ctx -> setSpawn(
                                                                 ctx.getSource(),
-                                                                //? if >= 1.21.11 {
                                                                 DimensionArgument.getDimension(ctx, "dimension").dimension().identifier(),
-                                                                //?} else {
-                                                                /*DimensionArgument.getDimension(ctx, "dimension").dimension().location(),
-                                                                *///?}
                                                                  BlockPosArgument.getLoadedBlockPos(ctx, "position").getX(),
                                                                 // +1 to not spawn player in ground
                                                                 BlockPosArgument.getLoadedBlockPos(ctx, "position").getY(),
@@ -275,11 +260,7 @@ public class AuthCommand {
      * @param pitch  player pitch (x rotation)
      * @return 0
      */
-    //? if >= 1.21.11 {
     private static int setSpawn(CommandSourceStack source, Identifier world, double x, double y, double z, float yaw, float pitch) {
-    //?} else {
-    /*private static int setSpawn(CommandSourceStack source, ResourceLocation world, double x, double y, double z, float yaw, float pitch) {
-    *///?}
         // Setting config values and saving
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {

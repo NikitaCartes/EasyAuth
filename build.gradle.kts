@@ -111,9 +111,6 @@ dependencies {
     modCompileOnly("maven.modrinth:vanish:${property("vanish_version")}")
 
     // Password hashing
-    implementAndInclude("de.mkammerer:argon2-jvm:${property("argon2_version")}")
-    implementAndInclude("de.mkammerer:argon2-jvm-nolibs:${property("argon2_version")}")
-
     implementAndInclude("at.favre.lib:bcrypt:${property("bcrypt_version")}")
     implementAndInclude("at.favre.lib:bytes:${property("bytes_version")}")
 
@@ -132,8 +129,6 @@ dependencies {
 
     implementation("org.spongepowered:configurate-hocon:${property("hocon_version")}")
     shadow("org.spongepowered:configurate-hocon:${property("hocon_version")}")
-
-    include("net.java.dev.jna:jna:${property("jna_version")}")
 }
 
 tasks.shadowJar {

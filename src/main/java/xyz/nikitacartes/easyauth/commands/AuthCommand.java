@@ -77,7 +77,7 @@ public class AuthCommand {
                                 ctx.getSource().getEntityOrException().getYRot(),
                                 ctx.getSource().getEntityOrException().getXRot()
                         ))
-                            .then(argument("dimension", DimensionArgument.dimension())
+                        .then(argument("dimension", DimensionArgument.dimension())
                                 .then(argument("position", BlockPosArgument.blockPos())
                                         .executes(ctx -> setSpawn(
                                                         ctx.getSource(),
@@ -90,7 +90,7 @@ public class AuthCommand {
                                                         0
                                                 )
                                         )
-                                    .then(argument("angle", RotationArgument.rotation())
+                                        .then(argument("angle", RotationArgument.rotation())
                                                 .executes(ctx -> setSpawn(
                                                                 ctx.getSource(),
                                                                 DimensionArgument.getDimension(ctx, "dimension").dimension().identifier(),

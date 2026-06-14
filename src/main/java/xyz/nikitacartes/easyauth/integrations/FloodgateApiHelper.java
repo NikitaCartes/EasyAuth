@@ -32,7 +32,7 @@ public class FloodgateApiHelper{
 
     public static boolean isFloodgatePlayer(UUID uuid) {
         //? if neoforge {
-        /*// Floodgate has no NeoForge port; always false. See NEOFORGE_NOTES.md.
+        /*// Floodgate has no NeoForge port; always false
         return false;
         *///?} else {
         if (!technicalConfig.floodgateLoaded) return false;

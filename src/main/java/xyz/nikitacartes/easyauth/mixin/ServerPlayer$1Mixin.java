@@ -16,8 +16,6 @@ public class ServerPlayer$1Mixin {
 
     //? if >= 1.21.5 {
     @Final
-    // NeoForge (and Fabric 26.1+) name the synthetic outer-class reference `this$0`;
-    // older Fabric uses the intermediary `field_58075`. The alias lets one declaration match both.
     @Shadow(remap = false, aliases = {"this$0"})
     ServerPlayer field_58075;
 

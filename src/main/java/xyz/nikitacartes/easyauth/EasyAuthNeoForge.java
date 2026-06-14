@@ -40,14 +40,6 @@ import static xyz.nikitacartes.easyauth.EasyAuth.migrateConfigs;
 import static xyz.nikitacartes.easyauth.EasyAuth.reloadConfigs;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
-/^*
- * NeoForge entrypoint for EasyAuth. The Fabric counterpart is {@link EasyAuthFabric}.
- * Registers commands and event listeners on NeoForge's game event bus.
- *
- * <p>Config hot-reload via {@code /reload} is only wired on MC 26.1+ (NeoForge's
- * reload-listener API differs across older versions); on older NeoForge versions
- * EasyAuth re-reads its configs on server (re)start. See NEOFORGE_NOTES.md.
- ^/
 @Mod(EasyAuthNeoForge.MOD_ID)
 public class EasyAuthNeoForge {
     public static final String MOD_ID = "easyauth";
@@ -113,8 +105,6 @@ public class EasyAuthNeoForge {
 
     //? if >=26.1 {
     /^private void onAddServerReloadListeners(AddServerReloadListenersEvent event) {
-        // NeoForge 26.1's AddServerReloadListenersEvent gives no server instance to the
-        // reload callback, so the MinecraftServer is captured lazily via ServerStartedEvent.
         event.addListener(
                 Identifier.fromNamespaceAndPath(MOD_ID, "config_reload"),
                 new EasyAuthReloadListener());
@@ -141,7 +131,7 @@ public class EasyAuthNeoForge {
     ^///?}
 
     //? if >=26.1 {
-    /^// NeoForge 26.1 moved BlockEvent.BreakEvent to event.level.block.BreakBlockEvent.
+    /^
     private void onBreakBlock(BreakBlockEvent event) {
         if (!AuthEventHandler.onBreakBlock(event.getPlayer())) {
             event.setCanceled(true);
@@ -168,7 +158,7 @@ public class EasyAuthNeoForge {
         }
     }
     //?} else {
-    /^// MC 1.21 (< 1.21.2): AuthEventHandler.onUseItem returns InteractionResultHolder<ItemStack>.
+    /^
     private void onUseItem(PlayerInteractEvent.RightClickItem event) {
         if (AuthEventHandler.onUseItem(event.getEntity()).getResult() == InteractionResult.FAIL) {
             event.setCanceled(true);

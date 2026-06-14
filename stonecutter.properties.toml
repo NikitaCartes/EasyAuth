@@ -19,8 +19,8 @@ postgresql_version = "42.7.10"
 hocon_version = "4.2.0"
 
 # ---------------------------------------------------------------------------
-# Fabric (build.fabric-obf.gradle.kts: fabric-loom + officialMojangMappings; 26.1
-# deobf uses build.fabric-deobf.gradle.kts). Dependency links:
+# Fabric (build.fabric-obf.gradle.kts: fabric-loom + officialMojangMappings;
+# 26.1 deobf uses build.fabric-deobf.gradle.kts). Dependency links:
 #   server_translations_version  https://github.com/NucleoidMC/Server-Translations/releases
 #   fabric_permissions_version   https://github.com/lucko/fabric-permissions-api/releases
 #   vanish_version               https://github.com/DrexHD/Vanish/releases

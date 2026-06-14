@@ -242,9 +242,7 @@ public class LangConfigV1 extends ConfigTemplate {
 
         private MutableComponent getTranslation(Object... args) {
             //? if neoforge {
-            /*// server-translations-api has no NeoForge port, so per-player server-side
-            // translation is unavailable; always emit a fallback-aware component
-            // (all players see the `defaultLanguage`). See NEOFORGE_NOTES.md.
+            /*// server-translations-api has no NeoForge port
             if (!fallback.isEmpty()) {
                 return translatableWithFallback(key, fallback, args);
             }

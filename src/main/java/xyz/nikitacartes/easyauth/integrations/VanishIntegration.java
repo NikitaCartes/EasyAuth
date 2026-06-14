@@ -15,7 +15,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.technicalConfig;
 public class VanishIntegration {
     public static boolean isVanished(ServerPlayer player) {
         //? if neoforge {
-        /*// Vanish/MeliusVanish has no NeoForge port; always false. See NEOFORGE_NOTES.md.
+        /*// Vanish has no NeoForge port; always false
         return false;
         *///?} else {
         if (!technicalConfig.vanishLoaded) return false;

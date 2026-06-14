@@ -28,9 +28,10 @@ repositories {
 
 base.archivesName = "${property("mod_id")}-mc${property("minecraft_version")}"
 
-// 26.1 uses the same access-widener surface as 1.21.11, but with the `official` namespace
-// (deobfuscated MC) instead of `named`.
-val awFile = "easyauth.26.1.accesswidener"
+val awFile = when {
+    stonecutter.eval(stonecutter.current.version, ">=26.1") -> "easyauth.26.1.accesswidener"
+    else -> throw GradleException("Access widener is missing for Minecraft ${stonecutter.current.version})")
+}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -80,7 +81,7 @@ dependencies {
         shadow(name)
     }
 
-    // Fabric — deobfuscated MC 26.1+, no mappings() (loom skips remapping).
+    // Fabric
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
 
     implementation("net.fabricmc:fabric-loader:${property("loader_version")}")
@@ -132,8 +133,6 @@ tasks.shadowJar {
     from(sourceSets.main.get().output)
 }
 
-// Unobfuscated loom has no remapJar; the `jar` task (with loom's access-widener + jar-in-jar
-// includes) is the final mod jar. Merge the relocated shadow output into it.
 tasks.jar {
     from("LICENCE")
     dependsOn(tasks.shadowJar)

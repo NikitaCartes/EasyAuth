@@ -9,8 +9,6 @@ plugins {
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
-// Tag this node's loader and version so the per-node values in stonecutter.properties.toml
-// (e.g. [neoforge."1.21.11"]) resolve to bare property("...") names.
 stonecutter {
     val (version, loader) = current.project.split('-', limit = 2)
     properties.tags(version, loader)
@@ -21,7 +19,6 @@ val dynamicVersion = project.extra["dynamicVersion"] as String
 
 base.archivesName = "${property("mod_id")}-neoforge-mc${property("minecraft_version")}"
 
-// Access transformer per version bucket — mirrors the Fabric access-widener selection in build.gradle.kts.
 val atFile = when {
     stonecutter.eval(stonecutter.current.version, ">=1.21.11") -> "easyauth.1.21.11.cfg"
     stonecutter.eval(stonecutter.current.version, ">=1.21.9") -> "easyauth.1.21.9.cfg"
@@ -68,10 +65,6 @@ neoForge {
 }
 
 
-// Mixin auto-discovery via Fletching Table (same mechanism as the Fabric build). Keeps
-// easyauth.mixins.json's `mixins: []` array populated per-version; the .neoforge flavour
-// would also register the config into neoforge.mods.toml, but we keep the explicit
-// [[mixins]] entry there, so disable that to avoid a duplicate registration.
 fletchingTable {
     neoforge {
         applyMixinConfig = false
@@ -88,8 +81,6 @@ configurations {
     runtimeOnly { extendsFrom(shaded) }
 }
 
-// Adds a library both to the dev classpath and as a nested JAR (NeoForge JarJar),
-// the closest analogue to Fabric's `include`.
 fun DependencyHandlerScope.implementAndJarJar(notation: String, version: String) {
     implementation(notation)
     jarJar(notation) {
@@ -98,7 +89,6 @@ fun DependencyHandlerScope.implementAndJarJar(notation: String, version: String)
 }
 
 dependencies {
-    // LuckPerms is server-side; compile-only, optional at runtime.
     compileOnly("net.luckperms:api:${property("luckperms_version")}")
     implementAndJarJar("io.github.llamalad7:mixinextras-neoforge:0.5.4", "0.5.4")
 
@@ -110,7 +100,6 @@ dependencies {
     implementAndJarJar("org.xerial:sqlite-jdbc:${property("sqlite_version")}", property("sqlite_version").toString())
     implementAndJarJar("org.postgresql:postgresql:${property("postgresql_version")}", property("postgresql_version").toString())
 
-    // Shaded (relocated) to avoid classpath conflicts with other mods bundling the same libs.
     shaded("org.mongodb:mongodb-driver-sync:${property("mongodb_version")}")
     shaded("org.mongodb:mongodb-driver-core:${property("mongodb_version")}")
     shaded("org.mongodb:bson:${property("mongodb_version")}")
@@ -121,11 +110,6 @@ tasks.shadowJar {
     archiveClassifier.set("dev-shadow")
     configurations = listOf(shaded)
 
-    // Rewrite META-INF/services/* to match the relocations below. Without this, shadow relocates the
-    // classes but leaves the original service files (e.g. configurate's ConfigurationFormat pointing at
-    // org.spongepowered.configurate.hocon.HoconConfigurationFormat) — a dangling provider entry. Fabric's
-    // loom tolerates it, but NeoForge's FML scans the jar as an automatic module and rejects the missing
-    // provider with java.lang.module.InvalidModuleDescriptorException, crashing at startup.
     mergeServiceFiles()
 
     relocate("org.spongepowered.configurate", "xyz.nikitacartes.shadow.configurate")
@@ -174,8 +158,7 @@ tasks.processResources {
         expand(expansions)
     }
 
-    // NeoForge runs on official Mojang names, so no refmap is needed. Blank the
-    // Fabric ${refmap} placeholder (fletching-table still populates the mixin list).
+    // NeoForge runs on official Mojang names, so no refmap is needed
     filesMatching("easyauth.mixins.json") {
         filter { it.replace("\${refmap}", "") }
     }
@@ -187,8 +170,6 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 
-// ModDevGradle's createMinecraftArtifacts consumes the sources Stonecutter generates;
-// make it wait for generation so a clean first build doesn't race the classpath setup.
 tasks.named("createMinecraftArtifacts") {
     dependsOn(tasks.named("stonecutterGenerate"))
 }

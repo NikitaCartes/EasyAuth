@@ -24,10 +24,8 @@ import static xyz.nikitacartes.easyauth.EasyAuth.technicalConfig;
  * Permission lookup.
  *
  * <p>On Fabric this delegates to {@code fabric-permissions-api-v0} (lucko).
- * NeoForge has no equivalent, so there it queries LuckPerms natively when
- * loaded and otherwise falls back to vanilla op-level checks. The permission
- * nodes ({@code easyauth.commands.*}) are identical on both loaders.
- * See NEOFORGE_NOTES.md.
+ * NeoForge has no equivalent, so there it queries LuckPerms natively.
+ * The permission nodes  are identical on both loaders.
  */
 public class FabricPermissions {
 

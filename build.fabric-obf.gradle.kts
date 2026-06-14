@@ -9,8 +9,6 @@ plugins {
     id("me.modmuss50.mod-publish-plugin") version "0.8.4"
 }
 
-// Tag this node's loader and version so the per-node values in stonecutter.properties.toml
-// (e.g. [fabric."1.21.11"]) resolve to bare property("...") names.
 stonecutter {
     val (version, loader) = current.project.split('-', limit = 2)
     properties.tags(version, loader)

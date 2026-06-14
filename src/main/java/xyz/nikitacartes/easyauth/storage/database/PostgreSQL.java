@@ -269,11 +269,6 @@ public class PostgreSQL implements DbApi {
     }
 
     @Override
-    public void migrateFromV1(HashMap<String, String> userCache) {
-        throw new UnsupportedOperationException("PostgreSQL does not support migrateFromV1");
-    }
-
-    @Override
     public void migrateFromV4() {
         throw new UnsupportedOperationException("PostgreSQL does not support migrateFromV4");
     }

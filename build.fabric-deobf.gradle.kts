@@ -104,9 +104,6 @@ dependencies {
     implementAndInclude("at.favre.lib:bytes:${property("bytes_version")}")
 
     // Storage
-    implementAndInclude("org.iq80.leveldb:leveldb:${property("leveldb_version")}")
-    implementAndInclude("org.iq80.leveldb:leveldb-api:${property("leveldb_version")}")
-
     implementAndShadow("org.mongodb:mongodb-driver-sync:${property("mongodb_version")}")
     implementAndShadow("org.mongodb:mongodb-driver-core:${property("mongodb_version")}")
     implementAndShadow("org.mongodb:bson:${property("mongodb_version")}")

@@ -5,13 +5,12 @@
 # Mod
 mod_name = "EasyAuth"
 mod_id = "easyauth"
-mod_version = "3.4.3"
+mod_version = "4.0.0-SNAPSHOT"
 
 # Shared dependencies
 luckperms_version = "5.4"
 bcrypt_version = "0.10.2"
 bytes_version = "1.6.1"
-leveldb_version = "0.12"
 mongodb_version = "5.3.1"
 mysql_version = "9.2.0"
 sqlite_version = "3.49.1.0"

@@ -36,7 +36,7 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 import static xyz.nikitacartes.easyauth.EasyAuth.loadConfigs;
 import static xyz.nikitacartes.easyauth.EasyAuth.loadDatabase;
-import static xyz.nikitacartes.easyauth.EasyAuth.migrateConfigs;
+import static xyz.nikitacartes.easyauth.EasyAuth.createConfigFolder;
 import static xyz.nikitacartes.easyauth.EasyAuth.reloadConfigs;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
@@ -48,7 +48,7 @@ public class EasyAuthNeoForge {
         EasyAuth.gameDirectory = FMLPaths.GAMEDIR.get();
         LogInfo("EasyAuth mod by NikitaCartes (NeoForge port)");
 
-        migrateConfigs();
+        createConfigFolder();
         loadConfigs();
         loadDatabase();
 

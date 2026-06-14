@@ -15,7 +15,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import xyz.nikitacartes.easyauth.config.deprecated.AuthConfig;
 import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
@@ -249,8 +248,6 @@ public class AuthCommand {
     }
 
     /**
-     * Sets {@link AuthConfig.MainConfig.WorldSpawn global spawn}.
-     *
      * @param source executioner of the command
      * @param world  world id of global spawn
      * @param x      x coordinate of the global spawn

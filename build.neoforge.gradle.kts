@@ -94,8 +94,6 @@ dependencies {
 
     implementAndJarJar("at.favre.lib:bcrypt:${property("bcrypt_version")}", property("bcrypt_version").toString())
     implementAndJarJar("at.favre.lib:bytes:${property("bytes_version")}", property("bytes_version").toString())
-    implementAndJarJar("org.iq80.leveldb:leveldb:${property("leveldb_version")}", property("leveldb_version").toString())
-    implementAndJarJar("org.iq80.leveldb:leveldb-api:${property("leveldb_version")}", property("leveldb_version").toString())
     implementAndJarJar("com.mysql:mysql-connector-j:${property("mysql_version")}", property("mysql_version").toString())
     implementAndJarJar("org.xerial:sqlite-jdbc:${property("sqlite_version")}", property("sqlite_version").toString())
     implementAndJarJar("org.postgresql:postgresql:${property("postgresql_version")}", property("postgresql_version").toString())

@@ -1,7 +1,6 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
-import net.minecraft.core.UUIDUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nikitacartes.easyauth.config.StorageConfigV1;
@@ -58,25 +57,8 @@ public class MySQL implements DbApi {
             } else {
                 // Check if the 'username' column exists. If not, add new columns
                 DatabaseMetaData metaData = MySQLConnection.getMetaData();
-                ResultSet columns = metaData.getColumns(null, null, config.mysql.mysqlTable, "username");
-                if (!columns.next()) {
-                    try (Statement alterTableStatement = MySQLConnection.createStatement()) {
-                        alterTableStatement.executeUpdate(String.format("ALTER TABLE `%s`.`%s` ADD COLUMN `username` VARCHAR(255) NULL;", config.mysql.mysqlDatabase, config.mysql.mysqlTable));
-                        LogDebug("Added column 'username' to the existing table.");
-                        alterTableStatement.executeUpdate(String.format("ALTER TABLE `%s`.`%s` ADD COLUMN `username_lower` VARCHAR(255) NULL;", config.mysql.mysqlDatabase, config.mysql.mysqlTable));
-                        LogDebug("Added column 'username_lower' to the existing table.");
-                        alterTableStatement.executeUpdate(String.format("ALTER TABLE `%s`.`%s` DROP INDEX `uuid`;", config.mysql.mysqlDatabase, config.mysql.mysqlTable));
-                        LogDebug("Dropped index 'uuid'.");
-                        alterTableStatement.executeUpdate(String.format("ALTER TABLE `%s`.`%s` MODIFY COLUMN `uuid` VARCHAR(255) NULL;", config.mysql.mysqlDatabase, config.mysql.mysqlTable));
-                        LogDebug("Changed column 'uuid' to nullable.");
-                    } catch (SQLException e) {
-                        MySQLConnection = null;
-                        throw new DBApiException("Error adding username, username_lower columns or changing uuid column", e);
-                    }
-                }
-                columns.close();
                 // Check if 'last_ip' column exists
-                columns = metaData.getColumns(null, null, config.mysql.mysqlTable, "last_ip");
+                ResultSet columns = metaData.getColumns(null, null, config.mysql.mysqlTable, "last_ip");
                 if (!columns.next()) {
                     try (Statement alterTableStatement = MySQLConnection.createStatement()) {
                         alterTableStatement.executeUpdate(String.format("ALTER TABLE `%s`.`%s` ADD COLUMN `last_ip` VARCHAR(45) NULL;", config.mysql.mysqlDatabase, config.mysql.mysqlTable));
@@ -332,52 +314,6 @@ public class MySQL implements DbApi {
             LogError("Error getting usernames by IP", e);
         }
         return usernames;
-    }
-
-    @Override
-    public void migrateFromV1(HashMap<String, String> userCache) {
-        try {
-            reConnect();
-            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO " + config.mysql.mysqlTable + " (username, username_lower, uuid, data) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE data = ?;");
-            userCache.forEach((username, uuid) -> {
-                try {
-                    PreparedStatement statement = MySQLConnection.prepareStatement("SELECT data FROM " + config.mysql.mysqlTable + " WHERE uuid = ?;");
-                    statement.setString(1, uuid);
-                    ResultSet resultSet = statement.executeQuery();
-
-                    String data = null;
-                    if (resultSet.next()) {
-                        data = resultSet.getString("data");
-                    } else {
-                        String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
-                        String lowerCaseUuid = UUIDUtil.createOfflinePlayerUUID(lowerCaseUsername).toString();
-                        statement.setString(1,lowerCaseUuid);
-                        resultSet = statement.executeQuery();
-                        if (resultSet.next()) {
-                            data = resultSet.getString("data");
-                        }
-                    }
-                    statement.close();
-                    resultSet.close();
-
-                    if (data != null) {
-                        PlayerEntryV1 playerEntry = migrateFromV1(data, username);
-                        preparedStatement.setString(1, playerEntry.username);
-                        preparedStatement.setString(2, playerEntry.usernameLowerCase);
-                        preparedStatement.setString(3, playerEntry.uuid == null ? null : playerEntry.uuid.toString());
-                        preparedStatement.setString(4, playerEntry.toJson());
-                        preparedStatement.setString(5, playerEntry.toJson());
-                        preparedStatement.addBatch();
-                    }
-                } catch (SQLException e) {
-                    LogError("Error migrating player " + username, e);
-                }
-            });
-            preparedStatement.executeBatch();
-            preparedStatement.close();
-        } catch (SQLException e) {
-            LogError("Error migrating players data", e);
-        }
     }
 
     /**

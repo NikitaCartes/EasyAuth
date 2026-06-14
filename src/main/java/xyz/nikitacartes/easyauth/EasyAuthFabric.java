@@ -23,7 +23,7 @@ public class EasyAuthFabric implements ModInitializer {
         gameDirectory = FabricLoader.getInstance().getGameDir();
         LogInfo("EasyAuth mod by NikitaCartes");
 
-        migrateConfigs();
+        createConfigFolder();
 
         loadConfigs();
         loadDatabase();

@@ -55,13 +55,12 @@ public class EasyAuth {
         }
     }
 
-    public static void migrateConfigs() {
+    public static void createConfigFolder() {
         File file = new File(gameDirectory + "/config/EasyAuth");
         if (!file.exists()) {
             if (!file.mkdirs()) {
                 throw new RuntimeException("[EasyAuth] Error creating directory for configs");
             }
-            ConfigMigration.migrateFromV0();
         }
     }
 

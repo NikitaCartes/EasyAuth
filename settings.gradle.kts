@@ -28,6 +28,6 @@ stonecutter {
         listOf("1.21", "1.21.2", "1.21.5", "1.21.6", "1.21.9", "1.21.11", "26.1").forEach { mc ->
             versions("$mc-neoforge" to mc).buildscript("build.neoforge.gradle.kts")
         }
-        vcsVersion = "1.21.11-fabric"
+        vcsVersion = "26.2-fabric"
     }
 }

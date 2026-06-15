@@ -3,8 +3,8 @@ package xyz.nikitacartes.easyauth.integrations;
 //? if fabric {
 import me.drex.vanish.api.VanishAPI;
 //? if != 1.20.2 && != 1.19.4 {
-/*import me.drex.vanish.util.VanishedEntity;
-*///?}
+import me.drex.vanish.util.VanishedEntity;
+//?}
 //?}
 import net.minecraft.server.level.ServerPlayer;
 
@@ -30,8 +30,8 @@ public class VanishIntegration {
         if (!technicalConfig.vanishLoaded) return;
         VanishAPI.setVanish(player, vanished);
         //? if != 1.20.2 && != 1.19.4 {
-        /*((VanishedEntity) player).vanish$setDirty();
-        *///?}
+        ((VanishedEntity) player).vanish$setDirty();
+        //?}
         //?}
     }
 }

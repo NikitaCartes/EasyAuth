@@ -179,7 +179,19 @@ floodgate_api_version = "2.2.4-SNAPSHOT"
 vanish_version = "1.6.8+26.1"
 display_name = "[26.1]"
 supported_versions = "26.1"
-supported_minecraft_version = ">=26.1-"
+supported_minecraft_version = ">=26.1- <26.2"
+
+[fabric."26.2"]
+minecraft_version = "26.2-rc-2"
+loader_version = "0.18.5"
+fabric_version = "0.152.0+26.2"
+server_translations_version = "3.1.0+26.2"
+fabric_permissions_version = "0.7.0"
+floodgate_api_version = "2.2.4-SNAPSHOT"
+vanish_version = "1.6.9+26.1.2"
+display_name = "[26.2]"
+supported_versions = "26.2"
+supported_minecraft_version = ">=26.2-"
 
 # ---------------------------------------------------------------------------
 # NeoForge (build.neoforge.gradle.kts: ModDevGradle).

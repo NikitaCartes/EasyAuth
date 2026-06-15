@@ -126,9 +126,9 @@ tasks.jar {
     from(zipTree(tasks.shadowJar.get().archiveFile)) {
         exclude("META-INF/MANIFEST.MF", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
     }
-    val mainClassesDirs = sourceSets.main.get().output.classesDirs.files
+    val mainOutputDirs = sourceSets.main.get().output.files
     exclude { element ->
-        element.file.extension == "class" && mainClassesDirs.any { element.file.toPath().startsWith(it.toPath()) }
+        mainOutputDirs.any { element.file.toPath().startsWith(it.toPath()) }
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

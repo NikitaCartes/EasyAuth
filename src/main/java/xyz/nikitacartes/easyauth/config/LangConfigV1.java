@@ -110,6 +110,7 @@ public class LangConfigV1 extends ConfigTemplate {
             config = new LangConfigV1();
             config.save();
         }
+        loadTranslations(config);
         return config;
     }
 
@@ -121,6 +122,11 @@ public class LangConfigV1 extends ConfigTemplate {
             config.save();
         }
 
+        loadTranslations(config);
+        return config;
+    }
+
+    private static void loadTranslations(LangConfigV1 config) {
         ClassLoader classLoader = LangConfigV1.class.getClassLoader();
         InputStream defaultLanguage = classLoader.getResourceAsStream("data/easyauth/lang/" + config.defaultLanguage + ".json");
 
@@ -137,8 +143,6 @@ public class LangConfigV1 extends ConfigTemplate {
         } catch (Exception e) {
             throw new RuntimeException("Failed to load default language", e);
         }
-
-        return config;
     }
 
     @Override

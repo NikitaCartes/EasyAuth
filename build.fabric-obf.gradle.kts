@@ -25,7 +25,7 @@ repositories {
     //mavenLocal()
 }
 
-base.archivesName = "${property("mod_id")}-mc${property("minecraft_version")}"
+base.archivesName = "${property("mod_id")}-fabric-mc${property("minecraft_version")}"
 
 val awFile = when {
     stonecutter.eval(stonecutter.current.version, ">=1.21.11") -> "easyauth.1.21.11.accesswidener"

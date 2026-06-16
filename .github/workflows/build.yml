@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Full history + tags so `git describe` can derive the build number
+          fetch-depth: 0
 
       - name: Set up JDK 25
         uses: actions/setup-java@v4

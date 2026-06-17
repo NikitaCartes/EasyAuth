@@ -2,11 +2,11 @@ package xyz.nikitacartes.easyauth.utils;
 
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
-import xyz.nikitacartes.easyauth.utils.hashing.HasherArgon2;
 import xyz.nikitacartes.easyauth.utils.hashing.HasherBCrypt;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
 public class AuthHelper {
     /**
@@ -40,11 +40,6 @@ public class AuthHelper {
         if (!verifyPassword(password, storedPassword)) {
             return PasswordOptions.WRONG;
         }
-        // Rehash password if it's using Argon2
-        if (storedPassword.startsWith("$argon2")) {
-            playerEntry.password = HasherBCrypt.hash(password);
-            playerEntry.update();
-        }
         return PasswordOptions.CORRECT;
     }
 
@@ -59,11 +54,6 @@ public class AuthHelper {
     public static boolean checkGlobalPassword(char[] password) {
         if (!verifyPassword(password, technicalConfig.globalPassword)) return false;
 
-        // Rehash password if it's using Argon2
-        if (technicalConfig.globalPassword.startsWith("$argon2")) {
-            technicalConfig.globalPassword = HasherBCrypt.hash(password);
-            technicalConfig.save();
-        }
         return true;
     }
 
@@ -73,10 +63,11 @@ public class AuthHelper {
 
     private static boolean verifyPassword(char[] pass, String hashed) {
         if (hashed.startsWith("$argon2")) {
-            if (config.debug) LogDebug("Hashed password (Argon2): " + HasherArgon2.hash(pass));
-            return HasherArgon2.verify(pass, hashed);
+            LogError("Password is using Argon2 hashing algorithm, which is not supported after 3.4.3");
+            LogError("You need to change password using /auth update <username> <password>");
+            return false;
         }
-        if (config.debug) LogDebug("Hashed password (BCrypt): " + HasherBCrypt.hash(pass));
+        if (config.debug) LogDebug("Hashed password: " + HasherBCrypt.hash(pass));
         return HasherBCrypt.verify(pass, hashed);
     }
 

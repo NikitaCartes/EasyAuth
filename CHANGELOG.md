@@ -9,6 +9,25 @@
 - Check how offline players work if they try to connect with a taken online account
 
 ---
+### 4.0.0
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.[x]
+#### Remove
+- Migration from older versions of EasyAuth (older than 3.1.0):
+  - LevelDB support
+  - Configuration files version 1 and 2
+  - Non-migrated Argon2 passwords
+  - Non-migrated databases
+- If you run server with EasyAuth [3.1.0, 3.4.3], you're already migrated all your data to the new format
+- 1.21.4 as separate version as 1.21.2 version is working fine
+
+#### Add
+- NeoForge support for Minecraft 1.21[.X] and 26.[x]
+
+#### Changes
+- Updated Hungarian translation [#272](https://github.com/NikitaCartes/EasyAuth/issues/272), thanks to @Zan1456
+- Require Java 25 or newer to run EasyAuth 4.0.0
+
+---
 ### 3.4.3
 ##### Minecraft 1.19.4, 1.20[.X], 1.21[.X]
 #### Add

@@ -3,7 +3,7 @@ package xyz.nikitacartes.easyauth.storage;
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
 import java.time.ZonedDateTime;
@@ -32,7 +32,7 @@ public class PlayerEntryV1 {
 
     /**
      * Last recorded IP of player.
-     * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayerEntity) sessions}.
+     * Used for {@link AuthEventHandler#onPlayerJoin(ServerPlayer) sessions}.
      */
     @Expose
     @SerializedName("last_ip")

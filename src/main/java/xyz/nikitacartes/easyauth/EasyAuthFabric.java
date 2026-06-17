@@ -1,5 +1,7 @@
+//~ resource_location
 package xyz.nikitacartes.easyauth;
 
+//? if fabric {
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;
@@ -7,7 +9,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 
@@ -21,7 +23,7 @@ public class EasyAuthFabric implements ModInitializer {
         gameDirectory = FabricLoader.getInstance().getGameDir();
         LogInfo("EasyAuth mod by NikitaCartes");
 
-        migrateConfigs();
+        createConfigFolder();
 
         loadConfigs();
         loadDatabase();
@@ -54,8 +56,13 @@ public class EasyAuthFabric implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(EasyAuth::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(EasyAuth::onStopServer);
 
-        Identifier earlyPhase = Identifier.of("easyauth", "early");
+        //? if >= 1.21 {
+        Identifier earlyPhase = Identifier.fromNamespaceAndPath("easyauth", "early");
+        //?} else {
+        /*Identifier earlyPhase = new Identifier("easyauth", "early");
+        *///?}
         ServerLoginConnectionEvents.QUERY_START.addPhaseOrdering(earlyPhase, Event.DEFAULT_PHASE);
         ServerLoginConnectionEvents.QUERY_START.register(earlyPhase, (netHandler, server, packetSender, sync) -> AuthEventHandler.onPreLogin(netHandler));
     }
 }
+//?}

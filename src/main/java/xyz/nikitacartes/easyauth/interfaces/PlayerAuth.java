@@ -1,12 +1,12 @@
 package xyz.nikitacartes.easyauth.interfaces;
 
 //? if >= 1.21.6 {
-import net.minecraft.storage.ReadView;
+import net.minecraft.world.level.storage.ValueInput;
 //?}
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.LastLocation;
 
@@ -20,7 +20,7 @@ public interface PlayerAuth {
 
     void easyAuth$saveTrueLocation();
 
-    void easyAuth$saveTrueDimension(RegistryKey<World> registryKey);
+    void easyAuth$saveTrueDimension(ResourceKey<Level> registryKey);
 
     void easyAuth$restoreTrueLocation();
 
@@ -77,9 +77,9 @@ public interface PlayerAuth {
     /**
      * Sets the player's IP address on connection step.
      *
-     * @param ClientConnection connection
+    * @param connection connection
      */
-    void easyAuth$setIpAddress(ClientConnection connection);
+    void easyAuth$setIpAddress(Connection connection);
 
     PlayerEntryV1 easyAuth$getPlayerEntryV1();
     void easyAuth$setPlayerEntryV1(PlayerEntryV1 playerEntryV1);
@@ -90,11 +90,11 @@ public interface PlayerAuth {
     LastLocation easyAuth$getLastLocation();
     void easyAuth$setLastLocation(LastLocation lastLocation);
     //? if >= 1.21.6 {
-    ReadView easyAuth$getRootVehicle();
-    void easyAuth$setRootVehicle(ReadView rootVehicle);
+    ValueInput easyAuth$getRootVehicle();
+    void easyAuth$setRootVehicle(ValueInput rootVehicle);
     //?} else {
-    /*NbtCompound easyAuth$getRootVehicle();
-    void easyAuth$setRootVehicle(NbtCompound rootVehicle);
+    /*CompoundTag easyAuth$getRootVehicle();
+    void easyAuth$setRootVehicle(CompoundTag rootVehicle);
     *///?}
     UUID easyAuth$getRidingEntityUUID();
     void easyAuth$setRidingEntityUUID(UUID ridingEntityUUID);

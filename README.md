@@ -1,5 +1,5 @@
 ## EasyAuth
-### Authentication mod for your Offline/Online server.
+### Authentication mod for your Offline/Online server for Fabric and NeoForge
 
 EasyAuth disallows players who aren't authenticated to do actions like placing blocks, moving, typing commands or use the inventory.
 
@@ -11,12 +11,12 @@ EasyAuth disallows players who aren't authenticated to do actions like placing b
 - UUID management commands: set custom UUID
 - Coordinate protection
 - Prevents "Logged in from another location"
-- Server-side translation
+- Server-side translation [Fabric]]
 - Support for special characters in password
 - Global password
 - Support Luckperms API and Luckperms Context
-- Support Floodgate and Carpet players
-- Support Vanish mod to hide unauthenticated players
+- Support Floodgate [Fabric] and Carpet players
+- Support Vanish mod to hide unauthenticated players [Fabric]
 
 See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 
@@ -26,19 +26,15 @@ See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
 
 [My Whitelist mod](https://github.com/NikitaCartes/EasyWhitelist) that changes whitelist behaviour from uuid-based to name-based, allowing it to be used on offline servers.
 
-### Dependencies
-This mod requires:
-- `Fabric API` [CurseForge](https://www.curseforge.com/minecraft/mc-mods/fabric-api), [Modrinth](https://modrinth.com/mod/fabric-api)
-
 ### Build
 Build all supported versions at once:
 ```bash
 ./gradlew build
 ```
 
-If you want to add new feature, you can make pull request against `fabric-1.21.6` branch as it contains the latest changes from `stonecutter` branch:
+If you want to add new feature, you can make pull request against `fabric-26.1` branch as it contains the latest changes from `stonecutter` branch:
 ```bash
-git checkout fabric-1.21.6
+git checkout fabric-26.1
 ./gradlew build
 ```
 ### Languages
@@ -51,7 +47,7 @@ This mod supports multiple languages.
 | English <br/>(en_gb, en_us)                                             |        0        |                        @samolego, @NikitaCartes                         |
 | Spanish <br/>(es_ar, es_cl, es_ec, <br/>es_es, es_mx, es_uy,<br/>es_ve) |        8        |             @Zailer43, @DanielTrejoBorjas, @danielospina-b              |
 | French <br/>(fr_fr)                                                     |       19        |                          @Uxzylon, @Sky-NiniKo                          |
-| Hungarian <br/>(hu_hu)                                                  |       24        |                             @Bendimester23                              |
+| Hungarian <br/>(hu_hu)                                                  |        0        |                        @Bendimester23, @Zan1456                         |
 | Italian <br/>(it_it)                                                    |       21        |                               @Rizzo1812                                |
 | Polish <br/>(pl_pl)                                                     |       21        |                             @LimakXRobczuk                              |
 | Brazilian Portuguese <br/>(pt_br)                                       |       12        |                         @luizffgv, @guigiffoni                          |

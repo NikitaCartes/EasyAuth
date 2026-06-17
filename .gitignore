@@ -25,4 +25,4 @@ bin/
 # fabric
 
 run/
-/versions/*/src/
+/versions/

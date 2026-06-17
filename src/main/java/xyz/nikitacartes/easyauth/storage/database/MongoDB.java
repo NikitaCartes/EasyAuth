@@ -5,8 +5,6 @@ import com.mongodb.MongoCommandException;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.*;
-import com.mongodb.client.model.InsertOneModel;
-import net.minecraft.util.Uuids;
 import org.bson.Document;
 import org.bson.UuidRepresentation;
 import org.jetbrains.annotations.NotNull;
@@ -194,35 +192,6 @@ public class MongoDB implements DbApi {
             LogError("Error getting usernames by IP", e);
         }
         return usernames;
-    }
-
-    @Override
-    public void migrateFromV1(HashMap<String, String> userCache) {
-        List<InsertOneModel<Document>> writeList = new ArrayList<>();
-        userCache.forEach((username, uuid) -> {
-            MongoCursor<Document> findIterable;
-            String data = null;
-
-            findIterable = collection.find(eq("UUID", uuid)).iterator();
-            if (findIterable.hasNext()) {
-                data = findIterable.next().toJson();
-            } else {
-                String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
-                String lowerCaseUuid = Uuids.getOfflinePlayerUuid(lowerCaseUsername).toString();
-                findIterable = collection.find(eq("UUID", lowerCaseUuid)).iterator();
-                if (findIterable.hasNext()) {
-                    data = findIterable.next().toJson();
-                }
-            }
-            if (data != null) {
-                PlayerEntryV1 playerEntry = migrateFromV1(data, username);
-                writeList.add(new InsertOneModel<>(new Document("username", playerEntry.username)
-                        .append("username_lower", playerEntry.usernameLowerCase)
-                        .append("uuid", playerEntry.uuid)
-                        .append("data", playerEntry.toJson())));
-            }
-        });
-        if (!writeList.isEmpty()) collection.bulkWrite(writeList);
     }
 
     @Override

@@ -1,11 +1,15 @@
 package xyz.nikitacartes.easyauth.integrations;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
+//? if fabric {
 import org.geysermc.floodgate.api.FloodgateApi;
+//?}
 
 import java.util.UUID;
 
+//? if fabric {
 import static xyz.nikitacartes.easyauth.EasyAuth.technicalConfig;
+//?}
 
 public class FloodgateApiHelper{
     /**
@@ -15,8 +19,8 @@ public class FloodgateApiHelper{
      * @return true if it's fake, otherwise false
      */
 
-    public static boolean isFloodgatePlayer(PlayerEntity player) {
-        return isFloodgatePlayer(player.getUuid());
+    public static boolean isFloodgatePlayer(Player player) {
+        return isFloodgatePlayer(player.getUUID());
     }
 
     /**
@@ -27,8 +31,13 @@ public class FloodgateApiHelper{
      */
 
     public static boolean isFloodgatePlayer(UUID uuid) {
+        //? if neoforge {
+        /*// Floodgate has no NeoForge port; always false
+        return false;
+        *///?} else {
         if (!technicalConfig.floodgateLoaded) return false;
         FloodgateApi floodgateApi = FloodgateApi.getInstance();
         return floodgateApi.isFloodgatePlayer(uuid);
+        //?}
     }
 }

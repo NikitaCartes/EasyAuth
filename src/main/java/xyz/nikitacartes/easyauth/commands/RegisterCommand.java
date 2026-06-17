@@ -3,9 +3,9 @@ package xyz.nikitacartes.easyauth.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import xyz.nikitacartes.easyauth.integrations.Permissions;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
@@ -15,8 +15,8 @@ import java.time.ZonedDateTime;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.AuthHelper.checkGlobalPassword;
 import static xyz.nikitacartes.easyauth.utils.AuthHelper.hashPassword;
@@ -26,23 +26,23 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogRegister;
 public class RegisterCommand {
 
     // Registering the "/reg" alias
-    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
             return;
         }
-        LiteralCommandNode<ServerCommandSource> node = registerRegister(dispatcher);
+        LiteralCommandNode<CommandSourceStack> node = registerRegister(dispatcher);
         if (extendedConfig.aliases.register) {
             dispatcher.register(literal("reg")
-                    .requires(Permissions.require("easyauth.commands.register", true))
+                    .requires(FabricPermissions.require("easyauth.commands.register", true))
                     .redirect(node));
         }
     }
 
     // Registering the "/register" command
-    public static LiteralCommandNode<ServerCommandSource> registerRegister(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static LiteralCommandNode<CommandSourceStack> registerRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
         if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
             return dispatcher.register(literal("register")
-                    .requires(Permissions.require("easyauth.commands.register", true))
+                    .requires(FabricPermissions.require("easyauth.commands.register", true))
                     .then(argument("globalPassword", string())
                             .then(argument("password", string())
                                     .then(argument("passwordAgain", string())
@@ -59,7 +59,7 @@ public class RegisterCommand {
                     }));
         } else {
             return dispatcher.register(literal("register")
-                    .requires(Permissions.require("easyauth.commands.register", true))
+                    .requires(FabricPermissions.require("easyauth.commands.register", true))
                     .then(argument("password", string())
                             .then(argument("passwordAgain", string())
                                     .executes(ctx -> register(ctx.getSource(),
@@ -74,8 +74,8 @@ public class RegisterCommand {
         }
     }
 
-    private static int register(ServerCommandSource source, String globalPassword, String pass1, String pass2) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+    private static int register(CommandSourceStack source, String globalPassword, String pass1, String pass2) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (playerAuth.easyAuth$isAuthenticated()) {
@@ -96,7 +96,7 @@ public class RegisterCommand {
                     playerData.lastKickedDate = ZonedDateTime.now();
                     playerData.loginTries = 0;
                     playerData.update();
-                    player.networkHandler.disconnect(langConfig.wrongGlobalPassword.get());
+                    player.connection.disconnect(langConfig.wrongGlobalPassword.get());
                     return 0;
                 }
                 langConfig.wrongGlobalPassword.send(source);
@@ -107,8 +107,8 @@ public class RegisterCommand {
     }
 
     // Method called for hashing the password & writing to DB
-    private static int register(ServerCommandSource source, String pass1, String pass2) throws CommandSyntaxException {
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+    private static int register(CommandSourceStack source, String pass1, String pass2) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
@@ -166,7 +166,7 @@ public class RegisterCommand {
             // Invalidate IP cache after registration
             IpLimitManager.invalidateCache(playerData.lastIp);
 
-            LogRegister("Player " + username + "{" + player.getUuidAsString() + "} successfully registered with password: " + playerData.password);
+            LogRegister("Player " + username + "{" + player.getStringUUID() + "} successfully registered with password: " + playerData.password);
         });
         return 0;
     }

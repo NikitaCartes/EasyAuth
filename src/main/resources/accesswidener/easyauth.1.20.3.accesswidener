@@ -1,9 +1,9 @@
 accessWidener	v1	named
 
-accessible class net/minecraft/server/network/ServerLoginNetworkHandler$State
-accessible field net/minecraft/server/network/ServerLoginNetworkHandler profile Lcom/mojang/authlib/GameProfile;
-accessible field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
-mutable field net/minecraft/stat/ServerStatHandler file Ljava/io/File;
-accessible class net/minecraft/util/UserCache$Entry
-accessible field net/minecraft/server/network/ServerPlayerEntity server Lnet/minecraft/server/MinecraftServer;
-accessible field net/minecraft/server/network/ServerPlayNetworkHandler requestedTeleportId I
+accessible class net/minecraft/server/network/ServerLoginPacketListenerImpl$State
+accessible field net/minecraft/server/network/ServerLoginPacketListenerImpl authenticatedProfile Lcom/mojang/authlib/GameProfile;
+accessible field net/minecraft/stats/ServerStatsCounter file Ljava/io/File;
+mutable field net/minecraft/stats/ServerStatsCounter file Ljava/io/File;
+accessible class net/minecraft/server/players/GameProfileCache$GameProfileInfo
+accessible field net/minecraft/server/level/ServerPlayer server Lnet/minecraft/server/MinecraftServer;
+accessible field net/minecraft/server/network/ServerGamePacketListenerImpl awaitingTeleport I

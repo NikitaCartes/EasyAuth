@@ -1,6 +1,5 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
-import net.minecraft.util.Uuids;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.nikitacartes.easyauth.EasyAuth;
@@ -259,44 +258,6 @@ public class SQLite implements DbApi {
             LogError("Error getting usernames by IP", e);
         }
         return usernames;
-    }
-
-    @Override
-    public void migrateFromV1(HashMap<String, String> userCache) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO " + config.sqlite.sqliteTable + " (username, username_lower, uuid, data) VALUES (?, ?, ?, ?);");
-            LevelDB levelDB = new LevelDB();
-            levelDB.connect();
-            userCache.forEach((username, uuid) -> {
-                try {
-                    String data = levelDB.getPlayerCache0(uuid);
-                    if (data == null) {
-                        String lowerCaseUsername = username.toLowerCase(Locale.ENGLISH);
-                        String lowerCaseUuid = Uuids.getOfflinePlayerUuid(lowerCaseUsername).toString();
-                        data = levelDB.getPlayerCache0(lowerCaseUuid);
-                    }
-                    if (data != null) {
-                        PlayerEntryV1 playerEntry = migrateFromV1(data, username);
-                        preparedStatement.setString(1, playerEntry.username);
-                        preparedStatement.setString(2, playerEntry.usernameLowerCase);
-                        preparedStatement.setObject(3, playerEntry.uuid);
-                        preparedStatement.setString(4, playerEntry.toJson());
-                        preparedStatement.addBatch();
-                    }
-                } catch (SQLException e) {
-                    LogError("Error migrating players data", e);
-                }
-            });
-            preparedStatement.executeBatch();
-            preparedStatement.close();
-            levelDB.close();
-        } catch (SQLException e) {
-            LogError("Error migrating players data", e);
-        } catch (DBApiException e) {
-            LogError("Error migrating players data", e);
-            connection = null;
-            throw new RuntimeException(e);
-        }
     }
 
     @Override

@@ -3,9 +3,9 @@ package xyz.nikitacartes.easyauth.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import xyz.nikitacartes.easyauth.integrations.Permissions;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -16,25 +16,25 @@ import java.time.ZonedDateTime;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogLogin;
 
 public class LoginCommand {
 
-    public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
-        LiteralCommandNode<ServerCommandSource> node = registerLogin(dispatcher); // Registering the "/login" command
+    public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralCommandNode<CommandSourceStack> node = registerLogin(dispatcher); // Registering the "/login" command
         if (extendedConfig.aliases.login) {
             dispatcher.register(literal("l")
-                    .requires(Permissions.require("easyauth.commands.login", true))
+                    .requires(FabricPermissions.require("easyauth.commands.login", true))
                     .redirect(node));
         }
     }
 
-    public static LiteralCommandNode<ServerCommandSource> registerLogin(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static LiteralCommandNode<CommandSourceStack> registerLogin(CommandDispatcher<CommandSourceStack> dispatcher) {
         return dispatcher.register(literal("login")
-                .requires(Permissions.require("easyauth.commands.login", true))
+                .requires(FabricPermissions.require("easyauth.commands.login", true))
                 .then(argument("password", string())
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
@@ -45,9 +45,9 @@ public class LoginCommand {
     }
 
     // Method called for checking the password
-    private static int login(ServerCommandSource source, String pass) throws CommandSyntaxException {
+    private static int login(CommandSourceStack source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
-        ServerPlayerEntity player = source.getPlayerOrThrow();
+        ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         String username = StoneCutterUtils.getUsername(player);
@@ -65,7 +65,7 @@ public class LoginCommand {
             LogLogin("Player " + username + " provide correct password");
             if (playerData.lastKickedDate.plusSeconds(config.resetLoginAttemptsTimeout).isAfter(ZonedDateTime.now())) {
                 LogLogin("Player " + username + " will be kicked due to kick timeout");
-                player.networkHandler.disconnect(langConfig.loginTriesExceeded.get());
+                player.connection.disconnect(langConfig.loginTriesExceeded.get());
                 return 0;
             }
             langConfig.successfullyAuthenticated.send(source);
@@ -101,9 +101,9 @@ public class LoginCommand {
             playerData.loginTries = 0;
             playerData.update();
             if (config.maxLoginTries == 1) {
-                player.networkHandler.disconnect(langConfig.wrongPassword.get());
+                player.connection.disconnect(langConfig.wrongPassword.get());
             } else {
-                player.networkHandler.disconnect(langConfig.loginTriesExceeded.get());
+                player.connection.disconnect(langConfig.loginTriesExceeded.get());
             }
             return 0;
         }

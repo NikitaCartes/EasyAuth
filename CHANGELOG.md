@@ -25,6 +25,7 @@
 
 #### Fix
 - The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)
+- Respawn at the death point [#269](https://github.com/NikitaCartes/EasyAuth/issues/269)
 
 #### Changes
 - Updated Hungarian translation [#272](https://github.com/NikitaCartes/EasyAuth/issues/272), thanks to @Zan1456

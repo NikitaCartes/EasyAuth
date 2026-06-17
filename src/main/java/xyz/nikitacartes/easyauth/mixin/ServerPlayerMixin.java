@@ -88,18 +88,6 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
     @Unique
     private boolean wasVanished = false;
 
-    //? if >= 1.21.9 {
-    @Override
-    public void easyAuth$savePlayerInfo() {
-        ridingEntityUUID = player.getVehicle() != null ? player.getVehicle().getUUID() : null;
-        wasDead = player.isDeadOrDying();
-        String username = player.getScoreboardName();
-        if (ridingEntityUUID != null) {
-            LogDebug(String.format("Saving vehicle of player %s as %s", username, ridingEntityUUID));
-        }
-    }
-    //?}
-
     @Override
     public void easyAuth$saveTrueLocation() {
         if (lastLocation == null) {

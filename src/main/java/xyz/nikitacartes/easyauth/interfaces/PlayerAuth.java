@@ -16,8 +16,6 @@ import java.util.UUID;
  * PLayer authentication extension.
  */
 public interface PlayerAuth {
-    void easyAuth$savePlayerInfo();
-
     void easyAuth$saveTrueLocation();
 
     void easyAuth$saveTrueDimension(ResourceKey<Level> registryKey);

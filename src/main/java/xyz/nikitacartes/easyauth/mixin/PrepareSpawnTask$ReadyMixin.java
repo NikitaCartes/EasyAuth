@@ -1,6 +1,7 @@
 //? if >= 1.21.9 {
 package xyz.nikitacartes.easyauth.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,9 +44,15 @@ public abstract class PrepareSpawnTask$ReadyMixin {
 
         player.easyAuth$setLastLocation(((PrepareSpawnTaskInterface) field_61141).easyAuth$getSpawnData());
         player.easyAuth$setSkipAuth();
-        player.easyAuth$savePlayerInfo();
 
         return original;
+    }
+
+    @ModifyReturnValue(method = "spawn(Lnet/minecraft/network/Connection;Lnet/minecraft/server/network/CommonListenerCookie;)Lnet/minecraft/server/level/ServerPlayer;",
+            at = @At("RETURN"))
+    private ServerPlayer saveDeadState(ServerPlayer player) {
+        ((PlayerAuth) player).easyAuth$wasDead(player.isDeadOrDying());
+        return player;
     }
 }
 //?}

@@ -69,8 +69,8 @@ public class LoginCommand {
                 return 0;
             }
             langConfig.successfullyAuthenticated.send(source);
-            playerAuth.easyAuth$setAuthenticated(true);
             playerAuth.easyAuth$restoreTrueLocation();
+            playerAuth.easyAuth$setAuthenticated(true);
             playerData.lastAuthenticatedDate = ZonedDateTime.now();
             playerData.loginTries = 0;
             String oldIp = playerData.lastIp;

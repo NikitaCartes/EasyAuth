@@ -7,8 +7,10 @@ import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
 import static net.minecraft.commands.Commands.literal;
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.getUnixZero;
 import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 
@@ -29,6 +31,12 @@ public class LogoutCommand {
         if (playerAuth.easyAuth$isAuthenticated() && !playerAuth.easyAuth$canSkipAuth()) {
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             playerAuth.easyAuth$setAuthenticated(false);
+
+            // Refresh the saved "true" location to the player's current spot
+            if (config.hidePlayerCoords) {
+                playerAuth.easyAuth$saveTrueLocation();
+                playerAuth.easyAuth$saveTrueDimension(StoneCutterUtils.getServerWorld(player).dimension());
+            }
 
             PlayerEntryV1 playerData = playerAuth.easyAuth$getPlayerEntryV1();
             playerData.lastAuthenticatedDate = getUnixZero();

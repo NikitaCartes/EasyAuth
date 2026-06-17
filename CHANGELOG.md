@@ -23,6 +23,9 @@
 #### Add
 - NeoForge support for Minecraft 1.21[.X] and 26.[x]
 
+#### Fix
+- The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)
+
 #### Changes
 - Updated Hungarian translation [#272](https://github.com/NikitaCartes/EasyAuth/issues/272), thanks to @Zan1456
 - Require Java 25 or newer to run EasyAuth 4.0.0

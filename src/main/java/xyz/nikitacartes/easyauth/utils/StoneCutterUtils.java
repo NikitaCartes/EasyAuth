@@ -59,8 +59,11 @@ public class StoneCutterUtils {
     }
 
     public static void teleport(ServerPlayer player, LastLocation lastLocation, ServerLevel fallbackWorld) {
+        ServerLevel targetWorld = lastLocation.dimension == null ? fallbackWorld : player.server.getLevel(lastLocation.dimension);
+        if (targetWorld == null) {
+            targetWorld = fallbackWorld;
+        }
         //? if >= 1.21.2 {
-        ServerLevel targetWorld = Objects.requireNonNull(lastLocation.dimension == null ? fallbackWorld : player.server.getLevel(lastLocation.dimension));
         player.teleportTo(
             targetWorld,
                 lastLocation.position.x,
@@ -72,7 +75,7 @@ public class StoneCutterUtils {
                 true);
         //?} else {
             /*player.teleportTo(
-                lastLocation.dimension == null ? fallbackWorld : player.server.getLevel(lastLocation.dimension),
+                targetWorld,
                 lastLocation.position.x,
                 lastLocation.position.y,
                 lastLocation.position.z,

@@ -47,6 +47,7 @@ public class LangConfigV1 extends ConfigTemplate {
     public Uuid uuid = new Uuid();
     public Admin admin = new Admin();
     public Errors error = new Errors();
+    public Dialog dialog = new Dialog();
 
     private static Map<String, String> translations = new HashMap<>();
 
@@ -297,5 +298,97 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText mojangUnavailable = new TranslatableText("error.mojangUnavailable");
         public TranslatableText ipLimitExceeded = new TranslatableText("error.ipLimitExceeded");
         public TranslatableText sessionLimitExceeded = new TranslatableText("error.sessionLimitExceeded");
+    }
+
+    @ConfigSerializable
+    public static final class Dialog {
+        public TranslatableText passwordWarning = new TranslatableText("dialog.passwordWarning");
+        public TranslatableText cancel = new TranslatableText("dialog.cancel");
+        public Login login = new Login();
+        public Register register = new Register();
+        public ChangePassword changePassword = new ChangePassword();
+        public Unregister unregister = new Unregister();
+        public Online online = new Online();
+        public Account account = new Account();
+        public Admin admin = new Admin();
+        public Field field = new Field();
+
+        @ConfigSerializable
+        public static final class Login {
+            public TranslatableText title = new TranslatableText("dialog.login.title");
+            public TranslatableText prompt = new TranslatableText("dialog.login.prompt");
+            public TranslatableText password = new TranslatableText("dialog.login.password");
+            public TranslatableText submit = new TranslatableText("dialog.login.submit");
+        }
+
+        @ConfigSerializable
+        public static final class Register {
+            public TranslatableText title = new TranslatableText("dialog.register.title");
+            public TranslatableText prompt = new TranslatableText("dialog.register.prompt");
+            public TranslatableText password = new TranslatableText("dialog.register.password");
+            public TranslatableText passwordConfirm = new TranslatableText("dialog.register.passwordConfirm");
+            public TranslatableText globalPassword = new TranslatableText("dialog.register.globalPassword");
+            public TranslatableText submit = new TranslatableText("dialog.register.submit");
+        }
+
+        @ConfigSerializable
+        public static final class ChangePassword {
+            public TranslatableText title = new TranslatableText("dialog.changePassword.title");
+            public TranslatableText oldPassword = new TranslatableText("dialog.changePassword.oldPassword");
+            public TranslatableText newPassword = new TranslatableText("dialog.changePassword.newPassword");
+            public TranslatableText submit = new TranslatableText("dialog.changePassword.submit");
+        }
+
+        @ConfigSerializable
+        public static final class Unregister {
+            public TranslatableText title = new TranslatableText("dialog.unregister.title");
+            public TranslatableText warning = new TranslatableText("dialog.unregister.warning");
+            public TranslatableText password = new TranslatableText("dialog.unregister.password");
+            public TranslatableText confirm = new TranslatableText("dialog.unregister.confirm");
+        }
+
+        @ConfigSerializable
+        public static final class Online {
+            public TranslatableText title = new TranslatableText("dialog.online.title");
+            public TranslatableText warning = new TranslatableText("dialog.online.warning");
+            public TranslatableText password = new TranslatableText("dialog.online.password");
+            public TranslatableText confirm = new TranslatableText("dialog.online.confirm");
+        }
+
+        @ConfigSerializable
+        public static final class Account {
+            public TranslatableText title = new TranslatableText("dialog.account.title");
+            public TranslatableText logoutButton = new TranslatableText("dialog.account.logoutButton");
+            public TranslatableText usage = new TranslatableText("dialog.account.usage");
+        }
+
+        @ConfigSerializable
+        public static final class Admin {
+            public TranslatableText title = new TranslatableText("dialog.admin.title");
+            public TranslatableText usage = new TranslatableText("dialog.admin.usage");
+            public TranslatableText confirm = new TranslatableText("dialog.admin.confirm");
+            public TranslatableText reload = new TranslatableText("dialog.admin.reload");
+            public TranslatableText list = new TranslatableText("dialog.admin.list");
+            public TranslatableText onlinePlayers = new TranslatableText("dialog.admin.onlinePlayers");
+            public TranslatableText setSpawn = new TranslatableText("dialog.admin.setSpawn");
+            public TranslatableText playerInfo = new TranslatableText("dialog.admin.playerInfo");
+            public TranslatableText getUuid = new TranslatableText("dialog.admin.getUuid");
+            public TranslatableText markOffline = new TranslatableText("dialog.admin.markOffline");
+            public TranslatableText markOnline = new TranslatableText("dialog.admin.markOnline");
+            public TranslatableText register = new TranslatableText("dialog.admin.register");
+            public TranslatableText update = new TranslatableText("dialog.admin.update");
+            public TranslatableText remove = new TranslatableText("dialog.admin.remove");
+            public TranslatableText setGlobalPassword = new TranslatableText("dialog.admin.setGlobalPassword");
+            public TranslatableText setUuid = new TranslatableText("dialog.admin.setUuid");
+            public TranslatableText clearUuid = new TranslatableText("dialog.admin.clearUuid");
+        }
+
+        @ConfigSerializable
+        public static final class Field {
+            public TranslatableText username = new TranslatableText("dialog.field.username");
+            public TranslatableText password = new TranslatableText("dialog.field.password");
+            public TranslatableText uuid = new TranslatableText("dialog.field.uuid");
+            public TranslatableText singleUse = new TranslatableText("dialog.field.singleUse");
+        }
     }
 }

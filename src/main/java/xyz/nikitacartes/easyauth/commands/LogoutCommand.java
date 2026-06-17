@@ -24,7 +24,7 @@ public class LogoutCommand {
         );
     }
 
-    private static int logout(CommandSourceStack serverCommandSource) throws CommandSyntaxException {
+    public static int logout(CommandSourceStack serverCommandSource) throws CommandSyntaxException {
         ServerPlayer player = serverCommandSource.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 

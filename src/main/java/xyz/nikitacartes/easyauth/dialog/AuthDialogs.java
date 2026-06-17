@@ -1,0 +1,325 @@
+//~ resource_location
+package xyz.nikitacartes.easyauth.dialog;
+//? if >= 1.21.6 {
+
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.dialog.*;
+import net.minecraft.server.dialog.action.Action;
+import net.minecraft.server.dialog.action.CustomAll;
+import net.minecraft.server.dialog.body.DialogBody;
+import net.minecraft.server.dialog.body.PlainMessage;
+import net.minecraft.server.dialog.input.BooleanInput;
+import net.minecraft.server.dialog.input.InputControl;
+import net.minecraft.server.dialog.input.TextInput;
+import net.minecraft.server.level.ServerPlayer;
+import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
+import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import static xyz.nikitacartes.easyauth.EasyAuth.*;
+
+/**
+ * Builds and opens the EasyAuth Dialog windows (1.21.6+).
+ * Layouts are built in code, but a datapack may override any of them by id
+ * (see {@code allowDatapackOverride}); the mod only relies on the submit
+ * action id and the input keys, not on the layout.
+ */
+public class AuthDialogs {
+
+    // Stage 1 — login / registration (submit ids)
+    public static final Identifier LOGIN = id("login");
+    public static final Identifier REGISTER = id("register");
+
+    // Stage 2 — account menu (open ids = also the datapack-override ids)
+    public static final Identifier ACCOUNT = id("account");
+    public static final Identifier CHANGE_PASSWORD_FORM = id("change_password_form");
+    public static final Identifier UNREGISTER_FORM = id("unregister_form");
+    public static final Identifier ACCOUNT_ONLINE_FORM = id("account_online_form");
+    // Stage 2 — submit ids
+    public static final Identifier CHANGE_PASSWORD = id("change_password");
+    public static final Identifier UNREGISTER = id("unregister");
+    public static final Identifier ACCOUNT_ONLINE = id("account_online");
+    public static final Identifier LOGOUT = id("logout");
+
+    private static final int WIDTH = 300;
+    private static final int BUTTON_WIDTH = 200;
+
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath("easyauth", path);
+    }
+
+    // ---------------------------------------------------------------- Stage 1
+
+    /**
+     * Opens the login or registration window depending on account state.
+     *
+     * @return true if a window was opened, false if dialogs are disabled for this case
+     *         (caller should fall back to the chat prompt).
+     */
+    public static boolean openAuthPrompt(ServerPlayer player) {
+        boolean registered = !((PlayerAuth) player).easyAuth$getPlayerEntryV1().password.isEmpty();
+        boolean wantLogin = registered || (config.enableGlobalPassword && !config.singleUseGlobalPassword);
+        if (wantLogin) {
+            if (!dialogConfig.login) {
+                return false;
+            }
+            open(player, LOGIN, buildLogin(null));
+            return true;
+        }
+        if (!dialogConfig.register) {
+            return false;
+        }
+        open(player, REGISTER, buildRegister(null));
+        return true;
+    }
+
+    public static void reopenLogin(ServerPlayer player, Component error) {
+        open(player, LOGIN, buildLogin(error));
+    }
+
+    public static void reopenRegister(ServerPlayer player, Component error) {
+        open(player, REGISTER, buildRegister(error));
+    }
+
+    static NoticeDialog buildLogin(Component error) {
+        List<DialogBody> body = new ArrayList<>();
+        body.add(new PlainMessage(langConfig.dialog.login.prompt.get(), WIDTH));
+        if (error != null) {
+            body.add(new PlainMessage(error, WIDTH));
+        }
+        body.add(new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
+        List<Input> inputs = List.of(new Input("password", passwordField(langConfig.dialog.login.password.get())));
+        return new NoticeDialog(
+                common(langConfig.dialog.login.title.get(), body, inputs, dialogConfig.canCloseWithEscape, DialogAction.NONE),
+                submit(langConfig.dialog.login.submit.get(), LOGIN));
+    }
+
+    static NoticeDialog buildRegister(Component error) {
+        List<DialogBody> body = new ArrayList<>();
+        body.add(new PlainMessage(langConfig.dialog.register.prompt.get(), WIDTH));
+        if (error != null) {
+            body.add(new PlainMessage(error, WIDTH));
+        }
+        body.add(new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
+        List<Input> inputs = new ArrayList<>();
+        if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
+            inputs.add(new Input("global_password", passwordField(langConfig.dialog.register.globalPassword.get())));
+        }
+        inputs.add(new Input("password", passwordField(langConfig.dialog.register.password.get())));
+        inputs.add(new Input("password_confirm", passwordField(langConfig.dialog.register.passwordConfirm.get())));
+        return new NoticeDialog(
+                common(langConfig.dialog.register.title.get(), body, inputs, dialogConfig.canCloseWithEscape, DialogAction.NONE),
+                submit(langConfig.dialog.register.submit.get(), REGISTER));
+    }
+
+    // ---------------------------------------------------------------- Stage 2
+
+    public static void openAccountMenu(ServerPlayer player) {
+        List<ActionButton> buttons = List.of(
+                navButton(langConfig.dialog.changePassword.title.get(), CHANGE_PASSWORD_FORM),
+                navButton(langConfig.dialog.unregister.title.get(), UNREGISTER_FORM),
+                navButton(langConfig.dialog.online.title.get(), ACCOUNT_ONLINE_FORM),
+                navButton(langConfig.dialog.account.logoutButton.get(), LOGOUT));
+        MultiActionDialog menu = new MultiActionDialog(
+                common(langConfig.dialog.account.title.get(), List.of(), List.of(), true, DialogAction.NONE),
+                buttons, Optional.empty(), 1);
+        open(player, ACCOUNT, menu);
+    }
+
+    public static void openChangePassword(ServerPlayer player) {
+        List<DialogBody> body = List.of(new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
+        List<Input> inputs = List.of(
+                new Input("old_password", passwordField(langConfig.dialog.changePassword.oldPassword.get())),
+                new Input("new_password", passwordField(langConfig.dialog.changePassword.newPassword.get())));
+        NoticeDialog dialog = new NoticeDialog(
+                common(langConfig.dialog.changePassword.title.get(), body, inputs, true, DialogAction.CLOSE),
+                submit(langConfig.dialog.changePassword.submit.get(), CHANGE_PASSWORD));
+        open(player, CHANGE_PASSWORD_FORM, dialog);
+    }
+
+    public static void openUnregister(ServerPlayer player) {
+        List<DialogBody> body = List.of(
+                new PlainMessage(langConfig.dialog.unregister.warning.get(), WIDTH),
+                new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
+        List<Input> inputs = List.of(new Input("password", passwordField(langConfig.dialog.unregister.password.get())));
+        ConfirmationDialog dialog = new ConfirmationDialog(
+                common(langConfig.dialog.unregister.title.get(), body, inputs, true, DialogAction.CLOSE),
+                submit(langConfig.dialog.unregister.confirm.get(), UNREGISTER),
+                cancelButton());
+        open(player, UNREGISTER_FORM, dialog);
+    }
+
+    public static void openAccountOnline(ServerPlayer player) {
+        List<DialogBody> body = List.of(
+                new PlainMessage(langConfig.dialog.online.warning.get(), WIDTH),
+                new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
+        List<Input> inputs = List.of(new Input("password", passwordField(langConfig.dialog.online.password.get())));
+        ConfirmationDialog dialog = new ConfirmationDialog(
+                common(langConfig.dialog.online.title.get(), body, inputs, true, DialogAction.CLOSE),
+                submit(langConfig.dialog.online.confirm.get(), ACCOUNT_ONLINE),
+                cancelButton());
+        open(player, ACCOUNT_ONLINE_FORM, dialog);
+    }
+
+    // ---------------------------------------------------------------- Stage 3 (admin)
+
+    public static final Identifier ADMIN = id("admin");
+
+    /** One input field of an admin form. {@code bool} fields render as a checkbox. */
+    public record FormField(String key, Supplier<Component> label, boolean bool) {}
+
+    /**
+     * An entry in the admin panel: its button label, the form fields it needs,
+     * whether it is destructive (confirmation), and the permission required to run it.
+     */
+    public record AdminAction(String key, Supplier<Component> label, List<FormField> fields, boolean confirm,
+                              String node, int level) {}
+
+    private static FormField username() {
+        return new FormField("username", () -> langConfig.dialog.field.username.get(), false);
+    }
+
+    private static FormField password() {
+        return new FormField("password", () -> langConfig.dialog.field.password.get(), false);
+    }
+
+    public static final List<AdminAction> ADMIN_ACTIONS = List.of(
+            new AdminAction("reload", () -> langConfig.dialog.admin.reload.get(),
+                    List.of(), false, "easyauth.commands.auth.reload", 3),
+            new AdminAction("list", () -> langConfig.dialog.admin.list.get(),
+                    List.of(), false, "easyauth.commands.auth.list", 3),
+            new AdminAction("online_players", () -> langConfig.dialog.admin.onlinePlayers.get(),
+                    List.of(), false, "easyauth.commands.auth.getOnlinePlayers", 3),
+            new AdminAction("set_spawn", () -> langConfig.dialog.admin.setSpawn.get(),
+                    List.of(), false, "easyauth.commands.auth.setSpawn", 3),
+            new AdminAction("player_info", () -> langConfig.dialog.admin.playerInfo.get(),
+                    List.of(username()), false, "easyauth.commands.auth.getPlayerInfo", 3),
+            new AdminAction("get_uuid", () -> langConfig.dialog.admin.getUuid.get(),
+                    List.of(username()), false, "easyauth.commands.auth.getUuid", 3),
+            new AdminAction("mark_offline", () -> langConfig.dialog.admin.markOffline.get(),
+                    List.of(username()), false, "easyauth.commands.auth.markAsOffline", 3),
+            new AdminAction("mark_online", () -> langConfig.dialog.admin.markOnline.get(),
+                    List.of(username()), false, "easyauth.commands.auth.markAsOnline", 3),
+            new AdminAction("register", () -> langConfig.dialog.admin.register.get(),
+                    List.of(username(), password()), false, "easyauth.commands.auth.register", 3),
+            new AdminAction("update", () -> langConfig.dialog.admin.update.get(),
+                    List.of(username(), password()), false, "easyauth.commands.auth.update", 3),
+            new AdminAction("remove", () -> langConfig.dialog.admin.remove.get(),
+                    List.of(username()), true, "easyauth.commands.auth.remove", 3),
+            new AdminAction("set_global_password", () -> langConfig.dialog.admin.setGlobalPassword.get(),
+                    List.of(password(), new FormField("single_use", () -> langConfig.dialog.field.singleUse.get(), true)),
+                    false, "easyauth.commands.auth.setGlobalPassword", 4),
+            new AdminAction("set_uuid", () -> langConfig.dialog.admin.setUuid.get(),
+                    List.of(username(), new FormField("uuid", () -> langConfig.dialog.field.uuid.get(), false)),
+                    true, "easyauth.commands.auth.setUuid", 4),
+            new AdminAction("clear_uuid", () -> langConfig.dialog.admin.clearUuid.get(),
+                    List.of(username()), true, "easyauth.commands.auth.clearUuid", 4));
+
+    public static AdminAction adminAction(String key) {
+        for (AdminAction action : ADMIN_ACTIONS) {
+            if (action.key().equals(key)) {
+                return action;
+            }
+        }
+        return null;
+    }
+
+    public static void openAdminMenu(ServerPlayer player) {
+        CommandSourceStack source = player.createCommandSourceStack();
+        List<ActionButton> buttons = new ArrayList<>();
+        for (AdminAction action : ADMIN_ACTIONS) {
+            if (!FabricPermissions.require(action.node(), action.level()).test(source)) {
+                continue;
+            }
+            Identifier target = action.fields().isEmpty() ? id("admin/" + action.key()) : id("admin_form/" + action.key());
+            buttons.add(submit(action.label().get(), target));
+        }
+        MultiActionDialog menu = new MultiActionDialog(
+                common(langConfig.dialog.admin.title.get(), List.of(), List.of(), true, DialogAction.NONE),
+                buttons, Optional.empty(), 2);
+        open(player, ADMIN, menu);
+    }
+
+    public static void openAdminForm(ServerPlayer player, String key) {
+        AdminAction action = adminAction(key);
+        if (action == null) {
+            return;
+        }
+        List<Input> inputs = new ArrayList<>();
+        for (FormField field : action.fields()) {
+            InputControl control = field.bool()
+                    ? new BooleanInput(field.label().get(), false, "true", "false")
+                    : new TextInput(WIDTH, field.label().get(), true, "", 256, Optional.empty());
+            inputs.add(new Input(field.key(), control));
+        }
+        Identifier submitId = id("admin/" + key);
+        Identifier dialogId = id("admin_form/" + key);
+        if (action.confirm()) {
+            ConfirmationDialog dialog = new ConfirmationDialog(
+                    common(action.label().get(), List.of(new PlainMessage(langConfig.dialog.admin.confirm.get(), WIDTH)),
+                            inputs, true, DialogAction.CLOSE),
+                    submit(action.label().get(), submitId), cancelButton());
+            open(player, dialogId, dialog);
+        } else {
+            NoticeDialog dialog = new NoticeDialog(
+                    common(action.label().get(), List.of(), inputs, true, DialogAction.CLOSE),
+                    submit(action.label().get(), submitId));
+            open(player, dialogId, dialog);
+        }
+    }
+
+    // ---------------------------------------------------------------- helpers
+
+    private static TextInput passwordField(Component label) {
+        long max = extendedConfig.maxPasswordLength;
+        int maxLength = max > 0 ? (int) max : 256;
+        return new TextInput(WIDTH, label, true, "", maxLength, Optional.empty());
+    }
+
+    private static CommonDialogData common(Component title, List<DialogBody> body, List<Input> inputs,
+                                           boolean canCloseWithEscape, DialogAction afterAction) {
+        return new CommonDialogData(title, Optional.empty(), canCloseWithEscape, false, afterAction, body, inputs);
+    }
+
+    private static ActionButton submit(Component label, Identifier action) {
+        return new ActionButton(new CommonButtonData(label, BUTTON_WIDTH),
+                Optional.of((Action) new CustomAll(action, Optional.empty())));
+    }
+
+    /** A button that asks the server to open another dialog. */
+    private static ActionButton navButton(Component label, Identifier target) {
+        return submit(label, target);
+    }
+
+    private static ActionButton cancelButton() {
+        return new ActionButton(new CommonButtonData(langConfig.dialog.cancel.get(), BUTTON_WIDTH), Optional.empty());
+    }
+
+    /** Opens {@code fallback}, unless a datapack provides a dialog registered under {@code id}. */
+    public static void open(ServerPlayer player, Identifier id, Dialog fallback) {
+        player.openDialog(resolve(player, id, fallback));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Holder<Dialog> resolve(ServerPlayer player, Identifier id, Dialog fallback) {
+        if (dialogConfig.allowDatapackOverride) {
+            Holder<Dialog> custom = player.registryAccess().lookup(Registries.DIALOG)
+                    .flatMap(registry -> registry.get(id))
+                    .map(reference -> (Holder<Dialog>) reference)
+                    .orElse(null);
+            if (custom != null) {
+                return custom;
+            }
+        }
+        return Holder.direct(fallback);
+    }
+}
+//?}

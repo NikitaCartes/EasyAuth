@@ -26,6 +26,7 @@ public class AccountCommand {
     public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("account")
                 .requires(FabricPermissions.require("easyauth.commands.account.root", true))
+                .executes(ctx -> accountRoot(ctx.getSource()))
                 .then(literal("unregister")
                         .requires(FabricPermissions.require("easyauth.commands.account.unregister", true))
                         .executes(ctx -> {
@@ -79,8 +80,20 @@ public class AccountCommand {
         );
     }
 
+    // Opens the account menu window, or prints the available actions when dialogs are off.
+    private static int accountRoot(CommandSourceStack source) throws CommandSyntaxException {
+        //? if >= 1.21.6 {
+        if (dialogConfig.enabled && dialogConfig.account) {
+            xyz.nikitacartes.easyauth.dialog.AuthDialogs.openAccountMenu(source.getPlayerOrException());
+            return 1;
+        }
+        //?}
+        langConfig.dialog.account.usage.send(source);
+        return 1;
+    }
+
     // Method called for checking the password and then removing user's account from db
-    private static int unregister(CommandSourceStack source, String pass) throws CommandSyntaxException {
+    public static int unregister(CommandSourceStack source, String pass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
@@ -126,7 +139,7 @@ public class AccountCommand {
     }
 
     // Method called for checking the password and then changing it
-    private static int changePassword(CommandSourceStack source, String oldPass, String newPass) throws CommandSyntaxException {
+    public static int changePassword(CommandSourceStack source, String oldPass, String newPass) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
@@ -196,7 +209,7 @@ public class AccountCommand {
         return 1;
     }
 
-    private static int markAsOnline(CommandSourceStack source, String password, boolean confirm) throws CommandSyntaxException {
+    public static int markAsOnline(CommandSourceStack source, String password, boolean confirm) throws CommandSyntaxException {
         if (!confirm) {
             langConfig.account.markSelfOnlineWarning.send(source);
             return 0;

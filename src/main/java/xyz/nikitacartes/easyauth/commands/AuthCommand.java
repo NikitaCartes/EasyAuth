@@ -44,6 +44,11 @@ public class AuthCommand {
     public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("auth")
                 .requires(FabricPermissions.require("easyauth.commands.auth.root", 3))
+                .executes(ctx -> openAdminPanel(ctx.getSource()))
+                .then(literal("gui")
+                        .requires(FabricPermissions.require("easyauth.commands.auth.root", 3))
+                        .executes(ctx -> openAdminPanel(ctx.getSource()))
+                )
                 .then(literal("reload")
                         .requires(FabricPermissions.require("easyauth.commands.auth.reload", 3))
                         .executes(ctx -> reloadConfig(ctx.getSource()))
@@ -211,6 +216,29 @@ public class AuthCommand {
         );
     }
 
+    // Opens the admin panel window, or prints the subcommand hint when dialogs are off.
+    private static int openAdminPanel(CommandSourceStack source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        //? if >= 1.21.6 {
+        if (dialogConfig.enabled && dialogConfig.admin) {
+            xyz.nikitacartes.easyauth.dialog.AuthDialogs.openAdminMenu(source.getPlayerOrException());
+            return 1;
+        }
+        //?}
+        langConfig.dialog.admin.usage.send(source);
+        return 1;
+    }
+
+    // Sets the login spawn to the caller's current position (the panel's "set spawn here" button).
+    public static int setSpawnHere(CommandSourceStack source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        return setSpawn(source,
+                StoneCutterUtils.getWorld(source.getEntityOrException()).dimension().identifier(),
+                source.getEntityOrException().getX(),
+                source.getEntityOrException().getY(),
+                source.getEntityOrException().getZ(),
+                source.getEntityOrException().getYRot(),
+                source.getEntityOrException().getXRot());
+    }
+
     /**
      * Reloads the config file.
      *
@@ -233,7 +261,7 @@ public class AuthCommand {
      * @param singleUse whether the global password is single-use
      * @return 0
      */
-    private static int setGlobalPassword(CommandSourceStack source, String password, boolean singleUse) {
+    public static int setGlobalPassword(CommandSourceStack source, String password, boolean singleUse) {
         // Writing the global pass to config
         technicalConfig.globalPassword = AuthHelper.hashPassword(password.toCharArray());
         config.enableGlobalPassword = true;
@@ -257,7 +285,7 @@ public class AuthCommand {
      * @param pitch  player pitch (x rotation)
      * @return 0
      */
-    private static int setSpawn(CommandSourceStack source, Identifier world, double x, double y, double z, float yaw, float pitch) {
+    public static int setSpawn(CommandSourceStack source, Identifier world, double x, double y, double z, float yaw, float pitch) {
         // Setting config values and saving
         // Different thread to avoid lag spikes
         THREADPOOL.submit(() -> {
@@ -282,7 +310,7 @@ public class AuthCommand {
      * @param username username of the player to delete account for
      * @return 0
      */
-    private static int removeAccount(CommandSourceStack source, String username) {
+    public static int removeAccount(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerEntry = DB.getUserData(username);
             if (playerEntry == null) {
@@ -315,7 +343,7 @@ public class AuthCommand {
      * @param password new password for the player account
      * @return 0
      */
-    private static int registerUser(CommandSourceStack source, String username, String password) {
+    public static int registerUser(CommandSourceStack source, String username, String password) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserDataOrCreate(username);
             playerData.password = AuthHelper.hashPassword(password.toCharArray());
@@ -335,7 +363,7 @@ public class AuthCommand {
      * @param password new password for the player
      * @return 0
      */
-    private static int updatePassword(CommandSourceStack source, String username, String password) {
+    public static int updatePassword(CommandSourceStack source, String username, String password) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
             if (playerData == null || playerData.password.isEmpty()) {
@@ -398,7 +426,7 @@ public class AuthCommand {
      * @param username player to add in list
      * @return 0
      */
-    private static int markAsOffline(CommandSourceStack source, String username) {
+    public static int markAsOffline(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 entry = DB.getUserDataOrCreate(username);
             entry.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
@@ -416,7 +444,7 @@ public class AuthCommand {
      * @param username player to add in list
      * @return 0
      */
-    private static int markAsOnline(CommandSourceStack source, String username) {
+    public static int markAsOnline(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             try {
                 if (!isValidUsername(username)) {
@@ -450,7 +478,7 @@ public class AuthCommand {
      * @param username username of the player to get information for
      * @return 0
      */
-    private static int getPlayerInfo(CommandSourceStack source, String username) {
+    public static int getPlayerInfo(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
             if (playerData == null) {
@@ -468,7 +496,7 @@ public class AuthCommand {
      *
      * @param source executioner of the command
      */
-    private static int getOnlinePlayers(CommandSourceStack source) {
+    public static int getOnlinePlayers(CommandSourceStack source) {
         THREADPOOL.submit(() -> {
             MutableComponent message = Component.literal("");
             source.getServer().getPlayerList().getPlayers().forEach(player -> {
@@ -497,7 +525,7 @@ public class AuthCommand {
      * @param uuidStr  the UUID to force for this player
      * @return 1 on success
      */
-    private static int setUuid(CommandSourceStack source, String username, String uuidStr) {
+    public static int setUuid(CommandSourceStack source, String username, String uuidStr) {
         THREADPOOL.submit(() -> {
             // Validate UUID format
             UUID uuid;
@@ -530,7 +558,7 @@ public class AuthCommand {
      * @param username username of the player
      * @return 1 on success
      */
-    private static int clearUuid(CommandSourceStack source, String username) {
+    public static int clearUuid(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 entry = DB.getUserData(username);
             if (entry == null) {
@@ -564,7 +592,7 @@ public class AuthCommand {
      * @param username username of the player
      * @return 1 on success
      */
-    private static int getUuid(CommandSourceStack source, String username) {
+    public static int getUuid(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 entry = DB.getUserData(username);
             

@@ -88,6 +88,9 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
     @Unique
     private boolean wasVanished = false;
 
+    @Unique
+    private boolean dialogShown = false;
+
     @Override
     public void easyAuth$saveTrueLocation() {
         if (lastLocation == null) {
@@ -154,6 +157,17 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
      */
     @Override
     public void easyAuth$sendAuthMessage() {
+        //? if >= 1.21.6 {
+        if (dialogConfig.enabled) {
+            // Open the window once; reopening on the prompt timer would wipe what the player typed.
+            if (!dialogShown && xyz.nikitacartes.easyauth.dialog.AuthDialogs.openAuthPrompt(player)) {
+                dialogShown = true;
+            }
+            if (dialogShown) {
+                return;
+            }
+        }
+        //?}
         if (playerEntryV1 != null && !playerEntryV1.password.isEmpty()) {
             langConfig.session.loginRequired.send(player);
             return;
@@ -240,6 +254,8 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
 
             VanishIntegration.setVanished(player, wasVanished);
         } else {
+            // Re-prompt with a fresh window next time (e.g. after /logout or an admin removing the account).
+            dialogShown = false;
             if (config.vanishUntilAuth) {
                 wasVanished = VanishIntegration.isVanished(player);
                 VanishIntegration.setVanished(player, true);

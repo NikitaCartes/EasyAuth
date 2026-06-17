@@ -183,7 +183,12 @@ public class AuthEventHandler {
         }
 
         //? if >= 1.21.6 {
-        if (packet instanceof ServerboundCustomClickActionPacket) {
+        if (packet instanceof ServerboundCustomClickActionPacket customClickActionPacket) {
+            // Always allow EasyAuth's own dialog responses: the login/register windows are
+            // shown to unauthenticated players, whose reply would otherwise be blocked here.
+            if (customClickActionPacket.id().getNamespace().equals("easyauth")) {
+                return true;
+            }
             if (extendedConfig.allowCustomPackets) {
                 return true;
             }

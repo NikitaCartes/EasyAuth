@@ -74,7 +74,7 @@ public class RegisterCommand {
         }
     }
 
-    private static int register(CommandSourceStack source, String globalPassword, String pass1, String pass2) throws CommandSyntaxException {
+    public static int register(CommandSourceStack source, String globalPassword, String pass1, String pass2) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
@@ -107,7 +107,7 @@ public class RegisterCommand {
     }
 
     // Method called for hashing the password & writing to DB
-    private static int register(CommandSourceStack source, String pass1, String pass2) throws CommandSyntaxException {
+    public static int register(CommandSourceStack source, String pass1, String pass2) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 

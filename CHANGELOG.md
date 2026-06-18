@@ -30,6 +30,7 @@
 #### Changes
 - Updated Hungarian translation [#272](https://github.com/NikitaCartes/EasyAuth/issues/272), thanks to @Zan1456
 - Require Java 25 or newer to run EasyAuth 4.0.0
+- Format of `translation.conf` config. Old format is not supported and not migrated automatically, but backup of old config is created in `config/EasyAuth/backup`.
 
 ---
 ### 3.4.3

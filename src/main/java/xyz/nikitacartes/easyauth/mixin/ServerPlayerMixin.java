@@ -155,18 +155,18 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
     @Override
     public void easyAuth$sendAuthMessage() {
         if (playerEntryV1 != null && !playerEntryV1.password.isEmpty()) {
-            langConfig.loginRequired.send(player);
+            langConfig.session.loginRequired.send(player);
             return;
         }
         if (!config.enableGlobalPassword) {
-            langConfig.registerRequired.send(player);
+            langConfig.registration.required.send(player);
             return;
         }
         if (config.singleUseGlobalPassword) {
-            langConfig.registerRequiredWithGlobalPassword.send(player);
+            langConfig.registration.requiredWithGlobalPassword.send(player);
             return;
         }
-        langConfig.loginRequired.send(player);
+        langConfig.session.loginRequired.send(player);
     }
 
     /**
@@ -252,7 +252,7 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
         if (!this.easyAuth$isAuthenticated()) {
             // Checking player timer
             if (kickTimer <= 0 && player.connection.isAcceptingMessages()) {
-                player.connection.disconnect(langConfig.timeExpired.get());
+                player.connection.disconnect(langConfig.session.timeExpired.get());
             } else {
                 // Sending authentication prompt every 10 seconds
                 if (kickTimer % (extendedConfig.authenticationPromptInterval * 20) == 0) {

@@ -1,0 +1,48 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Vous devez entrer votre mot de passe !"
+      enterNew: "§4Vous devez entrer un nouveau mot de passe !"
+      incorrect: "§4Mauvais mot de passe !"
+      mismatch: "§6Les mots de passe doivent correspondres !"
+      changed: "§aVotre mot de passe a été modifié avec succès !"
+      tooLong: "§6Le mot de passe doit faire au minimum %d charactères de long !"
+      tooShort: "§6Le mot de passe doit faire au maximum %d charactères de long !"
+      cannotChange: "§cVous ne pouvez pas changer de mot de passe !"
+      globalSet: "§aLe mot de passe global a été créé avec succès !"
+    # Session
+    session:
+      loginRequired: "§cVous n'êtes pas connecté !\n§6Tapez /login, /l pour vous connecter !"
+      tooManyAttempts: "§4Trop de tentatives de connection."
+      notAuthenticated: "§cVous n'êtes pas connecté !\n§6Tapez /login, /l ou /register."
+      alreadyAuthenticated: "§6Vous êtes déjà connecté."
+      loginSuccess: "§aVous êtes maintenant connecté."
+      logoutSuccess: "§aDéconnexion réussie."
+      cannotLogout: "§cVous ne pouvez pas vous déconnecter !"
+      timeExpired: "§cLe temps pour se connecter a expiré."
+      valid: "§aVous avez une session valide. Pas besoin de se connecter."
+      onlineAccount: "§aVous utilisez un compte Mojang. Pas besoin de se connecter."
+    # Registration
+    registration:
+      required: "§6Tapez /register <motdepasse> <motdepasse> pour vous approprier ce compte."
+      alreadyRegistered: "§6Ce nom de compte est déjà enregistré !"
+      success: "§aVous êtes maintenant connecté."
+      notRegistered: "§cCe joueur n'est pas enregistré !"
+    # Account
+    account:
+      cannotUnregister: "§cVous ne pouvez pas désinscrire ce compte !"
+      deleted: "§aVotre compte a été supprimé avec succès !"
+      dataDeleted: "§aDonnées utilisateur supprimées."
+      dataUpdated: "§aDonnées utilisateur mise à jour."
+      dataCorrupted: "§cVos données sont probablement corrompus. Veuillez contacter un admin."
+      usernameInvalid: "§6Charactères utilisateur invalide ! Charactères autorisés regex: %s"
+      alreadyOnline: "§cLe joueur %s est déjà connecté !"
+    # Uuid
+    uuid:
+      offline: "L'UUID hors ligne du joueur %s est (cliquer pour copier)\n%s"
+    # Admin
+    admin:
+      configReloaded: "§aLe fichier de configuration a été rechargé avec succès."
+      spawnSet: "§aLe spawn pour la connection a été réglé avec succès."
+      registeredPlayers: "Liste des joueurs enregistrés :"

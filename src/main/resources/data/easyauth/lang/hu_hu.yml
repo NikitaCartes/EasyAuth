@@ -1,0 +1,69 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Meg kell adnod a jelszavad!"
+      enterNew: "§4Meg kell adnod egy új jelszót!"
+      incorrect: "§4Hibás jelszó!"
+      mismatch: "§6A jelszavaknak eggyezniük kell!"
+      changed: "§aJelszó sikeresen megváltoztatva!"
+      tooLong: "§6A jelszó maximum %d karakter hosszú lehet!"
+      tooShort: "§6A jelszónak legalább %d karakter hosszúnak kell lennie!"
+      cannotChange: "§cNem változtathatod meg a jelszavad!"
+      globalSet: "§aGlobális jelszó sikeresen beállítva!"
+      globalIncorrect: "§4Helytelen globális jelszó!"
+    # Session
+    session:
+      loginRequired: "§cNem vagy bejelentkezve!\n§6Használd a /login, /l parancsot hogy belépj!"
+      tooManyAttempts: "§4Túl sok belépési kísérlet."
+      notAuthenticated: "§cNem vagy bejelentkezve!\n§6Használd a /login, /l vagy a /register parancsot."
+      alreadyAuthenticated: "§6Már be vagy lépve."
+      loginSuccess: "§aSikeresen beléptél."
+      logoutSuccess: "§aSikeresen kiléptél."
+      cannotLogout: "§cNem tudsz kijelentkezni!"
+      timeExpired: "§cBejelentkezési idő túllépve"
+      valid: "§aÉrvényes munkamenettel rendelkezel. Nem kell bejelentkezned."
+      onlineAccount: "§Eredeti fiókot használsz. Nem szükséges bejelentkezni."
+    # Registration
+    registration:
+      required: "§6Használd a /register <jelszó> <jelszó> parancsot, hogy lefoglald ezt a fiókot."
+      requiredWithGlobalPassword: "§6Használd a /register <globális jelszó> <jelszó> <jelszó> parancsot a fiók igényléséhez."
+      alreadyRegistered: "§6Ez a név már regisztrálva van!"
+      success: "§aRegisztráció sikeres."
+      notRegistered: "§cEz a játékos még nincs regisztrálva!"
+    # Account
+    account:
+      cannotUnregister: "§cNem törölheted a regisztrációt!"
+      deleted: "§aFiók sikeresen törölve!"
+      dataDeleted: "§aFelhasználói adatok törölve."
+      dataUpdated: "§aFelhasználói adatok frissítve."
+      dataCorrupted: "§cAz adataid hibásak. Lépj kapcsolatba egy adminnal"
+      usernameInvalid: "§6Érvénytelen felhasználónév! Engedélyezett karakterek: %s"
+      usernameCaseMismatch: "§6Eltérő betűhasználattal adtad meg a felhasználóneved. Használd a helyeset."
+      alreadyOnline: "§c%s már online!"
+      markedSelfOnline: "§aSikeresen online játékosként jelölted meg magad."
+      markSelfOnlineWarning: "§6Éppen online játékosként készülsz megjelölni magad.\n§6Nem fogsz tudni bejelentkezni, hacsak nincs online fiókod.\n§6Az offline UUID-hoz kötött adatok (pl. falusi kereskedők kedvezményei, kisállatok) elvesznek.\n§aA folytatáshoz írd be: /account online <jelszó> true."
+      onlineNotFound: "§cOnline fiók nem található."
+    # Uuid
+    uuid:
+      offline: "Offline UUID %s játékoshoz (kattints a másoláshoz):\n%s"
+      forcedSet: "§a§e%s §játékos kényszerített UUID-ja §e%s§a értékre lett állítva. A játékos ki lesz rúgva a változtatások alkalmazásához."
+      forcedCleared: "§a§e%s §játékos kényszerített UUID-ja törölve lett. A játékos az alapértelmezett UUID-t fogja használni a következő bejelentkezéskor."
+      changed: "§6Az UUID-dat egy adminisztrátor megváltoztatta. Csatlakozz újra."
+      invalidFormat: "§cÉrvénytelen UUID formátum: §e%s§c. Használd a következő formátumot: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+      noForced: "§c§e%s §cjátékosnak nincs beállított kényszerített UUID-ja."
+    # Admin
+    admin:
+      configReloaded: "§aKonfig újratöltve."
+      spawnSet: "§aBejelentkezési pont beállítva."
+      registeredPlayers: "Regisztrált játékosok listája:"
+      markedOffline: "§a%s játékos offline-ként lett megjelölve."
+      markedOnline: "§a%s játékos online-ként lett megjelölve."
+      ipLimitNotify: "§e[EasyAuth] §cIP Limit Figyelmeztetés: §f§e%s §fjátékos §e%s §fIP-ről túllépte a §e%d §ffiók korlátot. Meglévő fiókok: §e%s"
+    # Error
+    error:
+      unknown: "§4Ismeretlen hiba történt."
+      database: "§4Adatbázis hiba, a részletekért nézd meg a konzolt."
+      mojangUnavailable: "§cA Mojang szerver nem elérhető. Próbáld meg később."
+      ipLimitExceeded: "§4Túl sok fiók érkezett az IP-címedről. Maximum engedélyezett: %d fiók IP-címenként."
+      sessionLimitExceeded: "§4Túl sok kapcsolat érkezett az IP-címedről. Próbáld meg később."

@@ -124,7 +124,7 @@ public class EasyAuthNeoForge {
                             return;
                         }
                         reloadConfigs(server);
-                        langConfig.configurationReloaded.send(server);
+                        langConfig.admin.configReloaded.send(server);
                     }, reloadExecutor);
         }
     }

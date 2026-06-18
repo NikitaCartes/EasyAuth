@@ -42,9 +42,9 @@ public class LogoutCommand {
             playerData.lastAuthenticatedDate = getUnixZero();
             playerData.update();
 
-            langConfig.successfulLogout.send(serverCommandSource);
+            langConfig.session.logoutSuccess.send(serverCommandSource);
         } else {
-            langConfig.cannotLogout.send(serverCommandSource);
+            langConfig.session.cannotLogout.send(serverCommandSource);
         }
         return 1;
     }

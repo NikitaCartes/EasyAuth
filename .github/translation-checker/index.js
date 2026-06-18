@@ -14,10 +14,7 @@ function parse(str) {
     const blame = execSync(`git blame --porcelain ${str}`).toString("utf8").trim().split("\n");
     const commitMap = new Map();
     const nodes = [];
-    const path = [];
-    let inMultiLineString = false;
-    let multiLineStringLastUpdated = null;
-    // let multiLineStringValue = "";
+    const stack = []; // { indent, key }
     for (let i = 0; i < blame.length; i++) {
         const hash = blame[i].split(" ")[0];
         i++;
@@ -36,58 +33,28 @@ function parse(str) {
             i += j;
         }
         const commit = commitMap.get(hash);
-        let lastUpdated = parseInt(commit.authorTime);
-        if (inMultiLineString) {
-            const line = blame[i].slice(1).trimEnd();
-            if (line.endsWith('"""')) {
-                // multiLineStringValue += "\n" + line.slice(0, -3);
-                nodes.push({
-                    path: [...path],
-                    lastUpdated: multiLineStringLastUpdated,
-                    // value: multiLineStringValue,
-                });
-                inMultiLineString = false;
-                multiLineStringLastUpdated = null;
-                // multiLineStringValue = "";
-                path.pop();
-                continue;
-            } else {
-                if (lastUpdated > multiLineStringLastUpdated)
-                    multiLineStringLastUpdated = commit.authorTime;
-                // multiLineStringValue += "\n" + blame[i].slice(1);
-                continue;
-            }
+        const lastUpdated = parseInt(commit.authorTime);
+
+        const raw = blame[i].slice(1); // source line, leading tab stripped, indentation kept
+        if (!raw.trim() || raw.trim().startsWith("#")) continue; // blank / comment
+        const indent = raw.length - raw.trimStart().length;
+        const line = raw.trim();
+        while (stack.length && stack[stack.length - 1].indent >= indent) stack.pop();
+        const idx = line.indexOf(":");
+        const key = line.slice(0, idx);
+        const rest = line.slice(idx + 1).trim();
+        if (rest === "") {
+            stack.push({ indent, key }); // mapping node
+        } else {
+            nodes.push({ path: [...stack.map((s) => s.key), key], lastUpdated }); // leaf
         }
-        const line = blame[i].slice(1).trim();
-        if (line === "{") continue;
-        if (line === "}") {
-            path.pop();
-            continue;
-        }
-        if (!line.includes('"')) {
-            path.push(line.split(":")[0].split(" ")[0]);
-            continue;
-        }
-        const [key, rest] = line.split(":");
-        if (rest.trimStart().startsWith('"""')) {
-            inMultiLineString = true;
-            multiLineStringLastUpdated = lastUpdated;
-            // multiLineStringValue = rest.trimStart().slice(3);
-            path.push(key);
-            continue;
-        }
-        nodes.push({
-            path: [...path, key],
-            lastUpdated,
-            // value: rest.trimStart().slice(1, -1)
-        });
     }
     return nodes;
 }
 
 const langFolder = "../../src/main/resources/data/easyauth/lang"
 const languageFiles = readdirSync(langFolder).filter(
-    (f) => f.endsWith(".json")
+    (f) => f.endsWith(".yml")
 );
 
 const languages = languageFiles.map((file) => {

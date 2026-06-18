@@ -1,0 +1,69 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Please enter your password!"
+      enterNew: "§4Please enter a new password!"
+      incorrect: "§4Incorrect password!"
+      mismatch: "§6Passwords must match!"
+      changed: "§aYour password has been updated successfully!"
+      tooLong: "§6Password can be at most %d characters long!"
+      tooShort: "§6Password must be at least %d characters long!"
+      cannotChange: "§cYou cannot change the password!"
+      globalSet: "§aGlobal password has been set successfully!"
+      globalIncorrect: "§4Incorrect global password!"
+    # Session
+    session:
+      loginRequired: "§cYou are not authorised!\n§6Use /login or /l to authenticate."
+      tooManyAttempts: "§4Too many login attempts. Please wait a few minutes and try again."
+      notAuthenticated: "§cYou are not authorised!\n§6Use /login, /l, or /register."
+      alreadyAuthenticated: "§6You are already authorised."
+      loginSuccess: "§aYou are now authorised."
+      logoutSuccess: "§aYou have logged out successfully."
+      cannotLogout: "§cYou cannot log out!"
+      timeExpired: "§cAuthentication time has expired."
+      valid: "§aYou have a valid session. No need to log in."
+      onlineAccount: "§aYou are using an online account. No need to log in."
+    # Registration
+    registration:
+      required: "§6Use /register <password> <password> to claim this account."
+      requiredWithGlobalPassword: "§6Use /register <global password> <password> <password> to claim this account."
+      alreadyRegistered: "§6This account name is already registered!"
+      success: "§aYou are now authorised."
+      notRegistered: "§cThis player is not registered!"
+    # Account
+    account:
+      cannotUnregister: "§cYou cannot unregister this account!"
+      deleted: "§aYour account has been deleted successfully!"
+      dataDeleted: "§aUser data has been deleted."
+      dataUpdated: "§aUser data has been updated."
+      dataCorrupted: "§cYour data may be corrupted. Please contact an administrator."
+      usernameInvalid: "§6Invalid characters in username! Allowed pattern: %s"
+      usernameCaseMismatch: "§6You are using a different case for your username. Please use the correct one."
+      alreadyOnline: "§cPlayer %s is already online!"
+      markedSelfOnline: "§aYou have marked yourself as an online player."
+      markSelfOnlineWarning: "§6You are about to mark yourself as an online player.\n§6You will not be able to log in unless you have an online account.\n§6All data linked to the offline UUID (like villagers' discounts, pets) will be lost.\n§aTo proceed, type /account online <password> true."
+      onlineNotFound: "§cOnline account not found."
+    # Uuid
+    uuid:
+      offline: "Offline UUID for player %s (click to copy):\n%s"
+      forcedSet: "§aForced UUID for player §e%s §ahas been set to §e%s§a. The player will be kicked to apply changes."
+      forcedCleared: "§aForced UUID for player §e%s §ahas been cleared. The player will use the default UUID on next login."
+      changed: "§6Your UUID has been changed by an administrator. Please reconnect."
+      invalidFormat: "§cInvalid UUID format: §e%s§c. Please use the format: 12345678-1234-1234-1234-123456789abc"
+      noForced: "§cPlayer §e%s §cdoes not have a forced UUID set."
+    # Admin
+    admin:
+      configReloaded: "§aConfiguration file reloaded successfully."
+      spawnSet: "§aLogin spawn point has been set successfully."
+      registeredPlayers: "List of registered players:"
+      markedOffline: "§aPlayer %s has been marked as offline."
+      markedOnline: "§aPlayer %s has been marked as online."
+      ipLimitNotify: "§e[EasyAuth] §cIP Limit Warning: §fPlayer §e%s §ffrom IP §e%s §fexceeded the limit of §e%d §faccounts. Existing accounts: §e%s"
+    # Error
+    error:
+      unknown: "§4An unknown error has occurred."
+      database: "§4Database error, see console for details."
+      mojangUnavailable: "§cMojang server is unavailable. Please try again later."
+      ipLimitExceeded: "§4Too many accounts from your IP address. Maximum allowed: %d accounts per IP."
+      sessionLimitExceeded: "§4Too many connections from your IP address. Please try again later."

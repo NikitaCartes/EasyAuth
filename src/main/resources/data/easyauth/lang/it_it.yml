@@ -1,0 +1,46 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Devi inserire la tua password!"
+      enterNew: "§4Devi inserire una nuova password!"
+      incorrect: "§4Password errata!"
+      mismatch: "§6Le password devono corrispondere!"
+      changed: "§aLa tua password è stata aggiornata correttamente!"
+      tooLong: "§6La Password deve essere lunga al massimo %d caratteri!"
+      tooShort: "§6La Password deve essere lunga almeno %d caratteri!"
+      cannotChange: "§cNon puoi cambiare password!"
+      globalSet: "§aPassword globale impostata correttamente!"
+    # Session
+    session:
+      loginRequired: "§cNon sei autenticato!\n§6Usa /login, /l per autenticarti!"
+      tooManyAttempts: "§4Troppi tentativi di accesso. Aspetta alcuni minuti e riprova."
+      notAuthenticated: "§cNon sei autenticato!\n§6Usa /login, /l o /register."
+      alreadyAuthenticated: "§6Sei già autenticato."
+      loginSuccess: "§aSei ora autenticato."
+      logoutSuccess: "§aLogout eseguito correttamente."
+      cannotLogout: "§cNon puoi effettuare il logout!"
+      timeExpired: "§cTempo per l'autenticazione scaduto."
+    # Registration
+    registration:
+      required: "§6Inserisci /register <password> <password> per rivendicare questo account."
+      alreadyRegistered: "§6Questo account è già registrato!"
+      success: "§aSei ora registrato e autenticato."
+      notRegistered: "§cQuesto giocatore non è registrato!"
+    # Account
+    account:
+      cannotUnregister: "§cNon puoi cancellare questo account!"
+      deleted: "§aIl tuo account è stato rimosso correttamente!"
+      dataDeleted: "§aDati utente eliminati."
+      dataUpdated: "§aDati utente aggiornati."
+      dataCorrupted: "§cI tuoi dati sono probabilmente corrotti. Per favore contatta l'amministratore."
+      usernameInvalid: "§6L'username contiene caratteri non validi! Regex di caratteri consentiti: %s"
+      alreadyOnline: "§cIl giocatore %s è già online!"
+    # Uuid
+    uuid:
+      offline: "L'UUID offline per il giocatore %s è (clicca per copiare)\n%s"
+    # Admin
+    admin:
+      configReloaded: "§aIl file di configurazione è stato ricaricato con successo."
+      spawnSet: "§aSpawn per autenticazione impostato correttamente."
+      registeredPlayers: "Lista di giocatori registrati:"

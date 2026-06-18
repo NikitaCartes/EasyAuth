@@ -39,7 +39,7 @@ public class LoginCommand {
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
-                    langConfig.enterPassword.send(ctx.getSource());
+                    langConfig.password.enter.send(ctx.getSource());
                     return 0;
                 }));
     }
@@ -54,7 +54,7 @@ public class LoginCommand {
         LogLogin("Player " + username + " is trying to login");
         if (playerAuth.easyAuth$isAuthenticated()) {
             LogLogin("Player " + username + " is already authenticated");
-            langConfig.alreadyAuthenticated.send(source);
+            langConfig.session.alreadyAuthenticated.send(source);
             return 0;
         }
         PlayerEntryV1 playerData = playerAuth.easyAuth$getPlayerEntryV1();
@@ -65,10 +65,10 @@ public class LoginCommand {
             LogLogin("Player " + username + " provide correct password");
             if (playerData.lastKickedDate.plusSeconds(config.resetLoginAttemptsTimeout).isAfter(ZonedDateTime.now())) {
                 LogLogin("Player " + username + " will be kicked due to kick timeout");
-                player.connection.disconnect(langConfig.loginTriesExceeded.get());
+                player.connection.disconnect(langConfig.session.tooManyAttempts.get());
                 return 0;
             }
-            langConfig.successfullyAuthenticated.send(source);
+            langConfig.session.loginSuccess.send(source);
             playerAuth.easyAuth$restoreTrueLocation();
             playerAuth.easyAuth$setAuthenticated(true);
             playerData.lastAuthenticatedDate = ZonedDateTime.now();
@@ -87,10 +87,10 @@ public class LoginCommand {
         } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
             LogLogin("Player " + username + " is not registered");
             if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
-                langConfig.registerRequiredWithGlobalPassword.send(source);
+                langConfig.registration.requiredWithGlobalPassword.send(source);
                 return 0;
             }
-            langConfig.registerRequired.send(source);
+            langConfig.registration.required.send(source);
             return 0;
         }
         playerData.loginTries++;
@@ -101,15 +101,15 @@ public class LoginCommand {
             playerData.loginTries = 0;
             playerData.update();
             if (config.maxLoginTries == 1) {
-                player.connection.disconnect(langConfig.wrongPassword.get());
+                player.connection.disconnect(langConfig.password.incorrect.get());
             } else {
-                player.connection.disconnect(langConfig.loginTriesExceeded.get());
+                player.connection.disconnect(langConfig.session.tooManyAttempts.get());
             }
             return 0;
         }
         LogLogin("Player " + username + " provided wrong password");
         // Sending wrong pass message
-        langConfig.wrongPassword.send(source);
+        langConfig.password.incorrect.send(source);
         return 0;
     }
 }

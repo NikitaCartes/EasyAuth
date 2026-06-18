@@ -1,0 +1,46 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Musíte zadat vaše heslo!"
+      enterNew: "§4Musíte zadat nové heslo!"
+      incorrect: "§4Špatné heslo!"
+      mismatch: "§6Hesla se musí shodovat!"
+      changed: "§aVaše heslo bylo úspěšně aktualizováno!"
+      tooLong: "§6Heslo může být maximálně %d znaků dlouhé!"
+      tooShort: "§6Heslo musí být aspoň %d znaků dlouhé!"
+      cannotChange: "§cNemůžete změnit heslo!"
+      globalSet: "§aGlobální heslo bylo úspěšně nastaveno!"
+    # Session
+    session:
+      loginRequired: "§cNejste ověřeni!\n§6Použijte /login, /l pro ověření!"
+      tooManyAttempts: "§4Příliš mnoho pokusů na přihlášení. Počkejte prosím pár minut a zkuste to znovu."
+      notAuthenticated: "§cNejste ověřeni!\n§6Zkuste /login, /l nebo /register."
+      alreadyAuthenticated: "§6Již jste ověřeni."
+      loginSuccess: "§aNyní jste ověřeni."
+      logoutSuccess: "§aÚspěšně odhlášeno."
+      cannotLogout: "§cNemůžete se odhlásit!"
+      timeExpired: "§cČas na ověření vypršel."
+    # Registration
+    registration:
+      required: "§6Napište /register <heslo> <heslo> pro přivlastnění tohoto účtu."
+      alreadyRegistered: "§6Tento účet je již zaregistrován!"
+      success: "§aNyní jste ověřeni."
+      notRegistered: "§cTento hráč není zaregistrovaný!"
+    # Account
+    account:
+      cannotUnregister: "§cNemůžete odregistrovat tento účet!"
+      deleted: "§aVáš účet byl úspěšně odstraněn!"
+      dataDeleted: "§aUživatelská data odstraněna."
+      dataUpdated: "§aUživatelská data aktualizována."
+      dataCorrupted: "§cVaše data jsou pravděpodobně poškozena. Prosím kontaktujte admina."
+      usernameInvalid: "§6Neplatné uživatelské jméno! Regex povolených znaků: %s"
+      alreadyOnline: "§cHráč %s je již online!"
+    # Uuid
+    uuid:
+      offline: "Offline UUID pro hráče %s je (kliknutím zkopírujte)\n%s"
+    # Admin
+    admin:
+      configReloaded: "§aKonfigurační soubor byl načten úspěšně."
+      spawnSet: "§aSpawn pro přihlašování byl úspěšně nastaven."
+      registeredPlayers: "Seznam registrovaných hráčů:"

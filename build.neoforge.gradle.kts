@@ -72,6 +72,10 @@ fletchingTable {
     mixins.create("main") {
         mixin("default", "easyauth.mixins.json")
     }
+    lang.create("main") {
+        // Nested YAML lang files are flattened to dotted-key JSON at build time
+        patterns.add("data/easyauth/lang/**")
+    }
 }
 
 // Configuration that gets shaded (relocated) into the main jar.

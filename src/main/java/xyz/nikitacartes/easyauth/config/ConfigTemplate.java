@@ -108,7 +108,16 @@ public abstract class ConfigTemplate {
             final boolean enabled = node.node(ENABLED).getBoolean(true);
             final boolean serverSide = node.node(SERVER_SIDE).getBoolean(true);
 
-            return new TranslatableText("text.easyauth." + camelCase(node.key()), text, enabled, serverSide);
+            // Key mirrors the node's full path under the root, e.g. [password, enter] -> text.easyauth.password.enter
+            final Object[] segments = node.path().array();
+            final StringBuilder key = new StringBuilder("text.easyauth.");
+            for (int i = 0; i < segments.length; i++) {
+                if (i > 0) {
+                    key.append('.');
+                }
+                key.append(camelCase(segments[i]));
+            }
+            return new TranslatableText(key.toString(), text, enabled, serverSide);
         }
 
         @Override

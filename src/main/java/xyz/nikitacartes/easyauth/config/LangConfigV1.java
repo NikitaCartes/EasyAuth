@@ -40,59 +40,13 @@ public class LangConfigV1 extends ConfigTemplate {
             Note: with server-side translation enabled, this language will be used for non-translatable messages
             Note: with disable server-side translation, message from "text" field have higher priority than defaultLanguage.""")
     public String defaultLanguage = "en_us";
-    public TranslatableText enterPassword = new TranslatableText("enterPassword");
-    public TranslatableText enterNewPassword = new TranslatableText("enterNewPassword");
-    public TranslatableText wrongPassword = new TranslatableText("wrongPassword");
-    public TranslatableText matchPassword = new TranslatableText("matchPassword");
-    public TranslatableText passwordUpdated = new TranslatableText("passwordUpdated");
-    public TranslatableText loginRequired = new TranslatableText("loginRequired");
-    public TranslatableText loginTriesExceeded = new TranslatableText("loginTriesExceeded");
-    public TranslatableText globalPasswordSet = new TranslatableText("globalPasswordSet");
-    public TranslatableText cannotChangePassword = new TranslatableText("cannotChangePassword");
-    public TranslatableText cannotUnregister = new TranslatableText("cannotUnregister");
-    public TranslatableText notAuthenticated = new TranslatableText("notAuthenticated");
-    public TranslatableText alreadyAuthenticated = new TranslatableText("alreadyAuthenticated");
-    public TranslatableText successfullyAuthenticated = new TranslatableText("successfullyAuthenticated");
-    public TranslatableText successfulLogout = new TranslatableText("successfulLogout");
-    public TranslatableText timeExpired = new TranslatableText("timeExpired");
-    public TranslatableText registerRequired = new TranslatableText("registerRequired");
-    public TranslatableText alreadyRegistered = new TranslatableText("alreadyRegistered");
-    public TranslatableText registerSuccess = new TranslatableText("registerSuccess");
-    public TranslatableText userdataDeleted = new TranslatableText("userdataDeleted");
-    public TranslatableText userdataUpdated = new TranslatableText("userdataUpdated");
-    public TranslatableText accountDeleted = new TranslatableText("accountDeleted");
-    public TranslatableText configurationReloaded = new TranslatableText("configurationReloaded");
-    public TranslatableText maxPasswordChars = new TranslatableText("maxPasswordChars");
-    public TranslatableText minPasswordChars = new TranslatableText("minPasswordChars");
-    public TranslatableText disallowedUsername = new TranslatableText("disallowedUsername");
-    public TranslatableText playerAlreadyOnline = new TranslatableText("playerAlreadyOnline");
-    public TranslatableText worldSpawnSet = new TranslatableText("worldSpawnSet");
-    public TranslatableText corruptedPlayerData = new TranslatableText("corruptedPlayerData");
-    public TranslatableText userNotRegistered = new TranslatableText("userNotRegistered");
-    public TranslatableText cannotLogout = new TranslatableText("cannotLogout");
-    public TranslatableText offlineUuid = new TranslatableText("offlineUuid");
-    public TranslatableText registeredPlayers = new TranslatableText("registeredPlayers");
-    public TranslatableText validSession = new TranslatableText("validSession");
-    public TranslatableText onlinePlayerLogin = new TranslatableText("onlinePlayerLogin");
-    public TranslatableText differentUsernameCase = new TranslatableText("differentUsernameCase");
-    public TranslatableText wrongGlobalPassword = new TranslatableText("wrongGlobalPassword");
-    public TranslatableText registerRequiredWithGlobalPassword = new TranslatableText("registerRequiredWithGlobalPassword");
-    public TranslatableText markAsOffline = new TranslatableText("markAsOffline");
-    public TranslatableText markAsOnline = new TranslatableText("markAsOnline");
-    public TranslatableText selfMarkAsOnline = new TranslatableText("selfMarkAsOnline");
-    public TranslatableText selfMarkAsOnlineWarning = new TranslatableText("selfMarkAsOnlineWarning");
-    public TranslatableText accountNotFound = new TranslatableText("accountNotFound");
-    public TranslatableText accountCheckFailed = new TranslatableText("accountCheckFailed");
-    public TranslatableText databaseError = new TranslatableText("databaseError");
-    public TranslatableText unknownError = new TranslatableText("unknownError");
-    public TranslatableText ipLimitExceeded = new TranslatableText("ipLimitExceeded");
-    public TranslatableText ipLimitAdminNotify = new TranslatableText("ipLimitAdminNotify");
-    public TranslatableText sessionLimitExceeded = new TranslatableText("sessionLimitExceeded");
-    public TranslatableText uuidSet = new TranslatableText("uuidSet");
-    public TranslatableText uuidCleared = new TranslatableText("uuidCleared");
-    public TranslatableText uuidChanged = new TranslatableText("uuidChanged");
-    public TranslatableText invalidUuid = new TranslatableText("invalidUuid");
-    public TranslatableText noForcedUuid = new TranslatableText("noForcedUuid");
+    public Password password = new Password();
+    public Session session = new Session();
+    public Registration registration = new Registration();
+    public Account account = new Account();
+    public Uuid uuid = new Uuid();
+    public Admin admin = new Admin();
+    public Errors error = new Errors();
 
     private static Map<String, String> translations = new HashMap<>();
 
@@ -263,4 +217,85 @@ public class LangConfigV1 extends ConfigTemplate {
         }
     }
 
+
+    @ConfigSerializable
+    public static final class Password {
+        public TranslatableText enter = new TranslatableText("password.enter");
+        public TranslatableText enterNew = new TranslatableText("password.enterNew");
+        public TranslatableText incorrect = new TranslatableText("password.incorrect");
+        public TranslatableText mismatch = new TranslatableText("password.mismatch");
+        public TranslatableText changed = new TranslatableText("password.changed");
+        public TranslatableText tooLong = new TranslatableText("password.tooLong");
+        public TranslatableText tooShort = new TranslatableText("password.tooShort");
+        public TranslatableText cannotChange = new TranslatableText("password.cannotChange");
+        public TranslatableText globalSet = new TranslatableText("password.globalSet");
+        public TranslatableText globalIncorrect = new TranslatableText("password.globalIncorrect");
+    }
+
+    @ConfigSerializable
+    public static final class Session {
+        public TranslatableText loginRequired = new TranslatableText("session.loginRequired");
+        public TranslatableText tooManyAttempts = new TranslatableText("session.tooManyAttempts");
+        public TranslatableText notAuthenticated = new TranslatableText("session.notAuthenticated");
+        public TranslatableText alreadyAuthenticated = new TranslatableText("session.alreadyAuthenticated");
+        public TranslatableText loginSuccess = new TranslatableText("session.loginSuccess");
+        public TranslatableText logoutSuccess = new TranslatableText("session.logoutSuccess");
+        public TranslatableText cannotLogout = new TranslatableText("session.cannotLogout");
+        public TranslatableText timeExpired = new TranslatableText("session.timeExpired");
+        public TranslatableText valid = new TranslatableText("session.valid");
+        public TranslatableText onlineAccount = new TranslatableText("session.onlineAccount");
+    }
+
+    @ConfigSerializable
+    public static final class Registration {
+        public TranslatableText required = new TranslatableText("registration.required");
+        public TranslatableText requiredWithGlobalPassword = new TranslatableText("registration.requiredWithGlobalPassword");
+        public TranslatableText alreadyRegistered = new TranslatableText("registration.alreadyRegistered");
+        public TranslatableText success = new TranslatableText("registration.success");
+        public TranslatableText notRegistered = new TranslatableText("registration.notRegistered");
+    }
+
+    @ConfigSerializable
+    public static final class Account {
+        public TranslatableText cannotUnregister = new TranslatableText("account.cannotUnregister");
+        public TranslatableText deleted = new TranslatableText("account.deleted");
+        public TranslatableText dataDeleted = new TranslatableText("account.dataDeleted");
+        public TranslatableText dataUpdated = new TranslatableText("account.dataUpdated");
+        public TranslatableText dataCorrupted = new TranslatableText("account.dataCorrupted");
+        public TranslatableText usernameInvalid = new TranslatableText("account.usernameInvalid");
+        public TranslatableText usernameCaseMismatch = new TranslatableText("account.usernameCaseMismatch");
+        public TranslatableText alreadyOnline = new TranslatableText("account.alreadyOnline");
+        public TranslatableText markedSelfOnline = new TranslatableText("account.markedSelfOnline");
+        public TranslatableText markSelfOnlineWarning = new TranslatableText("account.markSelfOnlineWarning");
+        public TranslatableText onlineNotFound = new TranslatableText("account.onlineNotFound");
+    }
+
+    @ConfigSerializable
+    public static final class Uuid {
+        public TranslatableText offline = new TranslatableText("uuid.offline");
+        public TranslatableText forcedSet = new TranslatableText("uuid.forcedSet");
+        public TranslatableText forcedCleared = new TranslatableText("uuid.forcedCleared");
+        public TranslatableText changed = new TranslatableText("uuid.changed");
+        public TranslatableText invalidFormat = new TranslatableText("uuid.invalidFormat");
+        public TranslatableText noForced = new TranslatableText("uuid.noForced");
+    }
+
+    @ConfigSerializable
+    public static final class Admin {
+        public TranslatableText configReloaded = new TranslatableText("admin.configReloaded");
+        public TranslatableText spawnSet = new TranslatableText("admin.spawnSet");
+        public TranslatableText registeredPlayers = new TranslatableText("admin.registeredPlayers");
+        public TranslatableText markedOffline = new TranslatableText("admin.markedOffline");
+        public TranslatableText markedOnline = new TranslatableText("admin.markedOnline");
+        public TranslatableText ipLimitNotify = new TranslatableText("admin.ipLimitNotify");
+    }
+
+    @ConfigSerializable
+    public static final class Errors {
+        public TranslatableText unknown = new TranslatableText("error.unknown");
+        public TranslatableText database = new TranslatableText("error.database");
+        public TranslatableText mojangUnavailable = new TranslatableText("error.mojangUnavailable");
+        public TranslatableText ipLimitExceeded = new TranslatableText("error.ipLimitExceeded");
+        public TranslatableText sessionLimitExceeded = new TranslatableText("error.sessionLimitExceeded");
+    }
 }

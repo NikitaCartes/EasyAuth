@@ -1,0 +1,41 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Du musst dein Passwort eingeben!"
+      enterNew: "§4Du musst ein neues Passwort eingeben!"
+      incorrect: "§4Falsches Passwort!"
+      mismatch: "§6Passwörter müssen übereinstimmen!"
+      changed: "§aDein Passwort wurde erfolgreich geändert!"
+      tooLong: "§6Das Passwort darf höchstens %d Zeichen lang sein!"
+      tooShort: "§6Das Passwort muss mindestens %d Zeichen lang sein!"
+      cannotChange: "§cDu kannst das Passwort nicht ändern!"
+      globalSet: "§aGlobales Passwort erfolgreich festgelegt!"
+    # Session
+    session:
+      loginRequired: "§cDu bist nicht authentifiziert!\n§6Nutze /login, /l um dich zu authentifizieren!"
+      tooManyAttempts: "§4Zu viele Anmeldeversuche."
+      notAuthenticated: "§cDu bist nicht authentifiziert!\n§6Versuche es mit /login, /l oder /register."
+      alreadyAuthenticated: "§6Du bist bereits authentifiziert."
+      loginSuccess: "§aDu bist jetzt authentifiziert."
+      logoutSuccess: "§aErfolgreich abgemeldet."
+      timeExpired: "§cDie Authentifizierungszeit ist abgelaufen."
+    # Registration
+    registration:
+      required: "§6Tippe /register <password> <password> um diesen Account zu übernehmen."
+      alreadyRegistered: "§6Dieser Accountname ist bereits registriert!"
+      success: "§aDu bist nun authetifiziert."
+      notRegistered: "§cDiese(r) SpielerIn ist nicht registriert!"
+    # Account
+    account:
+      cannotUnregister: "§cDu kannst diesen Account nicht löschen!"
+      deleted: "§aDein Account wurde erfolgreich gelöscht!"
+      dataDeleted: "§aBenutzerdaten gelöscht."
+      dataUpdated: "§aBenutzerdaten aktualisiert."
+      dataCorrupted: "§cDeine Daten sind wahrscheinlich beschädigt. Bitte wende dich an einen Admin."
+      usernameInvalid: "§6Ungültige Benutzernamen! Zulässiger Regex für Zeichen: %s"
+      alreadyOnline: "§cSpielerIn %s ist bereits online!"
+    # Admin
+    admin:
+      configReloaded: "§aKonfigurationsdatei wurde erfolgreich neu geladen."
+      spawnSet: "§aSpawn für die Anmeldung wurde erfolgreich gesetzt."

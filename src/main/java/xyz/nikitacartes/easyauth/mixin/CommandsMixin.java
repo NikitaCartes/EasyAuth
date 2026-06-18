@@ -24,7 +24,7 @@ public class CommandsMixin {
     *///?}
         InteractionResult result = AuthEventHandler.onPlayerCommand(parseResults.getContext().getSource().getPlayer(), command);
         if (result == InteractionResult.FAIL) {
-            langConfig.loginRequired.send(parseResults.getContext().getSource());
+            langConfig.session.loginRequired.send(parseResults.getContext().getSource());
             //? if >= 1.20.3 {
             ci.cancel();
             //?} else {

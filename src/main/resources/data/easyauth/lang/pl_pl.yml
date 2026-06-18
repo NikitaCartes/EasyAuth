@@ -1,0 +1,46 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Musisz wpisać hasło!"
+      enterNew: "§4Musisz utworzyć hasło!"
+      incorrect: "§4Złe hasło!"
+      mismatch: "§6Hasła muszą być identyczne!"
+      changed: "§aHasło zmienione!"
+      tooLong: "§6Hasło musi mieć mniej niż %d znaków!"
+      tooShort: "§6Hasło musi zawierać co najmniej %d znaki!"
+      cannotChange: "§cNie możesz zmienić hasła!"
+      globalSet: "§aHasło globalne utworzono pomyślnie!"
+    # Session
+    session:
+      loginRequired: "§c§6Użyj /login, /l aby się zalogować!"
+      tooManyAttempts: "§4Spróbuj ponownie później. Za dużo pomyłek."
+      notAuthenticated: "§cNie jesteś zalogowany!\n§6Użyj /login, /l aby się zalogować \nlub /register aby utworzyć hasło."
+      alreadyAuthenticated: "§6Jesteś już zalogowany."
+      loginSuccess: "§aZalogowano pomyślnie!"
+      logoutSuccess: "§aWylogowano pomyślnie."
+      cannotLogout: "§cNie możesz się wylogować!"
+      timeExpired: "§cCzas na zalogowanie się minął."
+    # Registration
+    registration:
+      required: "§6Wpisz: /register >hasło> <hasło>\naby utworzyć hasło."
+      alreadyRegistered: "§6To konto jest już zarejestrowane!"
+      success: "§aPomyślnie zarejestrowano."
+      notRegistered: "§cTen gracz nie jest zarejestrowany!"
+    # Account
+    account:
+      cannotUnregister: "§cNie możesz wyrejestrować tego konta!"
+      deleted: "§aKonto usunięte!"
+      dataDeleted: "§aDane usunięte."
+      dataUpdated: "§aDane zaktualizowane."
+      dataCorrupted: "§c Twoje dane są uszkodzone, skontaktuj się z administratorem."
+      usernameInvalid: "§6Niewłaściwe znaki w nicku, dozwolone znaki to: %s"
+      alreadyOnline: "§cPlayer %s jest już zalogowany!"
+    # Uuid
+    uuid:
+      offline: "Offline UUID dla %s to %s"
+    # Admin
+    admin:
+      configReloaded: "§aPlik konfiguracyjny przeładowany."
+      spawnSet: "§aSpawn do logowania ustawiono pomyślnie."
+      registeredPlayers: "Zarejestrowani gracze:"

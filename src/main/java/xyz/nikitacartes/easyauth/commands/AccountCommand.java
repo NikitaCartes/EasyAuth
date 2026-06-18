@@ -29,7 +29,7 @@ public class AccountCommand {
                 .then(literal("unregister")
                         .requires(FabricPermissions.require("easyauth.commands.account.unregister", true))
                         .executes(ctx -> {
-                            langConfig.enterPassword.send(ctx.getSource());
+                            langConfig.password.enter.send(ctx.getSource());
                             return 1;
                         })
                         .then(argument("password", string())
@@ -44,7 +44,7 @@ public class AccountCommand {
                         .requires(FabricPermissions.require("easyauth.commands.account.changePassword", true))
                         .then(argument("old password", string())
                                 .executes(ctx -> {
-                                    langConfig.enterNewPassword.send(ctx.getSource());
+                                    langConfig.password.enterNew.send(ctx.getSource());
                                     return 1;
                                 })
                                 .then(argument("new password", string())
@@ -86,17 +86,17 @@ public class AccountCommand {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
-            langConfig.cannotUnregister.send(source);
+            langConfig.account.cannotUnregister.send(source);
             return 0;
         }
 
         if (playerAuth.easyAuth$canSkipAuth()) {
-            langConfig.cannotUnregister.send(source);
+            langConfig.account.cannotUnregister.send(source);
             return 0;
         }
 
         if (!playerAuth.easyAuth$isAuthenticated()) {
-            langConfig.loginRequired.send(source);
+            langConfig.session.loginRequired.send(source);
             return 0;
         }
 
@@ -106,21 +106,21 @@ public class AccountCommand {
             if (AuthHelper.checkPassword(playerAuth, pass.toCharArray()) == AuthHelper.PasswordOptions.CORRECT) {
                 PlayerEntryV1 playerEntry = DB.getUserData(username);
                 if (playerEntry == null) {
-                    langConfig.cannotUnregister.send(source);
+                    langConfig.account.cannotUnregister.send(source);
                     return;
                 }
 
                 if (!DB.deleteUserData(username)) {
-                    langConfig.unknownError.send(source);
+                    langConfig.error.unknown.send(source);
                     return;
                 }
-                langConfig.accountDeleted.send(source);
+                langConfig.account.deleted.send(source);
                 playerAuth.easyAuth$setAuthenticated(false);
                 playerAuth.easyAuth$setPlayerEntryV1(new PlayerEntryV1(username));
-                player.connection.disconnect(langConfig.accountDeleted.get());
+                player.connection.disconnect(langConfig.account.deleted.get());
                 return;
             }
-            langConfig.wrongPassword.send(source);
+            langConfig.password.incorrect.send(source);
         });
         return 0;
     }
@@ -132,14 +132,14 @@ public class AccountCommand {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
-            langConfig.cannotChangePassword.send(source);
+            langConfig.password.cannotChange.send(source);
             return 0;
         }
         if (newPass.length() < extendedConfig.minPasswordLength) {
-            langConfig.minPasswordChars.send(source, extendedConfig.minPasswordLength);
+            langConfig.password.tooShort.send(source, extendedConfig.minPasswordLength);
             return 0;
         } else if (newPass.length() > extendedConfig.maxPasswordLength && extendedConfig.maxPasswordLength != -1) {
-            langConfig.maxPasswordChars.send(source, extendedConfig.maxPasswordLength);
+            langConfig.password.tooLong.send(source, extendedConfig.maxPasswordLength);
             return 0;
         }
         // Different thread to avoid lag spikes
@@ -151,9 +151,9 @@ public class AccountCommand {
                 playerEntry.password = AuthHelper.hashPassword(newPass.toCharArray());
                 playerEntry.update();
 
-                langConfig.passwordUpdated.send(source);
+                langConfig.password.changed.send(source);
             } else {
-                langConfig.wrongPassword.send(source);
+                langConfig.password.incorrect.send(source);
             }
         });
         return 0;
@@ -175,11 +175,11 @@ public class AccountCommand {
                 String username = StoneCutterUtils.getUsername(player);
                 try {
                     if (!isValidUsername(username)) {
-                        langConfig.accountNotFound.send(source);
+                        langConfig.account.onlineNotFound.send(source);
                         return;
                     }
                 } catch (IOException e) {
-                    langConfig.accountCheckFailed.send(source);
+                    langConfig.error.mojangUnavailable.send(source);
                     return;
                 }
 
@@ -187,9 +187,9 @@ public class AccountCommand {
                 playerEntry.onlineAccount = PlayerEntryV1.OnlineAccount.TRUE;
                 playerEntry.update();
 
-                langConfig.selfMarkAsOnline.send(source);
+                langConfig.account.markedSelfOnline.send(source);
             } else {
-                langConfig.wrongPassword.send(source);
+                langConfig.password.incorrect.send(source);
             }
         });
 
@@ -198,7 +198,7 @@ public class AccountCommand {
 
     private static int markAsOnline(CommandSourceStack source, String password, boolean confirm) throws CommandSyntaxException {
         if (!confirm) {
-            langConfig.selfMarkAsOnlineWarning.send(source);
+            langConfig.account.markSelfOnlineWarning.send(source);
             return 0;
         }
         return markAsOnline(source, password);

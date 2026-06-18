@@ -1,0 +1,55 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Você precisa inserir sua senha!"
+      enterNew: "§4Você precisa inserir uma nova senha!"
+      incorrect: "§4Senha incorreta!"
+      mismatch: "§6As senhas devem coincidir!"
+      changed: "§aSua senha foi atualizada com sucesso!"
+      tooLong: "§6A senha deve possuir até %d caracteres!"
+      tooShort: "§6A senha deve possuir pelo menos %d caracteres!"
+      cannotChange: "§cVocê não pode mudar a senha!"
+      globalSet: "§aSenha global definida com sucesso!"
+      globalIncorrect: "§4Senha global errada!"
+    # Session
+    session:
+      loginRequired: "§cVocê não está autenticado!\n§6Use /login, /l para autenticar!"
+      tooManyAttempts: "§4Muitas tentativas de login."
+      notAuthenticated: "§cVocê não está autenticado!\n§6Tente com /login, /l ou /register."
+      alreadyAuthenticated: "§6Você já está autenticado."
+      loginSuccess: "§aVocê foi autenticado."
+      logoutSuccess: "§Desconectado com sucesso."
+      cannotLogout: "§cVocê não pode desconectar!"
+      timeExpired: "§cTempo de autenticação expirado."
+      valid: "§aVocê tem uma sessão válida. Não é necessário autenticar."
+      onlineAccount: "§aVocê está usando uma conta original. Não é necessário autenticar."
+    # Registration
+    registration:
+      required: "§6Digite /register <senha> <senha> para reivindicar essa conta."
+      requiredWithGlobalPassword: "§6Digite /register <senha global> <senha> <senha> para reivindicar essa conta."
+      alreadyRegistered: "§6O nome dessa conta já está registrado!"
+      success: "§aVocê foi autenticado."
+      notRegistered: "§cEsse jogador não está registrado!"
+    # Account
+    account:
+      cannotUnregister: "§cVocê não pode remover essa conta!"
+      deleted: "§aSua conta foi deletada com sucesso!"
+      dataDeleted: "§aDados do usuário deletados."
+      dataUpdated: "§aDados do usuário atualizados."
+      dataCorrupted: "§cSeus dados estão provavelmente corrompidos. Por favor contate um administrador."
+      usernameInvalid: "§6Caracteres inválidos no nome de usuário! Expressão regular permitida: %s"
+      usernameCaseMismatch: "Você está usando uma formatação diferente no seu nome de usuário. Por favor utilize a correta."
+      alreadyOnline: "§cO jogador %s já está online!"
+      markedSelfOnline: "§aVocê se definiu como conta original."
+      markSelfOnlineWarning: "§6Você quer se definir como conta original.\n§6Você não será capaz de autenticar caso não tenha uma conta original.\n§6Dados atrelados ao uuid offline (disconto de aldeões, discontos, pets) serão perdidos.\n§aSe deseja prosseguir, digite /account online <senha> true."
+    # Uuid
+    uuid:
+      offline: "UUID offline para o jogador %s é (clique para copiar)\n%s"
+    # Admin
+    admin:
+      configReloaded: "§aArquivo de configuração recarregado com sucesso."
+      spawnSet: "§aPonto de surgimento para login definido com sucesso."
+      registeredPlayers: "Lista de jogadores registrados:"
+      markedOffline: "§aJogador %s foi definido como conta pirata."
+      markedOnline: "§aJogador %s foi definido como conta original."

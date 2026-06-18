@@ -220,7 +220,7 @@ public class AuthCommand {
     public static int reloadConfig(CommandSourceStack sender) {
         reloadConfigs(sender.getServer());
 
-        langConfig.configurationReloaded.send(sender);
+        langConfig.admin.configReloaded.send(sender);
 
         return Command.SINGLE_SUCCESS;
     }
@@ -243,7 +243,7 @@ public class AuthCommand {
 
         reloadConfigs(source.getServer());
 
-        langConfig.globalPasswordSet.send(source);
+        langConfig.password.globalSet.send(source);
         return 1;
     }
 
@@ -271,7 +271,7 @@ public class AuthCommand {
             config.save();
         });
 
-        langConfig.worldSpawnSet.send(source);
+        langConfig.admin.spawnSet.send(source);
         return 1;
     }
 
@@ -286,14 +286,14 @@ public class AuthCommand {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerEntry = DB.getUserData(username);
             if (playerEntry == null) {
-                langConfig.userNotRegistered.send(source);
+                langConfig.registration.notRegistered.send(source);
                 return;
             }
 
             if (DB.deleteUserData(username)) {
-                langConfig.userdataDeleted.send(source);
+                langConfig.account.dataDeleted.send(source);
             } else {
-                langConfig.databaseError.send(source);
+                langConfig.error.database.send(source);
             }
         });
 
@@ -301,7 +301,7 @@ public class AuthCommand {
         if (playerEntity != null && getUsername(playerEntity).equals(username)) {
             ((PlayerAuth) playerEntity).easyAuth$setAuthenticated(false);
             ((PlayerAuth) playerEntity).easyAuth$setPlayerEntryV1(new PlayerEntryV1(username));
-            playerEntity.connection.disconnect(langConfig.userdataDeleted.get());
+            playerEntity.connection.disconnect(langConfig.account.dataDeleted.get());
         }
 
         return 1; // Success
@@ -322,7 +322,7 @@ public class AuthCommand {
             playerData.registrationDate = ZonedDateTime.now();
             playerData.update();
 
-            langConfig.userdataUpdated.send(source);
+            langConfig.account.dataUpdated.send(source);
         });
         return 0;
     }
@@ -339,7 +339,7 @@ public class AuthCommand {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
             if (playerData == null || playerData.password.isEmpty()) {
-                langConfig.userNotRegistered.send(source);
+                langConfig.registration.notRegistered.send(source);
                 return;
             }
             String newPasswordHash = AuthHelper.hashPassword(password.toCharArray());
@@ -355,7 +355,7 @@ public class AuthCommand {
                 }
             }
             
-            langConfig.userdataUpdated.send(source);
+            langConfig.account.dataUpdated.send(source);
         });
         return 0;
     }
@@ -368,9 +368,9 @@ public class AuthCommand {
      */
     public static int getRegisteredPlayers(CommandSourceStack source) {
         THREADPOOL.submit(() -> {
-            if (langConfig.registeredPlayers.enabled) {
+            if (langConfig.admin.registeredPlayers.enabled) {
                 AtomicInteger i = new AtomicInteger();
-                MutableComponent message = langConfig.registeredPlayers.get();
+                MutableComponent message = langConfig.admin.registeredPlayers.get();
                 DB.getAllData().forEach((username, playerData) -> {
                     if (playerData == null || playerData.password == null) {
                         return;
@@ -405,7 +405,7 @@ public class AuthCommand {
             entry.update();
         });
 
-        langConfig.markAsOffline.send(source, username);
+        langConfig.admin.markedOffline.send(source, username);
         return 1;
     }
 
@@ -420,11 +420,11 @@ public class AuthCommand {
         THREADPOOL.submit(() -> {
             try {
                 if (!isValidUsername(username)) {
-                    langConfig.accountNotFound.send(source);
+                    langConfig.account.onlineNotFound.send(source);
                     return;
                 }
             } catch (IOException e) {
-                langConfig.accountCheckFailed.send(source);
+                langConfig.error.mojangUnavailable.send(source);
                 return;
             }
 
@@ -438,7 +438,7 @@ public class AuthCommand {
             entry.onlineAccount = PlayerEntryV1.OnlineAccount.TRUE;
             entry.update();
 
-            langConfig.markAsOnline.send(source, username);
+            langConfig.admin.markedOnline.send(source, username);
         });
         return 1;
     }
@@ -454,7 +454,7 @@ public class AuthCommand {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
             if (playerData == null) {
-                langConfig.userNotRegistered.send(source);
+                langConfig.registration.notRegistered.send(source);
                 return;
             }
             // Send player information to the source
@@ -504,7 +504,7 @@ public class AuthCommand {
             try {
                 uuid = UUID.fromString(uuidStr);
             } catch (IllegalArgumentException e) {
-                langConfig.invalidUuid.send(source, uuidStr);
+                langConfig.uuid.invalidFormat.send(source, uuidStr);
                 return;
             }
 
@@ -512,12 +512,12 @@ public class AuthCommand {
             entry.forcedUuid = uuid.toString();
             entry.update();
 
-            langConfig.uuidSet.send(source, username, uuid.toString());
+            langConfig.uuid.forcedSet.send(source, username, uuid.toString());
 
             // Kick the player if online so they rejoin with the new UUID
             ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
             if (player != null) {
-                player.connection.disconnect(langConfig.uuidChanged.get());
+                player.connection.disconnect(langConfig.uuid.changed.get());
             }
         });
         return 1;
@@ -534,24 +534,24 @@ public class AuthCommand {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 entry = DB.getUserData(username);
             if (entry == null) {
-                langConfig.userNotRegistered.send(source);
+                langConfig.registration.notRegistered.send(source);
                 return;
             }
 
             if (entry.forcedUuid == null || entry.forcedUuid.isEmpty()) {
-                langConfig.noForcedUuid.send(source, username);
+                langConfig.uuid.noForced.send(source, username);
                 return;
             }
 
             entry.forcedUuid = null;
             entry.update();
 
-            langConfig.uuidCleared.send(source, username);
+            langConfig.uuid.forcedCleared.send(source, username);
 
             // Kick the player if online so they rejoin with the default UUID
             ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
             if (player != null) {
-                player.connection.disconnect(langConfig.uuidChanged.get());
+                player.connection.disconnect(langConfig.uuid.changed.get());
             }
         });
         return 1;

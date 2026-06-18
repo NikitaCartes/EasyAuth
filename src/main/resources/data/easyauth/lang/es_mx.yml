@@ -1,0 +1,61 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6¡Necesitas introducir tu contraseña!"
+      enterNew: "§4¡Necesitas introducir una nueva contraseña!"
+      incorrect: "§4¡Contraseña incorrecta!"
+      mismatch: "§6¡Ambas contraseñas deben coincidir!"
+      changed: "§a¡Tu contraseña se actualizó correctamente!"
+      tooLong: "§6¡La contraseña puede tener como máximo %d caracteres!"
+      tooShort: "§6¡La contraseña debe tener al menos %d caracteres!"
+      cannotChange: "§c¡No puedes cambiar la contraseña!"
+      globalSet: "§a¡La contraseña global se estableció correctamente!"
+      globalIncorrect: "§4¡Contraseña global incorrecta!"
+    # Session
+    session:
+      loginRequired: "§c¡No estás autenticado!\n§6Usa /login o /l para autenticarte!"
+      tooManyAttempts: "§4Demasiados intentos de inicio de sesión."
+      notAuthenticated: "§c¡No estás autenticado!\n§6Intenta con /login, /l o /register."
+      alreadyAuthenticated: "§6Ahora estás autenticado."
+      loginSuccess: "§aTe has autenticado."
+      logoutSuccess: "§aCerraste sesión correctamente."
+      cannotLogout: "§c¡No puedes cerrar sesión!"
+      timeExpired: "§cEl tiempo de autenticación ha expirado."
+      valid: "§aTienes una sesión válida. No es necesario autenticarte."
+      onlineAccount: "§aEstás usando una cuenta en línea. No necesitas iniciar sesión."
+    # Registration
+    registration:
+      required: "§6Escribe /register <contraseña> <contraseña> para registrarte."
+      requiredWithGlobalPassword: "§6Escribe /register <contraseña global> <contraseña> <contraseña> para reclamar esta cuenta."
+      alreadyRegistered: "§6El nombre de esta cuenta ya está registrado."
+      success: "§aYa estás autenticado."
+      notRegistered: "§c¡Este jugador no está registrado!"
+    # Account
+    account:
+      cannotUnregister: "§c¡No puedes dar de baja esta cuenta!"
+      deleted: "§a¡Tu cuenta se eliminó con éxito!"
+      dataDeleted: "§aSe han eliminado los datos de usuario."
+      dataUpdated: "§aSe han actualizado los datos de usuario."
+      dataCorrupted: "§cSus datos probablemente estén dañados. Póngase en contacto con el administrador."
+      usernameInvalid: "§6¡Caracteres de nombre de usuario no válidos! Regex de caracteres permitidos: %s"
+      usernameCaseMismatch: "§6Estás usando una mayúscula/minúscula diferente en tu nombre de usuario. Por favor usa la correcta."
+      alreadyOnline: "§c¡El jugador %s ya se encuentra conectado!"
+      markedSelfOnline: "§aTe has marcado como jugador online."
+      markSelfOnlineWarning: "§6Estás a punto de marcarte como jugador online.\n§6No podrás autenticarte a menos que tengas una cuenta online.\n§6Todos los datos vinculados al UUID offline (como descuentos de aldeanos, mascotas) se perderán.\n§aPara proceder, escribe /account online <contraseña> true."
+      onlineNotFound: "§cCuenta online no encontrada."
+    # Uuid
+    uuid:
+      offline: "UUID offline para el jugador %s (click para copiar):\n%s"
+    # Admin
+    admin:
+      configReloaded: "§aEl archivo de configuración se ha recargado correctamente."
+      spawnSet: "§aSpawn para iniciar sesión se estableció correctamente."
+      registeredPlayers: "Lista de jugadores registrados:"
+      markedOffline: "§aEl jugador %s se ha marcado como offline."
+      markedOnline: "§aEl jugador %s se ha marcado como online."
+    # Error
+    error:
+      unknown: "§4Ha ocurrido un error desconocido."
+      database: "§4Error en base de datos, mira la consola para más detalles."
+      mojangUnavailable: "§cEl servidor de Mojang no está disponible. Por favor, inténtalo de nuevo más tarde."

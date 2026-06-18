@@ -147,7 +147,7 @@ public class IpLimitManager {
         List<String> existingAccounts = getUsernamesForIp(ipAddress);
         String accountList = String.join(", ", existingAccounts);
 
-        Component message = langConfig.ipLimitAdminNotify.get(username, ipAddress,
+        Component message = langConfig.admin.ipLimitNotify.get(username, ipAddress,
                 extendedConfig.ipLimit.maxAccountsPerIp, accountList);
 
         LogInfo("IP limit exceeded: " + username + " from IP " + ipAddress +

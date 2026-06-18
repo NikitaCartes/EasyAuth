@@ -1,0 +1,41 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§6Vnesi geslo!"
+      enterNew: "§4Vnesi novo geslo!"
+      incorrect: "§4Napačno geslo!"
+      mismatch: "§6Gesli se morata ujemati!"
+      changed: "§aGeslo je bilo uspešno posodobljeno!"
+      tooLong: "§6Geslo ne sme biti daljše od %d znakov!"
+      tooShort: "§6Geslo ne sme biti krajše od %d znakov!"
+      cannotChange: "§cNe moreš spremeniti gesla!"
+      globalSet: "§aGlobalno geslo je bilo uspešno nastavljeno!"
+    # Session
+    session:
+      loginRequired: "§cNisi prijavljen/-a.\n§6Uporabi /login, /l za prijavo!"
+      tooManyAttempts: "§4Preveč poskusov prijave."
+      notAuthenticated: "§cNisi prijavljen/-a!\n§6Poskusi z ukazom /login, /l ali /register."
+      alreadyAuthenticated: "§6Si že prijavljen/-a."
+      loginSuccess: "§aZdaj si prijavljen/-a."
+      logoutSuccess: "§aUspešna odjava."
+      timeExpired: "§cČas za prijavo je potekel."
+    # Registration
+    registration:
+      required: "§6Vpiši /register <geslo> <geslo> da prevzameš račun."
+      alreadyRegistered: "§6Račun je že registriran!"
+      success: "§aZdaj si prijavljen/-a."
+      notRegistered: "§cUporabnik ni registriran!"
+    # Account
+    account:
+      cannotUnregister: "§cNe moreš odregistrirati računa!"
+      deleted: "§aTvoj račun je uspešno izbrisan!"
+      dataDeleted: "§aUporabniški podatki so izbrisani."
+      dataUpdated: "§aUporabniški podatki so posodobljeni."
+      dataCorrupted: "§cTvoji podatki so verjetno pokvarjeni. Kontaktiraj z administratorjem."
+      usernameInvalid: "§6Neveljavni znaki v uporabniškem imenu! Regularni izraz dovoljenih znakov: %s"
+      alreadyOnline: "§cUporabnik %s je že povezan!"
+    # Admin
+    admin:
+      configReloaded: "§aNastavitve so bile uspešno posodobljene."
+      spawnSet: "§aKoordinate za prijavo so nastavljene."

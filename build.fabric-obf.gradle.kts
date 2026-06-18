@@ -234,6 +234,10 @@ fletchingTable {
         // Default matches the default value in the annotation
         mixin("default", "easyauth.mixins.json")
     }
+    lang.create("main") {
+        // Nested YAML lang files are flattened to dotted-key JSON at build time
+        patterns.add("data/easyauth/lang/**")
+    }
 }
 
 private abstract class ServerRunSemaphore : BuildService<BuildServiceParameters.None>

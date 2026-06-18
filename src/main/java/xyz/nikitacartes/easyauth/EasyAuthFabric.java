@@ -51,7 +51,7 @@ public class EasyAuthFabric implements ModInitializer {
         UseEntityCallback.EVENT.register((player, world, hand, entity, entityHitResult) -> AuthEventHandler.onUseEntity(player));
         ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, serverResourceManager) -> {
             reloadConfigs(server);
-            langConfig.configurationReloaded.send(server);
+            langConfig.admin.configReloaded.send(server);
         });
         ServerLifecycleEvents.SERVER_STARTED.register(EasyAuth::onStartServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(EasyAuth::onStopServer);

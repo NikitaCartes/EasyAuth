@@ -54,7 +54,7 @@ public class RegisterCommand {
                             )
                     )
                     .executes(ctx -> {
-                        langConfig.enterPassword.send(ctx.getSource());
+                        langConfig.password.enter.send(ctx.getSource());
                         return 0;
                     }));
         } else {
@@ -68,7 +68,7 @@ public class RegisterCommand {
                             )
                     )
                     .executes(ctx -> {
-                        langConfig.enterPassword.send(ctx.getSource());
+                        langConfig.password.enter.send(ctx.getSource());
                         return 0;
                     }));
         }
@@ -79,7 +79,7 @@ public class RegisterCommand {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (playerAuth.easyAuth$isAuthenticated()) {
-            langConfig.alreadyAuthenticated.send(source);
+            langConfig.session.alreadyAuthenticated.send(source);
             return 0;
         }
 
@@ -96,10 +96,10 @@ public class RegisterCommand {
                     playerData.lastKickedDate = ZonedDateTime.now();
                     playerData.loginTries = 0;
                     playerData.update();
-                    player.connection.disconnect(langConfig.wrongGlobalPassword.get());
+                    player.connection.disconnect(langConfig.password.globalIncorrect.get());
                     return 0;
                 }
-                langConfig.wrongGlobalPassword.send(source);
+                langConfig.password.globalIncorrect.send(source);
                 return 0;
             }
         }
@@ -112,21 +112,21 @@ public class RegisterCommand {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
-            langConfig.loginRequired.send(source);
+            langConfig.session.loginRequired.send(source);
             return 0;
         } else if (playerAuth.easyAuth$isAuthenticated()) {
-            langConfig.alreadyAuthenticated.send(source);
+            langConfig.session.alreadyAuthenticated.send(source);
             return 0;
         } else if (!pass1.equals(pass2)) {
-            langConfig.matchPassword.send(source);
+            langConfig.password.mismatch.send(source);
             return 0;
         }
 
         if (pass1.length() < extendedConfig.minPasswordLength) {
-            langConfig.minPasswordChars.send(source, extendedConfig.minPasswordLength);
+            langConfig.password.tooShort.send(source, extendedConfig.minPasswordLength);
             return 0;
         } else if (pass1.length() > extendedConfig.maxPasswordLength && extendedConfig.maxPasswordLength != -1) {
-            langConfig.maxPasswordChars.send(source, extendedConfig.maxPasswordLength);
+            langConfig.password.tooLong.send(source, extendedConfig.maxPasswordLength);
             return 0;
         }
 
@@ -138,7 +138,7 @@ public class RegisterCommand {
             LogRegister("Player " + username + " exceeded IP limit from " + ipAddress);
             if (IpLimitManager.shouldBlockExcessRegistration()) {
                 IpLimitManager.notifyAdmins(source.getServer(), ipAddress, username);
-                langConfig.ipLimitExceeded.send(source);
+                langConfig.error.ipLimitExceeded.send(source);
                 return 0;
             } else {
                 // Just notify admins but allow registration
@@ -147,12 +147,12 @@ public class RegisterCommand {
         }
 
         if (!playerData.password.isEmpty()) {
-            langConfig.alreadyRegistered.send(source);
+            langConfig.registration.alreadyRegistered.send(source);
             return 0;
         }
         playerAuth.easyAuth$setAuthenticated(true);
         playerAuth.easyAuth$restoreTrueLocation();
-        langConfig.registerSuccess.send(source);
+        langConfig.registration.success.send(source);
         // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
 
         THREADPOOL.submit(() -> {

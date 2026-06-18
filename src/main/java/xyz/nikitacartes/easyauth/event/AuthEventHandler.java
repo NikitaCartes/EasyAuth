@@ -246,7 +246,7 @@ public class AuthEventHandler {
 
             // if joining from same IP, allow the player to join
             if (!((PlayerAuth) onlinePlayer).easyAuth$getIpAddress().equals(ip)) {
-                return langConfig.playerAlreadyOnline.getNonTranslatable(incomingPlayerUsername);
+                return langConfig.account.alreadyOnline.getNonTranslatable(incomingPlayerUsername);
             }
         }
 
@@ -254,18 +254,18 @@ public class AuthEventHandler {
         Matcher matcher = usernamePattern.matcher(incomingPlayerUsername);
 
         if (!(matcher.matches() || (extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(StoneCutterUtils.getId(profile))))) {
-            return langConfig.disallowedUsername.getNonTranslatable(extendedConfig.usernameRegexp);
+            return langConfig.account.usernameInvalid.getNonTranslatable(extendedConfig.usernameRegexp);
         }
         // If the player name and registered name are different, kick the player if differentUsernameCase is enabled
         // Create in case of Floodgate player
         PlayerEntryV1 playerEntryV1 = PlayersCache.getOrLoadOrRegister(incomingPlayerUsername);
 
         if (!extendedConfig.allowCaseInsensitiveUsername && !playerEntryV1.username.equals(incomingPlayerUsername)) {
-            return langConfig.differentUsernameCase.getNonTranslatable(incomingPlayerUsername);
+            return langConfig.account.usernameCaseMismatch.getNonTranslatable(incomingPlayerUsername);
         }
 
         if (config.maxLoginTries != -1 && playerEntryV1.lastKickedDate.plusSeconds(config.resetLoginAttemptsTimeout).isAfter(ZonedDateTime.now())) {
-            return langConfig.loginTriesExceeded.getNonTranslatable();
+            return langConfig.session.tooManyAttempts.getNonTranslatable();
         }
 
         // Check concurrent session limit per IP
@@ -273,7 +273,7 @@ public class AuthEventHandler {
         if (IpLimitManager.isConcurrentSessionLimitExceeded(manager.getServer(), ip, isOnlinePlayer)) {
             LogDebug("Player " + incomingPlayerUsername + " blocked: concurrent session limit exceeded for IP " + ip);
             IpLimitManager.notifyAdmins(manager.getServer(), ip, incomingPlayerUsername);
-            return langConfig.sessionLimitExceeded.getNonTranslatable();
+            return langConfig.error.sessionLimitExceeded.getNonTranslatable();
         }
 
         return null;
@@ -332,10 +332,10 @@ public class AuthEventHandler {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
         if (playerAuth.easyAuth$canSkipAuth()) {
-            langConfig.onlinePlayerLogin.send(player);
+            langConfig.session.onlineAccount.send(player);
             return;
         } else if (playerAuth.easyAuth$isAuthenticated()) {
-            langConfig.validSession.send(player);
+            langConfig.session.valid.send(player);
             return;
         } else if (isSkipAllAuthChecksApplicable(player)) {
             return;

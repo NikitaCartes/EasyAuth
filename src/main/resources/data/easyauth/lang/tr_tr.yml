@@ -1,0 +1,59 @@
+text:
+  easyauth:
+    # Password
+    password:
+      enter: "§Parolanı girmen gerek!"
+      enterNew: "§4Yeni parola girmen gerek!"
+      incorrect: "§4Yanlış parola!"
+      mismatch: "§6Parolalar aynı olmalı!"
+      changed: "§aParolan başarılı bir şekilde güncellendi!"
+      tooLong: "§Parola en fazla %d karakter uzunluğunda olabilir!"
+      tooShort: "§6Parola en az %d karakter uzunluğunda olmalı!"
+      cannotChange: "§cParolayı değiştiremezsin!"
+      globalSet: "§aGlobal parola ayarlaması başarılı!"
+      globalIncorrect: "§4Yanlış global parola!"
+    # Session
+    session:
+      loginRequired: "§cKimliğin doğrulanmadı!\n§6/login'i kullan, /l ile kimliğini doğrula!"
+      tooManyAttempts: "§4Çok fazla giriş denemesi."
+      notAuthenticated: "§cKimliğin doğrulanmadı!\n§6/login, /l veya /register komutlarını dene."
+      alreadyAuthenticated: "§6Kimliğin zaten doğrulandı."
+      loginSuccess: "§aŞimdi kimliğin doğrulandı."
+      logoutSuccess: "§aBaşarılı bir şekilde çıkış yapıldı."
+      cannotLogout: "§cÇıkış yapamazsın!"
+      timeExpired: "§cKimlik doğrulama zamanı aşıldı."
+      valid: "§aGeçerli bir oturumun var. Giriş yapmana gerek yok."
+      onlineAccount: "§aÇevrimiçi bir hesap kullanıyorsun. Giriş yapmana gerek yok."
+    # Registration
+    registration:
+      required: "§6Bu hesabı sahiplenmek için /register <parola> <parola> yazın."
+      requiredWithGlobalPassword: "§6Bu hesabı sahiplenmek için /register <global password> <password> <password> yazın."
+      alreadyRegistered: "§6Bu hesap ismi zaten kayıtlı!"
+      success: "§aKimlik kaydı başarılı"
+      notRegistered: "§cBu oyuncu kayıtlı değil!"
+    # Account
+    account:
+      cannotUnregister: "§cBu hesabın kaydını silemezsin!"
+      deleted: "§aHesabın başarılı bir şekilde silindi!"
+      dataDeleted: "§aKullanıcı verisi silindi."
+      dataUpdated: "§aKullanıcı verisi güncellendi."
+      dataCorrupted: "§cVerilerin büyük ihtimalle bozuldu. Lütfen yöneticiye ulaşın."
+      usernameInvalid: "§6Geçersiz kullanıcı ismi karakterleri! Geçerli karakterlerin regex'i: %s"
+      usernameCaseMismatch: "§6Kullanıcı adının farklı yazılmış hallini kullanıyorsun. Lütfen doğrusunu kullan."
+      alreadyOnline: "§c%s adlı oyuncu hala çevrimiçi!"
+      markedSelfOnline: "§aKendini çevrimiçi oyuncu olarak ayarladın."
+      markSelfOnlineWarning: "§6Kendini çevrimdışı oyuncu olarak ayarlamak istiyorsun.\n§6Eğer çevrimiçi hesabın yoksa giriş yapamayacaksın.\n§6Çevrimdışı uuid'ye başlı veri (köylüler, indirimler, evcil hayvanlar) kaybolacak.\n§aDevam etmek istiyorsanız /account online <parola> true yazın."
+      onlineNotFound: "§cÇevrimiçi hesap bulunamadı."
+    # Uuid
+    uuid:
+      offline: "%s adlı oyuncunun çevrimdışı UUID'si (kopyalamak için tıkla)\n%s"
+    # Admin
+    admin:
+      configReloaded: "§aYapılandırma dosyası başarılı şekilde yeniden yüklendi."
+      spawnSet: "§aGiriş yapmak için doğma başarılı bir şekilde ayarlandı."
+      registeredPlayers: "Kayıtlı oyuncuların listesi:"
+      markedOffline: "§aOyuncu %s çevrimdışı oyuncu olarak ayarlandı."
+      markedOnline: "§aOyuncu %s çevrimiçi oyuncu olarak ayarlandı."
+    # Error
+    error:
+      mojangUnavailable: "§cMojang sunucularına erişilemiyor. Lütfen daha sonra tekrar deneyin"

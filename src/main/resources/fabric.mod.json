@@ -27,7 +27,7 @@
   "depends": {
     "fabric-api": "*",
     "fabricloader": "*",
-    "minecraft": ">=26.1-"
+    "minecraft": ">=26.2-"
   },
   "suggests": {
     "luckperms": "*",

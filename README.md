@@ -6,12 +6,14 @@ EasyAuth disallows players who aren't authenticated to do actions like placing b
 ### Feature:
 - Auto login players that have purchased Minecraft
 - Online UUIDs for online players
-- Sessions for auto login if they connect from the same IP
+- Server-side login/registration GUI windows (Minecraft 1.21.6+), with chat-command fallback on older versions
+- Sessions for auto login if they connect from the same IP, with optional per-player session length
 - IP-based account and session limits with exemptions and admin notifications
 - UUID management commands: set custom UUID
+- Multiple storage backends: SQLite (default), MySQL, PostgreSQL, MongoDB
 - Coordinate protection
 - Prevents "Logged in from another location"
-- Server-side translation [Fabric]]
+- Server-side translation [Fabric]
 - Support for special characters in password
 - Global password
 - Support Luckperms API and Luckperms Context

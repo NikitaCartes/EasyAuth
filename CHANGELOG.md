@@ -3,7 +3,6 @@
 - Add support for a changing "invalid session" message when offline player connects with online nickname
 - Gamemode switching on login
 - Op status switching on login
-- Optional session by player
 
 #### Fix
 - Check how offline players work if they try to connect with a taken online account
@@ -22,6 +21,11 @@
 
 #### Add
 - NeoForge support for Minecraft 1.21[.X] and 26.[x]
+- Server-side Dialog windows (GUI) for login, registration, the account menu and the admin panel on Minecraft 1.21.6+. Older versions automatically fall back to the chat commands.
+  - New config file `dialogs.conf` to control them (`enabled`, `login`, `register`, `account`, `admin`, `can-close-with-escape`, `allow-datapack-override`)
+  - Datapacks can override any built-in window by id (e.g. `easyauth:login`)
+- Per-player session length: `/account session [<seconds>]` (`0` = server default, `-1` = always require login; positive values are clamped to the server default)
+- Per-player toggle for the login window: `/account dialog <true|false>`
 
 #### Fix
 - The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)

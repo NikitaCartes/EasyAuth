@@ -269,6 +269,12 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText markedSelfOnline = new TranslatableText("account.markedSelfOnline");
         public TranslatableText markSelfOnlineWarning = new TranslatableText("account.markSelfOnlineWarning");
         public TranslatableText onlineNotFound = new TranslatableText("account.onlineNotFound");
+        public TranslatableText sessionCurrent = new TranslatableText("account.sessionCurrent");
+        public TranslatableText sessionSet = new TranslatableText("account.sessionSet");
+        public TranslatableText sessionInvalid = new TranslatableText("account.sessionInvalid");
+        public TranslatableText dialogEnabled = new TranslatableText("account.dialogEnabled");
+        public TranslatableText dialogDisabled = new TranslatableText("account.dialogDisabled");
+        public TranslatableText settingsSaved = new TranslatableText("account.settingsSaved");
     }
 
     @ConfigSerializable
@@ -309,6 +315,7 @@ public class LangConfigV1 extends ConfigTemplate {
         public ChangePassword changePassword = new ChangePassword();
         public Unregister unregister = new Unregister();
         public Online online = new Online();
+        public Settings settings = new Settings();
         public Account account = new Account();
         public Admin admin = new Admin();
         public Field field = new Field();
@@ -353,6 +360,15 @@ public class LangConfigV1 extends ConfigTemplate {
             public TranslatableText warning = new TranslatableText("dialog.online.warning");
             public TranslatableText password = new TranslatableText("dialog.online.password");
             public TranslatableText confirm = new TranslatableText("dialog.online.confirm");
+        }
+
+        @ConfigSerializable
+        public static final class Settings {
+            public TranslatableText title = new TranslatableText("dialog.settings.title");
+            public TranslatableText prompt = new TranslatableText("dialog.settings.prompt");
+            public TranslatableText sessionLabel = new TranslatableText("dialog.settings.sessionLabel");
+            public TranslatableText dialogLabel = new TranslatableText("dialog.settings.dialogLabel");
+            public TranslatableText submit = new TranslatableText("dialog.settings.submit");
         }
 
         @ConfigSerializable

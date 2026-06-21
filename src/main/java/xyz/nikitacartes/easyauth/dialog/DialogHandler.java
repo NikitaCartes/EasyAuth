@@ -59,6 +59,7 @@ public class DialogHandler {
             case "change_password_form" -> open(player, AuthDialogs::openChangePassword);
             case "unregister_form" -> open(player, AuthDialogs::openUnregister);
             case "account_online_form" -> open(player, AuthDialogs::openAccountOnline);
+            case "settings_form" -> open(player, AuthDialogs::openSettings);
             // Stage 2 — account actions (feedback goes to chat; the player is authenticated so it is visible)
             case "change_password" -> account(player, source ->
                     AccountCommand.changePassword(source, data.getStringOr("old_password", ""), data.getStringOr("new_password", "")));
@@ -66,6 +67,9 @@ public class DialogHandler {
                     AccountCommand.unregister(source, data.getStringOr("password", "")));
             case "account_online" -> account(player, source ->
                     AccountCommand.markAsOnline(source, data.getStringOr("password", ""), true));
+            case "settings" -> account(player, source ->
+                    AccountCommand.applySettings(source, data.getStringOr("session_timeout", "0"),
+                            "true".equals(data.getStringOr("show_login_dialog", "false"))));
             case "logout" -> {
                 account(player, LogoutCommand::logout);
                 close(player);

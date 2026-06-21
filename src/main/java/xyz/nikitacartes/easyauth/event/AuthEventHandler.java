@@ -308,11 +308,13 @@ public class AuthEventHandler {
             ((PlayerAuth) player).easyAuth$wasVanished(VanishIntegration.isVanished(player));
         }
 
+        // 0 = follow server default; otherwise clamp so a player can only shorten their session, never exceed the admin's policy.
+        long sessionTimeout = cache.sessionTimeout == 0 ? config.sessionTimeout : Math.min(cache.sessionTimeout, config.sessionTimeout);
         if (playerAuth.easyAuth$canSkipAuth()) {
             playerAuth.easyAuth$setAuthenticated(true);
 
             update = false;
-        } else if (cache.lastIp.equals(playerAuth.easyAuth$getIpAddress()) && cache.lastAuthenticatedDate.plusSeconds(config.sessionTimeout).isAfter(ZonedDateTime.now())) {
+        } else if (cache.lastIp.equals(playerAuth.easyAuth$getIpAddress()) && cache.lastAuthenticatedDate.plusSeconds(sessionTimeout).isAfter(ZonedDateTime.now())) {
             playerAuth.easyAuth$setAuthenticated(true);
 
             cache.lastAuthenticatedDate = ZonedDateTime.now();

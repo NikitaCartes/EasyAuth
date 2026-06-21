@@ -158,7 +158,7 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
     @Override
     public void easyAuth$sendAuthMessage() {
         //? if >= 1.21.6 {
-        if (dialogConfig.enabled) {
+        if (dialogConfig.enabled && (playerEntryV1 == null || Boolean.TRUE.equals(playerEntryV1.showLoginDialog))) {
             // Open the window once; reopening on the prompt timer would wipe what the player typed.
             if (!dialogShown && xyz.nikitacartes.easyauth.dialog.AuthDialogs.openAuthPrompt(player)) {
                 dialogShown = true;

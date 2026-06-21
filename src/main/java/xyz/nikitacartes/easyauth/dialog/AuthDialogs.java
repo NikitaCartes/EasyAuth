@@ -18,6 +18,7 @@ import net.minecraft.server.dialog.input.TextInput;
 import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +44,12 @@ public class AuthDialogs {
     public static final Identifier CHANGE_PASSWORD_FORM = id("change_password_form");
     public static final Identifier UNREGISTER_FORM = id("unregister_form");
     public static final Identifier ACCOUNT_ONLINE_FORM = id("account_online_form");
+    public static final Identifier SETTINGS_FORM = id("settings_form");
     // Stage 2 — submit ids
     public static final Identifier CHANGE_PASSWORD = id("change_password");
     public static final Identifier UNREGISTER = id("unregister");
     public static final Identifier ACCOUNT_ONLINE = id("account_online");
+    public static final Identifier SETTINGS = id("settings");
     public static final Identifier LOGOUT = id("logout");
 
     private static final int WIDTH = 300;
@@ -127,6 +130,7 @@ public class AuthDialogs {
                 navButton(langConfig.dialog.changePassword.title.get(), CHANGE_PASSWORD_FORM),
                 navButton(langConfig.dialog.unregister.title.get(), UNREGISTER_FORM),
                 navButton(langConfig.dialog.online.title.get(), ACCOUNT_ONLINE_FORM),
+                navButton(langConfig.dialog.settings.title.get(), SETTINGS_FORM),
                 navButton(langConfig.dialog.account.logoutButton.get(), LOGOUT));
         MultiActionDialog menu = new MultiActionDialog(
                 common(langConfig.dialog.account.title.get(), List.of(), List.of(), true, DialogAction.NONE),
@@ -167,6 +171,20 @@ public class AuthDialogs {
                 submit(langConfig.dialog.online.confirm.get(), ACCOUNT_ONLINE),
                 cancelButton());
         open(player, ACCOUNT_ONLINE_FORM, dialog);
+    }
+
+    public static void openSettings(ServerPlayer player) {
+        PlayerEntryV1 entry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
+        List<DialogBody> body = List.of(new PlainMessage(langConfig.dialog.settings.prompt.get(), WIDTH));
+        List<Input> inputs = List.of(
+                new Input("session_timeout", new TextInput(WIDTH, langConfig.dialog.settings.sessionLabel.get(),
+                        true, String.valueOf(entry.sessionTimeout), 20, Optional.empty())),
+                new Input("show_login_dialog", new BooleanInput(langConfig.dialog.settings.dialogLabel.get(),
+                        Boolean.TRUE.equals(entry.showLoginDialog), "true", "false")));
+        NoticeDialog dialog = new NoticeDialog(
+                common(langConfig.dialog.settings.title.get(), body, inputs, true, DialogAction.CLOSE),
+                submit(langConfig.dialog.settings.submit.get(), SETTINGS));
+        open(player, SETTINGS_FORM, dialog);
     }
 
     // ---------------------------------------------------------------- Stage 3 (admin)

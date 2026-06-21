@@ -90,6 +90,26 @@ public class PlayerEntryV1 {
     @SerializedName("forced_uuid")
     public String forcedUuid = null;
 
+    /**
+     * Player-chosen session length in seconds (auto-login window).
+     * 0 = follow the server default ({@code config.sessionTimeout}).
+     * -1 = never keep a session (always require a fresh login).
+     * Any positive value is clamped to the server default, so a player can only
+     * shorten their session, never extend it beyond the admin's policy.
+     */
+    @Expose
+    @SerializedName("session_timeout")
+    public long sessionTimeout = 0;
+
+    /**
+     * Whether the login Dialog window is shown to this player on join.
+     * When false, the player gets the chat prompt instead. Boxed so a missing
+     * value in old data deserializes to {@code true} (the previous behaviour).
+     */
+    @Expose
+    @SerializedName("show_login_dialog")
+    public Boolean showLoginDialog = true;
+
 
     public PlayerEntryV1(String username, String usernameLowerCase, String uuid, String json) {
         PlayerEntryV1 entry = gson.fromJson(json, PlayerEntryV1.class);
@@ -108,6 +128,8 @@ public class PlayerEntryV1 {
         this.registrationDate = entry.registrationDate == null ? startOfTime : entry.registrationDate;
         this.dataVersion = entry.dataVersion;
         this.forcedUuid = entry.forcedUuid;
+        this.sessionTimeout = entry.sessionTimeout;
+        this.showLoginDialog = entry.showLoginDialog == null ? Boolean.TRUE : entry.showLoginDialog;
     }
 
     public PlayerEntryV1(String username) {

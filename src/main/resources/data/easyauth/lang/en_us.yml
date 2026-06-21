@@ -44,6 +44,12 @@ text:
       markedSelfOnline: "§aYou have marked yourself as an online player."
       markSelfOnlineWarning: "§6You are about to mark yourself as an online player.\n§6You will not be able to log in unless you have an online account.\n§6All data linked to the offline UUID (like villagers' discounts, pets) will be lost.\n§aTo proceed, type /account online <password> true."
       onlineNotFound: "§cOnline account not found."
+      sessionCurrent: "§6Your session length is %d seconds. (0 = server default, -1 = log in every time)"
+      sessionSet: "§aYour session length is now %d seconds. (0 = server default, -1 = log in every time)\n§7Values longer than the server limit are capped to it."
+      sessionInvalid: "§cSession length must be a whole number of seconds."
+      dialogEnabled: "§aThe login window will be shown when you join."
+      dialogDisabled: "§aYou will use the chat login prompt instead of the window."
+      settingsSaved: "§aYour settings have been saved."
     # Uuid
     uuid:
       offline: "Offline UUID for player %s (click to copy):\n%s"
@@ -98,10 +104,16 @@ text:
         warning: "§6Mark yourself as an online (premium) account. You will only be able to log in with a valid Mojang/Microsoft account, and data tied to your offline UUID (villager discounts, pets) will be lost."
         password: "Password"
         confirm: "Confirm"
+      settings:
+        title: "Settings"
+        prompt: "§6Personal options. Session length is in seconds: 0 uses the server default, -1 asks for your password every time. A value longer than the server limit is capped to it."
+        sessionLabel: "Session length (seconds)"
+        dialogLabel: "Show login window on join"
+        submit: "Save"
       account:
         title: "Account"
         logoutButton: "Log out"
-        usage: "§6Use /account changePassword, /account unregister or /account online."
+        usage: "§6Use /account changePassword, /account unregister, /account online, /account session <seconds> or /account dialog <true|false>."
       admin:
         title: "EasyAuth — Admin panel"
         usage: "§6Use /auth <subcommand>. Run /auth gui to open the panel."

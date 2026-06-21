@@ -14,6 +14,8 @@ import java.io.IOException;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
+import static com.mojang.brigadier.arguments.LongArgumentType.getLong;
+import static com.mojang.brigadier.arguments.LongArgumentType.longArg;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static net.minecraft.commands.Commands.argument;
@@ -75,6 +77,25 @@ public class AccountCommand {
                                                 )
                                         )
                                 )
+                        )
+                )
+                .then(literal("session")
+                        .requires(FabricPermissions.require("easyauth.commands.account.session", true))
+                        .executes(ctx -> showSessionTimeout(ctx.getSource()))
+                        .then(argument("seconds", longArg(-1))
+                                .executes(ctx -> setSessionTimeout(
+                                        ctx.getSource(),
+                                        getLong(ctx, "seconds")
+                                ))
+                        )
+                )
+                .then(literal("dialog")
+                        .requires(FabricPermissions.require("easyauth.commands.account.dialog", true))
+                        .then(argument("show", bool())
+                                .executes(ctx -> setShowLoginDialog(
+                                        ctx.getSource(),
+                                        getBool(ctx, "show")
+                                ))
                         )
                 )
         );
@@ -215,5 +236,73 @@ public class AccountCommand {
             return 0;
         }
         return markAsOnline(source, password);
+    }
+
+    /** Shows the player's current session length setting. */
+    private static int showSessionTimeout(CommandSourceStack source) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        langConfig.account.sessionCurrent.send(source, playerAuth.easyAuth$getPlayerEntryV1().sessionTimeout);
+        return 1;
+    }
+
+    /**
+     * Sets the player's own session length (auto-login window) in seconds.
+     * 0 = follow the server default, -1 = always require a fresh login.
+     * Positive values are clamped to the server default at login time, so a player can only shorten their session.
+     */
+    public static int setSessionTimeout(CommandSourceStack source, long seconds) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        PlayerEntryV1 playerEntry = playerAuth.easyAuth$getPlayerEntryV1();
+        playerEntry.sessionTimeout = seconds;
+        playerEntry.update();
+        langConfig.account.sessionSet.send(source, seconds);
+        return 1;
+    }
+
+    /** Toggles whether the login Dialog window is shown to this player on join (otherwise the chat prompt is used). */
+    public static int setShowLoginDialog(CommandSourceStack source, boolean show) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        PlayerEntryV1 playerEntry = playerAuth.easyAuth$getPlayerEntryV1();
+        playerEntry.showLoginDialog = show;
+        playerEntry.update();
+        (show ? langConfig.account.dialogEnabled : langConfig.account.dialogDisabled).send(source);
+        return 1;
+    }
+
+    /** Applies both player settings from the settings Dialog window in one update. */
+    public static int applySettings(CommandSourceStack source, String secondsStr, boolean showDialog) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        long seconds;
+        try {
+            seconds = Long.parseLong(secondsStr.trim());
+        } catch (NumberFormatException e) {
+            langConfig.account.sessionInvalid.send(source);
+            return 0;
+        }
+        if (seconds < -1) {
+            seconds = -1;
+        }
+        PlayerEntryV1 playerEntry = playerAuth.easyAuth$getPlayerEntryV1();
+        playerEntry.sessionTimeout = seconds;
+        playerEntry.showLoginDialog = showDialog;
+        playerEntry.update();
+        langConfig.account.settingsSaved.send(source);
+        return 1;
     }
 }

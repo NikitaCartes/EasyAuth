@@ -98,7 +98,6 @@ public class AuthDialogs {
         if (error != null) {
             body.add(new PlainMessage(error, WIDTH));
         }
-        body.add(new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
         List<Input> inputs = List.of(new Input("password", passwordField(langConfig.dialog.login.password.get())));
         return new NoticeDialog(
                 common(langConfig.dialog.login.title.get(), body, inputs, dialogConfig.canCloseWithEscape, DialogAction.NONE),
@@ -111,7 +110,6 @@ public class AuthDialogs {
         if (error != null) {
             body.add(new PlainMessage(error, WIDTH));
         }
-        body.add(new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
         List<Input> inputs = new ArrayList<>();
         if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
             inputs.add(new Input("global_password", passwordField(langConfig.dialog.register.globalPassword.get())));
@@ -127,11 +125,11 @@ public class AuthDialogs {
 
     public static void openAccountMenu(ServerPlayer player) {
         List<ActionButton> buttons = List.of(
-                navButton(langConfig.dialog.changePassword.title.get(), CHANGE_PASSWORD_FORM),
-                navButton(langConfig.dialog.unregister.title.get(), UNREGISTER_FORM),
-                navButton(langConfig.dialog.online.title.get(), ACCOUNT_ONLINE_FORM),
-                navButton(langConfig.dialog.settings.title.get(), SETTINGS_FORM),
-                navButton(langConfig.dialog.account.logoutButton.get(), LOGOUT));
+                submit(langConfig.dialog.changePassword.title.get(), langConfig.dialog.account.changePasswordTooltip.get(), CHANGE_PASSWORD_FORM),
+                submit(langConfig.dialog.unregister.title.get(), langConfig.dialog.account.unregisterTooltip.get(), UNREGISTER_FORM),
+                submit(langConfig.dialog.online.title.get(), langConfig.dialog.account.onlineTooltip.get(), ACCOUNT_ONLINE_FORM),
+                submit(langConfig.dialog.settings.title.get(), langConfig.dialog.account.settingsTooltip.get(), SETTINGS_FORM),
+                submit(langConfig.dialog.account.logoutButton.get(), langConfig.dialog.account.logoutTooltip.get(), LOGOUT));
         MultiActionDialog menu = new MultiActionDialog(
                 common(langConfig.dialog.account.title.get(), List.of(), List.of(), true, DialogAction.NONE),
                 buttons, Optional.empty(), 1);
@@ -139,20 +137,20 @@ public class AuthDialogs {
     }
 
     public static void openChangePassword(ServerPlayer player) {
-        List<DialogBody> body = List.of(new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
+        List<DialogBody> body = List.of();
         List<Input> inputs = List.of(
                 new Input("old_password", passwordField(langConfig.dialog.changePassword.oldPassword.get())),
                 new Input("new_password", passwordField(langConfig.dialog.changePassword.newPassword.get())));
-        NoticeDialog dialog = new NoticeDialog(
+        ConfirmationDialog dialog = new ConfirmationDialog(
                 common(langConfig.dialog.changePassword.title.get(), body, inputs, true, DialogAction.CLOSE),
-                submit(langConfig.dialog.changePassword.submit.get(), CHANGE_PASSWORD));
+                submit(langConfig.dialog.changePassword.submit.get(), CHANGE_PASSWORD),
+                cancelButton());
         open(player, CHANGE_PASSWORD_FORM, dialog);
     }
 
     public static void openUnregister(ServerPlayer player) {
         List<DialogBody> body = List.of(
-                new PlainMessage(langConfig.dialog.unregister.warning.get(), WIDTH),
-                new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
+                new PlainMessage(langConfig.dialog.unregister.warning.get(), WIDTH));
         List<Input> inputs = List.of(new Input("password", passwordField(langConfig.dialog.unregister.password.get())));
         ConfirmationDialog dialog = new ConfirmationDialog(
                 common(langConfig.dialog.unregister.title.get(), body, inputs, true, DialogAction.CLOSE),
@@ -163,8 +161,7 @@ public class AuthDialogs {
 
     public static void openAccountOnline(ServerPlayer player) {
         List<DialogBody> body = List.of(
-                new PlainMessage(langConfig.dialog.online.warning.get(), WIDTH),
-                new PlainMessage(langConfig.dialog.passwordWarning.get(), WIDTH));
+                new PlainMessage(langConfig.dialog.online.warning.get(), WIDTH));
         List<Input> inputs = List.of(new Input("password", passwordField(langConfig.dialog.online.password.get())));
         ConfirmationDialog dialog = new ConfirmationDialog(
                 common(langConfig.dialog.online.title.get(), body, inputs, true, DialogAction.CLOSE),
@@ -181,9 +178,10 @@ public class AuthDialogs {
                         true, String.valueOf(entry.sessionTimeout), 20, Optional.empty())),
                 new Input("show_login_dialog", new BooleanInput(langConfig.dialog.settings.dialogLabel.get(),
                         Boolean.TRUE.equals(entry.showLoginDialog), "true", "false")));
-        NoticeDialog dialog = new NoticeDialog(
+        ConfirmationDialog dialog = new ConfirmationDialog(
                 common(langConfig.dialog.settings.title.get(), body, inputs, true, DialogAction.CLOSE),
-                submit(langConfig.dialog.settings.submit.get(), SETTINGS));
+                submit(langConfig.dialog.settings.submit.get(), SETTINGS),
+                cancelButton());
         open(player, SETTINGS_FORM, dialog);
     }
 
@@ -198,8 +196,8 @@ public class AuthDialogs {
      * An entry in the admin panel: its button label, the form fields it needs,
      * whether it is destructive (confirmation), and the permission required to run it.
      */
-    public record AdminAction(String key, Supplier<Component> label, List<FormField> fields, boolean confirm,
-                              String node, int level) {}
+    public record AdminAction(String key, Supplier<Component> label, Supplier<Component> tooltip, List<FormField> fields,
+                              boolean confirm, String node, int level) {}
 
     private static FormField username() {
         return new FormField("username", () -> langConfig.dialog.field.username.get(), false);
@@ -210,35 +208,35 @@ public class AuthDialogs {
     }
 
     public static final List<AdminAction> ADMIN_ACTIONS = List.of(
-            new AdminAction("reload", () -> langConfig.dialog.admin.reload.get(),
+            new AdminAction("reload", () -> langConfig.dialog.admin.reload.get(), () -> langConfig.dialog.admin.reloadTooltip.get(),
                     List.of(), false, "easyauth.commands.auth.reload", 3),
-            new AdminAction("list", () -> langConfig.dialog.admin.list.get(),
+            new AdminAction("list", () -> langConfig.dialog.admin.list.get(), () -> langConfig.dialog.admin.listTooltip.get(),
                     List.of(), false, "easyauth.commands.auth.list", 3),
-            new AdminAction("online_players", () -> langConfig.dialog.admin.onlinePlayers.get(),
+            new AdminAction("online_players", () -> langConfig.dialog.admin.onlinePlayers.get(), () -> langConfig.dialog.admin.onlinePlayersTooltip.get(),
                     List.of(), false, "easyauth.commands.auth.getOnlinePlayers", 3),
-            new AdminAction("set_spawn", () -> langConfig.dialog.admin.setSpawn.get(),
+            new AdminAction("set_spawn", () -> langConfig.dialog.admin.setSpawn.get(), () -> langConfig.dialog.admin.setSpawnTooltip.get(),
                     List.of(), false, "easyauth.commands.auth.setSpawn", 3),
-            new AdminAction("player_info", () -> langConfig.dialog.admin.playerInfo.get(),
+            new AdminAction("player_info", () -> langConfig.dialog.admin.playerInfo.get(), () -> langConfig.dialog.admin.playerInfoTooltip.get(),
                     List.of(username()), false, "easyauth.commands.auth.getPlayerInfo", 3),
-            new AdminAction("get_uuid", () -> langConfig.dialog.admin.getUuid.get(),
+            new AdminAction("get_uuid", () -> langConfig.dialog.admin.getUuid.get(), () -> langConfig.dialog.admin.getUuidTooltip.get(),
                     List.of(username()), false, "easyauth.commands.auth.getUuid", 3),
-            new AdminAction("mark_offline", () -> langConfig.dialog.admin.markOffline.get(),
+            new AdminAction("mark_offline", () -> langConfig.dialog.admin.markOffline.get(), () -> langConfig.dialog.admin.markOfflineTooltip.get(),
                     List.of(username()), false, "easyauth.commands.auth.markAsOffline", 3),
-            new AdminAction("mark_online", () -> langConfig.dialog.admin.markOnline.get(),
+            new AdminAction("mark_online", () -> langConfig.dialog.admin.markOnline.get(), () -> langConfig.dialog.admin.markOnlineTooltip.get(),
                     List.of(username()), false, "easyauth.commands.auth.markAsOnline", 3),
-            new AdminAction("register", () -> langConfig.dialog.admin.register.get(),
+            new AdminAction("register", () -> langConfig.dialog.admin.register.get(), () -> langConfig.dialog.admin.registerTooltip.get(),
                     List.of(username(), password()), false, "easyauth.commands.auth.register", 3),
-            new AdminAction("update", () -> langConfig.dialog.admin.update.get(),
+            new AdminAction("update", () -> langConfig.dialog.admin.update.get(), () -> langConfig.dialog.admin.updateTooltip.get(),
                     List.of(username(), password()), false, "easyauth.commands.auth.update", 3),
-            new AdminAction("remove", () -> langConfig.dialog.admin.remove.get(),
+            new AdminAction("remove", () -> langConfig.dialog.admin.remove.get(), () -> langConfig.dialog.admin.removeTooltip.get(),
                     List.of(username()), true, "easyauth.commands.auth.remove", 3),
-            new AdminAction("set_global_password", () -> langConfig.dialog.admin.setGlobalPassword.get(),
+            new AdminAction("set_global_password", () -> langConfig.dialog.admin.setGlobalPassword.get(), () -> langConfig.dialog.admin.setGlobalPasswordTooltip.get(),
                     List.of(password(), new FormField("single_use", () -> langConfig.dialog.field.singleUse.get(), true)),
                     false, "easyauth.commands.auth.setGlobalPassword", 4),
-            new AdminAction("set_uuid", () -> langConfig.dialog.admin.setUuid.get(),
+            new AdminAction("set_uuid", () -> langConfig.dialog.admin.setUuid.get(), () -> langConfig.dialog.admin.setUuidTooltip.get(),
                     List.of(username(), new FormField("uuid", () -> langConfig.dialog.field.uuid.get(), false)),
                     true, "easyauth.commands.auth.setUuid", 4),
-            new AdminAction("clear_uuid", () -> langConfig.dialog.admin.clearUuid.get(),
+            new AdminAction("clear_uuid", () -> langConfig.dialog.admin.clearUuid.get(), () -> langConfig.dialog.admin.clearUuidTooltip.get(),
                     List.of(username()), true, "easyauth.commands.auth.clearUuid", 4));
 
     public static AdminAction adminAction(String key) {
@@ -258,7 +256,7 @@ public class AuthDialogs {
                 continue;
             }
             Identifier target = action.fields().isEmpty() ? id("admin/" + action.key()) : id("admin_form/" + action.key());
-            buttons.add(submit(action.label().get(), target));
+            buttons.add(submit(action.label().get(), action.tooltip().get(), target));
         }
         MultiActionDialog menu = new MultiActionDialog(
                 common(langConfig.dialog.admin.title.get(), List.of(), List.of(), true, DialogAction.NONE),
@@ -287,9 +285,9 @@ public class AuthDialogs {
                     submit(action.label().get(), submitId), cancelButton());
             open(player, dialogId, dialog);
         } else {
-            NoticeDialog dialog = new NoticeDialog(
+            ConfirmationDialog dialog = new ConfirmationDialog(
                     common(action.label().get(), List.of(), inputs, true, DialogAction.CLOSE),
-                    submit(action.label().get(), submitId));
+                    submit(action.label().get(), submitId), cancelButton());
             open(player, dialogId, dialog);
         }
     }
@@ -312,9 +310,10 @@ public class AuthDialogs {
                 Optional.of((Action) new CustomAll(action, Optional.empty())));
     }
 
-    /** A button that asks the server to open another dialog. */
-    private static ActionButton navButton(Component label, Identifier target) {
-        return submit(label, target);
+    /** A submit button that shows {@code tooltip} when hovered. */
+    private static ActionButton submit(Component label, Component tooltip, Identifier action) {
+        return new ActionButton(new CommonButtonData(label, Optional.of(tooltip), BUTTON_WIDTH),
+                Optional.of((Action) new CustomAll(action, Optional.empty())));
     }
 
     private static ActionButton cancelButton() {

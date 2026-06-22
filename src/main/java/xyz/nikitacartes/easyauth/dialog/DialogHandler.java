@@ -69,7 +69,7 @@ public class DialogHandler {
                     AccountCommand.markAsOnline(source, data.getStringOr("password", ""), true));
             case "settings" -> account(player, source ->
                     AccountCommand.applySettings(source, data.getStringOr("session_timeout", "0"),
-                            "true".equals(data.getStringOr("show_login_dialog", "false"))));
+                            data.getBooleanOr("show_login_dialog", false)));
             case "logout" -> {
                 account(player, LogoutCommand::logout);
                 close(player);
@@ -187,7 +187,7 @@ public class DialogHandler {
                 case "update" -> AuthCommand.updatePassword(source, username, data.getStringOr("password", ""));
                 case "remove" -> AuthCommand.removeAccount(source, username);
                 case "set_global_password" -> AuthCommand.setGlobalPassword(source,
-                        data.getStringOr("password", ""), "true".equals(data.getStringOr("single_use", "false")));
+                        data.getStringOr("password", ""), data.getBooleanOr("single_use", false));
                 case "set_uuid" -> AuthCommand.setUuid(source, username, data.getStringOr("uuid", ""));
                 case "clear_uuid" -> AuthCommand.clearUuid(source, username);
                 default -> { }

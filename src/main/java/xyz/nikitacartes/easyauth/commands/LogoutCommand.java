@@ -31,6 +31,8 @@ public class LogoutCommand {
         if (playerAuth.easyAuth$isAuthenticated() && !playerAuth.easyAuth$canSkipAuth()) {
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.REMOVE_PLAYER, player));
             playerAuth.easyAuth$setAuthenticated(false);
+            // Don't slam the login window open right after a manual logout; the chat prompt still appears.
+            playerAuth.easyAuth$setLoginDialogSuppressed(true);
 
             // Refresh the saved "true" location to the player's current spot
             if (config.hidePlayerCoords) {

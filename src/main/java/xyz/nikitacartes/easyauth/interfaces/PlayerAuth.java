@@ -39,6 +39,12 @@ public interface PlayerAuth {
     boolean easyAuth$isAuthenticated();
 
     /**
+     * Suppresses auto-opening the login Dialog window (the chat prompt is still shown).
+     * Set after a manual {@code /logout} so the window does not reopen immediately.
+     */
+    void easyAuth$setLoginDialogSuppressed(boolean suppressed);
+
+    /**
      * Gets the text which tells the player
      * to login or register, depending on account status.
      *

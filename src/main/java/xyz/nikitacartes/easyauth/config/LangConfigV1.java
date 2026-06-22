@@ -308,7 +308,6 @@ public class LangConfigV1 extends ConfigTemplate {
 
     @ConfigSerializable
     public static final class Dialog {
-        public TranslatableText passwordWarning = new TranslatableText("dialog.passwordWarning");
         public TranslatableText cancel = new TranslatableText("dialog.cancel");
         public Login login = new Login();
         public Register register = new Register();
@@ -376,6 +375,11 @@ public class LangConfigV1 extends ConfigTemplate {
             public TranslatableText title = new TranslatableText("dialog.account.title");
             public TranslatableText logoutButton = new TranslatableText("dialog.account.logoutButton");
             public TranslatableText usage = new TranslatableText("dialog.account.usage");
+            public TranslatableText changePasswordTooltip = new TranslatableText("dialog.account.changePasswordTooltip");
+            public TranslatableText unregisterTooltip = new TranslatableText("dialog.account.unregisterTooltip");
+            public TranslatableText onlineTooltip = new TranslatableText("dialog.account.onlineTooltip");
+            public TranslatableText settingsTooltip = new TranslatableText("dialog.account.settingsTooltip");
+            public TranslatableText logoutTooltip = new TranslatableText("dialog.account.logoutTooltip");
         }
 
         @ConfigSerializable
@@ -397,6 +401,20 @@ public class LangConfigV1 extends ConfigTemplate {
             public TranslatableText setGlobalPassword = new TranslatableText("dialog.admin.setGlobalPassword");
             public TranslatableText setUuid = new TranslatableText("dialog.admin.setUuid");
             public TranslatableText clearUuid = new TranslatableText("dialog.admin.clearUuid");
+            public TranslatableText reloadTooltip = new TranslatableText("dialog.admin.reloadTooltip");
+            public TranslatableText listTooltip = new TranslatableText("dialog.admin.listTooltip");
+            public TranslatableText onlinePlayersTooltip = new TranslatableText("dialog.admin.onlinePlayersTooltip");
+            public TranslatableText setSpawnTooltip = new TranslatableText("dialog.admin.setSpawnTooltip");
+            public TranslatableText playerInfoTooltip = new TranslatableText("dialog.admin.playerInfoTooltip");
+            public TranslatableText getUuidTooltip = new TranslatableText("dialog.admin.getUuidTooltip");
+            public TranslatableText markOfflineTooltip = new TranslatableText("dialog.admin.markOfflineTooltip");
+            public TranslatableText markOnlineTooltip = new TranslatableText("dialog.admin.markOnlineTooltip");
+            public TranslatableText registerTooltip = new TranslatableText("dialog.admin.registerTooltip");
+            public TranslatableText updateTooltip = new TranslatableText("dialog.admin.updateTooltip");
+            public TranslatableText removeTooltip = new TranslatableText("dialog.admin.removeTooltip");
+            public TranslatableText setGlobalPasswordTooltip = new TranslatableText("dialog.admin.setGlobalPasswordTooltip");
+            public TranslatableText setUuidTooltip = new TranslatableText("dialog.admin.setUuidTooltip");
+            public TranslatableText clearUuidTooltip = new TranslatableText("dialog.admin.clearUuidTooltip");
         }
 
         @ConfigSerializable

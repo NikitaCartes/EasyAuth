@@ -75,7 +75,6 @@ text:
       sessionLimitExceeded: "§4Too many connections from your IP address. Please try again later."
     # Dialog
     dialog:
-      passwordWarning: "§7⚠ Your password is shown on screen. For privacy you can close this window and use the chat command instead."
       cancel: "Cancel"
       login:
         title: "Login"
@@ -106,7 +105,7 @@ text:
         confirm: "Confirm"
       settings:
         title: "Settings"
-        prompt: "§6Personal options. Session length is in seconds: 0 uses the server default, -1 asks for your password every time. A value longer than the server limit is capped to it."
+        prompt: "§6Personal options.\n§7Session length is in seconds:\n§7• 0 = use the server default\n§7• -1 = ask for your password every time\n§7Values longer than the server limit are capped to it."
         sessionLabel: "Session length (seconds)"
         dialogLabel: "Show login window on join"
         submit: "Save"
@@ -114,6 +113,11 @@ text:
         title: "Account"
         logoutButton: "Log out"
         usage: "§6Use /account changePassword, /account unregister, /account online, /account session <seconds> or /account dialog <true|false>."
+        changePasswordTooltip: "Set a new password for your account."
+        unregisterTooltip: "Permanently delete your account. You will be disconnected and must register again."
+        onlineTooltip: "Switch to a premium (Mojang/Microsoft) account. Data tied to your offline UUID is lost."
+        settingsTooltip: "Adjust your session length and whether the login window shows on join."
+        logoutTooltip: "End your session now. You will need to log in again."
       admin:
         title: "EasyAuth — Admin panel"
         usage: "§6Use /auth <subcommand>. Run /auth gui to open the panel."
@@ -132,6 +136,20 @@ text:
         setGlobalPassword: "Set global password"
         setUuid: "Set forced UUID"
         clearUuid: "Clear forced UUID"
+        reloadTooltip: "Reload EasyAuth config files from disk."
+        listTooltip: "List every registered player account."
+        onlinePlayersTooltip: "Show which players are currently online."
+        setSpawnTooltip: "Set the pre-login spawn point to your current position."
+        playerInfoTooltip: "Show account details (UUID, status) for a player."
+        getUuidTooltip: "Show the offline UUID generated for a username."
+        markOfflineTooltip: "Force a player to authenticate as an offline (cracked) account."
+        markOnlineTooltip: "Mark a player as a premium account so they skip the password prompt."
+        registerTooltip: "Create an account for a player with a password you set."
+        updateTooltip: "Change an existing player's password."
+        removeTooltip: "Delete a player's account. This cannot be undone."
+        setGlobalPasswordTooltip: "Set the shared server password used to register new accounts."
+        setUuidTooltip: "Force a specific UUID for a player. They will be kicked to apply it."
+        clearUuidTooltip: "Remove a player's forced UUID so they use the default again."
       field:
         username: "Username"
         password: "Password"

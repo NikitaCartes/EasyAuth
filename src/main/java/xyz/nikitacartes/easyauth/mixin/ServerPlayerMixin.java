@@ -91,6 +91,9 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
     @Unique
     private boolean dialogShown = false;
 
+    @Unique
+    private boolean dialogSuppressed = false;
+
     @Override
     public void easyAuth$saveTrueLocation() {
         if (lastLocation == null) {
@@ -158,7 +161,7 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
     @Override
     public void easyAuth$sendAuthMessage() {
         //? if >= 1.21.6 {
-        if (dialogConfig.enabled && (playerEntryV1 == null || Boolean.TRUE.equals(playerEntryV1.showLoginDialog))) {
+        if (dialogConfig.enabled && !dialogSuppressed && (playerEntryV1 == null || Boolean.TRUE.equals(playerEntryV1.showLoginDialog))) {
             // Open the window once; reopening on the prompt timer would wipe what the player typed.
             if (!dialogShown && xyz.nikitacartes.easyauth.dialog.AuthDialogs.openAuthPrompt(player)) {
                 dialogShown = true;
@@ -226,6 +229,11 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
         return isAuthenticated;
     }
 
+    @Override
+    public void easyAuth$setLoginDialogSuppressed(boolean suppressed) {
+        this.dialogSuppressed = suppressed;
+    }
+
     /**
      * Sets the authentication status of the player
      *
@@ -236,6 +244,7 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
         isAuthenticated = authenticated;
 
         if (authenticated) {
+            dialogSuppressed = false;
             kickTimer = config.kickTimeout * 20;
             // Updating blocks if needed (in case if portal rescue action happened)
             ServerLevel world = StoneCutterUtils.getServerWorld(player);

@@ -23,6 +23,7 @@ import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -478,6 +479,8 @@ public class AuthCommand {
      * @param username username of the player to get information for
      * @return 0
      */
+    private static final DateTimeFormatter INFO_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     public static int getPlayerInfo(CommandSourceStack source, String username) {
         THREADPOOL.submit(() -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
@@ -485,10 +488,30 @@ public class AuthCommand {
                 langConfig.registration.notRegistered.send(source);
                 return;
             }
-            // Send player information to the source
-            source.sendSystemMessage(Component.literal("Player Info: " + playerData.toJson()));
+            MutableComponent message = Component.literal("§6── " + playerData.username + " ──\n");
+            message.append(infoLine("UUID", playerData.uuid == null ? "—" : playerData.uuid.toString()));
+            message.append(infoLine("Registered", playerData.password.isEmpty() ? "§cno" : "§ayes"));
+            message.append(infoLine("Online account", playerData.onlineAccount.name()));
+            message.append(infoLine("Registration date", formatInfoDate(playerData.registrationDate)));
+            message.append(infoLine("Last login", formatInfoDate(playerData.lastAuthenticatedDate)));
+            message.append(infoLine("Last IP", playerData.lastIp.isEmpty() ? "—" : playerData.lastIp));
+            message.append(infoLine("Login tries", String.valueOf(playerData.loginTries)));
+            message.append(infoLine("Session timeout", playerData.sessionTimeout + "s"));
+            message.append(infoLine("Login window", Boolean.FALSE.equals(playerData.showLoginDialog) ? "hidden" : "shown"));
+            if (playerData.forcedUuid != null) {
+                message.append(infoLine("Forced UUID", playerData.forcedUuid));
+            }
+            source.sendSystemMessage(message);
         });
         return 1;
+    }
+
+    private static MutableComponent infoLine(String label, String value) {
+        return Component.literal("§7" + label + ": §f" + value + "\n");
+    }
+
+    private static String formatInfoDate(ZonedDateTime date) {
+        return date == null || date.isEqual(getUnixZero()) ? "never" : date.format(INFO_DATE_FORMAT);
     }
 
     /**

@@ -1,11 +1,11 @@
 {
   "required": true,
   "package": "xyz.nikitacartes.easyauth.mixin",
+  "refmap": "${refmap}",
   "mixins": [
   ],
   "minVersion": "0.8",
   "injectors": {
     "defaultRequire": 1
-  },
-  "refmap": "${refmap}"
+  }
 }

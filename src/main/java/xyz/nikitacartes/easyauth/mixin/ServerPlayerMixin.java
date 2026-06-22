@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //? if < 1.21.11 {
 /*import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 *///?}
+import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.integrations.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
@@ -33,8 +34,6 @@ import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.*;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.UUID;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -161,9 +160,9 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
     @Override
     public void easyAuth$sendAuthMessage() {
         //? if >= 1.21.6 {
-        if (dialogConfig.enabled && !dialogSuppressed && (playerEntryV1 == null || Boolean.TRUE.equals(playerEntryV1.showLoginDialog))) {
+        if (dialogConfig.enabled && !dialogSuppressed && (playerEntryV1 == null || playerEntryV1.showLoginDialog)) {
             // Open the window once; reopening on the prompt timer would wipe what the player typed.
-            if (!dialogShown && xyz.nikitacartes.easyauth.dialog.AuthDialogs.openAuthPrompt(player)) {
+            if (!dialogShown && AuthDialogs.openAuthPrompt(player)) {
                 dialogShown = true;
             }
             if (dialogShown) {

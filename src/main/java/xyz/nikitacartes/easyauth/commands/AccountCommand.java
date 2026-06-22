@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
 import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
@@ -105,7 +106,7 @@ public class AccountCommand {
     private static int accountRoot(CommandSourceStack source) throws CommandSyntaxException {
         //? if >= 1.21.6 {
         if (dialogConfig.enabled && dialogConfig.account) {
-            xyz.nikitacartes.easyauth.dialog.AuthDialogs.openAccountMenu(source.getPlayerOrException());
+            AuthDialogs.openAccountMenu(source.getPlayerOrException());
             return 1;
         }
         //?}

@@ -35,17 +35,16 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
  */
 public class AuthDialogs {
 
-    // Stage 1 — login / registration (submit ids)
+    // login / registration (submit ids)
     public static final Identifier LOGIN = id("login");
     public static final Identifier REGISTER = id("register");
 
-    // Stage 2 — account menu (open ids = also the datapack-override ids)
+    // account menu (open ids = also the datapack-override ids)
     public static final Identifier ACCOUNT = id("account");
     public static final Identifier CHANGE_PASSWORD_FORM = id("change_password_form");
     public static final Identifier UNREGISTER_FORM = id("unregister_form");
     public static final Identifier ACCOUNT_ONLINE_FORM = id("account_online_form");
     public static final Identifier SETTINGS_FORM = id("settings_form");
-    // Stage 2 — submit ids
     public static final Identifier CHANGE_PASSWORD = id("change_password");
     public static final Identifier UNREGISTER = id("unregister");
     public static final Identifier ACCOUNT_ONLINE = id("account_online");
@@ -58,8 +57,6 @@ public class AuthDialogs {
     private static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath("easyauth", path);
     }
-
-    // ---------------------------------------------------------------- Stage 1
 
     /**
      * Opens the login or registration window depending on account state.
@@ -121,8 +118,6 @@ public class AuthDialogs {
                 submit(langConfig.dialog.register.submit.get(), REGISTER));
     }
 
-    // ---------------------------------------------------------------- Stage 2
-
     public static void openAccountMenu(ServerPlayer player) {
         List<ActionButton> buttons = List.of(
                 submit(langConfig.dialog.changePassword.title.get(), langConfig.dialog.account.changePasswordTooltip.get(), CHANGE_PASSWORD_FORM),
@@ -176,16 +171,13 @@ public class AuthDialogs {
         List<Input> inputs = List.of(
                 new Input("session_timeout", new TextInput(WIDTH, langConfig.dialog.settings.sessionLabel.get(),
                         true, String.valueOf(entry.sessionTimeout), 20, Optional.empty())),
-                new Input("show_login_dialog", new BooleanInput(langConfig.dialog.settings.dialogLabel.get(),
-                        Boolean.TRUE.equals(entry.showLoginDialog), "true", "false")));
+                new Input("show_login_dialog", new BooleanInput(langConfig.dialog.settings.dialogLabel.get(), entry.showLoginDialog, "true", "false")));
         ConfirmationDialog dialog = new ConfirmationDialog(
                 common(langConfig.dialog.settings.title.get(), body, inputs, true, DialogAction.CLOSE),
                 submit(langConfig.dialog.settings.submit.get(), SETTINGS),
                 cancelButton());
         open(player, SETTINGS_FORM, dialog);
     }
-
-    // ---------------------------------------------------------------- Stage 3 (admin)
 
     public static final Identifier ADMIN = id("admin");
 
@@ -231,11 +223,9 @@ public class AuthDialogs {
             new AdminAction("remove", () -> langConfig.dialog.admin.remove.get(), () -> langConfig.dialog.admin.removeTooltip.get(),
                     List.of(username()), true, "easyauth.commands.auth.remove", 3),
             new AdminAction("set_global_password", () -> langConfig.dialog.admin.setGlobalPassword.get(), () -> langConfig.dialog.admin.setGlobalPasswordTooltip.get(),
-                    List.of(password(), new FormField("single_use", () -> langConfig.dialog.field.singleUse.get(), true)),
-                    false, "easyauth.commands.auth.setGlobalPassword", 4),
+                    List.of(password(), new FormField("single_use", () -> langConfig.dialog.field.singleUse.get(), true)), false, "easyauth.commands.auth.setGlobalPassword", 4),
             new AdminAction("set_uuid", () -> langConfig.dialog.admin.setUuid.get(), () -> langConfig.dialog.admin.setUuidTooltip.get(),
-                    List.of(username(), new FormField("uuid", () -> langConfig.dialog.field.uuid.get(), false)),
-                    true, "easyauth.commands.auth.setUuid", 4),
+                    List.of(username(), new FormField("uuid", () -> langConfig.dialog.field.uuid.get(), false)), true, "easyauth.commands.auth.setUuid", 4),
             new AdminAction("clear_uuid", () -> langConfig.dialog.admin.clearUuid.get(), () -> langConfig.dialog.admin.clearUuidTooltip.get(),
                     List.of(username()), true, "easyauth.commands.auth.clearUuid", 4));
 
@@ -278,21 +268,18 @@ public class AuthDialogs {
         }
         Identifier submitId = id("admin/" + key);
         Identifier dialogId = id("admin_form/" + key);
+        ConfirmationDialog dialog;
         if (action.confirm()) {
-            ConfirmationDialog dialog = new ConfirmationDialog(
-                    common(action.label().get(), List.of(new PlainMessage(langConfig.dialog.admin.confirm.get(), WIDTH)),
-                            inputs, true, DialogAction.CLOSE),
+            dialog = new ConfirmationDialog(
+                    common(action.label().get(), List.of(new PlainMessage(langConfig.dialog.admin.confirm.get(), WIDTH)), inputs, true, DialogAction.CLOSE),
                     submit(action.label().get(), submitId), cancelButton());
-            open(player, dialogId, dialog);
         } else {
-            ConfirmationDialog dialog = new ConfirmationDialog(
+            dialog = new ConfirmationDialog(
                     common(action.label().get(), List.of(), inputs, true, DialogAction.CLOSE),
                     submit(action.label().get(), submitId), cancelButton());
-            open(player, dialogId, dialog);
         }
+        open(player, dialogId, dialog);
     }
-
-    // ---------------------------------------------------------------- helpers
 
     private static TextInput passwordField(Component label) {
         long max = extendedConfig.maxPasswordLength;
@@ -300,20 +287,17 @@ public class AuthDialogs {
         return new TextInput(WIDTH, label, true, "", maxLength, Optional.empty());
     }
 
-    private static CommonDialogData common(Component title, List<DialogBody> body, List<Input> inputs,
-                                           boolean canCloseWithEscape, DialogAction afterAction) {
+    private static CommonDialogData common(Component title, List<DialogBody> body, List<Input> inputs, boolean canCloseWithEscape, DialogAction afterAction) {
         return new CommonDialogData(title, Optional.empty(), canCloseWithEscape, false, afterAction, body, inputs);
     }
 
     private static ActionButton submit(Component label, Identifier action) {
-        return new ActionButton(new CommonButtonData(label, BUTTON_WIDTH),
-                Optional.of((Action) new CustomAll(action, Optional.empty())));
+        return new ActionButton(new CommonButtonData(label, BUTTON_WIDTH), Optional.of(new CustomAll(action, Optional.empty())));
     }
 
     /** A submit button that shows {@code tooltip} when hovered. */
     private static ActionButton submit(Component label, Component tooltip, Identifier action) {
-        return new ActionButton(new CommonButtonData(label, Optional.of(tooltip), BUTTON_WIDTH),
-                Optional.of((Action) new CustomAll(action, Optional.empty())));
+        return new ActionButton(new CommonButtonData(label, Optional.of(tooltip), BUTTON_WIDTH), Optional.of(new CustomAll(action, Optional.empty())));
     }
 
     private static ActionButton cancelButton() {
@@ -325,12 +309,11 @@ public class AuthDialogs {
         player.openDialog(resolve(player, id, fallback));
     }
 
-    @SuppressWarnings("unchecked")
     private static Holder<Dialog> resolve(ServerPlayer player, Identifier id, Dialog fallback) {
         if (dialogConfig.allowDatapackOverride) {
-            Holder<Dialog> custom = player.registryAccess().lookup(Registries.DIALOG)
+            Holder<Dialog> custom = player.registryAccess()
+                    .lookup(Registries.DIALOG)
                     .flatMap(registry -> registry.get(id))
-                    .map(reference -> (Holder<Dialog>) reference)
                     .orElse(null);
             if (custom != null) {
                 return custom;

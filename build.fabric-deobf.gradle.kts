@@ -156,10 +156,10 @@ tasks.processResources {
         )
     }
 
-    // Deobfuscated MC needs no mixin refmap (names already match runtime).
+    // Deobfuscated MC needs no mixin refmap.
     filesMatching("easyauth.mixins.json") {
         filter {
-            it.replace("\${refmap}", "")
+            it.replace($$"\"refmap\": \"${refmap}\",", "")
         }
     }
 }

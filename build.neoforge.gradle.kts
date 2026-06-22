@@ -162,7 +162,7 @@ tasks.processResources {
 
     // NeoForge runs on official Mojang names, so no refmap is needed
     filesMatching("easyauth.mixins.json") {
-        filter { it.replace("\${refmap}", "") }
+        filter { it.replace($$"\"refmap\": \"${refmap}\",", "") }
     }
 }
 

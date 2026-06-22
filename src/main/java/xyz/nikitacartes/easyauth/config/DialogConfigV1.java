@@ -35,8 +35,7 @@ public class DialogConfigV1 extends ConfigTemplate {
 
     @Comment("""
 
-            Allow closing the login/registration window with ESC.
-            Keep this false so players can't dismiss the prompt and stay stuck unauthenticated.""")
+            Allow closing the login/registration window with ESC.""")
     public boolean canCloseWithEscape = false;
 
     @Comment("""

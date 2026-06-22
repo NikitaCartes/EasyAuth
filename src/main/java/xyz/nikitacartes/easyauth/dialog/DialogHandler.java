@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientboundClearDialogPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomClickActionPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.commands.AccountCommand;
@@ -21,11 +22,12 @@ import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 
 /**
- * Receives dialog submissions ({@link net.minecraft.network.protocol.common.ServerboundCustomClickActionPacket})
+ * Receives dialog submissions ({@link ServerboundCustomClickActionPacket})
  * and routes them to the existing command logic. Runs on the server thread.
  */
 public class DialogHandler {
@@ -54,13 +56,13 @@ public class DialogHandler {
                 register(player, data);
                 return true;
             }
-            // Stage 2 — account menu navigation (open a sub-window)
+            // account menu navigation (open a sub-window)
             case "account" -> open(player, AuthDialogs::openAccountMenu);
             case "change_password_form" -> open(player, AuthDialogs::openChangePassword);
             case "unregister_form" -> open(player, AuthDialogs::openUnregister);
             case "account_online_form" -> open(player, AuthDialogs::openAccountOnline);
             case "settings_form" -> open(player, AuthDialogs::openSettings);
-            // Stage 2 — account actions (feedback goes to chat; the player is authenticated so it is visible)
+            // account actions (feedback goes to chat; the player is authenticated so it is visible)
             case "change_password" -> account(player, source ->
                     AccountCommand.changePassword(source, data.getStringOr("old_password", ""), data.getStringOr("new_password", "")));
             case "unregister" -> account(player, source ->
@@ -98,7 +100,7 @@ public class DialogHandler {
         }
     }
 
-    private static boolean open(ServerPlayer player, java.util.function.Consumer<ServerPlayer> opener) {
+    private static boolean open(ServerPlayer player, Consumer<ServerPlayer> opener) {
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             opener.accept(player);
         }
@@ -147,7 +149,7 @@ public class DialogHandler {
         if (!player.connection.isAcceptingMessages()) {
             return; // player was kicked (e.g. too many tries)
         }
-        Component error = feedback.isEmpty() ? langConfig.password.incorrect.get() : feedback.get(feedback.size() - 1);
+        Component error = feedback.isEmpty() ? langConfig.password.incorrect.get() : feedback.getLast();
         if (which.equals(AuthDialogs.LOGIN)) {
             AuthDialogs.reopenLogin(player, error);
         } else {
@@ -157,8 +159,7 @@ public class DialogHandler {
 
     private static boolean adminAllowed(ServerPlayer player, String key) {
         AuthDialogs.AdminAction action = AuthDialogs.adminAction(key);
-        return action != null
-                && FabricPermissions.require(action.node(), action.level()).test(player.createCommandSourceStack());
+        return action != null && FabricPermissions.require(action.node(), action.level()).test(player.createCommandSourceStack());
     }
 
     private static void adminForm(ServerPlayer player, String key) {
@@ -186,8 +187,7 @@ public class DialogHandler {
                 case "register" -> AuthCommand.registerUser(source, username, data.getStringOr("password", ""));
                 case "update" -> AuthCommand.updatePassword(source, username, data.getStringOr("password", ""));
                 case "remove" -> AuthCommand.removeAccount(source, username);
-                case "set_global_password" -> AuthCommand.setGlobalPassword(source,
-                        data.getStringOr("password", ""), data.getBooleanOr("single_use", false));
+                case "set_global_password" -> AuthCommand.setGlobalPassword(source, data.getStringOr("password", ""), data.getBooleanOr("single_use", false));
                 case "set_uuid" -> AuthCommand.setUuid(source, username, data.getStringOr("uuid", ""));
                 case "clear_uuid" -> AuthCommand.clearUuid(source, username);
                 default -> { }

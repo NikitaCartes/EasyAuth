@@ -104,11 +104,11 @@ public class PlayerEntryV1 {
     /**
      * Whether the login Dialog window is shown to this player on join.
      * When false, the player gets the chat prompt instead. Boxed so a missing
-     * value in old data deserializes to {@code true} (the previous behaviour).
+     * value in old data deserializes to {@code true}.
      */
     @Expose
     @SerializedName("show_login_dialog")
-    public Boolean showLoginDialog = true;
+    public boolean showLoginDialog = true;
 
 
     public PlayerEntryV1(String username, String usernameLowerCase, String uuid, String json) {
@@ -129,7 +129,7 @@ public class PlayerEntryV1 {
         this.dataVersion = entry.dataVersion;
         this.forcedUuid = entry.forcedUuid;
         this.sessionTimeout = entry.sessionTimeout;
-        this.showLoginDialog = entry.showLoginDialog == null ? Boolean.TRUE : entry.showLoginDialog;
+        this.showLoginDialog = entry.showLoginDialog;
     }
 
     public PlayerEntryV1(String username) {

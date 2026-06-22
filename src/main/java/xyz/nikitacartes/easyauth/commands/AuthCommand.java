@@ -3,6 +3,7 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.DimensionArgument;
@@ -15,6 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
 import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
@@ -218,10 +220,10 @@ public class AuthCommand {
     }
 
     // Opens the admin panel window, or prints the subcommand hint when dialogs are off.
-    private static int openAdminPanel(CommandSourceStack source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+    private static int openAdminPanel(CommandSourceStack source) throws CommandSyntaxException {
         //? if >= 1.21.6 {
         if (dialogConfig.enabled && dialogConfig.admin) {
-            xyz.nikitacartes.easyauth.dialog.AuthDialogs.openAdminMenu(source.getPlayerOrException());
+            AuthDialogs.openAdminMenu(source.getPlayerOrException());
             return 1;
         }
         //?}
@@ -230,7 +232,7 @@ public class AuthCommand {
     }
 
     // Sets the login spawn to the caller's current position (the panel's "set spawn here" button).
-    public static int setSpawnHere(CommandSourceStack source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+    public static int setSpawnHere(CommandSourceStack source) throws CommandSyntaxException {
         return setSpawn(source,
                 StoneCutterUtils.getWorld(source.getEntityOrException()).dimension().identifier(),
                 source.getEntityOrException().getX(),
@@ -497,7 +499,7 @@ public class AuthCommand {
             message.append(infoLine("Last IP", playerData.lastIp.isEmpty() ? "—" : playerData.lastIp));
             message.append(infoLine("Login tries", String.valueOf(playerData.loginTries)));
             message.append(infoLine("Session timeout", playerData.sessionTimeout + "s"));
-            message.append(infoLine("Login window", Boolean.FALSE.equals(playerData.showLoginDialog) ? "hidden" : "shown"));
+            message.append(infoLine("Login window", !playerData.showLoginDialog ? "hidden" : "shown"));
             if (playerData.forcedUuid != null) {
                 message.append(infoLine("Forced UUID", playerData.forcedUuid));
             }

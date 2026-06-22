@@ -5,7 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
-import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
+import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -27,14 +27,14 @@ public class LoginCommand {
         LiteralCommandNode<CommandSourceStack> node = registerLogin(dispatcher); // Registering the "/login" command
         if (extendedConfig.aliases.login) {
             dispatcher.register(literal("l")
-                    .requires(FabricPermissions.require("easyauth.commands.login", true))
+                    .requires(EasyAuthPermissions.require("easyauth.commands.login", true))
                     .redirect(node));
         }
     }
 
     public static LiteralCommandNode<CommandSourceStack> registerLogin(CommandDispatcher<CommandSourceStack> dispatcher) {
         return dispatcher.register(literal("login")
-                .requires(FabricPermissions.require("easyauth.commands.login", true))
+                .requires(EasyAuthPermissions.require("easyauth.commands.login", true))
                 .then(argument("password", string())
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))

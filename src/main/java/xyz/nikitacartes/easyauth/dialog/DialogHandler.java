@@ -16,7 +16,7 @@ import xyz.nikitacartes.easyauth.commands.AuthCommand;
 import xyz.nikitacartes.easyauth.commands.LoginCommand;
 import xyz.nikitacartes.easyauth.commands.LogoutCommand;
 import xyz.nikitacartes.easyauth.commands.RegisterCommand;
-import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
+import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 
 import java.util.ArrayList;
@@ -159,7 +159,7 @@ public class DialogHandler {
 
     private static boolean adminAllowed(ServerPlayer player, String key) {
         AuthDialogs.AdminAction action = AuthDialogs.adminAction(key);
-        return action != null && FabricPermissions.require(action.node(), action.level()).test(player.createCommandSourceStack());
+        return action != null && EasyAuthPermissions.require(action.node(), action.level()).test(player.createCommandSourceStack());
     }
 
     private static void adminForm(ServerPlayer player, String key) {

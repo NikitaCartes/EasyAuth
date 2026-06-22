@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
-import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
+import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -46,18 +46,18 @@ public class AuthCommand {
      */
     public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("auth")
-                .requires(FabricPermissions.require("easyauth.commands.auth.root", 3))
+                .requires(EasyAuthPermissions.require("easyauth.commands.auth.root", 3))
                 .executes(ctx -> openAdminPanel(ctx.getSource()))
                 .then(literal("gui")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.root", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.root", 3))
                         .executes(ctx -> openAdminPanel(ctx.getSource()))
                 )
                 .then(literal("reload")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.reload", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.reload", 3))
                         .executes(ctx -> reloadConfig(ctx.getSource()))
                 )
                 .then(literal("setGlobalPassword")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.setGlobalPassword", 4))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.setGlobalPassword", 4))
                         .then(argument("password", string())
                                 .executes(ctx -> setGlobalPassword(
                                         ctx.getSource(),
@@ -74,7 +74,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("setSpawn")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.setSpawn", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.setSpawn", 3))
                         .executes(ctx -> setSpawn(
                                 ctx.getSource(),
                                 StoneCutterUtils.getWorld(ctx.getSource().getEntityOrException()).dimension().identifier(),
@@ -119,7 +119,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("remove")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.remove", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.remove", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> removeAccount(
                                         ctx.getSource(),
@@ -128,7 +128,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("register")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.register", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.register", 3))
                         .then(argument("username", word())
                                 .then(argument("password", string())
                                         .executes(ctx -> registerUser(
@@ -140,7 +140,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("update")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.update", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.update", 3))
                         .then(argument("username", word())
                                 .then(argument("password", string())
                                         .executes(ctx -> updatePassword(
@@ -152,11 +152,11 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("list")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.list", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.list", 3))
                         .executes(ctx -> getRegisteredPlayers(ctx.getSource()))
                 )
                 .then(literal("markAsOffline")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.markAsOffline", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.markAsOffline", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> markAsOffline(
                                         ctx.getSource(),
@@ -165,7 +165,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("markAsOnline")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.markAsOnline", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.markAsOnline", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> markAsOnline(
                                         ctx.getSource(),
@@ -174,7 +174,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("getPlayerInfo")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.getPlayerInfo", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.getPlayerInfo", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> getPlayerInfo(
                                         ctx.getSource(),
@@ -183,11 +183,11 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("getOnlinePlayers")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.getOnlinePlayers", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.getOnlinePlayers", 3))
                         .executes(ctx -> getOnlinePlayers(ctx.getSource()))
                 )
                 .then(literal("setUuid")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.setUuid", 4))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.setUuid", 4))
                         .then(argument("username", word())
                                 .then(argument("uuid", string())
                                         .executes(ctx -> setUuid(
@@ -199,7 +199,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("clearUuid")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.clearUuid", 4))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.clearUuid", 4))
                         .then(argument("username", word())
                                 .executes(ctx -> clearUuid(
                                         ctx.getSource(),
@@ -208,7 +208,7 @@ public class AuthCommand {
                         )
                 )
                 .then(literal("getUuid")
-                        .requires(FabricPermissions.require("easyauth.commands.auth.getUuid", 3))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.getUuid", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> getUuid(
                                         ctx.getSource(),

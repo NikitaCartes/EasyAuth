@@ -5,7 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
-import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
+import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -28,10 +28,10 @@ public class AccountCommand {
 
     public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("account")
-                .requires(FabricPermissions.require("easyauth.commands.account.root", true))
+                .requires(EasyAuthPermissions.require("easyauth.commands.account.root", true))
                 .executes(ctx -> accountRoot(ctx.getSource()))
                 .then(literal("unregister")
-                        .requires(FabricPermissions.require("easyauth.commands.account.unregister", true))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.account.unregister", true))
                         .executes(ctx -> {
                             langConfig.password.enter.send(ctx.getSource());
                             return 1;
@@ -45,7 +45,7 @@ public class AccountCommand {
                         )
                 )
                 .then(literal("changePassword")
-                        .requires(FabricPermissions.require("easyauth.commands.account.changePassword", true))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.account.changePassword", true))
                         .then(argument("old password", string())
                                 .executes(ctx -> {
                                     langConfig.password.enterNew.send(ctx.getSource());
@@ -62,7 +62,7 @@ public class AccountCommand {
                         )
                 )
                 .then(literal("online")
-                        .requires(FabricPermissions.require("easyauth.commands.account.online", true))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.account.online", true))
                         .then(argument("password", string())
                                 .executes(ctx -> markAsOnline(
                                         ctx.getSource(),
@@ -81,7 +81,7 @@ public class AccountCommand {
                         )
                 )
                 .then(literal("session")
-                        .requires(FabricPermissions.require("easyauth.commands.account.session", true))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.account.session", true))
                         .executes(ctx -> showSessionTimeout(ctx.getSource()))
                         .then(argument("seconds", longArg(-1))
                                 .executes(ctx -> setSessionTimeout(
@@ -91,7 +91,7 @@ public class AccountCommand {
                         )
                 )
                 .then(literal("dialog")
-                        .requires(FabricPermissions.require("easyauth.commands.account.dialog", true))
+                        .requires(EasyAuthPermissions.require("easyauth.commands.account.dialog", true))
                         .then(argument("show", bool())
                                 .executes(ctx -> setShowLoginDialog(
                                         ctx.getSource(),

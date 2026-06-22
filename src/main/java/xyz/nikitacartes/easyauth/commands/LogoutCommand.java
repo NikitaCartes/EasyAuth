@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
-import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
+import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
@@ -19,7 +19,7 @@ public class LogoutCommand {
     public static void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         // Registering the "/logout" command
         dispatcher.register(literal("logout")
-                .requires(FabricPermissions.require("easyauth.commands.logout", true))
+                .requires(EasyAuthPermissions.require("easyauth.commands.logout", true))
                 .executes(ctx -> logout(ctx.getSource())) // Tries to de-authenticate the user
         );
     }

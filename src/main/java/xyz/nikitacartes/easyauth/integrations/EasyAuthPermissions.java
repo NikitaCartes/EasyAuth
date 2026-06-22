@@ -27,7 +27,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.technicalConfig;
  * NeoForge has no equivalent, so there it queries LuckPerms natively.
  * The permission nodes  are identical on both loaders.
  */
-public class FabricPermissions {
+public class EasyAuthPermissions {
 
     public static @NotNull Predicate<CommandSourceStack> require(@NotNull String permission, boolean defaultValue) {
         //? if neoforge {

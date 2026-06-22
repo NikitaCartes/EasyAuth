@@ -8,7 +8,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.dialog.*;
-import net.minecraft.server.dialog.action.Action;
 import net.minecraft.server.dialog.action.CustomAll;
 import net.minecraft.server.dialog.body.DialogBody;
 import net.minecraft.server.dialog.body.PlainMessage;
@@ -16,7 +15,7 @@ import net.minecraft.server.dialog.input.BooleanInput;
 import net.minecraft.server.dialog.input.InputControl;
 import net.minecraft.server.dialog.input.TextInput;
 import net.minecraft.server.level.ServerPlayer;
-import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
+import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
@@ -26,6 +25,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
+//?}
 
 /**
  * Builds and opens the EasyAuth Dialog windows (1.21.6+).
@@ -34,7 +34,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
  * action id and the input keys, not on the layout.
  */
 public class AuthDialogs {
-
+    //? if >= 1.21.6 {
     // login / registration (submit ids)
     public static final Identifier LOGIN = id("login");
     public static final Identifier REGISTER = id("register");
@@ -242,7 +242,7 @@ public class AuthDialogs {
         CommandSourceStack source = player.createCommandSourceStack();
         List<ActionButton> buttons = new ArrayList<>();
         for (AdminAction action : ADMIN_ACTIONS) {
-            if (!FabricPermissions.require(action.node(), action.level()).test(source)) {
+            if (!EasyAuthPermissions.require(action.node(), action.level()).test(source)) {
                 continue;
             }
             Identifier target = action.fields().isEmpty() ? id("admin/" + action.key()) : id("admin_form/" + action.key());
@@ -321,5 +321,5 @@ public class AuthDialogs {
         }
         return Holder.direct(fallback);
     }
+    //?}
 }
-//?}

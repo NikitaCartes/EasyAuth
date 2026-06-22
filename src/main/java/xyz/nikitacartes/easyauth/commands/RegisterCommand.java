@@ -5,7 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
-import xyz.nikitacartes.easyauth.integrations.FabricPermissions;
+import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
@@ -33,7 +33,7 @@ public class RegisterCommand {
         LiteralCommandNode<CommandSourceStack> node = registerRegister(dispatcher);
         if (extendedConfig.aliases.register) {
             dispatcher.register(literal("reg")
-                    .requires(FabricPermissions.require("easyauth.commands.register", true))
+                    .requires(EasyAuthPermissions.require("easyauth.commands.register", true))
                     .redirect(node));
         }
     }
@@ -42,7 +42,7 @@ public class RegisterCommand {
     public static LiteralCommandNode<CommandSourceStack> registerRegister(CommandDispatcher<CommandSourceStack> dispatcher) {
         if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
             return dispatcher.register(literal("register")
-                    .requires(FabricPermissions.require("easyauth.commands.register", true))
+                    .requires(EasyAuthPermissions.require("easyauth.commands.register", true))
                     .then(argument("globalPassword", string())
                             .then(argument("password", string())
                                     .then(argument("passwordAgain", string())
@@ -59,7 +59,7 @@ public class RegisterCommand {
                     }));
         } else {
             return dispatcher.register(literal("register")
-                    .requires(FabricPermissions.require("easyauth.commands.register", true))
+                    .requires(EasyAuthPermissions.require("easyauth.commands.register", true))
                     .then(argument("password", string())
                             .then(argument("passwordAgain", string())
                                     .executes(ctx -> register(ctx.getSource(),

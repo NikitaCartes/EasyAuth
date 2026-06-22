@@ -89,19 +89,19 @@ public class AuthDialogs {
         open(player, REGISTER, buildRegister(error));
     }
 
-    static NoticeDialog buildLogin(Component error) {
+    static MultiActionDialog buildLogin(Component error) {
         List<DialogBody> body = new ArrayList<>();
         body.add(new PlainMessage(langConfig.dialog.login.prompt.get(), WIDTH));
         if (error != null) {
             body.add(new PlainMessage(error, WIDTH));
         }
         List<Input> inputs = List.of(new Input("password", passwordField(langConfig.dialog.login.password.get())));
-        return new NoticeDialog(
+        return new MultiActionDialog(
                 common(langConfig.dialog.login.title.get(), body, inputs, dialogConfig.canCloseWithEscape, DialogAction.NONE),
-                submit(langConfig.dialog.login.submit.get(), LOGIN));
+                List.of(submit(langConfig.dialog.login.submit.get(), LOGIN)), Optional.empty(), 1);
     }
 
-    static NoticeDialog buildRegister(Component error) {
+    static MultiActionDialog buildRegister(Component error) {
         List<DialogBody> body = new ArrayList<>();
         body.add(new PlainMessage(langConfig.dialog.register.prompt.get(), WIDTH));
         if (error != null) {
@@ -113,9 +113,9 @@ public class AuthDialogs {
         }
         inputs.add(new Input("password", passwordField(langConfig.dialog.register.password.get())));
         inputs.add(new Input("password_confirm", passwordField(langConfig.dialog.register.passwordConfirm.get())));
-        return new NoticeDialog(
+        return new MultiActionDialog(
                 common(langConfig.dialog.register.title.get(), body, inputs, dialogConfig.canCloseWithEscape, DialogAction.NONE),
-                submit(langConfig.dialog.register.submit.get(), REGISTER));
+                List.of(submit(langConfig.dialog.register.submit.get(), REGISTER)), Optional.empty(), 1);
     }
 
     public static void openAccountMenu(ServerPlayer player) {

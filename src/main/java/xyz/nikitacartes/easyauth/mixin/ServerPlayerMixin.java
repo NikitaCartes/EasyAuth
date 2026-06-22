@@ -165,7 +165,7 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
             if (!dialogShown && AuthDialogs.openAuthPrompt(player)) {
                 dialogShown = true;
             }
-            if (dialogShown) {
+            if (dialogShown && !dialogConfig.canCloseWithEscape) {
                 return;
             }
         }

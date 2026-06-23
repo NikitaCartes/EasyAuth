@@ -166,7 +166,7 @@ public class RegisterCommand {
             // Invalidate IP cache after registration
             IpLimitManager.invalidateCache(playerData.lastIp);
 
-            LogRegister("Player " + username + "{" + player.getStringUUID() + "} successfully registered with password: " + playerData.password);
+            LogRegister("Player " + username + "{" + player.getStringUUID() + "} successfully registered");
         });
         return 0;
     }

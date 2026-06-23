@@ -34,7 +34,6 @@ public class AuthHelper {
         String storedPassword = playerEntry.password;
         if (config.debug) {
             LogDebug("Checking password for " + playerEntry.username);
-            LogDebug("Stored password's hash: " + storedPassword);
         }
         // Verify password
         if (!verifyPassword(password, storedPassword)) {
@@ -67,7 +66,6 @@ public class AuthHelper {
             LogError("You need to change password using /auth update <username> <password>");
             return false;
         }
-        if (config.debug) LogDebug("Hashed password: " + HasherBCrypt.hash(pass));
         return HasherBCrypt.verify(pass, hashed);
     }
 

@@ -2,14 +2,15 @@ package xyz.nikitacartes.easyauth.utils;
 
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.DB;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 
 // PlayersCache for player data
 public class PlayersCache {
-    private static final HashMap<String, PlayerEntryV1> playerDataCache = new HashMap<>();
+    private static final Map<String, PlayerEntryV1> playerDataCache = new ConcurrentHashMap<>();
 
     public static void put(String username, PlayerEntryV1 data) {
         playerDataCache.put(username, data);

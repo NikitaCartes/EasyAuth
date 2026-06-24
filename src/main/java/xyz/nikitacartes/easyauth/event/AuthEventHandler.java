@@ -42,8 +42,10 @@ import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
 import java.net.SocketAddress;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -63,66 +65,78 @@ public class AuthEventHandler {
     private static final Map<UUID, Long> lastAcceptedPacketByPlayer = new ConcurrentHashMap<>();
     private static final Map<UUID, Boolean> administratorCache = new ConcurrentHashMap<>();
 
+    // Housekeeping packets an unauthenticated player must always be allowed to send.
+    private static final Set<Class<?>> ALWAYS_ALLOWED = new HashSet<>();
+
+    // Inventory/slot packets, allowed together under allowItemMoving.
+    private static final Set<Class<?>> ITEM_MOVING = Set.of(
+            ServerboundContainerClickPacket.class,
+            ServerboundSetCreativeModeSlotPacket.class,
+            ServerboundSetCarriedItemPacket.class,
+            ServerboundContainerClosePacket.class,
+            ServerboundContainerButtonClickPacket.class);
+
+    static {
+        ALWAYS_ALLOWED.add(ServerboundKeepAlivePacket.class);
+        ALWAYS_ALLOWED.add(ServerboundResourcePackPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundAcceptTeleportationPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundChatSessionUpdatePacket.class);
+        ALWAYS_ALLOWED.add(ServerboundChatAckPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundClientCommandPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundCommandSuggestionPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundChatCommandPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundPingRequestPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundMoveVehiclePacket.class);
+        ALWAYS_ALLOWED.add(ServerboundPlayerInputPacket.class);
+        //? if >= 1.21.5 {
+        ALWAYS_ALLOWED.add(ServerboundPlayerLoadedPacket.class);
+        //?}
+        //? if >= 1.21.2 {
+        ALWAYS_ALLOWED.add(ServerboundClientTickEndPacket.class);
+        //?}
+        //? if >= 1.20.5 {
+        ALWAYS_ALLOWED.add(ServerboundCookieResponsePacket.class);
+        ALWAYS_ALLOWED.add(ServerboundChatCommandSignedPacket.class);
+        //?}
+        //? if >= 1.20.2 {
+        ALWAYS_ALLOWED.add(ServerboundPongPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundClientInformationPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundChunkBatchReceivedPacket.class);
+        ALWAYS_ALLOWED.add(ServerboundConfigurationAcknowledgedPacket.class);
+        //?} else {
+        /*ALWAYS_ALLOWED.add(ServerboundPongPacket.class);
+        *///?}
+    }
+
     public static boolean isAllowedPacket(ServerPlayer player, Packet<?> packet) {
-        if (packet instanceof ServerboundKeepAlivePacket
-                || packet instanceof ServerboundResourcePackPacket
-                || packet instanceof ServerboundAcceptTeleportationPacket
-                || packet instanceof ServerboundChatSessionUpdatePacket
-                || packet instanceof ServerboundChatAckPacket
-                || packet instanceof ServerboundClientCommandPacket
-                || packet instanceof ServerboundCommandSuggestionPacket
-                || packet instanceof ServerboundChatCommandPacket
-                || packet instanceof ServerboundPingRequestPacket
-                //? if >= 1.21.5 {
-                || packet instanceof ServerboundPlayerLoadedPacket
-                //?}
-                //? if >= 1.21.2 {
-                || packet instanceof ServerboundClientTickEndPacket
-                //?}
-                //? if >= 1.20.5 {
-                || packet instanceof ServerboundCookieResponsePacket
-                || packet instanceof ServerboundChatCommandSignedPacket
-                //?}
-                //? if >= 1.20.2 {
-                || packet instanceof ServerboundPongPacket
-                || packet instanceof ServerboundClientInformationPacket
-                || packet instanceof ServerboundChunkBatchReceivedPacket
-                || packet instanceof ServerboundConfigurationAcknowledgedPacket
-                //?} else {
-                /*|| packet instanceof ServerboundPongPacket
-                *///?}
-        ) {
+        Class<?> packetClass = packet.getClass();
+
+        if (ALWAYS_ALLOWED.contains(packetClass)) {
             return true;
         }
 
         // Movement packets are handled separately
-        if (packet instanceof ServerboundMovePlayerPacket ||
-                packet instanceof ServerboundMovePlayerPacket.PosRot ||
-                packet instanceof ServerboundMovePlayerPacket.Rot ||
-                packet instanceof ServerboundMovePlayerPacket.StatusOnly ||
-                packet instanceof ServerboundMovePlayerPacket.Pos ||
-                packet instanceof ServerboundMoveVehiclePacket ||
-                packet instanceof ServerboundPlayerInputPacket) {
+        if (packet instanceof ServerboundMovePlayerPacket) {
             return true;
         }
 
-        if (extendedConfig.allowChat && packet instanceof ServerboundChatPacket) {
+        if (extendedConfig.allowChat && packetClass == ServerboundChatPacket.class) {
             return true;
         }
 
-        if (extendedConfig.allowBlockInteraction && packet instanceof ServerboundUseItemOnPacket) {
+        if (extendedConfig.allowBlockInteraction && packetClass == ServerboundUseItemOnPacket.class) {
             return true;
         }
 
-        if (extendedConfig.allowEntityInteraction && packet instanceof ServerboundInteractPacket) {
+        if (extendedConfig.allowEntityInteraction && packetClass == ServerboundInteractPacket.class) {
             return true;
         }
 
-        if (extendedConfig.allowItemUsing && packet instanceof ServerboundUseItemPacket) {
+        if (extendedConfig.allowItemUsing && packetClass == ServerboundUseItemPacket.class) {
             return true;
         }
 
-        if (packet instanceof ServerboundSwingPacket) {
+        if (packetClass == ServerboundSwingPacket.class) {
             return extendedConfig.allowBlockInteraction || extendedConfig.allowEntityInteraction || extendedConfig.allowEntityAttacking;
         }
         
@@ -146,13 +160,7 @@ public class AuthEventHandler {
             return false;
         }
 
-        if (extendedConfig.allowItemMoving && (
-                packet instanceof ServerboundContainerClickPacket ||
-                packet instanceof ServerboundSetCreativeModeSlotPacket ||
-                packet instanceof ServerboundSetCarriedItemPacket ||
-                packet instanceof ServerboundContainerClosePacket ||
-                packet instanceof ServerboundContainerButtonClickPacket
-        )) {
+        if (extendedConfig.allowItemMoving && ITEM_MOVING.contains(packetClass)) {
             return true;
         }
 

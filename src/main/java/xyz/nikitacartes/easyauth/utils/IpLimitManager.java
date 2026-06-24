@@ -6,8 +6,11 @@ import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -23,6 +26,10 @@ public class IpLimitManager {
     // Cache for IP usernames with timestamps to reduce database queries
     private record IpCacheEntry(List<String> usernames, long timestamp) {}
     private static final ConcurrentHashMap<String, IpCacheEntry> ipCache = new ConcurrentHashMap<>();
+
+    // Sliding window of /login attempt timestamps per IP. In-memory only: a restart clears it, which itself disrupts brute-force.
+    private static final Map<String, Deque<Long>> loginAttempts = new ConcurrentHashMap<>();
+    private static final long LOGIN_WINDOW_MS = 60_000L;
 
     /**
      * Checks if the given IP address has exceeded the account limit.
@@ -233,5 +240,39 @@ public class IpLimitManager {
      */
     public static boolean shouldBlockExcessRegistration() {
         return extendedConfig.ipLimit.enabled && extendedConfig.ipLimit.blockExcessRegistration;
+    }
+
+    /**
+     * Checks (and records) a /login attempt from the given IP against the per-minute rate limit.
+     * Each call within the limit records the attempt; reset the counter with {@link #clearLoginAttempts} on success.
+     *
+     * @param ipAddress the source IP of the login attempt
+     * @return true if the IP has exceeded the configured attempts-per-minute and should be blocked
+     */
+    public static boolean isLoginRateLimitExceeded(String ipAddress) {
+        if (!extendedConfig.ipLimit.enabled || extendedConfig.ipLimit.maxLoginAttemptsPerMinute <= 0) {
+            return false;
+        }
+        long now = System.currentTimeMillis();
+        Deque<Long> attempts = loginAttempts.computeIfAbsent(ipAddress, _ -> new ArrayDeque<>());
+        synchronized (attempts) { // ArrayDeque is not thread-safe
+            while (!attempts.isEmpty() && now - attempts.peekFirst() > LOGIN_WINDOW_MS) {
+                attempts.pollFirst();
+            }
+            if (attempts.size() >= extendedConfig.ipLimit.maxLoginAttemptsPerMinute) {
+                return true;
+            }
+            attempts.addLast(now);
+            return false;
+        }
+    }
+
+    /**
+     * Clears the recorded /login attempts for an IP. Call on a successful login.
+     *
+     * @param ipAddress the IP to reset
+     */
+    public static void clearLoginAttempts(String ipAddress) {
+        loginAttempts.remove(ipAddress);
     }
 }

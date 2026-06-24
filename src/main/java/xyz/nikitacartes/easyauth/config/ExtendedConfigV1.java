@@ -341,5 +341,11 @@ public class ExtendedConfigV1 extends ConfigTemplate {
             Whether online (premium) players are exempt from the concurrent session limit.
             If true, premium players that auto-login will not be blocked by the session limit.""")
         public boolean exemptOnlinePlayers = false;
+
+        @Comment("""
+
+            Max /login attempts per IP per minute (0 = disabled).
+            Brute-force protection for the /login command.""")
+        public int maxLoginAttemptsPerMinute = 10;
     }
 }

@@ -57,6 +57,14 @@ public class LoginCommand {
             langConfig.session.alreadyAuthenticated.send(source);
             return 0;
         }
+
+        String ip = playerAuth.easyAuth$getIpAddress();
+        if (IpLimitManager.isLoginRateLimitExceeded(ip)) {
+            LogLogin("Player " + username + " blocked by login rate limit");
+            langConfig.session.tooManyAttempts.send(source);
+            return 0;
+        }
+
         PlayerEntryV1 playerData = playerAuth.easyAuth$getPlayerEntryV1();
 
         AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(playerData, pass.toCharArray());
@@ -78,6 +86,7 @@ public class LoginCommand {
             playerData.update();
             
             // Invalidate IP cache if IP changed
+            IpLimitManager.clearLoginAttempts(ip);
             if (!oldIp.equals(playerData.lastIp)) {
                 IpLimitManager.invalidateCache(oldIp);
                 IpLimitManager.invalidateCache(playerData.lastIp);

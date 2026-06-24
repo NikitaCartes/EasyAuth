@@ -51,8 +51,13 @@ public class EasyAuth {
         DB = getDbApi();
         try {
             DB.connect();
+            if (DB.isClosed()) {
+                LogError("Database connection is closed right after connect()");
+                DB = null;
+            }
         } catch (DBApiException e) {
-            LogError("Error while set up database connection", e);
+            LogError("Error while setting up database connection", e);
+            DB = null;
         }
     }
 
@@ -75,9 +80,10 @@ public class EasyAuth {
         } catch (IOException e) {
             LogError("Error while reading server properties: ", e);
         }
-        if (DB.isClosed()) {
-            LogError("Couldn't connect to database. Stopping server");
+        if (DB == null || DB.isClosed()) {
+            LogError("CRITICAL: database unavailable — stopping server to prevent auth bypass");
             server.halt(false);
+            return;
         }
 
         // Register LuckPerms integration if it's loaded
@@ -101,7 +107,9 @@ public class EasyAuth {
         }
 
         // Closing DbApi connection
-        DB.close();
+        if (DB != null) {
+            DB.close();
+        }
     }
 
     public static void loadConfigs() {
@@ -143,17 +151,25 @@ public class EasyAuth {
     }
 
     public static void reloadConfigs(MinecraftServer server) {
-        DB.close();
+        if (DB != null) {
+            DB.close();
+        }
 
         boolean regAlias = extendedConfig.aliases.register;
         boolean loginAlias = extendedConfig.aliases.login;
 
         EasyAuth.loadConfigs();
 
+        if (DB == null) {
+            DB = getDbApi();
+        }
         try {
             DB.connect();
+            if (DB.isClosed()) {
+                LogError("Database reconnection failed; auth features unavailable");
+            }
         } catch (DBApiException e) {
-            LogError("onInitialize error: ", e);
+            LogError("Database reconnection error: ", e);
         }
 
         Commands serverCommandManager = server.getCommands();

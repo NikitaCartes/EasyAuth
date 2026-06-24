@@ -316,6 +316,23 @@ public class MySQL implements DbApi {
         return usernames;
     }
 
+    @Override
+    public @Nullable String getUsernameByUuid(String uuid) {
+        try {
+            reConnect();
+            try (PreparedStatement statement = MySQLConnection.prepareStatement(
+                    "SELECT username FROM " + config.mysql.mysqlTable + " WHERE uuid = ? LIMIT 1;")) {
+                statement.setString(1, uuid);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    return resultSet.next() ? resultSet.getString("username") : null;
+                }
+            }
+        } catch (SQLException e) {
+            LogError("Error getting username by UUID", e);
+            return null;
+        }
+    }
+
     /**
      * Migrates IP addresses from JSON to column.
      */

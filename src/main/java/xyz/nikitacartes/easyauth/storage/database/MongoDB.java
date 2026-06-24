@@ -195,6 +195,17 @@ public class MongoDB implements DbApi {
     }
 
     @Override
+    public @Nullable String getUsernameByUuid(String uuid) {
+        try {
+            Document document = collection.find(eq("uuid", uuid)).first();
+            return document != null ? document.getString("username") : null;
+        } catch (Exception e) {
+            LogError("Error getting username by UUID", e);
+            return null;
+        }
+    }
+
+    @Override
     public void migrateFromV4() {
         LogInfo("Migrating IPs from JSON to field...");
         try {

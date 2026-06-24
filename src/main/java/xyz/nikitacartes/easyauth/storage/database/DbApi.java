@@ -89,6 +89,16 @@ public interface DbApi {
     List<String> getUsernamesByIp(String ipAddress);
 
     /**
+     * Returns the username that owns the given UUID, or null if none.
+     * Used to detect forced-UUID collisions.
+     *
+     * @param uuid the UUID (canonical string form) to look up
+     * @return the owning username, or null if the UUID is unused
+     */
+    @Nullable
+    String getUsernameByUuid(String uuid);
+
+    /**
      * Migrates IP addresses from JSON to column.
      */
     void migrateFromV4();

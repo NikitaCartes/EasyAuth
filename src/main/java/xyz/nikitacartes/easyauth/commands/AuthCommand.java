@@ -36,6 +36,7 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.isValidUsername;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getUsername;
 
 public class AuthCommand {
@@ -558,6 +559,25 @@ public class AuthCommand {
                 uuid = UUID.fromString(uuidStr);
             } catch (IllegalArgumentException e) {
                 langConfig.uuid.invalidFormat.send(source, uuidStr);
+                return;
+            }
+
+            // Reject a UUID already owned by another account (identity-spoofing protection).
+            // Two storage locations to check: the natural `uuid` column (getUsernameByUuid) and
+            // any already-assigned forced UUID, which lives inside the data blob and needs a scan.
+            String candidateUuid = uuid.toString();
+            String existingOwner = DB.getUsernameByUuid(candidateUuid);
+            if (existingOwner == null) {
+                for (PlayerEntryV1 other : DB.getAllData().values()) {
+                    if (candidateUuid.equalsIgnoreCase(other.forcedUuid)) {
+                        existingOwner = other.username;
+                        break;
+                    }
+                }
+            }
+            if (existingOwner != null && !existingOwner.equalsIgnoreCase(username)) {
+                langConfig.uuid.collision.send(source, candidateUuid, existingOwner);
+                LogInfo("UUID collision: " + username + " tried to claim " + candidateUuid + " owned by " + existingOwner);
                 return;
             }
 

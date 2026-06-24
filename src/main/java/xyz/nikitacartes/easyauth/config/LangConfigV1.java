@@ -285,6 +285,7 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText changed = new TranslatableText("uuid.changed");
         public TranslatableText invalidFormat = new TranslatableText("uuid.invalidFormat");
         public TranslatableText noForced = new TranslatableText("uuid.noForced");
+        public TranslatableText collision = new TranslatableText("uuid.collision");
     }
 
     @ConfigSerializable

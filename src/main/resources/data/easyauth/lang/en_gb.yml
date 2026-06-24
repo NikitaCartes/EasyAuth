@@ -58,6 +58,7 @@ text:
       changed: "§6Your UUID has been changed by an administrator. Please reconnect."
       invalidFormat: "§cInvalid UUID format: §e%s§c. Please use the format: 12345678-1234-1234-1234-123456789abc"
       noForced: "§cPlayer §e%s §cdoes not have a forced UUID set."
+      collision: "§cUUID §e%s §cis already used by player §e%s§c."
     # Admin
     admin:
       configReloaded: "§aConfiguration file reloaded successfully."

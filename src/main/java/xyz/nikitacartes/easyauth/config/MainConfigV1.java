@@ -32,6 +32,7 @@ public class MainConfigV1 extends ConfigTemplate {
             
             How long to keep session (auto-logging in the player), in seconds.
             Set to -1 to disable.
+            Behind a proxy that does NOT forward the player's real IP, set this to 0.
             For more information, see https://github.com/NikitaCartes/EasyAuth/wiki/Sessions""")
     public long sessionTimeout = 86400; // 24 hours
 

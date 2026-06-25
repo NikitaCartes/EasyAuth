@@ -30,6 +30,8 @@ import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.Utils.getIp;
+import static xyz.nikitacartes.easyauth.utils.Utils.isResolvedIp;
+import static xyz.nikitacartes.easyauth.utils.Utils.sameResolvedIp;
 
 @Mixin(ServerConfigurationPacketListenerImpl.class)
 public abstract class ServerConfigurationPacketListenerImplMixin extends ServerCommonPacketListenerImpl {
@@ -67,14 +69,16 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
         SocketAddress socketAddress = ((ServerConfigurationPacketListenerImpl)(Object)this).connection.getRemoteAddress();
 
         String ipAddress = getIp(socketAddress);
-        if (ipAddress == null) {
+        if (!isResolvedIp(ipAddress)) {
             spawnTask.easyAuth$setAuthenticated(false);
             LogDebug(String.format("Player %s is not authenticated: no IP", gameProfile.name()));
 
             return;
         }
 
-        if (entry.lastIp.equals(ipAddress) && entry.lastAuthenticatedDate.plusSeconds(config.sessionTimeout).isAfter(ZonedDateTime.now())) {
+        // 0 = follow server default; otherwise clamp so a player can only shorten their session, never exceed the admin's policy.
+        long sessionTimeout = entry.sessionTimeout == 0 ? config.sessionTimeout : Math.min(entry.sessionTimeout, config.sessionTimeout);
+        if (sameResolvedIp(entry.lastIp, ipAddress) && entry.lastAuthenticatedDate.plusSeconds(sessionTimeout).isAfter(ZonedDateTime.now())) {
             spawnTask.easyAuth$setAuthenticated(true);
             LogDebug(String.format("Player %s is authenticated by alive session", gameProfile.name()));
 

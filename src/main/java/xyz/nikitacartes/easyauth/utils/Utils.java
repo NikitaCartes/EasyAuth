@@ -16,4 +16,12 @@ public class Utils {
             return "<unknown>";
         }
     }
+
+    public static boolean isResolvedIp(String ip) {
+        return ip != null && !ip.isEmpty() && !ip.equals("<unknown>");
+    }
+
+    public static boolean sameResolvedIp(String stored, String incoming) {
+        return isResolvedIp(incoming) && incoming.equals(stored);
+    }
 }

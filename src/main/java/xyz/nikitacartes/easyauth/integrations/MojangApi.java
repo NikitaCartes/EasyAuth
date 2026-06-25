@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.google.gson.JsonParser.parseString;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 
 public class MojangApi {
     private record PremiumResult(boolean isPremium, long expiresAt) {
@@ -77,12 +79,18 @@ public class MojangApi {
             String responseBody = new String(httpsURLConnection.getInputStream().readAllBytes());
             httpsURLConnection.disconnect();
 
-            // Extract UUID from the response body
-            String uuidString = responseBody.split("\"id\" : \"")[1].split("\"")[0];
-            LogDebug("Player " + username + " has UUID: " + uuidString);
-            UUID uuid = UUID.fromString(uuidString.replaceFirst("(.{8})(.{4})(.{4})(.{4})(.{12})", "$1-$2-$3-$4-$5"));
-            UUID_CACHE.put(key, uuid);
-            return uuid;
+            // Extract UUID from the response body.
+            try {
+                String uuidString = parseString(responseBody)
+                        .getAsJsonObject().get("id").getAsString();
+                LogDebug("Player " + username + " has UUID: " + uuidString);
+                UUID uuid = UUID.fromString(uuidString.replaceFirst("(.{8})(.{4})(.{4})(.{4})(.{12})", "$1-$2-$3-$4-$5"));
+                UUID_CACHE.put(key, uuid);
+                return uuid;
+            } catch (RuntimeException e) {
+                LogError("Failed to parse Mojang response for " + username);
+                throw new IOException("Failed to parse Mojang response for " + username, e);
+            }
         } else if (response == HttpURLConnection.HTTP_NO_CONTENT || response == HttpURLConnection.HTTP_NOT_FOUND) {
             httpsURLConnection.disconnect();
             LogDebug("Player " + username + " not found");

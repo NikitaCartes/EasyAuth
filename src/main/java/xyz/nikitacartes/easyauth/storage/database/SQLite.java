@@ -144,8 +144,8 @@ public class SQLite implements DbApi {
             return playerEntry;
         } catch (SQLException e) {
             LogError("Error checking user registration", e);
+            throw new DBReadException("getUserData failed for " + username, e);
         }
-        return null;
     }
 
     public @NotNull PlayerEntryV1 getUserDataOrCreate(String username) {

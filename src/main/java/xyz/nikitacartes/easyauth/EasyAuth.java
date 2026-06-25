@@ -9,6 +9,7 @@ import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.*;
 import xyz.nikitacartes.easyauth.storage.database.*;
 import xyz.nikitacartes.easyauth.integrations.LuckPermsIntegration;
+import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
 import java.io.File;
 import java.io.FileReader;
@@ -170,6 +171,15 @@ public class EasyAuth {
             }
         } catch (DBApiException e) {
             LogError("Database reconnection error: ", e);
+        }
+
+        if (DB == null || DB.isClosed()) {
+            LogError("CRITICAL: database unavailable after reload — logins/registrations are locked until it is restored");
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (StoneCutterUtils.isOperator(server.getPlayerList(), player)) {
+                    langConfig.admin.databaseUnavailable.send(player);
+                }
+            }
         }
 
         Commands serverCommandManager = server.getCommands();

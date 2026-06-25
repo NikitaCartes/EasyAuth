@@ -296,6 +296,7 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText markedOffline = new TranslatableText("admin.markedOffline");
         public TranslatableText markedOnline = new TranslatableText("admin.markedOnline");
         public TranslatableText ipLimitNotify = new TranslatableText("admin.ipLimitNotify");
+        public TranslatableText databaseUnavailable = new TranslatableText("admin.databaseUnavailable");
     }
 
     @ConfigSerializable

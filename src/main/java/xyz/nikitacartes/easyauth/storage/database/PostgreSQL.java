@@ -143,8 +143,8 @@ public class PostgreSQL implements DbApi {
             return playerEntry;
         } catch (SQLException e) {
             LogError("Error checking user in PostgreSQL DB", e);
+            throw new DBReadException("getUserData failed for " + username, e);
         }
-        return null;
     }
 
     @Override

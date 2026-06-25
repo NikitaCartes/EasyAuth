@@ -307,6 +307,18 @@ public class AuthCommand {
         return 1;
     }
 
+    // Runs a DB-touching admin task off-thread, reporting a database error to the caller if it fails.
+    private static void runDbTask(CommandSourceStack source, Runnable task) {
+        THREADPOOL.submit(() -> {
+            try {
+                task.run();
+            } catch (RuntimeException e) {
+                LogError("DB command failed", e);
+                langConfig.error.database.send(source);
+            }
+        });
+    }
+
     /**
      * Deletes (unregisters) player's account.
      *
@@ -315,7 +327,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int removeAccount(CommandSourceStack source, String username) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             PlayerEntryV1 playerEntry = DB.getUserData(username);
             if (playerEntry == null) {
                 langConfig.registration.notRegistered.send(source);
@@ -348,7 +360,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int registerUser(CommandSourceStack source, String username, String password) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             PlayerEntryV1 playerData = DB.getUserDataOrCreate(username);
             playerData.password = AuthHelper.hashPassword(password.toCharArray());
             playerData.registrationDate = ZonedDateTime.now();
@@ -368,7 +380,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int updatePassword(CommandSourceStack source, String username, String password) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
             if (playerData == null || playerData.password.isEmpty()) {
                 langConfig.registration.notRegistered.send(source);
@@ -399,7 +411,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int getRegisteredPlayers(CommandSourceStack source) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             if (langConfig.admin.registeredPlayers.enabled) {
                 AtomicInteger i = new AtomicInteger();
                 MutableComponent message = langConfig.admin.registeredPlayers.get();
@@ -431,7 +443,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int markAsOffline(CommandSourceStack source, String username) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             PlayerEntryV1 entry = DB.getUserDataOrCreate(username);
             entry.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
             entry.update();
@@ -449,7 +461,7 @@ public class AuthCommand {
      * @return 0
      */
     public static int markAsOnline(CommandSourceStack source, String username) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             try {
                 if (!isValidUsername(username)) {
                     langConfig.account.onlineNotFound.send(source);
@@ -485,7 +497,7 @@ public class AuthCommand {
     private static final DateTimeFormatter INFO_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static int getPlayerInfo(CommandSourceStack source, String username) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             PlayerEntryV1 playerData = DB.getUserData(username);
             if (playerData == null) {
                 langConfig.registration.notRegistered.send(source);
@@ -523,7 +535,7 @@ public class AuthCommand {
      * @param source executioner of the command
      */
     public static int getOnlinePlayers(CommandSourceStack source) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             MutableComponent message = Component.literal("");
             source.getServer().getPlayerList().getPlayers().forEach(player -> {
                 String username = getUsername(player);
@@ -552,7 +564,7 @@ public class AuthCommand {
      * @return 1 on success
      */
     public static int setUuid(CommandSourceStack source, String username, String uuidStr) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             // Validate UUID format
             UUID uuid;
             try {
@@ -604,7 +616,7 @@ public class AuthCommand {
      * @return 1 on success
      */
     public static int clearUuid(CommandSourceStack source, String username) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             PlayerEntryV1 entry = DB.getUserData(username);
             if (entry == null) {
                 langConfig.registration.notRegistered.send(source);
@@ -638,9 +650,9 @@ public class AuthCommand {
      * @return 1 on success
      */
     public static int getUuid(CommandSourceStack source, String username) {
-        THREADPOOL.submit(() -> {
+        runDbTask(source, () -> {
             PlayerEntryV1 entry = DB.getUserData(username);
-            
+
             UUID offlineUuid = UUIDUtil.createOfflinePlayerUUID(username);
             
             MutableComponent message = Component.literal("");

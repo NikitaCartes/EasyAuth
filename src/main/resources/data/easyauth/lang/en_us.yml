@@ -67,6 +67,7 @@ text:
       markedOffline: "§aPlayer %s has been marked as offline."
       markedOnline: "§aPlayer %s has been marked as online."
       ipLimitNotify: "§e[EasyAuth] §cIP Limit Warning: §fPlayer §e%s §ffrom IP §e%s §fexceeded the limit of §e%d §faccounts. Existing accounts: §e%s"
+      databaseUnavailable: "§e[EasyAuth] §4Database unavailable after reload — logins and registrations are locked until it is restored."
     # Error
     error:
       unknown: "§4An unknown error has occurred."

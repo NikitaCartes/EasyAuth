@@ -72,7 +72,15 @@ public abstract class ServerLoginPacketListenerImplMixin {
 
         LogDebug("UUID of player " + username + " is " + packet.profileId());
 
-        PlayerEntryV1 playerData = PlayersCache.loadOrRegister(username);
+        PlayerEntryV1 playerData;
+        try {
+            playerData = PlayersCache.loadOrRegister(username);
+        } catch (RuntimeException e) {
+            LogError("DB unavailable during login for " + username, e);
+            ((ServerLoginPacketListenerImpl) (Object) this).disconnect(EasyAuth.langConfig.error.database.get());
+            ci.cancel();
+            return;
+        }
 
         if (server.usesAuthentication()) {
             try {

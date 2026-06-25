@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 *///?}
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
+import xyz.nikitacartes.easyauth.storage.database.DBReadException;
 import xyz.nikitacartes.easyauth.integrations.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.IpLimitManager;
@@ -240,6 +241,11 @@ public class AuthEventHandler {
     //?} else {
     /*public static Component checkCanPlayerJoinServer(GameProfile profile, PlayerList manager, SocketAddress socketAddress) {
     *///?}
+        // Runtime equivalent of the startup DB halt: no database -> don't let anyone in (fail-close).
+        if (DB == null || DB.isClosed()) {
+            return langConfig.error.database.getNonTranslatable();
+        }
+
         // Getting the player. By this point, the player's game profile has been authenticated so the UUID is legitimate.
         String incomingPlayerUsername = StoneCutterUtils.getName(profile);
         Player onlinePlayer = manager.getPlayerByName(incomingPlayerUsername);
@@ -271,7 +277,12 @@ public class AuthEventHandler {
         }
         // If the player name and registered name are different, kick the player if differentUsernameCase is enabled
         // Create in case of Floodgate player
-        PlayerEntryV1 playerEntryV1 = PlayersCache.getOrLoadOrRegister(incomingPlayerUsername);
+        PlayerEntryV1 playerEntryV1;
+        try {
+            playerEntryV1 = PlayersCache.getOrLoadOrRegister(incomingPlayerUsername);
+        } catch (DBReadException e) {
+            return langConfig.error.database.getNonTranslatable();
+        }
 
         if (!extendedConfig.allowCaseInsensitiveUsername && !playerEntryV1.username.equals(incomingPlayerUsername)) {
             return langConfig.account.usernameCaseMismatch.getNonTranslatable(incomingPlayerUsername);

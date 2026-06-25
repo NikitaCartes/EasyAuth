@@ -72,6 +72,7 @@ text:
     error:
       unknown: "§4An unknown error has occurred."
       database: "§4Database error, see console for details."
+      hasher: "§4Hasher error, see console for details."
       mojangUnavailable: "§cMojang server is unavailable. Please try again later."
       ipLimitExceeded: "§4Too many accounts from your IP address. Maximum allowed: %d accounts per IP."
       sessionLimitExceeded: "§4Too many connections from your IP address. Please try again later."

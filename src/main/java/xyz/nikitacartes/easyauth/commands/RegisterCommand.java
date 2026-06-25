@@ -156,18 +156,38 @@ public class RegisterCommand {
         // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
 
         THREADPOOL.submit(() -> {
-            playerData.password = hashPassword(pass1.toCharArray());
+            String hash = hashPassword(pass1.toCharArray());
+            if (hash == null) {
+                revokeRegistration(player, playerAuth, source);
+                return;
+            }
+            playerData.password = hash;
             playerData.registrationDate = ZonedDateTime.now();
             playerData.lastIp = playerAuth.easyAuth$getIpAddress();
             playerData.lastAuthenticatedDate = ZonedDateTime.now();
             playerAuth.easyAuth$setPlayerEntryV1(playerData);
-            playerData.update();
-            
+
+            // Synchronous write with result (we're already in THREADPOOL): if it fails, revoke access.
+            if (!DB.updateUserData(playerData)) {
+                revokeRegistration(player, playerAuth, source);
+                return;
+            }
+
             // Invalidate IP cache after registration
             IpLimitManager.invalidateCache(playerData.lastIp);
 
             LogRegister("Player " + username + "{" + player.getStringUUID() + "} successfully registered");
         });
         return 0;
+    }
+
+    // Write failed -> strip the password and drop authentication on the server thread.
+    private static void revokeRegistration(ServerPlayer player, PlayerAuth playerAuth, CommandSourceStack source) {
+        playerAuth.easyAuth$getPlayerEntryV1().password = "";
+        player.server.execute(() -> {
+            playerAuth.easyAuth$setAuthenticated(false);
+            playerAuth.easyAuth$setLoginDialogSuppressed(true);
+            langConfig.error.database.send(source);
+        });
     }
 }

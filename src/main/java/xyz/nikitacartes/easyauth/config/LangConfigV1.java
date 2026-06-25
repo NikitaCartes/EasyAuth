@@ -303,6 +303,7 @@ public class LangConfigV1 extends ConfigTemplate {
     public static final class Errors {
         public TranslatableText unknown = new TranslatableText("error.unknown");
         public TranslatableText database = new TranslatableText("error.database");
+        public TranslatableText hasher = new TranslatableText("error.hasher");
         public TranslatableText mojangUnavailable = new TranslatableText("error.mojangUnavailable");
         public TranslatableText ipLimitExceeded = new TranslatableText("error.ipLimitExceeded");
         public TranslatableText sessionLimitExceeded = new TranslatableText("error.sessionLimitExceeded");

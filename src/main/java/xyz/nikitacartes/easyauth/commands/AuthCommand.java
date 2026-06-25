@@ -36,6 +36,7 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.isValidUsername;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getUsername;
 
@@ -267,7 +268,12 @@ public class AuthCommand {
      */
     public static int setGlobalPassword(CommandSourceStack source, String password, boolean singleUse) {
         // Writing the global pass to config
-        technicalConfig.globalPassword = AuthHelper.hashPassword(password.toCharArray());
+        String hash = AuthHelper.hashPassword(password.toCharArray());
+        if (hash == null) {
+            langConfig.error.hasher.send(source);
+            return 0;
+        }
+        technicalConfig.globalPassword = hash;
         config.enableGlobalPassword = true;
         config.singleUseGlobalPassword = singleUse;
         technicalConfig.save();
@@ -362,7 +368,12 @@ public class AuthCommand {
     public static int registerUser(CommandSourceStack source, String username, String password) {
         runDbTask(source, () -> {
             PlayerEntryV1 playerData = DB.getUserDataOrCreate(username);
-            playerData.password = AuthHelper.hashPassword(password.toCharArray());
+            String hash = AuthHelper.hashPassword(password.toCharArray());
+            if (hash == null) {
+                langConfig.error.hasher.send(source);
+                return;
+            }
+            playerData.password = hash;
             playerData.registrationDate = ZonedDateTime.now();
             playerData.update();
 
@@ -387,6 +398,10 @@ public class AuthCommand {
                 return;
             }
             String newPasswordHash = AuthHelper.hashPassword(password.toCharArray());
+            if (newPasswordHash == null) {
+                langConfig.error.hasher.send(source);
+                return;
+            }
             playerData.password = newPasswordHash;
             playerData.update();
             

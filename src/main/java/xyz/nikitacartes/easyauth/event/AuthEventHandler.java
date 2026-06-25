@@ -40,11 +40,11 @@ import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.IpLimitManager;
 import xyz.nikitacartes.easyauth.utils.PlayersCache;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
+import xyz.nikitacartes.easyauth.utils.Utils;
 
 import java.net.SocketAddress;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -64,7 +64,12 @@ public class AuthEventHandler {
     public static Pattern usernamePattern;
 
     private static final Map<UUID, Long> lastAcceptedPacketByPlayer = new ConcurrentHashMap<>();
-    private static final Map<UUID, Boolean> administratorCache = new ConcurrentHashMap<>();
+
+    // Admin status is a cheap in-memory op-list lookup, but it's checked on every custom packet,
+    // so cache it with a short TTL. The TTL bounds how long an op/deop change stays invisible.
+    private record AdminFlag(boolean isAdmin, long checkedAtNanos) {}
+    private static final Map<UUID, AdminFlag> administratorCache = new ConcurrentHashMap<>();
+    private static final long ADMIN_TTL_NANOS = 60_000_000_000L; // 1m
 
     // Housekeeping packets an unauthenticated player must always be allowed to send.
     private static final Set<Class<?>> ALWAYS_ALLOWED = new HashSet<>();
@@ -211,7 +216,14 @@ public class AuthEventHandler {
 
     public static boolean isAdministratorCached(ServerPlayer player) {
         UUID playerUuid = player.getUUID();
-        return administratorCache.computeIfAbsent(playerUuid, ignored -> StoneCutterUtils.isAdministrator(player.server.getPlayerList(), player));
+        long now = System.nanoTime();
+        AdminFlag flag = administratorCache.get(playerUuid);
+        if (flag != null && now - flag.checkedAtNanos() < ADMIN_TTL_NANOS) {
+            return flag.isAdmin();
+        }
+        boolean isAdmin = StoneCutterUtils.isAdministrator(player.server.getPlayerList(), player);
+        administratorCache.put(playerUuid, new AdminFlag(isAdmin, now));
+        return isAdmin;
     }
 
     private static boolean isAllowedCustomPacket(String packetIdentifier) {
@@ -306,10 +318,6 @@ public class AuthEventHandler {
     public static void loadPlayerData(ServerPlayer player, Connection connection) {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
-        UUID playerUuid = player.getUUID();
-        PlayerList playerManager = player.server.getPlayerList();
-        administratorCache.put(playerUuid, StoneCutterUtils.isAdministrator(playerManager, player));
-
         // Create in case of Carpet player
         String username = StoneCutterUtils.getUsername(player);
         PlayerEntryV1 cache = PlayersCache.getOrCreate(username);
@@ -333,7 +341,7 @@ public class AuthEventHandler {
             playerAuth.easyAuth$setAuthenticated(true);
 
             update = false;
-        } else if (cache.lastIp.equals(playerAuth.easyAuth$getIpAddress()) && cache.lastAuthenticatedDate.plusSeconds(sessionTimeout).isAfter(ZonedDateTime.now())) {
+        } else if (Utils.sameResolvedIp(cache.lastIp, playerAuth.easyAuth$getIpAddress()) && cache.lastAuthenticatedDate.plusSeconds(sessionTimeout).isAfter(ZonedDateTime.now())) {
             playerAuth.easyAuth$setAuthenticated(true);
 
             cache.lastAuthenticatedDate = ZonedDateTime.now();
@@ -441,23 +449,6 @@ public class AuthEventHandler {
                 || (extendedConfig.aliases.login && command.startsWith("l "))
                 || (extendedConfig.aliases.register && command.startsWith("reg "))) {
             return InteractionResult.PASS;
-        }
-
-        String normalizedCommand = command.trim();
-        if (normalizedCommand.startsWith("/")) {
-            normalizedCommand = normalizedCommand.substring(1);
-        }
-
-        String lowercaseCommand = normalizedCommand.toLowerCase(Locale.ENGLISH);
-        if (lowercaseCommand.equals("op")
-                || lowercaseCommand.startsWith("op ")
-                || lowercaseCommand.equals("minecraft:op")
-                || lowercaseCommand.startsWith("minecraft:op ")
-                || lowercaseCommand.equals("deop")
-                || lowercaseCommand.startsWith("deop ")
-                || lowercaseCommand.equals("minecraft:deop")
-                || lowercaseCommand.startsWith("minecraft:deop ")) {
-            administratorCache.clear();
         }
 
         String username = StoneCutterUtils.getUsername(player);

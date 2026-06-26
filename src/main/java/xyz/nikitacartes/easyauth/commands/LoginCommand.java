@@ -46,6 +46,10 @@ public class LoginCommand {
 
     // Method called for checking the password
     public static int login(CommandSourceStack source, String pass) throws CommandSyntaxException {
+        return login(source, pass, null);
+    }
+
+    public static int login(CommandSourceStack source, String pass, Runnable onComplete) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
@@ -55,6 +59,7 @@ public class LoginCommand {
         if (playerAuth.easyAuth$isAuthenticated()) {
             LogLogin("Player " + username + " is already authenticated");
             langConfig.session.alreadyAuthenticated.send(source);
+            runComplete(onComplete);
             return 0;
         }
 
@@ -62,19 +67,43 @@ public class LoginCommand {
         if (IpLimitManager.isLoginRateLimitExceeded(ip)) {
             LogLogin("Player " + username + " blocked by login rate limit");
             langConfig.session.tooManyAttempts.send(source);
+            runComplete(onComplete);
             return 0;
         }
 
         PlayerEntryV1 playerData = playerAuth.easyAuth$getPlayerEntryV1();
 
-        AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(playerData, pass.toCharArray());
+        THREADPOOL.submit(() -> {
+            AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(playerData, pass.toCharArray());
+            player.server.execute(() -> {
+                applyLoginResult(source, player, playerAuth, playerData, username, ip, passwordResult);
+                runComplete(onComplete);
+            });
+        });
+        return 0;
+    }
+
+    private static void runComplete(Runnable onComplete) {
+        if (onComplete != null) {
+            onComplete.run();
+        }
+    }
+
+    // Applies the verify result on the server thread (state mutations, packets, feedback).
+    private static void applyLoginResult(CommandSourceStack source, ServerPlayer player, PlayerAuth playerAuth,
+                                         PlayerEntryV1 playerData, String username, String ip,
+                                         AuthHelper.PasswordOptions passwordResult) {
+        // Player may have left or authenticated another way while we were hashing.
+        if (playerAuth.easyAuth$isAuthenticated()) {
+            return;
+        }
 
         if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
             LogLogin("Player " + username + " provide correct password");
             if (playerData.lastKickedDate.plusSeconds(config.resetLoginAttemptsTimeout).isAfter(ZonedDateTime.now())) {
                 LogLogin("Player " + username + " will be kicked due to kick timeout");
                 player.connection.disconnect(langConfig.session.tooManyAttempts.get());
-                return 0;
+                return;
             }
             langConfig.session.loginSuccess.send(source);
             playerAuth.easyAuth$restoreTrueLocation();
@@ -92,15 +121,15 @@ public class LoginCommand {
                 IpLimitManager.invalidateCache(playerData.lastIp);
             }
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
-            return 0;
+            return;
         } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
             LogLogin("Player " + username + " is not registered");
             if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
                 langConfig.registration.requiredWithGlobalPassword.send(source);
-                return 0;
+                return;
             }
             langConfig.registration.required.send(source);
-            return 0;
+            return;
         }
         playerData.loginTries++;
         if (playerData.loginTries >= config.maxLoginTries && config.maxLoginTries != -1) { // Player exceeded maxLoginTries
@@ -114,11 +143,10 @@ public class LoginCommand {
             } else {
                 player.connection.disconnect(langConfig.session.tooManyAttempts.get());
             }
-            return 0;
+            return;
         }
         LogLogin("Player " + username + " provided wrong password");
         // Sending wrong pass message
         langConfig.password.incorrect.send(source);
-        return 0;
     }
 }

@@ -114,10 +114,11 @@ public class DialogHandler {
         }
         List<Component> feedback = new ArrayList<>();
         try {
-            LoginCommand.login(capturing(player, feedback), data.getStringOr("password", ""));
+            // Login verifies the hash off-thread, so finish() must run from the callback, not synchronously here.
+            LoginCommand.login(capturing(player, feedback), data.getStringOr("password", ""),
+                    () -> finish(player, AuthDialogs.LOGIN, feedback));
         } catch (Exception ignored) {
         }
-        finish(player, AuthDialogs.LOGIN, feedback);
     }
 
     private static void register(ServerPlayer player, CompoundTag data) {
@@ -140,7 +141,7 @@ public class DialogHandler {
         finish(player, AuthDialogs.REGISTER, feedback);
     }
 
-    /** Login/register flip the auth flag synchronously, so we can tell success from failure here. */
+    /** By the time finish() runs (register synchronously, login via its callback) the auth flag is set, so we can tell success from failure here. */
     private static void finish(ServerPlayer player, Identifier which, List<Component> feedback) {
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             close(player);

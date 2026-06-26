@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
+import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
+
 public class Utils {
 
     @Nullable
@@ -22,6 +24,9 @@ public class Utils {
     }
 
     public static boolean sameResolvedIp(String stored, String incoming) {
-        return isResolvedIp(incoming) && incoming.equals(stored);
+        return isResolvedIp(incoming) &&
+                (!extendedConfig.disableSessionForLoopback ||
+                        !(incoming.startsWith("127.") || "::1".equals(incoming) || "0:0:0:0:0:0:0:1".equals(incoming))) &&
+                incoming.equals(stored);
     }
 }

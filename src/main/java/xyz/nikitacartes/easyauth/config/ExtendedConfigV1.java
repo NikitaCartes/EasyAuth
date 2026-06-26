@@ -93,7 +93,15 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     public boolean allowAllPackets = false;
 
     @Comment("""
-            
+
+            Disable session auto-login when the player's IP is a loopback address (127.x.x.x or ::1).
+            Behind a reverse proxy (e.g. FRP) that does not forward the real IP, all players arrive from
+            127.0.0.1, so anyone can auto-login into someone else's session.
+            Set to false only if you are certain your proxy forwards real IPs.""")
+    public boolean disableSessionForLoopback = true;
+
+    @Comment("""
+
             Hide player's inventory from them while not logged in.""")
     public boolean hideInventory = true;
 

@@ -31,6 +31,7 @@
   - When enabled, login requires both factors: `/login <password> <code>` (the login window shows a second field automatically on 1.21.6+)
   - `/auth resetOtp <username>` for admins to clear 2FA when a player loses their device
   - New `enable-otp` option in `main.conf` to allow/disallow the feature server-wide
+- New `disable-session-for-loopback` option in `extended.conf` (default `true`)
 
 #### Fix
 - The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)
@@ -41,6 +42,7 @@
 - Updated Hungarian translation [#272](https://github.com/NikitaCartes/EasyAuth/issues/272), thanks to @Zan1456
 - Require Java 25 or newer to run EasyAuth 4.0.0
 - Format of `translation.conf` config. Old format is not supported and not migrated automatically, but backup of old config is created in `config/EasyAuth/backup`.
+- Session auto-login is now blocked when the connecting IP is a loopback address (`127.x.x.x` / `::1`), preventing account takeover behind reverse proxies (e.g. FRP) that do not forward the real player IP [#240](https://github.com/NikitaCartes/EasyAuth/issues/240)
 
 ---
 ### 3.4.3

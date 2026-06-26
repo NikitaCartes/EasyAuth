@@ -232,6 +232,12 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     public boolean requireRegistrationForPremium = false;
 
     @Comment("""
+
+            Disable new player registrations. Unregistered players are kicked on join.
+            Useful for private servers where only pre-registered players should be allowed.""")
+    public boolean disableRegistration = false;
+
+    @Comment("""
             
             IP Limit Settings - Restrict the number of accounts that can be registered/logged in from the same IP address.""")
     public IpLimitSettings ipLimit = new IpLimitSettings();

@@ -378,6 +378,11 @@ public class AuthEventHandler {
             return;
         }
 
+        if (extendedConfig.disableRegistration && playerAuth.easyAuth$getPlayerEntryV1().password.isEmpty()) {
+            player.connection.disconnect(langConfig.registration.registrationDisabled.get());
+            return;
+        }
+
         // Tries to rescue player from nether portal
         if (extendedConfig.tryPortalRescue) {
             BlockPos pos = player.blockPosition();

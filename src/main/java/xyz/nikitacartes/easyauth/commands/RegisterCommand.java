@@ -111,7 +111,10 @@ public class RegisterCommand {
         ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
-        if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
+        if (extendedConfig.disableRegistration) {
+            langConfig.registration.registrationDisabled.send(source);
+            return 0;
+        } else if (config.enableGlobalPassword && !config.singleUseGlobalPassword) {
             langConfig.session.loginRequired.send(source);
             return 0;
         } else if (playerAuth.easyAuth$isAuthenticated()) {

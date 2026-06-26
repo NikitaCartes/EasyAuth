@@ -174,6 +174,10 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
             langConfig.session.loginRequired.send(player);
             return;
         }
+        if (config.enableGlobalPassword && extendedConfig.requireRegistrationForPremium && easyAuth$isUsingMojangAccount()) {
+            langConfig.registration.premiumMustRegister.send(player);
+            return;
+        }
         if (!config.enableGlobalPassword) {
             langConfig.registration.required.send(player);
             return;
@@ -200,7 +204,8 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
         easyAuth$setUsingMojangAccount();
         canSkipAuth = (this.player.getClass() != ServerPlayer.class) ||
                 (config.floodgateAutoLogin && FloodgateApiHelper.isFloodgatePlayer(this.player)) ||
-                (config.premiumAutoLogin && easyAuth$isUsingMojangAccount());
+                (config.premiumAutoLogin && easyAuth$isUsingMojangAccount() &&
+                    !(config.enableGlobalPassword && extendedConfig.requireRegistrationForPremium && playerEntryV1.password.isEmpty()));
     }
 
     /**

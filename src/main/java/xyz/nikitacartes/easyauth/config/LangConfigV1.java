@@ -253,6 +253,7 @@ public class LangConfigV1 extends ConfigTemplate {
     public static final class Registration {
         public TranslatableText required = new TranslatableText("registration.required");
         public TranslatableText requiredWithGlobalPassword = new TranslatableText("registration.requiredWithGlobalPassword");
+        public TranslatableText premiumMustRegister = new TranslatableText("registration.premiumMustRegister");
         public TranslatableText alreadyRegistered = new TranslatableText("registration.alreadyRegistered");
         public TranslatableText success = new TranslatableText("registration.success");
         public TranslatableText notRegistered = new TranslatableText("registration.notRegistered");

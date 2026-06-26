@@ -226,6 +226,12 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     public boolean checkOfflinePlayersWithOnlineUsernames = false;
 
     @Comment("""
+
+            When enabled alongside enable-global-password, premium (online-account) players must register once
+            with the global password before auto-login is allowed. After registering they can join without a password.""")
+    public boolean requireRegistrationForPremium = false;
+
+    @Comment("""
             
             IP Limit Settings - Restrict the number of accounts that can be registered/logged in from the same IP address.""")
     public IpLimitSettings ipLimit = new IpLimitSettings();

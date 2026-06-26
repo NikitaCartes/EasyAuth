@@ -30,6 +30,7 @@ text:
     registration:
       required: "§6Use /register <password> <password> to claim this account."
       requiredWithGlobalPassword: "§6Use /register <global password> <password> <password> to claim this account."
+      premiumMustRegister: "§6Your account is not yet registered on this server. Use /register <global password> <password> <password> to claim your account."
       alreadyRegistered: "§6This account name is already registered!"
       success: "§aYou are now authorised."
       notRegistered: "§cThis player is not registered!"

@@ -70,7 +70,6 @@ public class MainConfigV1 extends ConfigTemplate {
     public boolean singleUseGlobalPassword = false;
 
     @Comment("""
-            
             Whether to teleport player to chosen location when joining (to hide original player coordinates).""")
     public boolean hidePlayerCoords = false;
 

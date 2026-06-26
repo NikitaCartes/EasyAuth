@@ -32,6 +32,7 @@
   - `/auth resetOtp <username>` for admins to clear 2FA when a player loses their device
   - New `enable-otp` option in `main.conf` to allow/disallow the feature server-wide
 - New `disable-session-for-loopback` option in `extended.conf` (default `true`)
+- New `require-registration-for-premium` option in `main.conf`: when enabled alongside `enable-global-password`, premium (online-account) players must register once with the global password before auto-login is allowed. [#201](https://github.com/NikitaCartes/EasyAuth/issues/201)
 
 #### Fix
 - The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)

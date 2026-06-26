@@ -29,6 +29,7 @@ import java.time.ZonedDateTime;
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 import static xyz.nikitacartes.easyauth.utils.Utils.getIp;
 import static xyz.nikitacartes.easyauth.utils.Utils.isResolvedIp;
 import static xyz.nikitacartes.easyauth.utils.Utils.sameResolvedIp;
@@ -49,8 +50,15 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
         PrepareSpawnTaskInterface spawnTask = (PrepareSpawnTaskInterface) prepareSpawnTask;
 
         PlayerEntryV1 entry = PlayersCache.get(gameProfile.name());
-        if ((entry == null) ||
-                (this.server.usesAuthentication() && config.premiumAutoLogin && entry.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE) ||
+
+        if (entry == null) {
+            spawnTask.easyAuth$setAuthenticated(false);
+            LogError(String.format("Player %s is not authenticated: no cache entry", gameProfile.name()));
+            LogError("This error should not happen. Please report that error to me.");
+            return;
+        }
+
+        if ((this.server.usesAuthentication() && config.premiumAutoLogin && entry.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE) ||
                 (config.floodgateAutoLogin && FloodgateApiHelper.isFloodgatePlayer(gameProfile.id())) ||
                 easyAuth$isSkipAllAuthChecksApplicable(entry)) {
             spawnTask.easyAuth$setAuthenticated(true);

@@ -282,9 +282,12 @@ public class AuthEventHandler {
         }
 
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
+        // Premium players bypass: their username is already validated by Mojang auth.
+        PlayerEntryV1 cachedEntry = PlayersCache.get(incomingPlayerUsername);
+        boolean isPremiumPlayer = cachedEntry != null && cachedEntry.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE;
         Matcher matcher = usernamePattern.matcher(incomingPlayerUsername);
 
-        if (!(matcher.matches() || (extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(StoneCutterUtils.getId(profile))))) {
+        if (!(matcher.matches() || isPremiumPlayer || (extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(StoneCutterUtils.getId(profile))))) {
             return langConfig.account.usernameInvalid.getNonTranslatable(extendedConfig.usernameRegexp);
         }
         // If the player name and registered name are different, kick the player if differentUsernameCase is enabled

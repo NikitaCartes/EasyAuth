@@ -138,8 +138,8 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     public long maxPasswordLength = -1;
 
     @Comment("""
-            
-            Regex for validation of player names.
+
+            Regex for validation of player names. Applied to offline players only; premium (online-account) players bypass this check.
             For more information, see https://github.com/NikitaCartes/EasyAuth/wiki/Username-Restriction""")
     public String usernameRegexp = "^[a-zA-Z0-9_]{3,16}$";
 

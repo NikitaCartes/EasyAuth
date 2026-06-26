@@ -21,12 +21,12 @@
 
 #### Add
 - NeoForge support for Minecraft 1.21[.X] and 26.[x]
-- Server-side Dialog windows (GUI) for login, registration, the account menu and the admin panel on Minecraft 1.21.6+. Older versions automatically fall back to the chat commands.
+- Server-side Dialog windows (GUI) for login, registration, the account menu and the admin panel on Minecraft 1.21.6+. Older versions automatically fall back to the chat commands. [#245](https://github.com/NikitaCartes/EasyAuth/issues/245)
   - New config file `dialogs.conf` to control them (`enabled`, `login`, `register`, `account`, `admin`, `can-close-with-escape`, `allow-datapack-override`)
   - Datapacks can override any built-in window by id (e.g. `easyauth:login`)
 - Per-player session length: `/account session [<seconds>]` (`0` = server default, `-1` = always require login; positive values are clamped to the server default)
 - Per-player toggle for the login window: `/account dialog <true|false>`
-- Two-factor authentication (TOTP), compatible with any authenticator app (Google Authenticator, Aegis, …)
+- Two-factor authentication (TOTP), compatible with any authenticator app (Google Authenticator, Aegis, …) [#135](https://github.com/NikitaCartes/EasyAuth/issues/135)
   - `/account otp enable` to start setup, `/account otp enable <code>` to confirm, `/account otp disable <code>` to turn off, `/account otp` to check status
   - When enabled, login requires both factors: `/login <password> <code>` (the login window shows a second field automatically on 1.21.6+)
   - `/auth resetOtp <username>` for admins to clear 2FA when a player loses their device
@@ -37,6 +37,7 @@
 - Respawn at the death point [#269](https://github.com/NikitaCartes/EasyAuth/issues/269)
 
 #### Changes
+- `username-regexp` now applies to offline players only; premium (online-account) players bypass the check [#214](https://github.com/NikitaCartes/EasyAuth/issues/214)
 - Updated Hungarian translation [#272](https://github.com/NikitaCartes/EasyAuth/issues/272), thanks to @Zan1456
 - Require Java 25 or newer to run EasyAuth 4.0.0
 - Format of `translation.conf` config. Old format is not supported and not migrated automatically, but backup of old config is created in `config/EasyAuth/backup`.

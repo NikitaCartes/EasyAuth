@@ -161,11 +161,7 @@ public class StoneCutterUtils {
         /^player.loadAndSpawnParentVehicle(Optional.of(rootVehicle));
          ^///?} else {
             /^CompoundTag nbtCompound = rootVehicle.getCompound("RootVehicle");
-            //? if > 1.19.4 {
-             Entity entity = EntityType.loadEntityRecursive(nbtCompound.getCompound("Entity"), player.serverLevel(), (vehicle) -> !player.serverLevel().addWithUUID(vehicle) ? null : vehicle);
-            //?} else {
-            /^¹Entity entity = EntityType.loadEntityRecursive(nbtCompound.getCompound("Entity"), player.getLevel(), (vehicle) -> !player.getLevel().addWithUUID(vehicle) ? null : vehicle);
-            ¹^///?}
+            Entity entity = EntityType.loadEntityRecursive(nbtCompound.getCompound("Entity"), getServerWorld(player), (vehicle) -> !getServerWorld(player).addWithUUID(vehicle) ? null : vehicle);
             if (entity != null) {
                 UUID uUID;
                 if (nbtCompound.hasUUID("Attach")) {

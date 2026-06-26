@@ -8,6 +8,7 @@ EasyAuth disallows players who aren't authenticated to do actions like placing b
 - Online UUIDs for online players
 - Server-side login/registration GUI windows (Minecraft 1.21.6+), with chat-command fallback on older versions
 - Sessions for auto login if they connect from the same IP, with optional per-player session length
+- Two-factor authentication (TOTP) with any authenticator app (Google Authenticator, Aegis, …)
 - IP-based account and session limits with exemptions and admin notifications
 - UUID management commands: set custom UUID
 - Multiple storage backends: SQLite (default), MySQL, PostgreSQL, MongoDB

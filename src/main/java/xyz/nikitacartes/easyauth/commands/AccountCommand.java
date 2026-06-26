@@ -2,7 +2,12 @@ package xyz.nikitacartes.easyauth.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
 import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
@@ -10,6 +15,7 @@ import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
+import xyz.nikitacartes.easyauth.utils.Totp;
 
 import java.io.IOException;
 
@@ -97,6 +103,27 @@ public class AccountCommand {
                                         ctx.getSource(),
                                         getBool(ctx, "show")
                                 ))
+                        )
+                )
+                .then(literal("otp")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.account.otp", true))
+                        .executes(ctx -> otpStatus(ctx.getSource()))
+                        .then(literal("enable")
+                                .executes(ctx -> otpEnableStart(ctx.getSource()))
+                                .then(argument("code", string())
+                                        .executes(ctx -> otpEnableConfirm(
+                                                ctx.getSource(),
+                                                getString(ctx, "code")
+                                        ))
+                                )
+                        )
+                        .then(literal("disable")
+                                .then(argument("code", string())
+                                        .executes(ctx -> otpDisable(
+                                                ctx.getSource(),
+                                                getString(ctx, "code")
+                                        ))
+                                )
                         )
                 )
         );
@@ -305,5 +332,117 @@ public class AccountCommand {
         playerEntry.update();
         langConfig.account.settingsSaved.send(source);
         return 1;
+    }
+
+    /** Reports whether two-factor authentication is currently active for the player. */
+    public static int otpStatus(CommandSourceStack source) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        (playerAuth.easyAuth$getPlayerEntryV1().hasOtp()
+                ? langConfig.account.otpStatusEnabled
+                : langConfig.account.otpStatusDisabled).send(source);
+        return 1;
+    }
+
+    /** Begins 2FA enrollment: generates a secret and shows the setup link/secret (and QR window on 1.21.6+). */
+    public static int otpEnableStart(CommandSourceStack source) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        PlayerAuth playerAuth = (PlayerAuth) player;
+        if (!config.enableOtp) {
+            langConfig.account.otpFeatureDisabled.send(source);
+            return 0;
+        }
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        PlayerEntryV1 entry = playerAuth.easyAuth$getPlayerEntryV1();
+        if (entry.hasOtp()) {
+            langConfig.account.otpAlreadyEnabled.send(source);
+            return 0;
+        }
+        String secret = Totp.generateSecret();
+        entry.otpSecret = secret;
+        entry.otpEnabled = false;
+        entry.update();
+        String uri = Totp.uri("EasyAuth", StoneCutterUtils.getUsername(player), secret);
+        langConfig.account.otpSetup.send(source);
+        source.sendSystemMessage(copyable(uri, ChatFormatting.AQUA));
+        source.sendSystemMessage(langConfig.account.otpSecretLabel.get().append(copyable(secret, ChatFormatting.YELLOW)));
+        //? if >= 1.21.6 {
+        if (dialogConfig.enabled && dialogConfig.account) {
+            AuthDialogs.openOtpSetup(player, secret, uri);
+        }
+        //?}
+        return 1;
+    }
+
+    /** Confirms enrollment: a valid code for the pending secret turns 2FA on. */
+    public static int otpEnableConfirm(CommandSourceStack source, String code) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!config.enableOtp) {
+            langConfig.account.otpFeatureDisabled.send(source);
+            return 0;
+        }
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        PlayerEntryV1 entry = playerAuth.easyAuth$getPlayerEntryV1();
+        if (entry.otpEnabled) {
+            langConfig.account.otpAlreadyEnabled.send(source);
+            return 0;
+        }
+        if (entry.otpSecret == null) {
+            langConfig.account.otpNoPending.send(source);
+            return 0;
+        }
+        if (!Totp.verify(entry.otpSecret, code, 1)) {
+            langConfig.account.otpInvalidCode.send(source);
+            return 0;
+        }
+        entry.otpEnabled = true;
+        entry.update();
+        langConfig.account.otpEnabled.send(source);
+        return 1;
+    }
+
+    /** Disables 2FA after verifying a current code, clearing the stored secret. */
+    public static int otpDisable(CommandSourceStack source, String code) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        PlayerEntryV1 entry = playerAuth.easyAuth$getPlayerEntryV1();
+        if (!entry.hasOtp()) {
+            langConfig.account.otpNotEnabled.send(source);
+            return 0;
+        }
+        if (!entry.verifyOtp(code)) {
+            langConfig.account.otpInvalidCode.send(source);
+            return 0;
+        }
+        entry.otpEnabled = false;
+        entry.otpSecret = null;
+        entry.update();
+        langConfig.account.otpDisabled.send(source);
+        return 1;
+    }
+
+    /** A literal component that copies {@code text} to the clipboard when clicked. */
+    private static MutableComponent copyable(String text, ChatFormatting color) {
+        return Component.literal(text).setStyle(Style.EMPTY.applyFormat(color).withClickEvent(copyClick(text)));
+    }
+
+    private static ClickEvent copyClick(String text) {
+        //? if >= 1.21.5 {
+        return new ClickEvent.CopyToClipboard(text);
+        //?} else {
+        /*return new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, text);
+        *///?}
     }
 }

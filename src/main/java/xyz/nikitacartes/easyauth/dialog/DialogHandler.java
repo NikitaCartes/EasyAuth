@@ -18,6 +18,9 @@ import xyz.nikitacartes.easyauth.commands.LogoutCommand;
 import xyz.nikitacartes.easyauth.commands.RegisterCommand;
 import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
+import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
+import xyz.nikitacartes.easyauth.utils.Totp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +65,11 @@ public class DialogHandler {
             case "unregister_form" -> open(player, AuthDialogs::openUnregister);
             case "account_online_form" -> open(player, AuthDialogs::openAccountOnline);
             case "settings_form" -> open(player, AuthDialogs::openSettings);
+            case "otp_setup_form" -> {
+                otpSetupForm(player);
+                return true;
+            }
+            case "otp_disable_form" -> open(player, AuthDialogs::openOtpDisable);
             // account actions (feedback goes to chat; the player is authenticated so it is visible)
             case "change_password" -> account(player, source ->
                     AccountCommand.changePassword(source, data.getStringOr("old_password", ""), data.getStringOr("new_password", "")));
@@ -72,6 +80,14 @@ public class DialogHandler {
             case "settings" -> account(player, source ->
                     AccountCommand.applySettings(source, data.getStringOr("session_timeout", "0"),
                             data.getBooleanOr("show_login_dialog", false)));
+            case "otp_enable" -> {
+                otpEnable(player, data);
+                return true;
+            }
+            case "otp_disable" -> {
+                otpDisable(player, data);
+                return true;
+            }
             case "logout" -> {
                 account(player, LogoutCommand::logout);
                 close(player);
@@ -115,10 +131,66 @@ public class DialogHandler {
         List<Component> feedback = new ArrayList<>();
         try {
             // Login verifies the hash off-thread, so finish() must run from the callback, not synchronously here.
-            LoginCommand.login(capturing(player, feedback), data.getStringOr("password", ""),
+            LoginCommand.login(capturing(player, feedback), data.getStringOr("password", ""), data.getStringOr("otp", ""),
                     () -> finish(player, AuthDialogs.LOGIN, feedback));
         } catch (Exception ignored) {
         }
+    }
+
+    /** Starts dialog 2FA enrollment: ensures a pending secret exists and opens the setup window. */
+    private static void otpSetupForm(ServerPlayer player) {
+        if (!((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return;
+        }
+        PlayerEntryV1 entry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
+        if (!config.enableOtp || entry.hasOtp()) {
+            AuthDialogs.openAccountMenu(player);
+            return;
+        }
+        if (entry.otpSecret == null) {
+            entry.otpSecret = Totp.generateSecret();
+            entry.otpEnabled = false;
+            entry.update();
+        }
+        String uri = Totp.uri("EasyAuth", StoneCutterUtils.getUsername(player), entry.otpSecret);
+        AuthDialogs.openOtpSetup(player, entry.otpSecret, uri);
+    }
+
+    private static void otpEnable(ServerPlayer player, CompoundTag data) {
+        if (!((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return;
+        }
+        PlayerEntryV1 entry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
+        List<Component> feedback = new ArrayList<>();
+        try {
+            AccountCommand.otpEnableConfirm(capturing(player, feedback), data.getStringOr("otp_code", ""));
+        } catch (Exception ignored) {
+        }
+        if (entry.otpEnabled || entry.otpSecret == null) {
+            close(player);
+            return;
+        }
+        String uri = Totp.uri("EasyAuth", StoneCutterUtils.getUsername(player), entry.otpSecret);
+        Component error = feedback.isEmpty() ? langConfig.account.otpInvalidCode.get() : feedback.getLast();
+        AuthDialogs.reopenOtpSetup(player, entry.otpSecret, uri, error);
+    }
+
+    private static void otpDisable(ServerPlayer player, CompoundTag data) {
+        if (!((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return;
+        }
+        PlayerEntryV1 entry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
+        List<Component> feedback = new ArrayList<>();
+        try {
+            AccountCommand.otpDisable(capturing(player, feedback), data.getStringOr("otp_code", ""));
+        } catch (Exception ignored) {
+        }
+        if (!entry.hasOtp()) {
+            close(player);
+            return;
+        }
+        Component error = feedback.isEmpty() ? langConfig.account.otpInvalidCode.get() : feedback.getLast();
+        AuthDialogs.reopenOtpDisable(player, error);
     }
 
     private static void register(ServerPlayer player, CompoundTag data) {

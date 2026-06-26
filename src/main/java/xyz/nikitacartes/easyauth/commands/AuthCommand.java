@@ -218,6 +218,15 @@ public class AuthCommand {
                                 ))
                         )
                 )
+                .then(literal("resetOtp")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.resetOtp", 3))
+                        .then(argument("username", word())
+                                .executes(ctx -> resetOtp(
+                                        ctx.getSource(),
+                                        getString(ctx, "username")
+                                ))
+                        )
+                )
         );
     }
 
@@ -498,6 +507,31 @@ public class AuthCommand {
             entry.update();
 
             langConfig.admin.markedOnline.send(source, username);
+        });
+        return 1;
+    }
+
+    /**
+     * Clears a player's two-factor authentication (for a lost authenticator device).
+     *
+     * @param source   executioner of the command
+     * @param username username of the player to reset 2FA for
+     * @return 1 on success
+     */
+    public static int resetOtp(CommandSourceStack source, String username) {
+        runDbTask(source, () -> {
+            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
+            PlayerEntryV1 entry = player != null
+                    ? ((PlayerAuth) player).easyAuth$getPlayerEntryV1()
+                    : DB.getUserData(username);
+            if (entry == null) {
+                langConfig.registration.notRegistered.send(source);
+                return;
+            }
+            entry.otpEnabled = false;
+            entry.otpSecret = null;
+            entry.update();
+            langConfig.account.otpReset.send(source, username);
         });
         return 1;
     }

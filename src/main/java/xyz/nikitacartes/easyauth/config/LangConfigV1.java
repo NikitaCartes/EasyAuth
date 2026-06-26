@@ -245,6 +245,8 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText timeExpired = new TranslatableText("session.timeExpired");
         public TranslatableText valid = new TranslatableText("session.valid");
         public TranslatableText onlineAccount = new TranslatableText("session.onlineAccount");
+        public TranslatableText otpRequired = new TranslatableText("session.otpRequired");
+        public TranslatableText otpIncorrect = new TranslatableText("session.otpIncorrect");
     }
 
     @ConfigSerializable
@@ -275,6 +277,18 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText dialogEnabled = new TranslatableText("account.dialogEnabled");
         public TranslatableText dialogDisabled = new TranslatableText("account.dialogDisabled");
         public TranslatableText settingsSaved = new TranslatableText("account.settingsSaved");
+        public TranslatableText otpStatusEnabled = new TranslatableText("account.otpStatusEnabled");
+        public TranslatableText otpStatusDisabled = new TranslatableText("account.otpStatusDisabled");
+        public TranslatableText otpFeatureDisabled = new TranslatableText("account.otpFeatureDisabled");
+        public TranslatableText otpAlreadyEnabled = new TranslatableText("account.otpAlreadyEnabled");
+        public TranslatableText otpSetup = new TranslatableText("account.otpSetup");
+        public TranslatableText otpSecretLabel = new TranslatableText("account.otpSecretLabel");
+        public TranslatableText otpNoPending = new TranslatableText("account.otpNoPending");
+        public TranslatableText otpInvalidCode = new TranslatableText("account.otpInvalidCode");
+        public TranslatableText otpEnabled = new TranslatableText("account.otpEnabled");
+        public TranslatableText otpNotEnabled = new TranslatableText("account.otpNotEnabled");
+        public TranslatableText otpDisabled = new TranslatableText("account.otpDisabled");
+        public TranslatableText otpReset = new TranslatableText("account.otpReset");
     }
 
     @ConfigSerializable
@@ -313,6 +327,7 @@ public class LangConfigV1 extends ConfigTemplate {
     public static final class Dialog {
         public TranslatableText cancel = new TranslatableText("dialog.cancel");
         public Login login = new Login();
+        public Otp otp = new Otp();
         public Register register = new Register();
         public ChangePassword changePassword = new ChangePassword();
         public Unregister unregister = new Unregister();
@@ -327,7 +342,21 @@ public class LangConfigV1 extends ConfigTemplate {
             public TranslatableText title = new TranslatableText("dialog.login.title");
             public TranslatableText prompt = new TranslatableText("dialog.login.prompt");
             public TranslatableText password = new TranslatableText("dialog.login.password");
+            public TranslatableText otp = new TranslatableText("dialog.login.otp");
             public TranslatableText submit = new TranslatableText("dialog.login.submit");
+        }
+
+        @ConfigSerializable
+        public static final class Otp {
+            public TranslatableText setupTitle = new TranslatableText("dialog.otp.setupTitle");
+            public TranslatableText setupPrompt = new TranslatableText("dialog.otp.setupPrompt");
+            public TranslatableText link = new TranslatableText("dialog.otp.link");
+            public TranslatableText secret = new TranslatableText("dialog.otp.secret");
+            public TranslatableText codeLabel = new TranslatableText("dialog.otp.codeLabel");
+            public TranslatableText setupSubmit = new TranslatableText("dialog.otp.setupSubmit");
+            public TranslatableText disableTitle = new TranslatableText("dialog.otp.disableTitle");
+            public TranslatableText disablePrompt = new TranslatableText("dialog.otp.disablePrompt");
+            public TranslatableText disableSubmit = new TranslatableText("dialog.otp.disableSubmit");
         }
 
         @ConfigSerializable
@@ -383,6 +412,10 @@ public class LangConfigV1 extends ConfigTemplate {
             public TranslatableText onlineTooltip = new TranslatableText("dialog.account.onlineTooltip");
             public TranslatableText settingsTooltip = new TranslatableText("dialog.account.settingsTooltip");
             public TranslatableText logoutTooltip = new TranslatableText("dialog.account.logoutTooltip");
+            public TranslatableText otpEnableButton = new TranslatableText("dialog.account.otpEnableButton");
+            public TranslatableText otpDisableButton = new TranslatableText("dialog.account.otpDisableButton");
+            public TranslatableText otpEnableTooltip = new TranslatableText("dialog.account.otpEnableTooltip");
+            public TranslatableText otpDisableTooltip = new TranslatableText("dialog.account.otpDisableTooltip");
         }
 
         @ConfigSerializable

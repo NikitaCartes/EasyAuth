@@ -37,6 +37,9 @@ public class LoginCommand {
                 .requires(EasyAuthPermissions.require("easyauth.commands.login", true))
                 .then(argument("password", string())
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
+                        )
+                        .then(argument("otp", string())
+                                .executes(ctx -> login(ctx.getSource(), getString(ctx, "password"), getString(ctx, "otp")))
                         ))
                 .executes(ctx -> {
                     langConfig.password.enter.send(ctx.getSource());
@@ -46,10 +49,14 @@ public class LoginCommand {
 
     // Method called for checking the password
     public static int login(CommandSourceStack source, String pass) throws CommandSyntaxException {
-        return login(source, pass, null);
+        return login(source, pass, null, null);
     }
 
-    public static int login(CommandSourceStack source, String pass, Runnable onComplete) throws CommandSyntaxException {
+    public static int login(CommandSourceStack source, String pass, String otp) throws CommandSyntaxException {
+        return login(source, pass, otp, null);
+    }
+
+    public static int login(CommandSourceStack source, String pass, String otp, Runnable onComplete) throws CommandSyntaxException {
         // Getting the player who send the command
         ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
@@ -76,7 +83,7 @@ public class LoginCommand {
         THREADPOOL.submit(() -> {
             AuthHelper.PasswordOptions passwordResult = AuthHelper.checkPassword(playerData, pass.toCharArray());
             player.server.execute(() -> {
-                applyLoginResult(source, player, playerAuth, playerData, username, ip, passwordResult);
+                applyLoginResult(source, player, playerAuth, playerData, username, ip, passwordResult, otp);
                 runComplete(onComplete);
             });
         });
@@ -92,13 +99,37 @@ public class LoginCommand {
     // Applies the verify result on the server thread (state mutations, packets, feedback).
     private static void applyLoginResult(CommandSourceStack source, ServerPlayer player, PlayerAuth playerAuth,
                                          PlayerEntryV1 playerData, String username, String ip,
-                                         AuthHelper.PasswordOptions passwordResult) {
+                                         AuthHelper.PasswordOptions passwordResult, String otp) {
         // Player may have left or authenticated another way while we were hashing.
         if (playerAuth.easyAuth$isAuthenticated()) {
             return;
         }
 
-        if (passwordResult == AuthHelper.PasswordOptions.CORRECT) {
+        if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
+            LogLogin("Player " + username + " is not registered");
+            if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
+                langConfig.registration.requiredWithGlobalPassword.send(source);
+                return;
+            }
+            langConfig.registration.required.send(source);
+            return;
+        }
+
+        boolean otpFailed = false;
+        if (passwordResult == AuthHelper.PasswordOptions.CORRECT && playerData.hasOtp()) {
+            if (otp == null || otp.isEmpty()) {
+                // Password was right; just ask for the second factor (no failed-attempt penalty).
+                LogLogin("Player " + username + " must provide a 2FA code");
+                langConfig.session.otpRequired.send(source);
+                return;
+            }
+            if (!playerData.verifyOtp(otp)) {
+                LogLogin("Player " + username + " provided wrong 2FA code");
+                otpFailed = true;
+            }
+        }
+
+        if (passwordResult == AuthHelper.PasswordOptions.CORRECT && !otpFailed) {
             LogLogin("Player " + username + " provide correct password");
             if (playerData.lastKickedDate.plusSeconds(config.resetLoginAttemptsTimeout).isAfter(ZonedDateTime.now())) {
                 LogLogin("Player " + username + " will be kicked due to kick timeout");
@@ -113,7 +144,7 @@ public class LoginCommand {
             String oldIp = playerData.lastIp;
             playerData.lastIp = playerAuth.easyAuth$getIpAddress();
             playerData.update();
-            
+
             // Invalidate IP cache if IP changed
             IpLimitManager.clearLoginAttempts(ip);
             if (!oldIp.equals(playerData.lastIp)) {
@@ -121,14 +152,6 @@ public class LoginCommand {
                 IpLimitManager.invalidateCache(playerData.lastIp);
             }
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
-            return;
-        } else if (passwordResult == AuthHelper.PasswordOptions.NOT_REGISTERED) {
-            LogLogin("Player " + username + " is not registered");
-            if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
-                langConfig.registration.requiredWithGlobalPassword.send(source);
-                return;
-            }
-            langConfig.registration.required.send(source);
             return;
         }
         playerData.loginTries++;
@@ -139,14 +162,14 @@ public class LoginCommand {
             playerData.loginTries = 0;
             playerData.update();
             if (config.maxLoginTries == 1) {
-                player.connection.disconnect(langConfig.password.incorrect.get());
+                player.connection.disconnect((otpFailed ? langConfig.session.otpIncorrect : langConfig.password.incorrect).get());
             } else {
                 player.connection.disconnect(langConfig.session.tooManyAttempts.get());
             }
             return;
         }
-        LogLogin("Player " + username + " provided wrong password");
-        // Sending wrong pass message
-        langConfig.password.incorrect.send(source);
+        LogLogin("Player " + username + " provided wrong " + (otpFailed ? "2FA code" : "password"));
+        // Sending wrong pass / wrong code message
+        (otpFailed ? langConfig.session.otpIncorrect : langConfig.password.incorrect).send(source);
     }
 }

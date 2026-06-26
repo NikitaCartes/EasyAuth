@@ -6,7 +6,8 @@
   "environment": "server",
   "entrypoints": {
     "fabric-gametest": [
-      "xyz.nikitacartes.easyauth.EasyAuthMixinTest"
+      "xyz.nikitacartes.easyauth.EasyAuthMixinTest",
+      "xyz.nikitacartes.easyauth.utils.TotpTest"
     ]
   }
 }

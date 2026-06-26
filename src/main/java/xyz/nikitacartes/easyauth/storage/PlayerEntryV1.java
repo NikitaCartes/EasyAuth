@@ -5,6 +5,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.utils.Totp;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -110,6 +111,20 @@ public class PlayerEntryV1 {
     @SerializedName("show_login_dialog")
     public boolean showLoginDialog = true;
 
+    /**
+     * Base32-encoded TOTP secret, or {@code null} if 2FA is not set up.
+     * Set when the player starts enrollment; 2FA only enforced once {@link #otpEnabled} is true.
+     */
+    @Expose
+    @SerializedName("otp_secret")
+    public String otpSecret = null;
+
+    /**
+     * Whether two-factor authentication is active for this player (confirmed enrollment).
+     */
+    @Expose
+    @SerializedName("otp_enabled")
+    public boolean otpEnabled = false;
 
     public PlayerEntryV1(String username, String usernameLowerCase, String uuid, String json) {
         PlayerEntryV1 entry = gson.fromJson(json, PlayerEntryV1.class);
@@ -130,6 +145,18 @@ public class PlayerEntryV1 {
         this.forcedUuid = entry.forcedUuid;
         this.sessionTimeout = entry.sessionTimeout;
         this.showLoginDialog = entry.showLoginDialog;
+        this.otpSecret = entry.otpSecret;
+        this.otpEnabled = entry.otpEnabled;
+    }
+
+    /** True if two-factor authentication is active and a code must be supplied at login. */
+    public boolean hasOtp() {
+        return otpEnabled && otpSecret != null;
+    }
+
+    /** Verifies a TOTP code against this player's secret (±1 time step for clock drift). */
+    public boolean verifyOtp(String code) {
+        return hasOtp() && Totp.verify(otpSecret, code, 1);
     }
 
     public PlayerEntryV1(String username) {

@@ -26,6 +26,11 @@
   - Datapacks can override any built-in window by id (e.g. `easyauth:login`)
 - Per-player session length: `/account session [<seconds>]` (`0` = server default, `-1` = always require login; positive values are clamped to the server default)
 - Per-player toggle for the login window: `/account dialog <true|false>`
+- Two-factor authentication (TOTP), compatible with any authenticator app (Google Authenticator, Aegis, …)
+  - `/account otp enable` to start setup, `/account otp enable <code>` to confirm, `/account otp disable <code>` to turn off, `/account otp` to check status
+  - When enabled, login requires both factors: `/login <password> <code>` (the login window shows a second field automatically on 1.21.6+)
+  - `/auth resetOtp <username>` for admins to clear 2FA when a player loses their device
+  - New `enable-otp` option in `main.conf` to allow/disallow the feature server-wide
 
 #### Fix
 - The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)

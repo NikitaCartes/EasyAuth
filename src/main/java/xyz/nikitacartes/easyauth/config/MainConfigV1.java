@@ -75,10 +75,18 @@ public class MainConfigV1 extends ConfigTemplate {
     public boolean hidePlayerCoords = false;
 
     @Comment("""
-            
+
             Whether to hide player from other players until they are authenticated
             This option requires the Vanish mod to be installed: https://github.com/DrexHD/Vanish""")
     public boolean vanishUntilAuth = true;
+
+    @Comment("""
+
+            Allow players to protect their account with two-factor authentication (TOTP).
+            When enabled, players can run /account otp enable to set up an authenticator app
+            (Google Authenticator, Aegis, etc.) and will be asked for a 6-digit code at login.
+            For more information, see https://github.com/NikitaCartes/EasyAuth/wiki/Two-Factor-Auth""")
+    public boolean enableOtp = true;
 
     @Comment("""
             

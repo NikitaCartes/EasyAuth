@@ -24,6 +24,8 @@ text:
       timeExpired: "§cAuthentication time has expired."
       valid: "§aYou have a valid session. No need to log in."
       onlineAccount: "§aYou are using an online account. No need to log in."
+      otpRequired: "§6This account is protected by two-factor authentication.\n§6Use /login <password> <code> with the code from your authenticator app."
+      otpIncorrect: "§4Incorrect two-factor code!"
     # Registration
     registration:
       required: "§6Use /register <password> <password> to claim this account."
@@ -50,6 +52,18 @@ text:
       dialogEnabled: "§aThe login window will be shown when you join."
       dialogDisabled: "§aYou will use the chat login prompt instead of the window."
       settingsSaved: "§aYour settings have been saved."
+      otpStatusEnabled: "§aTwo-factor authentication is enabled on your account."
+      otpStatusDisabled: "§6Two-factor authentication is disabled. Use /account otp enable to set it up."
+      otpFeatureDisabled: "§cTwo-factor authentication is disabled on this server."
+      otpAlreadyEnabled: "§6Two-factor authentication is already enabled on your account."
+      otpSetup: "§6Scan the link below in an authenticator app (Google Authenticator, Aegis, …), or enter the secret manually. Then confirm with /account otp enable <code>:"
+      otpSecretLabel: "§7Secret: "
+      otpNoPending: "§6Run /account otp enable first to start setup."
+      otpInvalidCode: "§4Invalid code. Please try again."
+      otpEnabled: "§aTwo-factor authentication is now enabled on your account."
+      otpNotEnabled: "§6Two-factor authentication is not enabled on your account."
+      otpDisabled: "§aTwo-factor authentication has been disabled."
+      otpReset: "§aTwo-factor authentication has been reset for player §e%s§a."
     # Uuid
     uuid:
       offline: "Offline UUID for player %s (click to copy):\n%s"
@@ -83,7 +97,18 @@ text:
         title: "Login"
         prompt: "§6Welcome back! Enter your password to log in."
         password: "Password"
+        otp: "2FA code"
         submit: "Log in"
+      otp:
+        setupTitle: "Two-factor authentication"
+        setupPrompt: "§6Add this account to an authenticator app (Google Authenticator, Aegis, …): click the setup link or the secret below to copy it, then paste it into the app. Enter the 6-digit code to confirm."
+        link: "§7Setup link (click to copy): %s"
+        secret: "§7Secret (click to copy): %s"
+        codeLabel: "6-digit code"
+        setupSubmit: "Enable 2FA"
+        disableTitle: "Disable two-factor authentication"
+        disablePrompt: "§6Enter a current 6-digit code to turn off two-factor authentication."
+        disableSubmit: "Disable 2FA"
       register:
         title: "Registration"
         prompt: "§6Welcome! Create a password to register your account."
@@ -121,6 +146,10 @@ text:
         onlineTooltip: "Switch to a premium (Mojang/Microsoft) account. Data tied to your offline UUID is lost."
         settingsTooltip: "Adjust your session length and whether the login window shows on join."
         logoutTooltip: "End your session now. You will need to log in again."
+        otpEnableButton: "Enable 2FA"
+        otpDisableButton: "Disable 2FA"
+        otpEnableTooltip: "Protect your account with an authenticator app (two-factor authentication)."
+        otpDisableTooltip: "Turn off two-factor authentication for your account."
       admin:
         title: "EasyAuth — Admin panel"
         usage: "§6Use /auth <subcommand>. Run /auth gui to open the panel."

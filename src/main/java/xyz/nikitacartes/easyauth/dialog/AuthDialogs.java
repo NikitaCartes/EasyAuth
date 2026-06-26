@@ -2,10 +2,14 @@
 package xyz.nikitacartes.easyauth.dialog;
 //? if >= 1.21.6 {
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.dialog.*;
 import net.minecraft.server.dialog.action.CustomAll;
@@ -50,6 +54,10 @@ public class AuthDialogs {
     public static final Identifier ACCOUNT_ONLINE = id("account_online");
     public static final Identifier SETTINGS = id("settings");
     public static final Identifier LOGOUT = id("logout");
+    public static final Identifier OTP_SETUP_FORM = id("otp_setup_form");
+    public static final Identifier OTP_ENABLE = id("otp_enable");
+    public static final Identifier OTP_DISABLE_FORM = id("otp_disable_form");
+    public static final Identifier OTP_DISABLE = id("otp_disable");
 
     private static final int WIDTH = 300;
     private static final int BUTTON_WIDTH = 200;
@@ -71,7 +79,7 @@ public class AuthDialogs {
             if (!dialogConfig.login) {
                 return false;
             }
-            open(player, LOGIN, buildLogin(null));
+            open(player, LOGIN, buildLogin(null, requireOtp(player)));
             return true;
         }
         if (!dialogConfig.register) {
@@ -82,20 +90,28 @@ public class AuthDialogs {
     }
 
     public static void reopenLogin(ServerPlayer player, Component error) {
-        open(player, LOGIN, buildLogin(error));
+        open(player, LOGIN, buildLogin(error, requireOtp(player)));
     }
 
     public static void reopenRegister(ServerPlayer player, Component error) {
         open(player, REGISTER, buildRegister(error));
     }
 
-    static MultiActionDialog buildLogin(Component error) {
+    private static boolean requireOtp(ServerPlayer player) {
+        return ((PlayerAuth) player).easyAuth$getPlayerEntryV1().hasOtp();
+    }
+
+    static MultiActionDialog buildLogin(Component error, boolean requireOtp) {
         List<DialogBody> body = new ArrayList<>();
         body.add(new PlainMessage(langConfig.dialog.login.prompt.get(), WIDTH));
         if (error != null) {
             body.add(new PlainMessage(error, WIDTH));
         }
-        List<Input> inputs = List.of(new Input("password", passwordField(langConfig.dialog.login.password.get())));
+        List<Input> inputs = new ArrayList<>();
+        inputs.add(new Input("password", passwordField(langConfig.dialog.login.password.get())));
+        if (requireOtp) {
+            inputs.add(new Input("otp", new TextInput(WIDTH, langConfig.dialog.login.otp.get(), true, "", 6, Optional.empty())));
+        }
         return new MultiActionDialog(
                 common(langConfig.dialog.login.title.get(), body, inputs, dialogConfig.canCloseWithEscape, DialogAction.NONE),
                 List.of(submit(langConfig.dialog.login.submit.get(), LOGIN)), Optional.empty(), 1);
@@ -119,16 +135,68 @@ public class AuthDialogs {
     }
 
     public static void openAccountMenu(ServerPlayer player) {
-        List<ActionButton> buttons = List.of(
-                submit(langConfig.dialog.changePassword.title.get(), langConfig.dialog.account.changePasswordTooltip.get(), CHANGE_PASSWORD_FORM),
-                submit(langConfig.dialog.unregister.title.get(), langConfig.dialog.account.unregisterTooltip.get(), UNREGISTER_FORM),
-                submit(langConfig.dialog.online.title.get(), langConfig.dialog.account.onlineTooltip.get(), ACCOUNT_ONLINE_FORM),
-                submit(langConfig.dialog.settings.title.get(), langConfig.dialog.account.settingsTooltip.get(), SETTINGS_FORM),
-                submit(langConfig.dialog.account.logoutButton.get(), langConfig.dialog.account.logoutTooltip.get(), LOGOUT));
+        List<ActionButton> buttons = new ArrayList<>();
+        buttons.add(submit(langConfig.dialog.changePassword.title.get(), langConfig.dialog.account.changePasswordTooltip.get(), CHANGE_PASSWORD_FORM));
+        buttons.add(submit(langConfig.dialog.unregister.title.get(), langConfig.dialog.account.unregisterTooltip.get(), UNREGISTER_FORM));
+        buttons.add(submit(langConfig.dialog.online.title.get(), langConfig.dialog.account.onlineTooltip.get(), ACCOUNT_ONLINE_FORM));
+        buttons.add(submit(langConfig.dialog.settings.title.get(), langConfig.dialog.account.settingsTooltip.get(), SETTINGS_FORM));
+        if (((PlayerAuth) player).easyAuth$getPlayerEntryV1().hasOtp()) {
+            buttons.add(submit(langConfig.dialog.account.otpDisableButton.get(), langConfig.dialog.account.otpDisableTooltip.get(), OTP_DISABLE_FORM));
+        } else if (config.enableOtp) {
+            buttons.add(submit(langConfig.dialog.account.otpEnableButton.get(), langConfig.dialog.account.otpEnableTooltip.get(), OTP_SETUP_FORM));
+        }
+        buttons.add(submit(langConfig.dialog.account.logoutButton.get(), langConfig.dialog.account.logoutTooltip.get(), LOGOUT));
         MultiActionDialog menu = new MultiActionDialog(
                 common(langConfig.dialog.account.title.get(), List.of(), List.of(), true, DialogAction.NONE),
                 buttons, Optional.empty(), 1);
         open(player, ACCOUNT, menu);
+    }
+
+    /** Setup window: shows the QR code + secret and asks for a confirmation code. */
+    public static void openOtpSetup(ServerPlayer player, String secret, String uri) {
+        open(player, OTP_SETUP_FORM, buildOtpSetup(player, secret, uri, null));
+    }
+
+    public static void reopenOtpSetup(ServerPlayer player, String secret, String uri, Component error) {
+        open(player, OTP_SETUP_FORM, buildOtpSetup(player, secret, uri, error));
+    }
+
+    private static ConfirmationDialog buildOtpSetup(ServerPlayer player, String secret, String uri, Component error) {
+        List<DialogBody> body = new ArrayList<>();
+        body.add(new PlainMessage(langConfig.dialog.otp.setupPrompt.get(), WIDTH));
+        body.add(new PlainMessage(langConfig.dialog.otp.link.get(copyable(uri)), WIDTH));
+        body.add(new PlainMessage(langConfig.dialog.otp.secret.get(copyable(secret)), WIDTH));
+        if (error != null) {
+            body.add(new PlainMessage(error, WIDTH));
+        }
+        List<Input> inputs = List.of(
+                new Input("otp_code", new TextInput(WIDTH, langConfig.dialog.otp.codeLabel.get(), true, "", 6, Optional.empty())));
+        return new ConfirmationDialog(
+                common(langConfig.dialog.otp.setupTitle.get(), body, inputs, true, DialogAction.CLOSE),
+                submit(langConfig.dialog.otp.setupSubmit.get(), OTP_ENABLE),
+                cancelButton());
+    }
+
+    public static void openOtpDisable(ServerPlayer player) {
+        open(player, OTP_DISABLE_FORM, buildOtpDisable(null));
+    }
+
+    public static void reopenOtpDisable(ServerPlayer player, Component error) {
+        open(player, OTP_DISABLE_FORM, buildOtpDisable(error));
+    }
+
+    private static ConfirmationDialog buildOtpDisable(Component error) {
+        List<DialogBody> body = new ArrayList<>();
+        body.add(new PlainMessage(langConfig.dialog.otp.disablePrompt.get(), WIDTH));
+        if (error != null) {
+            body.add(new PlainMessage(error, WIDTH));
+        }
+        List<Input> inputs = List.of(
+                new Input("otp_code", new TextInput(WIDTH, langConfig.dialog.otp.codeLabel.get(), true, "", 6, Optional.empty())));
+        return new ConfirmationDialog(
+                common(langConfig.dialog.otp.disableTitle.get(), body, inputs, true, DialogAction.CLOSE),
+                submit(langConfig.dialog.otp.disableSubmit.get(), OTP_DISABLE),
+                cancelButton());
     }
 
     public static void openChangePassword(ServerPlayer player) {
@@ -279,6 +347,17 @@ public class AuthDialogs {
                     submit(action.label().get(), submitId), cancelButton());
         }
         open(player, dialogId, dialog);
+    }
+
+    /** A clickable component that copies {@code text} to the clipboard (for the setup link/secret). */
+    private static MutableComponent copyable(String text) {
+        return Component.literal(text).setStyle(Style.EMPTY.applyFormat(ChatFormatting.AQUA).withClickEvent(
+                //? if >= 1.21.5 {
+                new ClickEvent.CopyToClipboard(text)
+                //?} else {
+                /*new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, text)
+                *///?}
+        ));
     }
 
     private static TextInput passwordField(Component label) {

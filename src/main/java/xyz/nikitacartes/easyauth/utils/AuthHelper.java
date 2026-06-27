@@ -50,19 +50,6 @@ public class AuthHelper {
         return checkPassword(player.easyAuth$getPlayerEntryV1(), password);
     }
 
-    /**
-     * Checks if player can force login
-     *
-     * @param player PlayerAuth object
-     * @return PasswordOptions enum
-     */
-    public static PasswordOptions canForceLogin(PlayerAuth player) {
-        PlayerEntryV1 entryV1 = player.easyAuth$getPlayerEntryV1();
-        if (entryV1 == null || entryV1.password.isEmpty()) return PasswordOptions.NOT_REGISTERED;
-        if (player.easyAuth$isAuthenticated()) return PasswordOptions.WRONG;
-        return PasswordOptions.CORRECT;
-    }
-
     public static boolean checkGlobalPassword(char[] password) {
         if (!verifyPassword(password, technicalConfig.globalPassword)) return false;
 

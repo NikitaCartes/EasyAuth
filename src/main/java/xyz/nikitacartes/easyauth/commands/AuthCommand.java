@@ -23,6 +23,7 @@ import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.IpLimitManager;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
 import java.io.IOException;
@@ -42,6 +43,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.isValidUsername;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogLogin;
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getUsername;
 
 public class AuthCommand {
@@ -241,6 +243,15 @@ public class AuthCommand {
                                                 getString(ctx, "newUsername")
                                         ))
                                 )
+                        )
+                )
+                .then(literal("forceLogin")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.forceLogin", 3))
+                        .then(argument("username", word())
+                                .executes(ctx -> forceLogin(
+                                        ctx.getSource(),
+                                        getString(ctx, "username")
+                                ))
                         )
                 )
         );
@@ -549,6 +560,51 @@ public class AuthCommand {
             entry.update();
             langConfig.account.otpReset.send(source, username);
         });
+        return 1;
+    }
+
+    /**
+     * Forces an online, unauthenticated player to be logged in, bypassing the password prompt.
+     * Intended for integrations where an external system authenticates the player.
+     *
+     * @param source   executioner of the command
+     * @param username username of the player to force-login
+     * @return 1 on success
+     */
+    public static int forceLogin(CommandSourceStack source, String username) {
+        ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
+        if (player == null) {
+            langConfig.admin.forceLoginOffline.send(source, username);
+            return 0;
+        }
+        PlayerAuth playerAuth = (PlayerAuth) player;
+        if (playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.admin.forceLoginAlreadyAuthenticated.send(source, username);
+            return 0;
+        }
+        PlayerEntryV1 playerData = playerAuth.easyAuth$getPlayerEntryV1();
+        if (playerData == null || playerData.password.isEmpty()) {
+            langConfig.registration.notRegistered.send(source);
+            return 0;
+        }
+
+        LogLogin("Player " + username + " was force-logged-in by " + source.getTextName());
+        playerAuth.easyAuth$restoreTrueLocation();
+        playerAuth.easyAuth$setAuthenticated(true);
+        playerData.lastAuthenticatedDate = ZonedDateTime.now();
+        playerData.loginTries = 0;
+        String oldIp = playerData.lastIp;
+        playerData.lastIp = playerAuth.easyAuth$getIpAddress();
+        playerData.update();
+
+        // Invalidate IP cache if the IP changed
+        if (!oldIp.equals(playerData.lastIp)) {
+            IpLimitManager.invalidateCache(oldIp);
+            IpLimitManager.invalidateCache(playerData.lastIp);
+        }
+
+        langConfig.session.loginSuccess.send(player);
+        langConfig.admin.forceLoginSuccess.send(source, username);
         return 1;
     }
 

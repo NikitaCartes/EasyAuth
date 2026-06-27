@@ -36,6 +36,7 @@
 - New `disable-registration` option in `extended.conf`: blocks new registrations and kicks unregistered players on join, for private servers that only allow pre-registered accounts. [#215](https://github.com/NikitaCartes/EasyAuth/issues/215)
 - New `hide-chat` option in `extended.conf` (default `true`): hides chat from unauthenticated players. [#235](https://github.com/NikitaCartes/EasyAuth/issues/235)
 - `/auth migrate <oldName> <newName>` to move an account and its world data (playerdata, stats, advancements) to a new username after a name change. Both players must be offline and the target must have no existing data.
+- `/auth forceLogin <username>` to authenticate an online, registered player without their password, for integrations that confirm logins externally (e.g. a Discord bot). [#263](https://github.com/NikitaCartes/EasyAuth/issues/263), [#264](https://github.com/NikitaCartes/EasyAuth/issues/264), [#129](https://github.com/NikitaCartes/EasyAuth/issues/129)
 
 #### Fix
 - The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)

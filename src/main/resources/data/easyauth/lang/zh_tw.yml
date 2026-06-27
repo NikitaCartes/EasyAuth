@@ -49,6 +49,9 @@ text:
       configReloaded: "§a配置文件成功重載。"
       spawnSet: "§a重生點已設置。"
       registeredPlayers: "已注冊玩家列表："
+      forceLoginOffline: "§c玩家 §e%s §c不在線。"
+      forceLoginAlreadyAuthenticated: "§c玩家 §e%s §c已經登入。"
+      forceLoginSuccess: "§a已強制玩家 §e%s §a登入。"
       ipLimitNotify: "§e[EasyAuth] §cIP限制警告: §f玩家 §e%s §f來自IP §e%s §f超出了 §e%d §f個帳戶的限制。已有帳戶: §e%s"
     # Error
     error:

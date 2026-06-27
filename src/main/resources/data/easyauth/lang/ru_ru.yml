@@ -86,6 +86,9 @@ text:
       migrateSameName: "§cСтарый и новый никнеймы должны различаться."
       migratePlayerOnline: "§cОба игрока должны быть оффлайн. Кикните их перед переносом."
       migrateTargetExists: "§cУ игрока §e%s §cуже есть данные. Удалите их перед переносом."
+      forceLoginOffline: "§cИгрок §e%s §cне в сети."
+      forceLoginAlreadyAuthenticated: "§cИгрок §e%s §cуже авторизован."
+      forceLoginSuccess: "§aИгрок §e%s §aпринудительно авторизован."
       ipLimitNotify: "§e[EasyAuth] §cПревышение лимита IP: §fИгрок §e%s §fс IP §e%s §fпревысил лимит в §e%d §fаккаунтов. Существующие аккаунты: §e%s"
       databaseUnavailable: "§e[EasyAuth] §4База данных недоступна после перезагрузки — вход и регистрация заблокированы, пока она не будет восстановлена."
     # Error

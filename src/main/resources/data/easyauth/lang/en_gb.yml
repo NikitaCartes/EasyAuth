@@ -86,6 +86,9 @@ text:
       migrateSameName: "§cThe old and new usernames must be different."
       migratePlayerOnline: "§cBoth players must be offline. Disconnect them before migrating."
       migrateTargetExists: "§cPlayer §e%s §calready has data. Remove it before migrating."
+      forceLoginOffline: "§cPlayer §e%s §cis not online."
+      forceLoginAlreadyAuthenticated: "§cPlayer §e%s §cis already authenticated."
+      forceLoginSuccess: "§aPlayer §e%s §ahas been forced to log in."
       ipLimitNotify: "§e[EasyAuth] §cIP Limit Warning: §fPlayer §e%s §ffrom IP §e%s §fexceeded the limit of §e%d §faccounts. Existing accounts: §e%s"
       databaseUnavailable: "§e[EasyAuth] §4Database unavailable after reload — logins and registrations are locked until it is restored."
     # Error

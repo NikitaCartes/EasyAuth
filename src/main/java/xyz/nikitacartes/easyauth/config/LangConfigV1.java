@@ -315,6 +315,9 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText migrateSameName = new TranslatableText("admin.migrateSameName");
         public TranslatableText migratePlayerOnline = new TranslatableText("admin.migratePlayerOnline");
         public TranslatableText migrateTargetExists = new TranslatableText("admin.migrateTargetExists");
+        public TranslatableText forceLoginOffline = new TranslatableText("admin.forceLoginOffline");
+        public TranslatableText forceLoginAlreadyAuthenticated = new TranslatableText("admin.forceLoginAlreadyAuthenticated");
+        public TranslatableText forceLoginSuccess = new TranslatableText("admin.forceLoginSuccess");
         public TranslatableText ipLimitNotify = new TranslatableText("admin.ipLimitNotify");
         public TranslatableText databaseUnavailable = new TranslatableText("admin.databaseUnavailable");
     }

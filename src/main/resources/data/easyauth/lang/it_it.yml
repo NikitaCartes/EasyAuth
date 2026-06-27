@@ -44,3 +44,6 @@ text:
       configReloaded: "§aIl file di configurazione è stato ricaricato con successo."
       spawnSet: "§aSpawn per autenticazione impostato correttamente."
       registeredPlayers: "Lista di giocatori registrati:"
+      forceLoginOffline: "§cIl giocatore §e%s §cnon è online."
+      forceLoginAlreadyAuthenticated: "§cIl giocatore §e%s §cha già effettuato l'accesso."
+      forceLoginSuccess: "§aIl giocatore §e%s §aè stato forzato ad effettuare l'accesso."

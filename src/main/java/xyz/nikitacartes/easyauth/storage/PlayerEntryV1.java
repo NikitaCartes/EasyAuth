@@ -169,6 +169,27 @@ public class PlayerEntryV1 {
         this.uuid = uuid;
     }
 
+    /**
+     * Copies this entry's account and auth state onto {@code target}, leaving identity fields
+     * (username, usernameLowerCase, uuid, forcedUuid) untouched. Used by {@code /auth migrate}.
+     * <p>
+     * When adding a new persisted account field above, copy it here too so migration keeps it.
+     */
+    public void copyAccountDataTo(PlayerEntryV1 target) {
+        target.password = this.password;
+        target.lastIp = this.lastIp;
+        target.lastAuthenticatedDate = this.lastAuthenticatedDate;
+        target.loginTries = this.loginTries;
+        target.lastKickedDate = this.lastKickedDate;
+        target.onlineAccount = this.onlineAccount;
+        target.registrationDate = this.registrationDate;
+        target.dataVersion = this.dataVersion;
+        target.sessionTimeout = this.sessionTimeout;
+        target.showLoginDialog = this.showLoginDialog;
+        target.otpSecret = this.otpSecret;
+        target.otpEnabled = this.otpEnabled;
+    }
+
     public String toJson() {
         return gson.toJson(this);
     }

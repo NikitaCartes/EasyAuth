@@ -263,6 +263,7 @@ public class DialogHandler {
                 case "set_global_password" -> AuthCommand.setGlobalPassword(source, data.getStringOr("password", ""), data.getBooleanOr("single_use", false));
                 case "set_uuid" -> AuthCommand.setUuid(source, username, data.getStringOr("uuid", ""));
                 case "clear_uuid" -> AuthCommand.clearUuid(source, username);
+                case "migrate" -> AuthCommand.migrate(source, data.getStringOr("old_username", ""), data.getStringOr("new_username", ""));
                 default -> { }
             }
         } catch (Exception ignored) {

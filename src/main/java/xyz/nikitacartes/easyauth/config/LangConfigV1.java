@@ -311,6 +311,10 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText registeredPlayers = new TranslatableText("admin.registeredPlayers");
         public TranslatableText markedOffline = new TranslatableText("admin.markedOffline");
         public TranslatableText markedOnline = new TranslatableText("admin.markedOnline");
+        public TranslatableText migrated = new TranslatableText("admin.migrated");
+        public TranslatableText migrateSameName = new TranslatableText("admin.migrateSameName");
+        public TranslatableText migratePlayerOnline = new TranslatableText("admin.migratePlayerOnline");
+        public TranslatableText migrateTargetExists = new TranslatableText("admin.migrateTargetExists");
         public TranslatableText ipLimitNotify = new TranslatableText("admin.ipLimitNotify");
         public TranslatableText databaseUnavailable = new TranslatableText("admin.databaseUnavailable");
     }
@@ -439,6 +443,7 @@ public class LangConfigV1 extends ConfigTemplate {
             public TranslatableText setGlobalPassword = new TranslatableText("dialog.admin.setGlobalPassword");
             public TranslatableText setUuid = new TranslatableText("dialog.admin.setUuid");
             public TranslatableText clearUuid = new TranslatableText("dialog.admin.clearUuid");
+            public TranslatableText migrate = new TranslatableText("dialog.admin.migrate");
             public TranslatableText reloadTooltip = new TranslatableText("dialog.admin.reloadTooltip");
             public TranslatableText listTooltip = new TranslatableText("dialog.admin.listTooltip");
             public TranslatableText onlinePlayersTooltip = new TranslatableText("dialog.admin.onlinePlayersTooltip");
@@ -453,11 +458,14 @@ public class LangConfigV1 extends ConfigTemplate {
             public TranslatableText setGlobalPasswordTooltip = new TranslatableText("dialog.admin.setGlobalPasswordTooltip");
             public TranslatableText setUuidTooltip = new TranslatableText("dialog.admin.setUuidTooltip");
             public TranslatableText clearUuidTooltip = new TranslatableText("dialog.admin.clearUuidTooltip");
+            public TranslatableText migrateTooltip = new TranslatableText("dialog.admin.migrateTooltip");
         }
 
         @ConfigSerializable
         public static final class Field {
             public TranslatableText username = new TranslatableText("dialog.field.username");
+            public TranslatableText oldUsername = new TranslatableText("dialog.field.oldUsername");
+            public TranslatableText newUsername = new TranslatableText("dialog.field.newUsername");
             public TranslatableText password = new TranslatableText("dialog.field.password");
             public TranslatableText uuid = new TranslatableText("dialog.field.uuid");
             public TranslatableText singleUse = new TranslatableText("dialog.field.singleUse");

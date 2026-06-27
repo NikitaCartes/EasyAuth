@@ -295,7 +295,11 @@ public class AuthDialogs {
             new AdminAction("set_uuid", () -> langConfig.dialog.admin.setUuid.get(), () -> langConfig.dialog.admin.setUuidTooltip.get(),
                     List.of(username(), new FormField("uuid", () -> langConfig.dialog.field.uuid.get(), false)), true, "easyauth.commands.auth.setUuid", 4),
             new AdminAction("clear_uuid", () -> langConfig.dialog.admin.clearUuid.get(), () -> langConfig.dialog.admin.clearUuidTooltip.get(),
-                    List.of(username()), true, "easyauth.commands.auth.clearUuid", 4));
+                    List.of(username()), true, "easyauth.commands.auth.clearUuid", 4),
+            new AdminAction("migrate", () -> langConfig.dialog.admin.migrate.get(), () -> langConfig.dialog.admin.migrateTooltip.get(),
+                    List.of(new FormField("old_username", () -> langConfig.dialog.field.oldUsername.get(), false),
+                            new FormField("new_username", () -> langConfig.dialog.field.newUsername.get(), false)),
+                    true, "easyauth.commands.auth.migrate", 4));
 
     public static AdminAction adminAction(String key) {
         for (AdminAction action : ADMIN_ACTIONS) {

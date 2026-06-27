@@ -15,7 +15,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.LevelResource;
 import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
 import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
@@ -24,6 +26,8 @@ import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -225,6 +229,18 @@ public class AuthCommand {
                                         ctx.getSource(),
                                         getString(ctx, "username")
                                 ))
+                        )
+                )
+                .then(literal("migrate")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.migrate", 4))
+                        .then(argument("oldUsername", word())
+                                .then(argument("newUsername", word())
+                                        .executes(ctx -> migrate(
+                                                ctx.getSource(),
+                                                getString(ctx, "oldUsername"),
+                                                getString(ctx, "newUsername")
+                                        ))
+                                )
                         )
                 )
         );
@@ -534,6 +550,102 @@ public class AuthCommand {
             langConfig.account.otpReset.send(source, username);
         });
         return 1;
+    }
+
+    /**
+     * Migrates an account and its world data from one username to another (e.g. after a name change).
+     * Moves playerdata/stats/advancements files and the database record.
+     * Both players must be offline, and the target must not already have data.
+     * <p>
+     * The file target is always the new name's offline UUID. On an online-mode server where the new
+     * name is premium, the data reaches the Mojang UUID via the existing offline→online auto-migration
+     * on join (see PlayerDataStorageMixin / PlayerListMixin#migrateOfflineStats), optionally after
+     * {@code /auth markAsOnline}.
+     *
+     * @param source      executioner of the command
+     * @param oldUsername username to migrate data from
+     * @param newUsername username to migrate data to
+     * @return 1 on success
+     */
+    public static int migrate(CommandSourceStack source, String oldUsername, String newUsername) {
+        if (oldUsername.equalsIgnoreCase(newUsername)) {
+            langConfig.admin.migrateSameName.send(source);
+            return 0;
+        }
+
+        MinecraftServer server = source.getServer();
+        if (server.getPlayerList().getPlayerByName(oldUsername) != null
+                || server.getPlayerList().getPlayerByName(newUsername) != null) {
+            langConfig.admin.migratePlayerOnline.send(source);
+            return 0;
+        }
+
+        runDbTask(source, () -> {
+            PlayerEntryV1 oldEntry = DB.getUserData(oldUsername);
+            if (oldEntry == null) {
+                langConfig.registration.notRegistered.send(source);
+                return;
+            }
+            if (DB.getUserData(newUsername) != null) {
+                langConfig.admin.migrateTargetExists.send(source, newUsername);
+                return;
+            }
+
+            UUID sourceUuid = (oldEntry.forcedUuid != null && !oldEntry.forcedUuid.isEmpty())
+                    ? UUID.fromString(oldEntry.forcedUuid)
+                    : UUIDUtil.createOfflinePlayerUUID(oldUsername);
+            UUID destUuid = UUIDUtil.createOfflinePlayerUUID(newUsername);
+
+            try {
+                if (!migratePlayerFiles(server, sourceUuid, destUuid)) {
+                    langConfig.admin.migrateTargetExists.send(source, newUsername);
+                    return;
+                }
+            } catch (IOException e) {
+                LogError("Failed to migrate player files from " + oldUsername + " to " + newUsername, e);
+                langConfig.error.unknown.send(source);
+                return;
+            }
+
+            // Copy the account record onto the new username, then drop the old one.
+            PlayerEntryV1 newEntry = DB.getUserDataOrCreate(newUsername);
+            oldEntry.copyAccountDataTo(newEntry);
+            DB.updateUserData(newEntry);
+            DB.deleteUserData(oldUsername);
+
+            LogInfo("Migrated account and player data from " + oldUsername + " to " + newUsername);
+            langConfig.admin.migrated.send(source, oldUsername, newUsername);
+        });
+        return 1;
+    }
+
+    /**
+     * Moves a player's data files (playerdata, stats, advancements) from one UUID to another.
+     * Refuses (returns false) without moving anything if any destination file already exists.
+     */
+    private static boolean migratePlayerFiles(MinecraftServer server, UUID from, UUID to) throws IOException {
+        Path playerData = server.getWorldPath(LevelResource.PLAYER_DATA_DIR);
+        Path stats = server.getWorldPath(LevelResource.PLAYER_STATS_DIR);
+        Path advancements = server.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR);
+
+        Path[][] moves = {
+                {playerData.resolve(from + ".dat"), playerData.resolve(to + ".dat")},
+                {playerData.resolve(from + ".dat_old"), playerData.resolve(to + ".dat_old")},
+                {stats.resolve(from + ".json"), stats.resolve(to + ".json")},
+                {advancements.resolve(from + ".json"), advancements.resolve(to + ".json")},
+        };
+
+        for (Path[] move : moves) {
+            if (Files.exists(move[1])) {
+                return false;
+            }
+        }
+        for (Path[] move : moves) {
+            if (Files.exists(move[0])) {
+                Files.move(move[0], move[1]);
+            }
+        }
+        return true;
     }
 
     /**

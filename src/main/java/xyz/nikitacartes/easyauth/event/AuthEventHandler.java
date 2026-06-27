@@ -241,6 +241,22 @@ public class AuthEventHandler {
     }
 
     /**
+     * Whether a clientbound packet about to be sent to the player should be suppressed because the
+     * player is not authenticated and {@code hide-chat} is enabled.
+     * System messages are left untouched.
+     */
+    public static boolean shouldHideClientboundChat(ServerPlayer player, Packet<?> packet) {
+        if (!extendedConfig.hideChat || player == null) {
+            return false;
+        }
+        if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
+            return false;
+        }
+        return packet instanceof ClientboundPlayerChatPacket
+                || packet instanceof ClientboundDisguisedChatPacket;
+    }
+
+    /**
      * Player pre-join.
      * Returns text as a reason for disconnect or null to pass
      *

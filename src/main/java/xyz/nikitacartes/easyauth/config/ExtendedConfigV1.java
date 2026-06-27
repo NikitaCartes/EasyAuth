@@ -18,7 +18,13 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     public boolean allowChat = false;
 
     @Comment("""
-            
+
+            Hide  chat from players who are not logged in.
+            EasyAuth's own login prompts and other system messages are not affected.""")
+    public boolean hideChat = true;
+
+    @Comment("""
+
             Allow players to use all commands while not logged in.""")
     public boolean allowCommands = false;
 

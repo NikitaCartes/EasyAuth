@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.core.UUIDUtil;
@@ -17,18 +18,16 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.storage.LevelResource;
 import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
 import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.IpLimitManager;
+import xyz.nikitacartes.easyauth.utils.PlayerDataMigration;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -241,6 +240,18 @@ public class AuthCommand {
                                                 ctx.getSource(),
                                                 getString(ctx, "oldUsername"),
                                                 getString(ctx, "newUsername")
+                                        ))
+                                )
+                        )
+                )
+                .then(literal("migrateUuid")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.migrate", 4))
+                        .then(argument("from", UuidArgument.uuid())
+                                .then(argument("to", UuidArgument.uuid())
+                                        .executes(ctx -> migrateUuid(
+                                                ctx.getSource(),
+                                                UuidArgument.getUuid(ctx, "from"),
+                                                UuidArgument.getUuid(ctx, "to")
                                         ))
                                 )
                         )
@@ -649,11 +660,11 @@ public class AuthCommand {
 
             UUID sourceUuid = (oldEntry.forcedUuid != null && !oldEntry.forcedUuid.isEmpty())
                     ? UUID.fromString(oldEntry.forcedUuid)
-                    : UUIDUtil.createOfflinePlayerUUID(oldUsername);
-            UUID destUuid = UUIDUtil.createOfflinePlayerUUID(newUsername);
+                    : PlayerDataMigration.offlineUuid(oldUsername);
+            UUID destUuid = PlayerDataMigration.offlineUuid(newUsername);
 
             try {
-                if (!migratePlayerFiles(server, sourceUuid, destUuid)) {
+                if (!PlayerDataMigration.copyThenBackup(server, sourceUuid, destUuid, newUsername, false)) {
                     langConfig.admin.migrateTargetExists.send(source, newUsername);
                     return;
                 }
@@ -676,32 +687,44 @@ public class AuthCommand {
     }
 
     /**
-     * Moves a player's data files (playerdata, stats, advancements) from one UUID to another.
-     * Refuses (returns false) without moving anything if any destination file already exists.
+     * Migrates only a player's world-data files (playerdata, stats, advancements) from one UUID to
+     * another, leaving the EasyAuth account record (keyed by username) untouched. Use this for the
+     * one-time offline&rarr;online UUID move when a player becomes premium on a proxy backend running
+     * with {@code keepOfflineUuidCompatibility=false} (new joins migrate automatically — this is the
+     * manual fallback). Both UUIDs must be offline (their data not loaded), and the target must have
+     * no existing files.
+     *
+     * @param source executioner of the command
+     * @param from   UUID to migrate data from (e.g. the offline UUID)
+     * @param to     UUID to migrate data to (e.g. the online/Mojang UUID)
+     * @return 1 on success
      */
-    private static boolean migratePlayerFiles(MinecraftServer server, UUID from, UUID to) throws IOException {
-        Path playerData = server.getWorldPath(LevelResource.PLAYER_DATA_DIR);
-        Path stats = server.getWorldPath(LevelResource.PLAYER_STATS_DIR);
-        Path advancements = server.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR);
-
-        Path[][] moves = {
-                {playerData.resolve(from + ".dat"), playerData.resolve(to + ".dat")},
-                {playerData.resolve(from + ".dat_old"), playerData.resolve(to + ".dat_old")},
-                {stats.resolve(from + ".json"), stats.resolve(to + ".json")},
-                {advancements.resolve(from + ".json"), advancements.resolve(to + ".json")},
-        };
-
-        for (Path[] move : moves) {
-            if (Files.exists(move[1])) {
-                return false;
-            }
+    public static int migrateUuid(CommandSourceStack source, UUID from, UUID to) {
+        if (from.equals(to)) {
+            langConfig.admin.migrateSameName.send(source);
+            return 0;
         }
-        for (Path[] move : moves) {
-            if (Files.exists(move[0])) {
-                Files.move(move[0], move[1]);
-            }
+
+        MinecraftServer server = source.getServer();
+        if (server.getPlayerList().getPlayer(from) != null || server.getPlayerList().getPlayer(to) != null) {
+            langConfig.admin.migratePlayerOnline.send(source);
+            return 0;
         }
-        return true;
+
+        try {
+            if (!PlayerDataMigration.copyThenBackup(server, from, to, null, false)) {
+                langConfig.admin.migrateTargetExists.send(source, to.toString());
+                return 0;
+            }
+        } catch (IOException e) {
+            LogError("Failed to migrate player files from " + from + " to " + to, e);
+            langConfig.error.unknown.send(source);
+            return 0;
+        }
+
+        LogInfo("Migrated player data files from " + from + " to " + to);
+        langConfig.admin.migrated.send(source, from.toString(), to.toString());
+        return 1;
     }
 
     /**

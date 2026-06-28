@@ -61,6 +61,7 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.utils.PlayerDataMigration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -69,8 +70,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /*import java.io.File;
 *///?}
 import java.net.SocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
 //? if < 1.21.11 {
 /*import java.util.Optional;
 import java.util.UUID;
@@ -82,6 +81,7 @@ import java.util.UUID;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getName;
+import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getId;
 //? if < 1.21.9 {
 /*import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.getUsername;
 *///?}
@@ -391,6 +391,10 @@ public abstract class PlayerListMixin {
     /*@Inject(method = "canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;", at = @At("HEAD"), cancellable = true)
     private void checkCanJoin(SocketAddress address, GameProfile profile, CallbackInfoReturnable<Component> cir) {
     *///?}
+        // Before the ServerPlayer is built (its constructor loads stats/advancements), move any
+        // offline-UUID world data onto the UUID this player is actually joining with.
+        PlayerDataMigration.migrateOnJoin(server, getName(profile), getId(profile));
+
         // Getting the player that is trying to join the server
         Component returnText = AuthEventHandler.checkCanPlayerJoinServer(profile, playerManager, address);
 
@@ -399,62 +403,6 @@ public abstract class PlayerListMixin {
             cir.setReturnValue(returnText);
         }
     }
-
-    //? if >= 1.21.11 {
-    @ModifyReturnValue(method = "locateStatsFile(Lcom/mojang/authlib/GameProfile;)Ljava/nio/file/Path;",
-            at = @At("RETURN")
-    )
-    private Path migrateOfflineStats(Path original, @Local(ordinal = 0) Path parentPath, @Local(ordinal = 1) Path onlinePath, @Local(argsOnly = true) GameProfile profile) {
-        if (!server.usesAuthentication() || extendedConfig.forcedOfflineUuid || Files.exists(onlinePath)) {
-            return original;
-        }
-
-        Player player = server.getPlayerList().getPlayer(profile.id());
-        if (player != null && ((PlayerAuth) player).easyAuth$isUsingMojangAccount()) {
-            String playername = getName(profile);
-            Path offlinePath = parentPath.resolve(UUIDUtil.createOfflinePlayerUUID(playername) + ".json");
-            if (!Files.exists(offlinePath)) {
-                return original;
-            }
-            try {
-                Files.move(offlinePath, onlinePath);
-                LogDebug("Migrated offline stats (" + offlinePath.getFileName() + ") for player " + playername + " to online stats (" + onlinePath.getFileName() + ")");
-            } catch (Exception e) {
-                LogWarn("Failed to migrate offline stats (" + offlinePath.getFileName() + ") for player " + playername + " to online stats (" + onlinePath.getFileName() + "): " + e.getMessage());
-                return original;
-            }
-            return onlinePath;
-        }
-
-        return original;
-    }
-    //?}
-
-
-    //? if < 1.21.11 {
-    /*@Inject(method = "getPlayerStats(Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/stats/ServerStatsCounter;",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
-            )
-    )
-    private void migrateOfflineStats(Player player, CallbackInfoReturnable<ServerStatsCounter> cir, @Local UUID uUID, @Local ServerStatsCounter serverStatHandler, @Local(ordinal = 0) File serverStatsDir) {
-        File onlineFile = new File(serverStatsDir, uUID + ".json");
-        if (server.usesAuthentication() && !extendedConfig.forcedOfflineUuid && ((PlayerAuth) player).easyAuth$isUsingMojangAccount() && !onlineFile.exists()) {
-            String playername = getName(player.getGameProfile());
-            File offlineFile = new File(onlineFile.getParent(), UUIDUtil.createOfflinePlayerUUID(playername) + ".json");
-            if (!offlineFile.exists()) {
-                return;
-            }
-            if (!offlineFile.renameTo(onlineFile)) {
-                LogWarn("Failed migrate offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
-                serverStatHandler.file = onlineFile;
-            } else {
-                LogDebug("Migrated offline stats (" + offlineFile.getName() + ") for player " + playername + " to online stats (" + onlineFile.getName() + ")");
-            }
-        }
-    }
-    *///?}
 
     //? if >= 1.21.9 {
     //?} else if >= 1.21.6 {

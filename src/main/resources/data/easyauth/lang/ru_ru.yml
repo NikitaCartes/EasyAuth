@@ -200,3 +200,9 @@ text:
         password: "Пароль"
         uuid: "UUID"
         singleUse: "Одноразовый"
+    # Premium (мост AuthMe proxy)
+    premium:
+      usage: "§6Использование: /premium enable <пароль> — вход без пароля, если этот ник принадлежит вам в Mojang.\n§6/premium disable <пароль> — вернуться к входу по паролю."
+      bridgeDisabled: "§cИнтеграция AuthMe proxy-bridge не включена на этом сервере."
+      enabled: "§aПроверка premium запущена.\n§6Переподключитесь к прокси, чтобы завершить — после этого вы будете заходить без пароля."
+      disabled: "§aPremium отключён. Теперь вход выполняется по паролю."

@@ -46,6 +46,7 @@ public class EasyAuth {
     public static TechnicalConfigV1 technicalConfig;
     public static StorageConfigV1 storageConfig;
     public static DialogConfigV1 dialogConfig;
+    public static ProxyConfigV1 proxyConfig;
 
 
     public static void loadDatabase() {
@@ -124,6 +125,7 @@ public class EasyAuth {
             EasyAuth.extendedConfig = ExtendedConfigV1.create();
             EasyAuth.storageConfig = StorageConfigV1.create();
             EasyAuth.dialogConfig = DialogConfigV1.create();
+            EasyAuth.proxyConfig = ProxyConfigV1.create();
             return;
         }
 
@@ -138,6 +140,7 @@ public class EasyAuth {
         EasyAuth.extendedConfig = ExtendedConfigV1.load();
         EasyAuth.storageConfig = StorageConfigV1.load();
         EasyAuth.dialogConfig = DialogConfigV1.load();
+        EasyAuth.proxyConfig = ProxyConfigV1.load();
 
         configMigration(configVersion);
     }
@@ -149,6 +152,7 @@ public class EasyAuth {
         EasyAuth.extendedConfig.save();
         EasyAuth.storageConfig.save();
         EasyAuth.dialogConfig.save();
+        EasyAuth.proxyConfig.save();
     }
 
     public static void reloadConfigs(MinecraftServer server) {

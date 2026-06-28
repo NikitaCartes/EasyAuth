@@ -44,6 +44,7 @@ public class LangConfigV1 extends ConfigTemplate {
     public Session session = new Session();
     public Registration registration = new Registration();
     public Account account = new Account();
+    public Premium premium = new Premium();
     public Uuid uuid = new Uuid();
     public Admin admin = new Admin();
     public Errors error = new Errors();
@@ -291,6 +292,14 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText otpNotEnabled = new TranslatableText("account.otpNotEnabled");
         public TranslatableText otpDisabled = new TranslatableText("account.otpDisabled");
         public TranslatableText otpReset = new TranslatableText("account.otpReset");
+    }
+
+    @ConfigSerializable
+    public static final class Premium {
+        public TranslatableText usage = new TranslatableText("premium.usage");
+        public TranslatableText bridgeDisabled = new TranslatableText("premium.bridgeDisabled");
+        public TranslatableText enabled = new TranslatableText("premium.enabled");
+        public TranslatableText disabled = new TranslatableText("premium.disabled");
     }
 
     @ConfigSerializable

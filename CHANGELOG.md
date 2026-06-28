@@ -37,6 +37,10 @@
 - New `hide-chat` option in `extended.conf` (default `true`): hides chat from unauthenticated players. [#235](https://github.com/NikitaCartes/EasyAuth/issues/235)
 - `/auth migrate <oldName> <newName>` to move an account and its world data (playerdata, stats, advancements) to a new username after a name change. Both players must be offline and the target must have no existing data.
 - `/auth forceLogin <username>` to authenticate an online, registered player without their password, for integrations that confirm logins externally (e.g. a Discord bot). [#263](https://github.com/NikitaCartes/EasyAuth/issues/263), [#264](https://github.com/NikitaCartes/EasyAuth/issues/264), [#129](https://github.com/NikitaCartes/EasyAuth/issues/129)
+- Unofficial [AuthMeReloaded](https://github.com/AuthMe/AuthMeReloaded) proxy-bridge support: behind a Velocity proxy with an AuthMe plugin, premium players auto-login passwordless while offline players keep using passwords. [Fabric]
+  - New config file `proxy.conf` (`enabled`, `proxy-shared-secret`); the `/premium` command is only registered when enabled
+  - `/premium enable|disable <password>` for a premium player to opt into (or out of) passwordless auto-login
+  - See the [Proxies wiki page](https://github.com/NikitaCartes/EasyAuth/wiki/Proxies) for setup
 
 #### Fix
 - The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)

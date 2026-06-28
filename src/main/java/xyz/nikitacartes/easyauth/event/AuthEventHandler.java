@@ -37,6 +37,7 @@ import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.storage.database.DBReadException;
 import xyz.nikitacartes.easyauth.integrations.FloodgateApiHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.proxy.ProxyBridgeProtocol;
 import xyz.nikitacartes.easyauth.utils.IpLimitManager;
 import xyz.nikitacartes.easyauth.utils.PlayersCache;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
@@ -187,6 +188,13 @@ public class AuthEventHandler {
             /*String customPacketIdentifier = ((ServerboundCustomPayloadPacket) packet).getIdentifier().toString();
              *///?}
 
+            // Always allow the AuthMe proxy-bridge channel for unauthenticated players: the proxy's
+            // perform.login is what triggers their passwordless auto-login, so it must not be blocked.
+            if (proxyConfig != null && proxyConfig.enabled
+                    && ProxyBridgeProtocol.CHANNEL.equals(customPacketIdentifier)) {
+                return true;
+            }
+
             if (isAllowedCustomPacket(customPacketIdentifier)) {
                 return true;
             }
@@ -300,7 +308,7 @@ public class AuthEventHandler {
         // Checking if player username is valid. The pattern is generated when the config is (re)loaded.
         // Premium players bypass: their username is already validated by Mojang auth.
         PlayerEntryV1 cachedEntry = PlayersCache.get(incomingPlayerUsername);
-        boolean isPremiumPlayer = cachedEntry != null && cachedEntry.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE;
+        boolean isPremiumPlayer = manager.getServer().usesAuthentication() && cachedEntry != null && cachedEntry.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE;
         Matcher matcher = usernamePattern.matcher(incomingPlayerUsername);
 
         if (!(matcher.matches() || isPremiumPlayer || (extendedConfig.floodgateBypassRegex && FloodgateApiHelper.isFloodgatePlayer(StoneCutterUtils.getId(profile))))) {

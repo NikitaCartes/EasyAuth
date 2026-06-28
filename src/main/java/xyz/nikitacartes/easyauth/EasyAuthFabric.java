@@ -28,6 +28,8 @@ public class EasyAuthFabric implements ModInitializer {
         loadConfigs();
         loadDatabase();
 
+        xyz.nikitacartes.easyauth.proxy.ProxyBridge.init();
+
         registerCommands();
         registerEvents();
     }
@@ -39,6 +41,9 @@ public class EasyAuthFabric implements ModInitializer {
             LogoutCommand.registerCommand(dispatcher);
             AuthCommand.registerCommand(dispatcher);
             AccountCommand.registerCommand(dispatcher);
+            if (proxyConfig != null && proxyConfig.enabled) {
+                PremiumCommand.registerCommand(dispatcher);
+            }
         });
     }
 

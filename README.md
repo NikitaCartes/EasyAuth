@@ -5,6 +5,7 @@ EasyAuth disallows players who aren't authenticated to do actions like placing b
 
 ### Feature:
 - Auto login players that have purchased Minecraft
+- Passwordless premium auto-login behind a Velocity proxy via the AuthMeReloaded proxy-bridge (unofficial), with `/premium` opt-in [Fabric]
 - Online UUIDs for online players
 - Server-side login/registration GUI windows (Minecraft 1.21.6+), with chat-command fallback on older versions
 - Sessions for auto login if they connect from the same IP, with optional per-player session length

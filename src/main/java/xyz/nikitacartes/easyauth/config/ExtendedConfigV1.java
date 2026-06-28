@@ -244,7 +244,7 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     public boolean disableRegistration = false;
 
     @Comment("""
-            
+
             IP Limit Settings - Restrict the number of accounts that can be registered/logged in from the same IP address.""")
     public IpLimitSettings ipLimit = new IpLimitSettings();
 

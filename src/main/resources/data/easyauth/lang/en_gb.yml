@@ -200,3 +200,9 @@ text:
         password: "Password"
         uuid: "UUID"
         singleUse: "Single-use"
+    # Premium (AuthMe proxy-bridge)
+    premium:
+      usage: "§6Usage: /premium enable <password> — join without a password if you own this Mojang account.\n§6/premium disable <password> — return to password login."
+      bridgeDisabled: "§cThe AuthMe proxy-bridge is not enabled on this server."
+      enabled: "§aPremium verification started.\n§6Reconnect to the proxy to finish — afterwards you will join without a password."
+      disabled: "§aPremium disabled. You will log in with a password from now on."

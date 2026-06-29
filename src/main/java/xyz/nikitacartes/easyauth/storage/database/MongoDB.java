@@ -197,6 +197,22 @@ public class MongoDB implements DbApi {
     }
 
     @Override
+    public List<String> getPremiumUsernames() {
+        List<String> usernames = new ArrayList<>();
+        try {
+            collection.find(eq("online_account", PlayerEntryV1.OnlineAccount.TRUE.name())).forEach(document -> {
+                String username = document.getString("username_lower");
+                if (username != null) {
+                    usernames.add(username);
+                }
+            });
+        } catch (Exception e) {
+            LogError("Error getting premium usernames", e);
+        }
+        return usernames;
+    }
+
+    @Override
     public @Nullable String getUsernameByUuid(String uuid) {
         try {
             Document document = collection.find(eq("uuid", uuid)).first();

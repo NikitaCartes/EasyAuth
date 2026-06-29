@@ -274,6 +274,27 @@ public class PostgreSQL implements DbApi {
     }
 
     @Override
+    public List<String> getPremiumUsernames() {
+        List<String> usernames = new ArrayList<>();
+        try {
+            reconnect();
+            PreparedStatement statement = connection.prepareStatement(
+                    "SELECT username_lower FROM " + config.postgresql.pgTable + " WHERE online_account = ?;"
+            );
+            statement.setString(1, PlayerEntryV1.OnlineAccount.TRUE.name());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                usernames.add(resultSet.getString("username_lower"));
+            }
+            resultSet.close();
+            statement.close();
+        } catch (SQLException e) {
+            LogError("Error getting premium usernames", e);
+        }
+        return usernames;
+    }
+
+    @Override
     public @Nullable String getUsernameByUuid(String uuid) {
         try {
             reconnect();

@@ -89,6 +89,12 @@ public interface DbApi {
     List<String> getUsernamesByIp(String ipAddress);
 
     /**
+     * Returns the lowercased usernames of all confirmed-premium accounts (online_account = TRUE),
+     * queried via the dedicated column instead of scanning every entry.
+     */
+    List<String> getPremiumUsernames();
+
+    /**
      * Returns the username that owns the given UUID, or null if none.
      * Used to detect forced-UUID collisions.
      *

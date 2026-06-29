@@ -233,16 +233,10 @@ public final class ProxyBridge {
     // --- Helpers ---
 
     private static List<String> collectConfirmedPremium() {
-        List<String> names = new ArrayList<>();
         if (DB == null || DB.isClosed()) {
-            return names;
+            return new ArrayList<>();
         }
-        for (PlayerEntryV1 entry : DB.getAllData().values()) {
-            if (entry.onlineAccount == PlayerEntryV1.OnlineAccount.TRUE) {
-                names.add(entry.username.toLowerCase(Locale.ROOT));
-            }
-        }
-        return names;
+        return DB.getPremiumUsernames();
     }
 
     private static void sendPremiumList(ServerPlayer carrier, List<String> names) {

@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
 import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
+import xyz.nikitacartes.easyauth.storage.database.DBApiException;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.IpLimitManager;
@@ -264,6 +265,10 @@ public class AuthCommand {
                                         getString(ctx, "username")
                                 ))
                         )
+                )
+                .then(literal("backup")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.backup", 4))
+                        .executes(ctx -> backupDatabase(ctx.getSource()))
                 )
         );
     }
@@ -943,6 +948,30 @@ public class AuthCommand {
             }
             
             source.sendSystemMessage(message);
+        });
+        return 1;
+    }
+
+    /**
+     * Writes a timestamped database backup (SQLite only) and reports the resulting path.
+     * For remote backends the command explains that their own tooling should be used.
+     *
+     * @param source executioner of the command
+     * @return 1 on success
+     */
+    public static int backupDatabase(CommandSourceStack source) {
+        runDbTask(source, () -> {
+            try {
+                String path = DB.backup();
+                if (path == null) {
+                    langConfig.admin.backupUnsupported.send(source);
+                } else {
+                    langConfig.admin.backupSuccess.send(source, path);
+                }
+            } catch (DBApiException e) {
+                LogError("Backup command failed", e);
+                langConfig.error.database.send(source);
+            }
         });
         return 1;
     }

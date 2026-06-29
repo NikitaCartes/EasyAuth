@@ -88,9 +88,26 @@ public class EasyAuth {
             return;
         }
 
+        if (storageConfig.backupOnStart) {
+            autoBackup("start");
+        }
+
         // Register LuckPerms integration if it's loaded
         if (technicalConfig.luckPermsLoaded) {
             LuckPermsIntegration.register();
+        }
+    }
+
+    // Writes a timestamped DB snapshot if the active backend supports it (SQLite only).
+    // Failures are logged but never block server start/stop.
+    private static void autoBackup(String when) {
+        if (DB == null || DB.isClosed()) {
+            return;
+        }
+        try {
+            DB.backup();
+        } catch (DBApiException e) {
+            LogError("Auto-backup on " + when + " failed", e);
         }
     }
 
@@ -106,6 +123,10 @@ public class EasyAuth {
         } catch (InterruptedException e) {
             LogError("Error on stop", e);
             THREADPOOL.shutdownNow();
+        }
+
+        if (storageConfig.backupOnStop) {
+            autoBackup("stop");
         }
 
         // Closing DbApi connection

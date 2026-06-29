@@ -329,6 +329,8 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText forceLoginSuccess = new TranslatableText("admin.forceLoginSuccess");
         public TranslatableText ipLimitNotify = new TranslatableText("admin.ipLimitNotify");
         public TranslatableText databaseUnavailable = new TranslatableText("admin.databaseUnavailable");
+        public TranslatableText backupSuccess = new TranslatableText("admin.backupSuccess");
+        public TranslatableText backupUnsupported = new TranslatableText("admin.backupUnsupported");
     }
 
     @ConfigSerializable

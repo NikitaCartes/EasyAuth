@@ -14,6 +14,19 @@ public class StorageConfigV1 extends ConfigTemplate {
     public String databaseType = "sqlite";
 
     @Comment("""
+
+            Write a timestamped database backup when the server starts.
+            Only effective for the SQLite backend; back up remote databases with their own tooling.
+            Backups go to a "backups" folder next to the SQLite file and are never auto-deleted.""")
+    public boolean backupOnStart = false;
+
+    @Comment("""
+
+            Write a timestamped database backup when the server stops.
+            Only effective for the SQLite backend; back up remote databases with their own tooling.""")
+    public boolean backupOnStop = false;
+
+    @Comment("""
             
             SQLite configuration.""")
     public SQLiteConfig sqlite = new SQLiteConfig();

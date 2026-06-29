@@ -91,6 +91,8 @@ text:
       forceLoginSuccess: "§aPlayer §e%s §ahas been forced to log in."
       ipLimitNotify: "§e[EasyAuth] §cIP Limit Warning: §fPlayer §e%s §ffrom IP §e%s §fexceeded the limit of §e%d §faccounts. Existing accounts: §e%s"
       databaseUnavailable: "§e[EasyAuth] §4Database unavailable after reload — logins and registrations are locked until it is restored."
+      backupSuccess: "§aDatabase backed up to §e%s§a."
+      backupUnsupported: "§eBackup is built in only for the SQLite backend. Back up MySQL, PostgreSQL or MongoDB with their own tooling (mysqldump, pg_dump, mongodump)."
     # Error
     error:
       unknown: "§4An unknown error has occurred."

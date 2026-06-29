@@ -8,6 +8,8 @@ import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 
 import java.io.File;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +19,8 @@ import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 public class SQLite implements DbApi {
+    private static final DateTimeFormatter BACKUP_STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+
     private final StorageConfigV1 config;
     private Connection connection;
 
@@ -304,6 +308,23 @@ public class SQLite implements DbApi {
             LogError("Error getting username by UUID", e);
             return null;
         }
+    }
+
+    @Override
+    public String backup() throws DBApiException {
+        File dbFile = new File(EasyAuth.gameDirectory + "/" + config.sqlite.sqlitePath);
+        File backupDir = new File(dbFile.getParentFile(), "backups");
+        if (!backupDir.exists() && !backupDir.mkdirs()) {
+            throw new DBApiException("Failed to create backup directory: " + backupDir, null);
+        }
+        File target = new File(backupDir, dbFile.getName() + "." + LocalDateTime.now().format(BACKUP_STAMP) + ".bak");
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate("VACUUM INTO '" + target.getAbsolutePath().replace("'", "''") + "';");
+        } catch (SQLException e) {
+            throw new DBApiException("SQLite backup failed", e);
+        }
+        LogInfo("Backed up SQLite database to " + target);
+        return target.getAbsolutePath();
     }
 
     @Override

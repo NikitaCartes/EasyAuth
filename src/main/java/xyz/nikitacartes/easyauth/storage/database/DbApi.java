@@ -105,6 +105,17 @@ public interface DbApi {
     String getUsernameByUuid(String uuid);
 
     /**
+     * Backs up the database to a timestamped file and returns its path.
+     * Only the file-based SQLite backend supports this; remote backends
+     * (MySQL/PostgreSQL/MongoDB) return null — back those up with their own tooling.
+     *
+     * @return the absolute path of the backup file, or null if this backend has no built-in backup
+     */
+    default String backup() throws DBApiException {
+        return null;
+    }
+
+    /**
      * Migrates IP addresses from JSON to column.
      */
     void migrateFromV4();

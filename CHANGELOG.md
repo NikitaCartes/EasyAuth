@@ -38,6 +38,7 @@
 - `/auth migrate <oldName> <newName>` to move an account and its world data (playerdata, stats, advancements) to a new username after a name change. Both players must be offline and the target must have no existing data.
 - `/auth migrateUuid <fromUuid> <toUuid>` to move a player's world data (playerdata, stats, advancements) between two UUIDs. Both players must be offline and the target must have no existing data.
 - `/auth forceLogin <username>` to authenticate an online, registered player without their password, for integrations that confirm logins externally (e.g. a Discord bot). [#263](https://github.com/NikitaCartes/EasyAuth/issues/263), [#264](https://github.com/NikitaCartes/EasyAuth/issues/264), [#129](https://github.com/NikitaCartes/EasyAuth/issues/129)
+- `/auth accounts <username>` to list every registered account that shares a player's last-login IP.
 - `/auth backup` to write a timestamped SQLite database snapshot on demand (SQLite backend only; snapshots go to a `backups` folder next to the database file and are never auto-deleted)
   - New `backup-on-start` and `backup-on-stop` options in `storage.conf` (default `false`) to also snapshot the SQLite database automatically when the server starts or stops
 - Unofficial [AuthMeReloaded](https://github.com/AuthMe/AuthMeReloaded) proxy-bridge support: behind a Velocity proxy with an AuthMe plugin, premium players auto-login passwordless while offline players keep using passwords. [Fabric]

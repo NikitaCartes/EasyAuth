@@ -31,6 +31,7 @@ import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -185,6 +186,15 @@ public class AuthCommand {
                         .requires(EasyAuthPermissions.require("easyauth.commands.auth.getPlayerInfo", 3))
                         .then(argument("username", word())
                                 .executes(ctx -> getPlayerInfo(
+                                        ctx.getSource(),
+                                        getString(ctx, "username")
+                                ))
+                        )
+                )
+                .then(literal("accounts")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.accounts", 3))
+                        .then(argument("username", word())
+                                .executes(ctx -> getAccountsByIp(
                                         ctx.getSource(),
                                         getString(ctx, "username")
                                 ))
@@ -947,6 +957,46 @@ public class AuthCommand {
                 message.append(Component.literal("(player offline)").withStyle(ChatFormatting.DARK_GRAY));
             }
             
+            source.sendSystemMessage(message);
+        });
+        return 1;
+    }
+
+    /**
+     * Lists every registered account whose last-login IP matches the target player's
+     * (AuthMe's displayOtherAccounts equivalent).
+     *
+     * @param source   executioner of the command
+     * @param username username of the player whose IP-neighbours to list
+     * @return 1 on success
+     */
+    public static int getAccountsByIp(CommandSourceStack source, String username) {
+        runDbTask(source, () -> {
+            PlayerEntryV1 playerData = DB.getUserData(username);
+            if (playerData == null) {
+                langConfig.registration.notRegistered.send(source);
+                return;
+            }
+            if (playerData.lastIp == null || playerData.lastIp.isEmpty()) {
+                langConfig.admin.accountsNoIp.send(source, playerData.username);
+                return;
+            }
+
+            List<String> usernames = DB.getUsernamesByIp(playerData.lastIp);
+            MutableComponent message = langConfig.admin.accounts.get(playerData.lastIp, usernames.size());
+            for (int i = 0; i < usernames.size(); i++) {
+                String name = usernames.get(i);
+                message.append(Component.literal(name)
+                        //? if >= 1.21.5 {
+                        .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(name)))
+                        //?} else {
+                        /*.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, name)))
+                        *///?}
+                        .withStyle(ChatFormatting.YELLOW));
+                if (i < usernames.size() - 1) {
+                    message.append(Component.literal(", ").withStyle(ChatFormatting.GRAY));
+                }
+            }
             source.sendSystemMessage(message);
         });
         return 1;

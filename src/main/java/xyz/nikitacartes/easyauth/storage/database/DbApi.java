@@ -102,4 +102,9 @@ public interface DbApi {
      * Migrates IP addresses from JSON to column.
      */
     void migrateFromV4();
+
+    /**
+     * Backfills the online_account mirror column from the JSON blob for existing rows.
+     */
+    void migrateFromV9();
 }

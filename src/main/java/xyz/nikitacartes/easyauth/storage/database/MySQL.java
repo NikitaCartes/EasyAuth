@@ -47,6 +47,7 @@ public class MySQL implements DbApi {
                                             `uuid` VARCHAR(255) NULL,
                                             `data` JSON NOT NULL,
                                             `last_ip` VARCHAR(45) NULL,
+                                            `online_account` VARCHAR(16) NULL,
                                             PRIMARY KEY (`id`), UNIQUE (`username`)
                                         ) ENGINE = InnoDB;""",
                                 config.mysql.mysqlDatabase,
@@ -69,6 +70,19 @@ public class MySQL implements DbApi {
                     }
                 }
                 columns.close();
+
+                // Ensure the online_account mirror column exists on pre-existing tables
+                ResultSet onlineColumn = metaData.getColumns(null, null, config.mysql.mysqlTable, "online_account");
+                if (!onlineColumn.next()) {
+                    try (Statement alterTableStatement = MySQLConnection.createStatement()) {
+                        alterTableStatement.executeUpdate(String.format("ALTER TABLE `%s`.`%s` ADD COLUMN `online_account` VARCHAR(16) NULL;", config.mysql.mysqlDatabase, config.mysql.mysqlTable));
+                        LogDebug("Added column 'online_account' to the existing table.");
+                    } catch (SQLException e) {
+                        MySQLConnection = null;
+                        throw new DBApiException("Error adding online_account column", e);
+                    }
+                }
+                onlineColumn.close();
             }
             preparedStatement.close();
         } catch (ClassNotFoundException | SQLException e) {
@@ -128,12 +142,13 @@ public class MySQL implements DbApi {
         LogDebug("Registering new player " + data.username + ": " + data.toJson());
         try {
             reConnect();
-            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO  " + config.mysql.mysqlTable + " (username, username_lower, uuid, data, last_ip) VALUES (?, ?, ?, ?, ?);");
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("INSERT INTO  " + config.mysql.mysqlTable + " (username, username_lower, uuid, data, last_ip, online_account) VALUES (?, ?, ?, ?, ?, ?);");
             preparedStatement.setString(1, data.username);
             preparedStatement.setString(2, data.usernameLowerCase);
             preparedStatement.setString(3, data.uuid == null ? null : data.uuid.toString());
             preparedStatement.setString(4, data.toJson());
             preparedStatement.setString(5, data.lastIp);
+            preparedStatement.setString(6, data.onlineAccountColumn());
             if (preparedStatement.executeUpdate() == 0) {
                 LogError("Failed to register user " + data.username + ": " + data.toJson());
             }
@@ -231,11 +246,12 @@ public class MySQL implements DbApi {
         LogDebug("Updating player data for " + data.username + ": " + data.toJson());
         try {
             reConnect();
-            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("UPDATE " + config.mysql.mysqlTable + " SET uuid = ?, data = ?, last_ip = ? WHERE username = ?;");
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("UPDATE " + config.mysql.mysqlTable + " SET uuid = ?, data = ?, last_ip = ?, online_account = ? WHERE username = ?;");
             preparedStatement.setString(1, data.uuid == null ? null : data.uuid.toString());
             preparedStatement.setString(2, data.toJson());
             preparedStatement.setString(3, data.lastIp);
-            preparedStatement.setString(4, data.username);
+            preparedStatement.setString(4, data.onlineAccountColumn());
+            preparedStatement.setString(5, data.username);
             int updatedRows = preparedStatement.executeUpdate();
             preparedStatement.close();
             if (updatedRows == 0) {
@@ -362,6 +378,26 @@ public class MySQL implements DbApi {
             } catch (SQLException ex) {
                 LogError("Error migrating IPs using Java fallback", ex);
             }
+        }
+    }
+
+    @Override
+    public void migrateFromV9() {
+        LogInfo("Migrating online_account from JSON to column...");
+        try {
+            reConnect();
+            HashMap<String, PlayerEntryV1> allData = getAllData();
+            PreparedStatement preparedStatement = MySQLConnection.prepareStatement("UPDATE " + config.mysql.mysqlTable + " SET online_account = ? WHERE username = ?;");
+            for (PlayerEntryV1 entry : allData.values()) {
+                preparedStatement.setString(1, entry.onlineAccountColumn());
+                preparedStatement.setString(2, entry.username);
+                preparedStatement.addBatch();
+            }
+            preparedStatement.executeBatch();
+            preparedStatement.close();
+            LogInfo("Migrated online_account successfully.");
+        } catch (SQLException e) {
+            LogError("Error migrating online_account", e);
         }
     }
 }

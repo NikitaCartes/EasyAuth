@@ -60,7 +60,8 @@ public class MongoDB implements DbApi {
                     .append("username_lower", data.usernameLowerCase)
                     .append("uuid", data.uuid == null ? null : data.uuid.toString())
                     .append("data", data.toJson())
-                    .append("last_ip", data.lastIp);
+                    .append("last_ip", data.lastIp)
+                    .append("online_account", data.onlineAccountColumn());
             if (collection.insertOne(document).getInsertedId() == null) {
                 LogError("Failed to insert data: " + data.toJson());
             }
@@ -135,7 +136,8 @@ public class MongoDB implements DbApi {
                     .append("username_lower", data.usernameLowerCase)
                     .append("uuid", data.uuid == null ? null : data.uuid.toString())
                     .append("data", data.toJson())
-                    .append("last_ip", data.lastIp);
+                    .append("last_ip", data.lastIp)
+                    .append("online_account", data.onlineAccountColumn());
             if (collection.replaceOne(eq("username", data.username), document).getModifiedCount() == 0) {
                 LogError("Failed to update data: " + data.toJson());
                 return false;
@@ -220,6 +222,23 @@ public class MongoDB implements DbApi {
             LogInfo("Migrated IPs successfully.");
         } catch (Exception e) {
             LogError("Error migrating IPs", e);
+        }
+    }
+
+    @Override
+    public void migrateFromV9() {
+        LogInfo("Migrating online_account from JSON to field...");
+        try {
+            for (Document document : collection.find()) {
+                String data = document.getString("data");
+                if (data != null) {
+                    PlayerEntryV1 entry = new PlayerEntryV1(document.getString("username"), document.getString("username_lower"), null, data);
+                    collection.updateOne(eq("_id", document.get("_id")), new Document("$set", new Document("online_account", entry.onlineAccountColumn())));
+                }
+            }
+            LogInfo("Migrated online_account successfully.");
+        } catch (Exception e) {
+            LogError("Error migrating online_account", e);
         }
     }
 

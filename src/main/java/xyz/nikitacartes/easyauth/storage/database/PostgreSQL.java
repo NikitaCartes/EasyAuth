@@ -39,9 +39,12 @@ public class PostgreSQL implements DbApi {
                         username_lower VARCHAR(255) NOT NULL,
                         uuid VARCHAR(255),
                         last_ip VARCHAR(45),
+                        online_account VARCHAR(16),
                         data JSONB NOT NULL
                     );
                     """, config.postgresql.pgTable));
+            // Ensure the online_account mirror column exists on pre-existing tables
+            statement.executeUpdate("ALTER TABLE " + config.postgresql.pgTable + " ADD COLUMN IF NOT EXISTS online_account VARCHAR(16);");
             statement.close();
         } catch (ClassNotFoundException | SQLException e) {
             connection = null;
@@ -87,12 +90,13 @@ public class PostgreSQL implements DbApi {
         try {
             reconnect();
             PreparedStatement stmt = connection.prepareStatement(
-                    "INSERT INTO " + config.postgresql.pgTable + " (username, username_lower, uuid, data, last_ip) VALUES (?, ?, ?, ?::jsonb, ?);");
+                    "INSERT INTO " + config.postgresql.pgTable + " (username, username_lower, uuid, data, last_ip, online_account) VALUES (?, ?, ?, ?::jsonb, ?, ?);");
             stmt.setString(1, data.username);
             stmt.setString(2, data.usernameLowerCase);
             stmt.setString(3, data.uuid == null ? null : data.uuid.toString());
             stmt.setString(4, data.toJson());
             stmt.setString(5, data.lastIp);
+            stmt.setString(6, data.onlineAccountColumn());
             if (stmt.executeUpdate() == 0) {
                 LogError("Failed to register user " + data.username + ": " + data.toJson());
             }
@@ -183,11 +187,12 @@ public class PostgreSQL implements DbApi {
         try {
             reconnect();
             PreparedStatement stmt = connection.prepareStatement(
-                    "UPDATE " + config.postgresql.pgTable + " SET uuid = ?, data = ?::jsonb, last_ip = ? WHERE username = ?;");
+                    "UPDATE " + config.postgresql.pgTable + " SET uuid = ?, data = ?::jsonb, last_ip = ?, online_account = ? WHERE username = ?;");
             stmt.setString(1, data.uuid == null ? null : data.uuid.toString());
             stmt.setString(2, data.toJson());
             stmt.setString(3, data.lastIp);
-            stmt.setString(4, data.username);
+            stmt.setString(4, data.onlineAccountColumn());
+            stmt.setString(5, data.username);
             int updatedRows = stmt.executeUpdate();
             stmt.close();
             if (updatedRows == 0) {
@@ -288,5 +293,25 @@ public class PostgreSQL implements DbApi {
     @Override
     public void migrateFromV4() {
         throw new UnsupportedOperationException("PostgreSQL does not support migrateFromV4");
+    }
+
+    @Override
+    public void migrateFromV9() {
+        LogInfo("Migrating online_account from JSON to column...");
+        try {
+            reconnect();
+            HashMap<String, PlayerEntryV1> allData = getAllData();
+            PreparedStatement stmt = connection.prepareStatement("UPDATE " + config.postgresql.pgTable + " SET online_account = ? WHERE username = ?;");
+            for (PlayerEntryV1 entry : allData.values()) {
+                stmt.setString(1, entry.onlineAccountColumn());
+                stmt.setString(2, entry.username);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            stmt.close();
+            LogInfo("Migrated online_account successfully.");
+        } catch (SQLException e) {
+            LogError("Error migrating online_account", e);
+        }
     }
 }

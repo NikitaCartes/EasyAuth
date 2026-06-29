@@ -48,6 +48,7 @@ public class SQLite implements DbApi {
                                 username_lower TEXT NOT NULL,
                                 uuid TEXT NULL,
                                 last_ip TEXT NULL,
+                                online_account TEXT NULL,
                                 data TEXT NOT NULL
                             );
                             """.formatted(config.sqlite.sqliteTable)
@@ -63,6 +64,15 @@ public class SQLite implements DbApi {
                 alterStatement.close();
             }
             columns.close();
+
+            // Ensure the online_account mirror column exists on pre-existing tables
+            ResultSet onlineColumn = metaData.getColumns(null, null, config.sqlite.sqliteTable, "online_account");
+            if (!onlineColumn.next()) {
+                Statement alterStatement = connection.createStatement();
+                alterStatement.executeUpdate("ALTER TABLE " + config.sqlite.sqliteTable + " ADD COLUMN online_account TEXT NULL;");
+                alterStatement.close();
+            }
+            onlineColumn.close();
 
             LogDebug("Connected to SQLite database successfully.");
         } catch (ClassNotFoundException | SQLException e) {
@@ -92,12 +102,13 @@ public class SQLite implements DbApi {
     public void registerUser(PlayerEntryV1 data) {
         LogDebug("Registering new player " + data.username + ": " + data.toJson());
         try {
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO " + config.sqlite.sqliteTable + " (username, username_lower, uuid, data, last_ip) VALUES (?, ?, ?, ?, ?);");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO " + config.sqlite.sqliteTable + " (username, username_lower, uuid, data, last_ip, online_account) VALUES (?, ?, ?, ?, ?, ?);");
             statement.setString(1, data.username);
             statement.setString(2, data.usernameLowerCase);
             statement.setObject(3, data.uuid);
             statement.setString(4, data.toJson());
             statement.setString(5, data.lastIp);
+            statement.setString(6, data.onlineAccountColumn());
             if (statement.executeUpdate() == 0) {
                 LogError("Failed to register user " + data.username + ": " + data.toJson());
             }
@@ -179,11 +190,12 @@ public class SQLite implements DbApi {
     public boolean updateUserData(PlayerEntryV1 data) {
         LogDebug("Updating player data for " + data.username + ": " + data.toJson());
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE " + config.sqlite.sqliteTable + " SET uuid = ?, data = ?, last_ip = ? WHERE username = ?;");
+            PreparedStatement statement = connection.prepareStatement("UPDATE " + config.sqlite.sqliteTable + " SET uuid = ?, data = ?, last_ip = ?, online_account = ? WHERE username = ?;");
             statement.setObject(1, data.uuid);
             statement.setString(2, data.toJson());
             statement.setString(3, data.lastIp);
-            statement.setString(4, data.username);
+            statement.setString(4, data.onlineAccountColumn());
+            statement.setString(5, data.username);
             int rowsAffected = statement.executeUpdate();
             statement.close();
             if (rowsAffected == 0) {
@@ -291,6 +303,26 @@ public class SQLite implements DbApi {
             LogInfo("Migrated IPs successfully.");
         } catch (SQLException e) {
             LogError("Error migrating IPs", e);
+        }
+    }
+
+    @Override
+    public void migrateFromV9() {
+        LogInfo("Migrating online_account from JSON to column...");
+        try {
+            HashMap<String, PlayerEntryV1> allData = getAllData();
+            PreparedStatement statement = connection.prepareStatement("UPDATE " + config.sqlite.sqliteTable + " SET online_account = ? WHERE username = ?;");
+
+            for (PlayerEntryV1 entry : allData.values()) {
+                statement.setString(1, entry.onlineAccountColumn());
+                statement.setString(2, entry.username);
+                statement.addBatch();
+            }
+            statement.executeBatch();
+            statement.close();
+            LogInfo("Migrated online_account successfully.");
+        } catch (SQLException e) {
+            LogError("Error migrating online_account", e);
         }
     }
 

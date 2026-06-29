@@ -194,6 +194,12 @@ public class PlayerEntryV1 {
         return gson.toJson(this);
     }
 
+    // Mirror of the JSON online_account field in its own queryable column (same representation: the
+    // enum name). ponytail: only this field gets a column; everything else stays JSON-only (YAGNI).
+    public String onlineAccountColumn() {
+        return onlineAccount == null ? null : onlineAccount.name();
+    }
+
     /*
      * Update entry in database.
      */

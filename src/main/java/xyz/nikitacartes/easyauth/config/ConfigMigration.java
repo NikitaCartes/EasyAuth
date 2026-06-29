@@ -34,6 +34,27 @@ public class ConfigMigration {
         LogInfo("Migration completed in " + (System.currentTimeMillis() - now) + "ms");
     }
 
+    public static void migrateFromV9() {
+        LogInfo("Migrating DB from v9 to v10");
+        long now = System.currentTimeMillis();
+
+        DbApi db = getDbApi();
+        try {
+            db.connect();
+        } catch (DBApiException e) {
+            LogError("Migration connection error: ", e);
+            return;
+        }
+
+        db.migrateFromV9();
+        db.close();
+
+        EasyAuth.config.configVersion = 10;
+        EasyAuth.config.save();
+
+        LogInfo("Migration completed in " + (System.currentTimeMillis() - now) + "ms");
+    }
+
     public static void saveAndMigrateTo(int targetVersion) {
         LogInfo("Backing up config and migrating to v" + targetVersion);
 
@@ -55,6 +76,9 @@ public class ConfigMigration {
         }
         if (configVersion < 5) {
             migrateFromV4();
+        }
+        if (configVersion < 10) {
+            migrateFromV9();
         }
         if (configVersion < CURRENT_CONFIG_VERSION) {
             saveAndMigrateTo(CURRENT_CONFIG_VERSION);

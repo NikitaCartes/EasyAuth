@@ -123,7 +123,7 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
 
     @Override
     public void easyAuth$restoreTrueLocation() {
-        if (lastLocation == null) {
+        if (lastLocation == null || lastLocation.position == null) {
             return;
         }
         if (wasDead) {

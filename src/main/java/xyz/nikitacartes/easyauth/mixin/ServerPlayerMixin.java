@@ -121,7 +121,7 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
 
     @Override
     public void easyAuth$restoreTrueLocation() {
-        if (lastLocation == null) {
+        if (lastLocation == null || lastLocation.position == null) {
             return;
         }
         if (wasDead) {

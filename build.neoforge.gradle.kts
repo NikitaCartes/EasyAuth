@@ -186,9 +186,10 @@ tasks.register<Copy>("collectJars") {
 publishMods {
     val modrinthToken = System.getenv("MODRINTH_TOKEN") ?: ""
     val curseforgeToken = System.getenv("CURSEFORGE_TOKEN") ?: ""
+    val githubToken = System.getenv("GITHUB_TOKEN") ?: ""
 
     file = tasks.jar.get().archiveFile
-    dryRun = modrinthToken.isEmpty() || curseforgeToken.isEmpty()
+    dryRun = modrinthToken.isEmpty() || curseforgeToken.isEmpty() || githubToken.isEmpty()
 
     displayName = "${property("display_name")} $dynamicVersion"
     version = dynamicVersion
@@ -211,5 +212,11 @@ publishMods {
         accessToken = curseforgeToken
         targets.forEach(minecraftVersions::add)
         optional("luckperms")
+    }
+
+    // Uploads this node's jar into the single release created by the root publishGithub task.
+    github {
+        accessToken = githubToken
+        parent(rootProject.tasks.named("publishGithub"))
     }
 }

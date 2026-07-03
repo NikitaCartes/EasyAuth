@@ -13,7 +13,8 @@ import java.util.UUID;
  * {@code main} directly (the class is pure Java). It independently re-encodes a {@code perform.login}
  * exactly the way AuthMe's Velocity plugin does, then asserts the protocol accepts/rejects correctly.
  *
- * <p>Not wired into the Gradle build (that source set is Fabric gametest); run standalone, e.g.
+ * <p>Lives in the Fabric gametest source set so it compiles against {@link ProxyBridgeProtocol}
+ * but is not run by any Gradle task (no {@code @GameTest}, not a JUnit test). Run standalone, e.g.
  * {@code javac -d out ProxyBridgeProtocol.java ProxyBridgeProtocolTest.java && java -ea -cp out
  * xyz.nikitacartes.easyauth.proxy.ProxyBridgeProtocolTest}.
  */

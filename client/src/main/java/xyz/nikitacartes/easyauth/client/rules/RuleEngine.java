@@ -30,32 +30,40 @@ public final class RuleEngine {
     private static final Gson GSON = new Gson();
 
     private static Path configFile;
+    private static Path credentialsFile;
 
     // Session state; empty when not connected or no rules for the current server.
     private static List<ActiveRule> active = List.of();
     private static final List<Pending> queue = new ArrayList<>();
     private static String serverAddress = "";
+    private static Credentials credentials;
 
     private RuleEngine() {
     }
 
     public static void init(Path configDir) {
-        configFile = configDir.resolve("easyauth-client").resolve("rules.json");
+        Path dir = configDir.resolve("easyauth-client");
+        configFile = dir.resolve("rules.json");
+        credentialsFile = dir.resolve("credentials.json");
     }
 
     public static void onJoin() {
         queue.clear();
         active = List.of();
+        credentials = null;
         ServerData server = Minecraft.getInstance().getCurrentServer();
         if (server == null || server.ip == null) {
             return; // singleplayer/realms
         }
         serverAddress = normalizeAddress(server.ip);
-        active = loadRules(serverAddress);
+        credentials = Credentials.load(credentialsFile, serverAddress);
+        long now = System.currentTimeMillis();
+        List<ActiveRule> rules = new ArrayList<>(loadRules(serverAddress));
+        addBuiltinAuthRules(rules, now);
+        active = rules;
         if (active.isEmpty()) {
             return;
         }
-        long now = System.currentTimeMillis();
         for (ActiveRule r : active) {
             switch (r.rule.trigger) {
                 case "join" -> tryFire(r, now, r.rule.delayMs);
@@ -63,6 +71,41 @@ public final class RuleEngine {
                 default -> {
                 }
             }
+        }
+    }
+
+    /**
+     * Auto-login (plan §4, variant A): built-in rules for servers with saved credentials.
+     * The chat rule matches EasyAuth's default en/ru prompts; the one-shot join fallback
+     * covers 1.21.6+ dialog servers and custom locales, where no chat prompt is ever sent.
+     * Both share one ActiveRule, so the cooldown prevents double-sending.
+     */
+    private static void addBuiltinAuthRules(List<ActiveRule> rules, long now) {
+        if (credentials == null || credentials.password == null || !credentials.autoLogin) {
+            return;
+        }
+        AutoInputRule login = new AutoInputRule();
+        login.trigger = "chat";
+        login.match = "Use /login|Используйте /login|Введите /login";
+        login.send = List.of(credentials.totpSecret == null || credentials.totpSecret.isEmpty()
+                ? "/login {password}"
+                : "/login {password} {otp}");
+        login.maxRuns = 5;
+        login.cooldownMs = 5000;
+        ActiveRule loginRule = new ActiveRule(login, Pattern.compile(login.match));
+        loginRule.oneShotAt = now + 3000;
+        rules.add(loginRule);
+
+        if (credentials.autoRegister) {
+            AutoInputRule register = new AutoInputRule();
+            register.trigger = "chat";
+            // Deliberately not matching the <global password> prompt variants:
+            // the global password is not stored, a 2-argument /register would be wrong there.
+            register.match = "Use /register <password>|Введите /register <пароль>";
+            register.send = List.of("/register {password} {password}");
+            register.maxRuns = 1;
+            register.cooldownMs = 5000;
+            rules.add(new ActiveRule(register, Pattern.compile(register.match)));
         }
     }
 
@@ -102,6 +145,10 @@ public final class RuleEngine {
                 tryFire(r, now, 0);
                 r.nextTimerAt = now + r.rule.cooldownMs;
             }
+            if (now >= r.oneShotAt) {
+                r.oneShotAt = Long.MAX_VALUE;
+                tryFire(r, now, 0);
+            }
         }
         for (Iterator<Pending> it = queue.iterator(); it.hasNext(); ) {
             Pending p = it.next();
@@ -121,6 +168,7 @@ public final class RuleEngine {
         }
         active = List.of();
         queue.clear();
+        credentials = null;
     }
 
     private static void tryFire(ActiveRule r, long now, long delay) {
@@ -149,11 +197,21 @@ public final class RuleEngine {
         String out = line
                 .replace("{username}", Minecraft.getInstance().getUser().getName())
                 .replace("{server}", serverAddress);
-        // {password}/{otp} arrive with the credentials store (plan phase 2);
-        // until then never let them leak into chat as literal text.
-        if (out.contains("{password}") || out.contains("{otp}")) {
-            LOGGER.warn("Skipping rule line with not-yet-supported placeholder: {}", line);
-            return null;
+        // Never let an unresolved placeholder leak into chat as literal text.
+        if (out.contains("{password}")) {
+            if (credentials == null || credentials.password == null) {
+                LOGGER.warn("Skipping rule line: no password stored for {} in credentials.json", serverAddress);
+                return null;
+            }
+            out = out.replace("{password}", credentials.password);
+        }
+        if (out.contains("{otp}")) {
+            String code = credentials == null ? null : Totp.currentCode(credentials.totpSecret);
+            if (code == null) {
+                LOGGER.warn("Skipping rule line: no valid totpSecret stored for {} in credentials.json", serverAddress);
+                return null;
+            }
+            out = out.replace("{otp}", code);
         }
         return out;
     }
@@ -255,6 +313,7 @@ public final class RuleEngine {
         int runs = 0;
         long lastRun = Long.MIN_VALUE / 2;
         long nextTimerAt = Long.MAX_VALUE;
+        long oneShotAt = Long.MAX_VALUE; // built-in join fallback (see addBuiltinAuthRules)
 
         ActiveRule(AutoInputRule rule, Pattern pattern) {
             this.rule = rule;

@@ -7,6 +7,10 @@ mod_name = "EasyAuth"
 mod_id = "easyauth"
 mod_version = "4.0.0-SNAPSHOT"
 
+# Client mod (client/ branch); no dashes in the id — NeoForge forbids them
+client_mod_id = "easyauthclient"
+client_mod_name = "EasyAuth Client"
+
 # Shared dependencies
 luckperms_version = "5.4"
 bcrypt_version = "0.10.2"

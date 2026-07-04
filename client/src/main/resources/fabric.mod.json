@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "easyauthclient",
+  "version": "${version}",
+  "name": "EasyAuth Client",
+  "description": "Client-side companion for EasyAuth: chat automation and auto-login.",
+  "authors": [
+    "NikitaCartes"
+  ],
+  "contact": {
+    "homepage": "https://github.com/NikitaCartes/EasyAuth",
+    "sources": "https://github.com/NikitaCartes/EasyAuth",
+    "issues": "https://github.com/NikitaCartes/EasyAuth/issues"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "xyz.nikitacartes.easyauth.client.EasyAuthClientFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.6",
+    "minecraft": "${supported_minecraft_version}",
+    "java": ">=25"
+  }
+}

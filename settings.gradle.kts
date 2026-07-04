@@ -10,7 +10,7 @@ pluginManagement {
 }
 
 plugins {
-    id("dev.kikugie.stonecutter") version "0.9.2"
+    id("dev.kikugie.stonecutter") version "0.9.4"
 }
 
 stonecutter {
@@ -27,6 +27,12 @@ stonecutter {
         // NeoForge
         listOf("1.21", "1.21.2", "1.21.5", "1.21.6", "1.21.9", "1.21.11", "26.1").forEach { mc ->
             versions("$mc-neoforge" to mc).buildscript("build.neoforge.gradle.kts")
+        }
+        // Client mod: separate artifact (environment: client), newest MC per loader only.
+        // Project names match the root branch so switching the active version keeps both in sync.
+        branch("client") {
+            versions("26.2-fabric" to "26.2").buildscript("build.fabric.gradle.kts")
+            versions("26.1-neoforge" to "26.1").buildscript("build.neoforge.gradle.kts")
         }
         vcsVersion = "26.2-fabric"
     }

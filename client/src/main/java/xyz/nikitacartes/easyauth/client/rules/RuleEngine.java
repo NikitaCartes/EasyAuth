@@ -47,6 +47,10 @@ public final class RuleEngine {
         credentialsFile = dir.resolve("credentials.json");
     }
 
+    public static Path getCredentialsFile() {
+        return credentialsFile;
+    }
+
     public static void onJoin() {
         queue.clear();
         active = List.of();
@@ -291,7 +295,7 @@ public final class RuleEngine {
         return result;
     }
 
-    static String normalizeAddress(String address) {
+    public static String normalizeAddress(String address) {
         String a = address.trim().toLowerCase(Locale.ROOT);
         if (a.endsWith(":25565")) {
             a = a.substring(0, a.length() - ":25565".length());

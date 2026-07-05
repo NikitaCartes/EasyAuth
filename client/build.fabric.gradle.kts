@@ -43,12 +43,18 @@ loom {
     }
 }
 
+repositories {
+    maven(url = "https://maven.terraformersmc.com/releases")
+}
+
 dependencies {
     // 26.x ships deobfuscated, so no mappings dependency (same as build.fabric-deobf.gradle.kts)
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
 
     implementation("net.fabricmc:fabric-loader:${property("loader_version")}")
     implementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
+    // Compile-only: the modmenu entrypoint class is loaded only when ModMenu is installed
+    compileOnly("com.terraformersmc:modmenu:${property("modmenu_version")}")
 }
 
 tasks.processResources {

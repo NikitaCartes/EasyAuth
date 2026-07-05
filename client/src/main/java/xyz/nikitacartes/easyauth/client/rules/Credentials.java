@@ -1,6 +1,7 @@
 package xyz.nikitacartes.easyauth.client.rules;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -47,6 +49,32 @@ public final class Credentials {
         } catch (IOException | JsonParseException e) {
             LOGGER.warn("Could not read {}: {}", file, e.toString());
             return null;
+        }
+    }
+
+    /** All stored entries as a mutable map; empty when the file is missing/unreadable. */
+    public static Map<String, Credentials> loadAll(Path file) {
+        try {
+            if (Files.exists(file)) {
+                CredentialsFile parsed = GSON.fromJson(Files.readString(file), CredentialsFile.class);
+                if (parsed != null && parsed.servers != null) {
+                    return new LinkedHashMap<>(parsed.servers);
+                }
+            }
+        } catch (IOException | JsonParseException e) {
+            LOGGER.warn("Could not read {}: {}", file, e.toString());
+        }
+        return new LinkedHashMap<>();
+    }
+
+    public static void saveAll(Path file, Map<String, Credentials> servers) {
+        CredentialsFile out = new CredentialsFile();
+        out.servers = servers;
+        try {
+            Files.createDirectories(file.getParent());
+            Files.writeString(file, new GsonBuilder().setPrettyPrinting().create().toJson(out));
+        } catch (IOException e) {
+            LOGGER.warn("Could not write {}: {}", file, e.toString());
         }
     }
 

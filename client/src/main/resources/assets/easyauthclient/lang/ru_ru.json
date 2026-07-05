@@ -1,0 +1,15 @@
+{
+  "modmenu.summaryTranslation.easyauthclient": "Автоматизация чата и автовход для серверов с EasyAuth.",
+  "modmenu.descriptionTranslation.easyauthclient": "Клиентский компаньон для EasyAuth: правила авто-ввода команд по серверам и автовход, опционально с TOTP-кодами.",
+  "easyauthclient.config.title": "EasyAuth Client",
+  "easyauthclient.config.server": "Сервер",
+  "easyauthclient.config.newServer": "+ Добавить сервер",
+  "easyauthclient.config.address": "Адрес сервера",
+  "easyauthclient.config.password": "Пароль",
+  "easyauthclient.config.password.tooltip": "Хранится открытым текстом в credentials.json. Очистите поле, чтобы забыть сервер.",
+  "easyauthclient.config.totp": "TOTP-секрет (Base32, необязательно)",
+  "easyauthclient.config.totp.tooltip": "Включает автоподстановку {otp}. Секрет на этом компьютере делает его вторым фактором.",
+  "easyauthclient.config.autoLogin": "Автовход",
+  "easyauthclient.config.autoRegister": "Авторегистрация (устанавливает пароль аккаунта!)",
+  "easyauthclient.config.rulesHint": "Правила авто-ввода: config/easyauth-client/rules.json"
+}

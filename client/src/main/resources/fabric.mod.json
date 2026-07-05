@@ -17,6 +17,9 @@
   "entrypoints": {
     "client": [
       "xyz.nikitacartes.easyauth.client.EasyAuthClientFabric"
+    ],
+    "modmenu": [
+      "xyz.nikitacartes.easyauth.client.EasyAuthClientModMenu"
     ]
   },
   "depends": {
@@ -24,5 +27,18 @@
     "fabricloader": ">=0.18.6",
     "minecraft": "${supported_minecraft_version}",
     "java": ">=25"
+  },
+  "suggests": {
+    "modmenu": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.modrinth": "https://modrinth.com/mod/easyauth",
+        "modmenu.curseforge": "https://www.curseforge.com/projects/503866",
+        "modmenu.github_releases": "https://github.com/NikitaCartes/EasyAuth/releases"
+      },
+      "update_checker": false
+    }
   }
 }

@@ -184,6 +184,8 @@ vanish_version = "1.6.14+26.2"
 display_name = "[26.2]"
 supported_versions = "26.2"
 supported_minecraft_version = ">=26.2-"
+# compile-only dependency of the client branch (client/build.fabric.gradle.kts)
+modmenu_version = "20.0.0-alpha.1"
 
 # ---------------------------------------------------------------------------
 # NeoForge (build.neoforge.gradle.kts: ModDevGradle).

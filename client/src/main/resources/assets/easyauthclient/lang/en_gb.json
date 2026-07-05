@@ -1,0 +1,15 @@
+{
+  "modmenu.summaryTranslation.easyauthclient": "Chat automation and auto-login for EasyAuth servers.",
+  "modmenu.descriptionTranslation.easyauthclient": "Client-side companion for EasyAuth: per-server chat/command automation rules and auto-login, with optional TOTP codes.",
+  "easyauthclient.config.title": "EasyAuth Client",
+  "easyauthclient.config.server": "Server",
+  "easyauthclient.config.newServer": "+ Add server",
+  "easyauthclient.config.address": "Server address",
+  "easyauthclient.config.password": "Password",
+  "easyauthclient.config.password.tooltip": "Stored as plain text in credentials.json. Clear this field to forget the server.",
+  "easyauthclient.config.totp": "TOTP secret (Base32, optional)",
+  "easyauthclient.config.totp.tooltip": "Enables automatic {otp} codes. Storing the secret here makes this computer the second factor.",
+  "easyauthclient.config.autoLogin": "Auto-login",
+  "easyauthclient.config.autoRegister": "Auto-register (sets the account password!)",
+  "easyauthclient.config.rulesHint": "Auto-input rules: config/easyauth-client/rules.json"
+}

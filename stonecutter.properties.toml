@@ -172,6 +172,8 @@ vanish_version = "1.6.8+26.1"
 display_name = "[26.1]"
 supported_versions = "26.1,26.1.1,26.1.2"
 supported_minecraft_version = ">=26.1- <26.2"
+# compile-only dependency of the client branch (client/build.fabric.gradle.kts)
+modmenu_version = "18.0.0-beta.1"
 
 [fabric."26.2"]
 minecraft_version = "26.2"

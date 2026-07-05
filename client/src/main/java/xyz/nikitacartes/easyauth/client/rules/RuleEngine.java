@@ -35,6 +35,8 @@ public final class RuleEngine {
     // Session state; empty when not connected or no rules for the current server.
     private static List<ActiveRule> active = List.of();
     private static final List<Pending> queue = new ArrayList<>();
+    // Built-in auto-login; sent once /login appears in the server's command tree (see onTick).
+    private static List<String> pendingAuthCommands = List.of();
     private static String serverAddress = "";
     private static Credentials credentials;
 
@@ -54,6 +56,7 @@ public final class RuleEngine {
     public static void onJoin() {
         queue.clear();
         active = List.of();
+        pendingAuthCommands = List.of();
         credentials = null;
         ServerData server = Minecraft.getInstance().getCurrentServer();
         if (server == null || server.ip == null) {
@@ -61,13 +64,9 @@ public final class RuleEngine {
         }
         serverAddress = normalizeAddress(server.ip);
         credentials = Credentials.load(credentialsFile, serverAddress);
+        pendingAuthCommands = buildAuthCommands();
+        active = loadRules(serverAddress);
         long now = System.currentTimeMillis();
-        List<ActiveRule> rules = new ArrayList<>(loadRules(serverAddress));
-        addBuiltinAuthRules(rules, now);
-        active = rules;
-        if (active.isEmpty()) {
-            return;
-        }
         for (ActiveRule r : active) {
             switch (r.rule.trigger) {
                 case "join" -> tryFire(r, now, r.rule.delayMs);
@@ -79,38 +78,24 @@ public final class RuleEngine {
     }
 
     /**
-     * Auto-login (plan §4, variant A): built-in rules for servers with saved credentials.
-     * The chat rule matches EasyAuth's default en/ru prompts; the one-shot join fallback
-     * covers 1.21.6+ dialog servers and custom locales, where no chat prompt is ever sent.
-     * Both share one ActiveRule, so the cooldown prevents double-sending.
+     * Auto-login (plan §4, variant A): instead of matching auth-mod chat prompts, the
+     * commands are sent once /login shows up in the command tree the server pushes after
+     * join (see onTick). No dependency on EasyAuth's messages, locales, or chat at all —
+     * works with dialog-only servers and any auth mod that registers /login.
      */
-    private static void addBuiltinAuthRules(List<ActiveRule> rules, long now) {
+    private static List<String> buildAuthCommands() {
         if (credentials == null || credentials.password == null || !credentials.autoLogin) {
-            return;
+            return List.of();
         }
-        AutoInputRule login = new AutoInputRule();
-        login.trigger = "chat";
-        login.match = "Use /login|Используйте /login|Введите /login";
-        login.send = List.of(credentials.totpSecret == null || credentials.totpSecret.isEmpty()
+        String login = credentials.totpSecret == null || credentials.totpSecret.isEmpty()
                 ? "/login {password}"
-                : "/login {password} {otp}");
-        login.maxRuns = 5;
-        login.cooldownMs = 5000;
-        ActiveRule loginRule = new ActiveRule(login, Pattern.compile(login.match));
-        loginRule.oneShotAt = now + 3000;
-        rules.add(loginRule);
-
-        if (credentials.autoRegister) {
-            AutoInputRule register = new AutoInputRule();
-            register.trigger = "chat";
-            // Deliberately not matching the <global password> prompt variants:
-            // the global password is not stored, a 2-argument /register would be wrong there.
-            register.match = "Use /register <password>|Введите /register <пароль>";
-            register.send = List.of("/register {password} {password}");
-            register.maxRuns = 1;
-            register.cooldownMs = 5000;
-            rules.add(new ActiveRule(register, Pattern.compile(register.match)));
-        }
+                : "/login {password} {otp}";
+        // /register goes first: on a fresh account it registers (EasyAuth authenticates right
+        // away), on an existing one it just fails and the /login applies. Global-password
+        // servers are not supported — the global password is not stored.
+        return credentials.autoRegister
+                ? List.of("/register {password} {password}", login)
+                : List.of(login);
     }
 
     /**
@@ -140,18 +125,26 @@ public final class RuleEngine {
     }
 
     public static void onTick() {
-        if (active.isEmpty() && queue.isEmpty()) {
+        if (active.isEmpty() && queue.isEmpty() && pendingAuthCommands.isEmpty()) {
             return;
+        }
+        if (!pendingAuthCommands.isEmpty()) {
+            ClientPacketListener connection = Minecraft.getInstance().getConnection();
+            if (connection != null && connection.getCommands().getRoot().getChild("login") != null) {
+                for (String line : pendingAuthCommands) {
+                    String resolved = resolvePlaceholders(line);
+                    if (resolved != null && !resolved.isEmpty()) {
+                        send(resolved);
+                    }
+                }
+                pendingAuthCommands = List.of();
+            }
         }
         long now = System.currentTimeMillis();
         for (ActiveRule r : active) {
             if (r.rule.trigger.equals("timer") && now >= r.nextTimerAt) {
                 tryFire(r, now, 0);
                 r.nextTimerAt = now + r.rule.cooldownMs;
-            }
-            if (now >= r.oneShotAt) {
-                r.oneShotAt = Long.MAX_VALUE;
-                tryFire(r, now, 0);
             }
         }
         for (Iterator<Pending> it = queue.iterator(); it.hasNext(); ) {
@@ -172,6 +165,7 @@ public final class RuleEngine {
         }
         active = List.of();
         queue.clear();
+        pendingAuthCommands = List.of();
         credentials = null;
     }
 
@@ -317,7 +311,6 @@ public final class RuleEngine {
         int runs = 0;
         long lastRun = Long.MIN_VALUE / 2;
         long nextTimerAt = Long.MAX_VALUE;
-        long oneShotAt = Long.MAX_VALUE; // built-in join fallback (see addBuiltinAuthRules)
 
         ActiveRule(AutoInputRule rule, Pattern pattern) {
             this.rule = rule;

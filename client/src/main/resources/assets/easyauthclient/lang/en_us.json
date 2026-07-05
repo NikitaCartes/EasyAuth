@@ -11,5 +11,11 @@
   "easyauthclient.config.totp.tooltip": "Enables automatic {otp} codes. Storing the secret here makes this computer the second factor.",
   "easyauthclient.config.autoLogin": "Auto-login",
   "easyauthclient.config.autoRegister": "Auto-register (sets the account password!)",
+  "easyauthclient.config.globalAutoLogin": "Auto-login (all servers)",
+  "easyauthclient.config.globalAutoLogin.tooltip": "Send /login automatically on servers that have the command and a saved password.",
+  "easyauthclient.config.globalAutoRegister": "Auto-register (new servers)",
+  "easyauthclient.config.globalAutoRegister.tooltip": "On servers with a /register command and no saved password, register with the default password (or a random one) and remember it.",
+  "easyauthclient.config.defaultPassword": "Default password for new servers",
+  "easyauthclient.config.defaultPassword.tooltip": "Used by auto-register. Leave empty to generate a random password per server.",
   "easyauthclient.config.rulesHint": "Auto-input rules: config/easyauth-client/rules.json"
 }

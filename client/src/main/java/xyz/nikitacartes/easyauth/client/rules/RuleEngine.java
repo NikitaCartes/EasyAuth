@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,9 +36,10 @@ public final class RuleEngine {
     // Session state; empty when not connected or no rules for the current server.
     private static List<ActiveRule> active = List.of();
     private static final List<Pending> queue = new ArrayList<>();
-    // Built-in auto-login; sent once /login appears in the server's command tree (see onTick).
-    private static List<String> pendingAuthCommands = List.of();
+    // Built-in auto-auth; fires once /login or /register appears in the server's command tree (see onTick).
+    private static boolean authPending;
     private static String serverAddress = "";
+    private static Credentials.Store store;
     private static Credentials credentials;
 
     private RuleEngine() {
@@ -56,15 +58,20 @@ public final class RuleEngine {
     public static void onJoin() {
         queue.clear();
         active = List.of();
-        pendingAuthCommands = List.of();
+        authPending = false;
+        store = null;
         credentials = null;
         ServerData server = Minecraft.getInstance().getCurrentServer();
         if (server == null || server.ip == null) {
             return; // singleplayer/realms
         }
         serverAddress = normalizeAddress(server.ip);
-        credentials = Credentials.load(credentialsFile, serverAddress);
-        pendingAuthCommands = buildAuthCommands();
+        store = Credentials.load(credentialsFile);
+        credentials = store.servers.get(serverAddress);
+        if (credentials != null && credentials.password != null) {
+            LOGGER.warn("Using credentials for {} from {} — this file is stored as plain text", serverAddress, credentialsFile);
+        }
+        authPending = store.autoLogin || store.autoRegister;
         active = loadRules(serverAddress);
         long now = System.currentTimeMillis();
         for (ActiveRule r : active) {
@@ -78,24 +85,54 @@ public final class RuleEngine {
     }
 
     /**
-     * Auto-login (plan §4, variant A): instead of matching auth-mod chat prompts, the
-     * commands are sent once /login shows up in the command tree the server pushes after
-     * join (see onTick). No dependency on EasyAuth's messages, locales, or chat at all —
-     * works with dialog-only servers and any auth mod that registers /login.
+     * Auto-auth (plan §4, variant A): fires once /login or /register shows up in the command
+     * tree the server pushes after join (see onTick) — detection of an installed auth mod,
+     * with no dependency on its messages, locales, or chat. A server without a stored
+     * password gets auto-registered with the default (or a random) password, which is saved
+     * back to credentials.json. Global-password servers are not supported.
      */
-    private static List<String> buildAuthCommands() {
-        if (credentials == null || credentials.password == null || !credentials.autoLogin) {
-            return List.of();
+    private static void sendAuthCommands(boolean hasLogin, boolean hasRegister) {
+        if (credentials == null || credentials.password == null) {
+            if (!store.autoRegister || !hasRegister) {
+                return;
+            }
+            Credentials entry = credentials != null ? credentials : new Credentials();
+            entry.password = store.defaultPassword == null || store.defaultPassword.isEmpty()
+                    ? randomPassword()
+                    : store.defaultPassword;
+            credentials = entry;
+            store.servers.put(serverAddress, entry);
+            Credentials.save(credentialsFile, store);
+            LOGGER.info("Auto-registering on {}; the password is saved in {}", serverAddress, credentialsFile);
+            send("/register " + entry.password + " " + entry.password);
+            return;
+        }
+        if (!store.autoLogin || !credentials.autoLogin || !hasLogin) {
+            return;
+        }
+        // /register goes first when opted in: on a fresh account it registers (EasyAuth
+        // authenticates right away), on an existing one it just fails and the /login applies.
+        if (credentials.autoRegister && hasRegister) {
+            send("/register " + credentials.password + " " + credentials.password);
         }
         String login = credentials.totpSecret == null || credentials.totpSecret.isEmpty()
                 ? "/login {password}"
                 : "/login {password} {otp}";
-        // /register goes first: on a fresh account it registers (EasyAuth authenticates right
-        // away), on an existing one it just fails and the /login applies. Global-password
-        // servers are not supported — the global password is not stored.
-        return credentials.autoRegister
-                ? List.of("/register {password} {password}", login)
-                : List.of(login);
+        String resolved = resolvePlaceholders(login);
+        if (resolved != null) {
+            send(resolved);
+        }
+    }
+
+    private static String randomPassword() {
+        // No look-alike characters (0/O, 1/l/I) — the password may need to be retyped by hand.
+        String alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(16);
+        for (int i = 0; i < 16; i++) {
+            password.append(alphabet.charAt(random.nextInt(alphabet.length())));
+        }
+        return password.toString();
     }
 
     /**
@@ -125,19 +162,19 @@ public final class RuleEngine {
     }
 
     public static void onTick() {
-        if (active.isEmpty() && queue.isEmpty() && pendingAuthCommands.isEmpty()) {
+        if (active.isEmpty() && queue.isEmpty() && !authPending) {
             return;
         }
-        if (!pendingAuthCommands.isEmpty()) {
+        if (authPending) {
             ClientPacketListener connection = Minecraft.getInstance().getConnection();
-            if (connection != null && connection.getCommands().getRoot().getChild("login") != null) {
-                for (String line : pendingAuthCommands) {
-                    String resolved = resolvePlaceholders(line);
-                    if (resolved != null && !resolved.isEmpty()) {
-                        send(resolved);
-                    }
+            if (connection != null) {
+                var root = connection.getCommands().getRoot();
+                boolean hasLogin = root.getChild("login") != null;
+                boolean hasRegister = root.getChild("register") != null;
+                if (hasLogin || hasRegister) {
+                    authPending = false;
+                    sendAuthCommands(hasLogin, hasRegister);
                 }
-                pendingAuthCommands = List.of();
             }
         }
         long now = System.currentTimeMillis();
@@ -165,7 +202,8 @@ public final class RuleEngine {
         }
         active = List.of();
         queue.clear();
-        pendingAuthCommands = List.of();
+        authPending = false;
+        store = null;
         credentials = null;
     }
 

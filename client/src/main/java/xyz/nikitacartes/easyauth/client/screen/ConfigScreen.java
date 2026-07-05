@@ -33,9 +33,13 @@ public class ConfigScreen extends Screen {
 
     private final Screen parent;
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
+    private final Credentials.Store store;
     private final Map<String, Credentials> servers;
     private String selected;
 
+    private Checkbox globalAutoLoginBox;
+    private Checkbox globalAutoRegisterBox;
+    private EditBox defaultPasswordBox;
     private EditBox addressBox;
     private EditBox passwordBox;
     private EditBox totpBox;
@@ -45,7 +49,8 @@ public class ConfigScreen extends Screen {
     public ConfigScreen(Screen parent) {
         super(Component.translatable("easyauthclient.config.title"));
         this.parent = parent;
-        this.servers = Credentials.loadAll(RuleEngine.getCredentialsFile());
+        this.store = Credentials.load(RuleEngine.getCredentialsFile());
+        this.servers = store.servers;
         ServerData current = Minecraft.getInstance().getCurrentServer();
         String address = current != null && current.ip != null ? RuleEngine.normalizeAddress(current.ip) : null;
         if (address != null && !address.isEmpty()) {
@@ -61,6 +66,27 @@ public class ConfigScreen extends Screen {
         layout.addTitleHeader(title, font);
         LinearLayout column = layout.addToContents(LinearLayout.vertical().spacing(4));
         Credentials entry = servers.get(selected);
+
+        LinearLayout globalRow = column.addChild(LinearLayout.horizontal().spacing(8));
+        globalAutoLoginBox = globalRow.addChild(Checkbox.builder(
+                        Component.translatable("easyauthclient.config.globalAutoLogin"), font)
+                .selected(store.autoLogin)
+                .build());
+        globalAutoLoginBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.globalAutoLogin.tooltip")));
+        globalAutoRegisterBox = globalRow.addChild(Checkbox.builder(
+                        Component.translatable("easyauthclient.config.globalAutoRegister"), font)
+                .selected(store.autoRegister)
+                .build());
+        globalAutoRegisterBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.globalAutoRegister.tooltip")));
+
+        defaultPasswordBox = column.addChild(new EditBox(font, ROW_WIDTH, 20,
+                Component.translatable("easyauthclient.config.defaultPassword")));
+        defaultPasswordBox.setMaxLength(512);
+        defaultPasswordBox.setHint(Component.translatable("easyauthclient.config.defaultPassword"));
+        defaultPasswordBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.defaultPassword.tooltip")));
+        if (store.defaultPassword != null) {
+            defaultPasswordBox.setValue(store.defaultPassword);
+        }
 
         List<String> values = new ArrayList<>(new TreeSet<>(servers.keySet()));
         values.add(NEW_SERVER);
@@ -98,10 +124,12 @@ public class ConfigScreen extends Screen {
             totpBox.setValue(entry.totpSecret);
         }
 
-        autoLoginBox = column.addChild(Checkbox.builder(Component.translatable("easyauthclient.config.autoLogin"), font)
+        // One row: with the global section above, stacked checkboxes overflow the smallest window.
+        LinearLayout serverRow = column.addChild(LinearLayout.horizontal().spacing(8));
+        autoLoginBox = serverRow.addChild(Checkbox.builder(Component.translatable("easyauthclient.config.autoLogin"), font)
                 .selected(entry == null || entry.autoLogin)
                 .build());
-        autoRegisterBox = column.addChild(Checkbox.builder(Component.translatable("easyauthclient.config.autoRegister"), font)
+        autoRegisterBox = serverRow.addChild(Checkbox.builder(Component.translatable("easyauthclient.config.autoRegister"), font)
                 .selected(entry != null && entry.autoRegister)
                 .build());
 
@@ -124,8 +152,11 @@ public class ConfigScreen extends Screen {
         rebuildWidgets();
     }
 
-    /** Writes the widget values into {@link #servers}; keeps {@link #selected} pointing at them. */
+    /** Writes the widget values into {@link #store}; keeps {@link #selected} pointing at them. */
     private void commitFields() {
+        store.autoLogin = globalAutoLoginBox.selected();
+        store.autoRegister = globalAutoRegisterBox.selected();
+        store.defaultPassword = defaultPasswordBox.getValue();
         String address = NEW_SERVER.equals(selected)
                 ? RuleEngine.normalizeAddress(addressBox.getValue())
                 : selected;
@@ -150,7 +181,7 @@ public class ConfigScreen extends Screen {
     public void onClose() {
         commitFields();
         servers.values().removeIf(entry -> entry.password == null && entry.totpSecret == null);
-        Credentials.saveAll(RuleEngine.getCredentialsFile(), servers);
+        Credentials.save(RuleEngine.getCredentialsFile(), store);
         //? if >=26.2 {
         minecraft.gui.setScreen(parent);
         //?} else {

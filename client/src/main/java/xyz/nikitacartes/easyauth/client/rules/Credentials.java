@@ -1,6 +1,5 @@
 package xyz.nikitacartes.easyauth.client.rules;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import org.slf4j.Logger;
@@ -19,66 +18,53 @@ import java.util.Map;
  */
 public final class Credentials {
     private static final Logger LOGGER = LoggerFactory.getLogger("EasyAuthClient");
-    private static final Gson GSON = new Gson();
 
     public String password;
     public String totpSecret;    // Base32; presence = explicit opt-in to auto-{otp}
     public boolean autoLogin = true;     // built-in auto-/login rules
     public boolean autoRegister = false; // opt-in: registering sets the account password
 
-    /** Returns the entry for {@code address} or null; creates a skeleton file if missing. */
-    static Credentials load(Path file, String address) {
+    /** Whole credentials.json: global auto-auth settings plus the per-server entries. */
+    public static final class Store {
+        public boolean autoLogin = true;     // master switch for the built-in /login
+        public boolean autoRegister = true;  // register on new servers that expose /register
+        public String defaultPassword = "";  // used by auto-register; empty = random per server
+        public Map<String, Credentials> servers = new LinkedHashMap<>();
+    }
+
+    /** Never null; creates a skeleton file on first run. */
+    public static Store load(Path file) {
         try {
             if (!Files.exists(file)) {
-                Files.createDirectories(file.getParent());
-                Files.writeString(file, "{\n  \"servers\": {}\n}\n");
-                return null;
+                Store store = new Store();
+                save(file, store);
+                return store;
             }
-            CredentialsFile parsed = GSON.fromJson(Files.readString(file), CredentialsFile.class);
-            if (parsed == null || parsed.servers == null) {
-                return null;
+            Store store = new GsonBuilder().create().fromJson(Files.readString(file), Store.class);
+            if (store == null) {
+                return new Store();
             }
-            Credentials entry = parsed.servers.get(address);
-            if (entry != null && (entry.password == null || entry.password.isEmpty())) {
-                entry.password = null;
+            if (store.servers == null) {
+                store.servers = new LinkedHashMap<>();
             }
-            if (entry != null && entry.password != null) {
-                LOGGER.warn("Using credentials for {} from {} — this file is stored as plain text", address, file);
-            }
-            return entry;
-        } catch (IOException | JsonParseException e) {
-            LOGGER.warn("Could not read {}: {}", file, e.toString());
-            return null;
-        }
-    }
-
-    /** All stored entries as a mutable map; empty when the file is missing/unreadable. */
-    public static Map<String, Credentials> loadAll(Path file) {
-        try {
-            if (Files.exists(file)) {
-                CredentialsFile parsed = GSON.fromJson(Files.readString(file), CredentialsFile.class);
-                if (parsed != null && parsed.servers != null) {
-                    return new LinkedHashMap<>(parsed.servers);
+            for (Credentials entry : store.servers.values()) {
+                if (entry != null && entry.password != null && entry.password.isEmpty()) {
+                    entry.password = null;
                 }
             }
+            return store;
         } catch (IOException | JsonParseException e) {
             LOGGER.warn("Could not read {}: {}", file, e.toString());
+            return new Store();
         }
-        return new LinkedHashMap<>();
     }
 
-    public static void saveAll(Path file, Map<String, Credentials> servers) {
-        CredentialsFile out = new CredentialsFile();
-        out.servers = servers;
+    public static void save(Path file, Store store) {
         try {
             Files.createDirectories(file.getParent());
-            Files.writeString(file, new GsonBuilder().setPrettyPrinting().create().toJson(out));
+            Files.writeString(file, new GsonBuilder().setPrettyPrinting().create().toJson(store));
         } catch (IOException e) {
             LOGGER.warn("Could not write {}: {}", file, e.toString());
         }
-    }
-
-    private static final class CredentialsFile {
-        Map<String, Credentials> servers;
     }
 }

@@ -11,5 +11,11 @@
   "easyauthclient.config.totp.tooltip": "Включает автоподстановку {otp}. Секрет на этом компьютере делает его вторым фактором.",
   "easyauthclient.config.autoLogin": "Автовход",
   "easyauthclient.config.autoRegister": "Авторегистрация (устанавливает пароль аккаунта!)",
+  "easyauthclient.config.globalAutoLogin": "Автовход (все серверы)",
+  "easyauthclient.config.globalAutoLogin.tooltip": "Автоматически отправлять /login на серверах, где есть эта команда и сохранён пароль.",
+  "easyauthclient.config.globalAutoRegister": "Авторегистрация (новые серверы)",
+  "easyauthclient.config.globalAutoRegister.tooltip": "На серверах с командой /register и без сохранённого пароля — зарегистрироваться с паролем по умолчанию (или случайным) и запомнить его.",
+  "easyauthclient.config.defaultPassword": "Пароль по умолчанию для новых серверов",
+  "easyauthclient.config.defaultPassword.tooltip": "Используется авторегистрацией. Оставьте пустым — для каждого сервера будет сгенерирован случайный пароль.",
   "easyauthclient.config.rulesHint": "Правила авто-ввода: config/easyauth-client/rules.json"
 }

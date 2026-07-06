@@ -195,6 +195,12 @@ public class AuthEventHandler {
                 return true;
             }
 
+            // Companion-mod credentials channel (ClientModBridge): its whole point is to
+            // arrive before authentication, so it must not be blocked here.
+            if ("easyauth:auth".equals(customPacketIdentifier)) {
+                return true;
+            }
+
             if (isAllowedCustomPacket(customPacketIdentifier)) {
                 return true;
             }
@@ -391,6 +397,18 @@ public class AuthEventHandler {
     // Player joining the server
     public static void onPlayerJoin(ServerPlayer player) {
         PlayerAuth playerAuth = (PlayerAuth) player;
+
+        //? if >= 26.1 {
+        // Companion-mod hello: announce capabilities + this player's auth state (must go out in
+        // every branch below, so it sits before them).
+        {
+            PlayerEntryV1 helloEntry = playerAuth.easyAuth$getPlayerEntryV1();
+            xyz.nikitacartes.easyauth.integrations.ClientModBridge.sendHello(player,
+                    playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()
+                            || isSkipAllAuthChecksApplicable(player),
+                    helloEntry != null && !helloEntry.password.isEmpty());
+        }
+        //?}
 
         if (playerAuth.easyAuth$canSkipAuth()) {
             langConfig.session.onlineAccount.send(player);

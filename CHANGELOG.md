@@ -22,6 +22,7 @@
 #### Add
 - NeoForge support for Minecraft 1.21[.X] and 26.[x]
 - EasyAuth Client — new separate client-side companion mod
+- New `client-mod` section in `extended.conf` (`allow-auto-login`, `allow-auto-register`): on 26.1+ servers (Fabric and NeoForge) the companion mod logs in and registers through direct packets instead of chat commands; these options let admins turn that off
 - Server-side Dialog windows (GUI) for login, registration, the account menu and the admin panel on Minecraft 1.21.6+. Older versions automatically fall back to the chat commands. [#245](https://github.com/NikitaCartes/EasyAuth/issues/245)
   - New config file `dialogs.conf` to control them (`enabled`, `login`, `register`, `account`, `admin`, `can-close-with-escape`, `allow-datapack-override`)
   - Datapacks can override any built-in window by id (e.g. `easyauth:login`)

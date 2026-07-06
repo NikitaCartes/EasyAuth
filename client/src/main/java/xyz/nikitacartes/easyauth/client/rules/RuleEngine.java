@@ -7,6 +7,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ServerData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.nikitacartes.easyauth.client.EasyAuthPackets;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -97,13 +98,7 @@ public final class RuleEngine {
             if (!store.autoRegister || !hasRegister) {
                 return;
             }
-            Credentials entry = credentials != null ? credentials : new Credentials();
-            entry.password = store.defaultPassword == null || store.defaultPassword.isEmpty()
-                    ? randomPassword()
-                    : store.defaultPassword;
-            credentials = entry;
-            store.servers.put(serverAddress, entry);
-            Credentials.save(credentialsFile, store);
+            ensureStoredPassword();
             LOGGER.info("Auto-registering on {}; the password is saved in {}", serverAddress, credentialsFile);
             sendResolved(store.registerCommand);
             return;
@@ -121,6 +116,49 @@ public final class RuleEngine {
             login += " {otp}";
         }
         sendResolved(login);
+    }
+
+    /**
+     * Hello from the server's EasyAuth (packet path, plan §6): supersedes the command fallback.
+     * The server routes the credentials to register or login by account state itself, and the
+     * capability flags let the admin veto auto-auth for compliant clients entirely.
+     * Called on the client main thread by the payload receiver in EasyAuthPackets.
+     */
+    public static void onHello(boolean canAutoLogin, boolean canAutoRegister, boolean registered, boolean authenticated) {
+        if (!authPending) {
+            return;
+        }
+        authPending = false;
+        if (authenticated) {
+            return; // session still valid (or the server skips auth for this player)
+        }
+        if (!registered) {
+            if (!canAutoRegister || !store.autoRegister) {
+                return;
+            }
+            ensureStoredPassword();
+            LOGGER.info("Auto-registering on {} via packet; the password is saved in {}", serverAddress, credentialsFile);
+            EasyAuthPackets.sendCredentials(credentials.password, null);
+            return;
+        }
+        if (!canAutoLogin || !store.autoLogin
+                || credentials == null || credentials.password == null || !credentials.autoLogin) {
+            return;
+        }
+        EasyAuthPackets.sendCredentials(credentials.password, Totp.currentCode(credentials.totpSecret));
+    }
+
+    /** Ensures {@link #credentials} has a stored password for this server, generating and saving one if needed. */
+    private static void ensureStoredPassword() {
+        Credentials entry = credentials != null ? credentials : new Credentials();
+        if (entry.password == null) {
+            entry.password = store.defaultPassword == null || store.defaultPassword.isEmpty()
+                    ? randomPassword()
+                    : store.defaultPassword;
+        }
+        credentials = entry;
+        store.servers.put(serverAddress, entry);
+        Credentials.save(credentialsFile, store);
     }
 
     /** First word of a command template, without the leading slash — the detection literal. */
@@ -183,7 +221,9 @@ public final class RuleEngine {
         }
         if (authPending) {
             ClientPacketListener connection = Minecraft.getInstance().getConnection();
-            if (connection != null) {
+            // When the server declared the packet channel (EasyAuth 26.1+ on Fabric), wait for
+            // its hello instead — see onHello. The command fallback covers everything else.
+            if (connection != null && !EasyAuthPackets.serverSupportsPacketAuth()) {
                 var root = connection.getCommands().getRoot();
                 boolean hasLogin = root.getChild(commandLiteral(store.loginCommand)) != null;
                 boolean hasRegister = root.getChild(commandLiteral(store.registerCommand)) != null;

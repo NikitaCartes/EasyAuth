@@ -245,6 +245,12 @@ public class ExtendedConfigV1 extends ConfigTemplate {
 
     @Comment("""
 
+            Settings for the EasyAuth Client companion mod (direct packet-based auto-login).
+            Requires Minecraft 26.1+ with the Fabric loader; has no effect otherwise.""")
+    public ClientModSettings clientMod = new ClientModSettings();
+
+    @Comment("""
+
             IP Limit Settings - Restrict the number of accounts that can be registered/logged in from the same IP address.""")
     public IpLimitSettings ipLimit = new IpLimitSettings();
 
@@ -299,6 +305,21 @@ public class ExtendedConfigV1 extends ConfigTemplate {
             this.login = login;
             this.register = register;
         }
+    }
+
+    @ConfigSerializable
+    public static final class ClientModSettings {
+        @Comment("""
+
+            Allow companion clients to log in automatically with their stored password (direct packet, no /login command).
+            The capability is announced to the client on join, so compliant clients stop auto-logging in when this is off.""")
+        public boolean allowAutoLogin = true;
+
+        @Comment("""
+
+            Allow companion clients to register automatically with a generated password (direct packet, no /register command).
+            The capability is announced to the client on join, so compliant clients stop auto-registering when this is off.""")
+        public boolean allowAutoRegister = true;
     }
 
     @ConfigSerializable

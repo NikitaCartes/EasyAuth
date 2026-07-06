@@ -16,6 +16,7 @@ public class EasyAuthClientFabric implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         RuleEngine.init(FabricLoader.getInstance().getConfigDir());
+        EasyAuthPackets.init();
 
         ClientPlayConnectionEvents.JOIN.register((listener, sender, client) -> RuleEngine.onJoin());
         ClientPlayConnectionEvents.DISCONNECT.register((listener, client) -> RuleEngine.onDisconnect());

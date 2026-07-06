@@ -54,6 +54,10 @@ public class EasyAuthNeoForge {
 
         // Mod-bus events (setup, registry)
         modBus.addListener(this::onCommonSetup);
+        //? if >=26.1 {
+        /^modBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) ->
+                xyz.nikitacartes.easyauth.integrations.ClientModBridge.onRegisterPayloads(event));
+        ^///?}
 
         // Game-bus events (commands, world, players)
         IEventBus gameBus = NeoForge.EVENT_BUS;

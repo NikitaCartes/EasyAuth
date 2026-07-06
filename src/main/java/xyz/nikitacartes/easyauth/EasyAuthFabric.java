@@ -29,6 +29,9 @@ public class EasyAuthFabric implements ModInitializer {
         loadDatabase();
 
         xyz.nikitacartes.easyauth.proxy.ProxyBridge.init();
+        //? if >= 26.1 {
+        xyz.nikitacartes.easyauth.integrations.ClientModBridge.init();
+        //?}
 
         registerCommands();
         registerEvents();

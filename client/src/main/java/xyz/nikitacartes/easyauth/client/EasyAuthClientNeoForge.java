@@ -21,9 +21,12 @@ public class EasyAuthClientNeoForge {
     public static final String MOD_ID = "easyauthclient";
     public static final Logger LOGGER = LoggerFactory.getLogger("EasyAuthClient");
 
-    public EasyAuthClientNeoForge(ModContainer container) {
+    public EasyAuthClientNeoForge(IEventBus modBus, ModContainer container) {
         RuleEngine.init(FMLPaths.CONFIGDIR.get());
         container.registerExtensionPoint(IConfigScreenFactory.class, (mod, parent) -> new ConfigScreen(parent));
+
+        modBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) ->
+                EasyAuthPackets.onRegisterPayloads(event));
 
         IEventBus gameBus = NeoForge.EVENT_BUS;
         gameBus.addListener((ClientPlayerNetworkEvent.LoggingIn event) -> RuleEngine.onJoin());

@@ -85,9 +85,10 @@ public final class RuleEngine {
     }
 
     /**
-     * Auto-auth (plan §4, variant A): fires once /login or /register shows up in the command
-     * tree the server pushes after join (see onTick) — detection of an installed auth mod,
-     * with no dependency on its messages, locales, or chat. A server without a stored
+     * Auto-auth (plan §4, variant A): fires once the login/register command shows up in the
+     * command tree the server pushes after join (see onTick) — detection of an installed auth
+     * mod, with no dependency on its messages, locales, or chat. The commands themselves are
+     * the configurable templates in {@link Credentials.Store}. A server without a stored
      * password gets auto-registered with the default (or a random) password, which is saved
      * back to credentials.json. Global-password servers are not supported.
      */
@@ -104,7 +105,7 @@ public final class RuleEngine {
             store.servers.put(serverAddress, entry);
             Credentials.save(credentialsFile, store);
             LOGGER.info("Auto-registering on {}; the password is saved in {}", serverAddress, credentialsFile);
-            send("/register " + entry.password + " " + entry.password);
+            sendResolved(store.registerCommand);
             return;
         }
         if (!store.autoLogin || !credentials.autoLogin || !hasLogin) {
@@ -113,13 +114,28 @@ public final class RuleEngine {
         // /register goes first when opted in: on a fresh account it registers (EasyAuth
         // authenticates right away), on an existing one it just fails and the /login applies.
         if (credentials.autoRegister && hasRegister) {
-            send("/register " + credentials.password + " " + credentials.password);
+            sendResolved(store.registerCommand);
         }
-        String login = credentials.totpSecret == null || credentials.totpSecret.isEmpty()
-                ? "/login {password}"
-                : "/login {password} {otp}";
-        String resolved = resolvePlaceholders(login);
-        if (resolved != null) {
+        String login = store.loginCommand;
+        if (credentials.totpSecret != null && !credentials.totpSecret.isEmpty() && !login.contains("{otp}")) {
+            login += " {otp}";
+        }
+        sendResolved(login);
+    }
+
+    /** First word of a command template, without the leading slash — the detection literal. */
+    private static String commandLiteral(String template) {
+        String s = template == null ? "" : template.trim();
+        if (s.startsWith("/")) {
+            s = s.substring(1);
+        }
+        int space = s.indexOf(' ');
+        return space < 0 ? s : s.substring(0, space);
+    }
+
+    private static void sendResolved(String template) {
+        String resolved = resolvePlaceholders(template);
+        if (resolved != null && !resolved.isEmpty()) {
             send(resolved);
         }
     }
@@ -169,8 +185,8 @@ public final class RuleEngine {
             ClientPacketListener connection = Minecraft.getInstance().getConnection();
             if (connection != null) {
                 var root = connection.getCommands().getRoot();
-                boolean hasLogin = root.getChild("login") != null;
-                boolean hasRegister = root.getChild("register") != null;
+                boolean hasLogin = root.getChild(commandLiteral(store.loginCommand)) != null;
+                boolean hasRegister = root.getChild(commandLiteral(store.registerCommand)) != null;
                 if (hasLogin || hasRegister) {
                     authPending = false;
                     sendAuthCommands(hasLogin, hasRegister);

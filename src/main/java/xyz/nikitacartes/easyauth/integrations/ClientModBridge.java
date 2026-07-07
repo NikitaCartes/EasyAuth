@@ -1,25 +1,14 @@
+//~ resource_location
 package xyz.nikitacartes.easyauth.integrations;
-//? if >= 26.1 {
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-//? if fabric {
-import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.loader.api.FabricLoader;
-//?} else {
-/*import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.HandlerThread;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-*///?}
+//? if >=1.20.5 {
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+//?}
 import xyz.nikitacartes.easyauth.commands.LoginCommand;
 import xyz.nikitacartes.easyauth.commands.RegisterCommand;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -37,13 +26,15 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
  * <p>After join the server sends {@code easyauth:hello} with its capabilities and the player's
  * auth state; the companion replies on {@code easyauth:auth} with the stored credentials and the
  * server routes them to the same handlers as /login and /register (by account state, so the
- * client never has to guess between the two). Compliant clients also honour the capability
- * flags, which is what makes the {@code client-mod} options in extended.conf enforceable.
+ * client never has to guess between the two).
  *
- * <p>MC 26.1+ on both loaders (the companion mod does not exist below that; older versions keep
- * working through the client's command-tree fallback). The payload records and the receive
- * handler are loader-agnostic; only registration and sending differ (Fabric networking API vs
- * NeoForge {@link RegisterPayloadHandlersEvent} + {@link PacketDistributor}).
+ * <p>Works on every supported version. Three networking eras (loader-specific classes are used
+ * fully-qualified to avoid per-era import juggling): {@code >=1.20.5} uses the CustomPacketPayload
+ * API (Fabric {@code PayloadTypeRegistry.serverboundPlay/clientboundPlay} at 26.1+, the older
+ * {@code playC2S/playS2C} names below; NeoForge {@code RegisterPayloadHandlersEvent}); {@code <1.20.5}
+ * (Fabric only — NeoForge starts at 1.21) uses the legacy {@code ResourceLocation}+{@code FriendlyByteBuf}
+ * channel API. The wire format (field order in the codecs and the legacy read/write) is identical
+ * across eras and MUST stay in sync with the client's EasyAuthPackets.
  */
 public final class ClientModBridge {
 
@@ -56,11 +47,22 @@ public final class ClientModBridge {
     private ClientModBridge() {
     }
 
+    private static Identifier id(String path) {
+        //? if >=1.21 {
+        return Identifier.fromNamespaceAndPath("easyauth", path);
+        //?} else {
+        /*return new Identifier("easyauth", path);*/
+        //?}
+    }
+
+    static final Identifier HELLO_ID = id("hello");
+    static final Identifier AUTH_ID = id("auth");
+
+    //? if >=1.20.5 {
     /** S2C capability + auth-state announce, sent right after join. */
     public record HelloPayload(int protocolVersion, boolean canAutoLogin, boolean canAutoRegister,
                                boolean registered, boolean authenticated) implements CustomPacketPayload {
-        public static final CustomPacketPayload.Type<HelloPayload> TYPE =
-                new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("easyauth", "hello"));
+        public static final CustomPacketPayload.Type<HelloPayload> TYPE = new CustomPacketPayload.Type<>(HELLO_ID);
 
         public static final StreamCodec<FriendlyByteBuf, HelloPayload> CODEC = StreamCodec.of(
                 (buf, payload) -> {
@@ -81,8 +83,7 @@ public final class ClientModBridge {
 
     /** C2S credentials; empty otp = none. */
     public record AuthPayload(String password, String otp) implements CustomPacketPayload {
-        public static final CustomPacketPayload.Type<AuthPayload> TYPE =
-                new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("easyauth", "auth"));
+        public static final CustomPacketPayload.Type<AuthPayload> TYPE = new CustomPacketPayload.Type<>(AUTH_ID);
 
         public static final StreamCodec<FriendlyByteBuf, AuthPayload> CODEC = StreamCodec.of(
                 (buf, payload) -> {
@@ -96,6 +97,7 @@ public final class ClientModBridge {
             return TYPE;
         }
     }
+    //?}
 
     //? if fabric {
     /**
@@ -104,13 +106,28 @@ public final class ClientModBridge {
      * ponytail: LAN hosts therefore have no packet auth — the command fallback covers them.
      */
     public static void init() {
-        if (initialized || FabricLoader.getInstance().getEnvironmentType() != EnvType.SERVER) {
+        if (initialized || net.fabricmc.loader.api.FabricLoader.getInstance().getEnvironmentType() != net.fabricmc.api.EnvType.SERVER) {
             return;
         }
-        PayloadTypeRegistry.serverboundPlay().register(AuthPayload.TYPE, AuthPayload.CODEC);
-        PayloadTypeRegistry.clientboundPlay().register(HelloPayload.TYPE, HelloPayload.CODEC);
-        ServerPlayNetworking.registerGlobalReceiver(AuthPayload.TYPE,
-                (payload, context) -> receive(context.player(), payload));
+        //? if >=1.20.5 {
+        //? if >=26.1 {
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(AuthPayload.TYPE, AuthPayload.CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(HelloPayload.TYPE, HelloPayload.CODEC);
+        //?} else {
+        /*net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playC2S().register(AuthPayload.TYPE, AuthPayload.CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(HelloPayload.TYPE, HelloPayload.CODEC);*/
+        //?}
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(AuthPayload.TYPE,
+                (payload, context) -> receive(context.player(), payload.password(), payload.otp()));
+        //?} else {
+        /*// Legacy channel API: the handler runs off-thread, so re-dispatch to the server thread.
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(AUTH_ID,
+                (server, player, handler, buf, sender) -> {
+                    String password = buf.readUtf();
+                    String otp = buf.readUtf();
+                    server.execute(() -> receive(player, password, otp));
+                });*/
+        //?}
         initialized = true;
         LogInfo("EasyAuth Client packet channels registered (easyauth:hello / " + AUTH_CHANNEL + ")");
     }
@@ -119,52 +136,73 @@ public final class ClientModBridge {
     public static void init() {
     }
 
-    /^*
-     * Registers the channels + receiver. Wired from EasyAuthNeoForge's mod bus. Dedicated
-     * servers only: on a client instance the companion mod owns these payload ids, and
-     * registering them twice would crash (Fabric's init() guards the same way with env==SERVER).
-     * ponytail: LAN hosts therefore have no packet auth — the command fallback covers them.
-     ^/
-    public static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
-        if (initialized || FMLEnvironment.getDist() != Dist.DEDICATED_SERVER) {
+    public static void onRegisterPayloads(net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {
+        //? if >=1.21.9 {
+        /^if (initialized || net.neoforged.fml.loading.FMLEnvironment.getDist() != net.neoforged.api.distmarker.Dist.DEDICATED_SERVER) {
             return;
         }
+        ^///?} else {
+        if (initialized || net.neoforged.fml.loading.FMLEnvironment.dist != net.neoforged.api.distmarker.Dist.DEDICATED_SERVER) {
+            return;
+        }
+        //?}
         // optional() so vanilla / non-companion clients are not rejected for lacking the channel.
-        PayloadRegistrar registrar = event.registrar(String.valueOf(PROTOCOL_VERSION))
-                .optional().executesOn(HandlerThread.MAIN);
-        registrar.playToClient(HelloPayload.TYPE, HelloPayload.CODEC); // send-only from the server
+        net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(String.valueOf(PROTOCOL_VERSION))
+                .optional().executesOn(net.neoforged.neoforge.network.registration.HandlerThread.MAIN);
+        // 3-arg (no-op handler) works on every NeoForge target; the 2-arg send-only overload is 1.21.9+.
+        registrar.playToClient(HelloPayload.TYPE, HelloPayload.CODEC, (payload, context) -> {});
         registrar.playToServer(AuthPayload.TYPE, AuthPayload.CODEC,
-                (payload, context) -> receive((ServerPlayer) context.player(), payload));
+                (payload, context) -> receive((ServerPlayer) context.player(), payload.password(), payload.otp()));
         initialized = true;
         LogInfo("EasyAuth Client packet channels registered (easyauth:hello / " + AUTH_CHANNEL + ")");
-    }
-    *///?}
+    }*/
+    //?}
 
     /** No-op for clients without the companion mod (they never declared the channel). */
     public static void sendHello(ServerPlayer player, boolean authenticated, boolean registered) {
+        if (!initialized) {
+            return;
+        }
         //? if fabric {
-        if (!initialized || !ServerPlayNetworking.canSend(player, HelloPayload.TYPE)) {
+        //? if >=1.20.5 {
+        if (!net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, HelloPayload.TYPE)) {
             return;
         }
         //?} else {
-        /*if (!initialized || !player.connection.hasChannel(HelloPayload.TYPE)) {
+        /*if (!net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, HELLO_ID)) {
             return;
-        }
-        *///?}
+        }*/
+        //?}
+        //?} else {
+        /*if (!player.connection.hasChannel(HelloPayload.TYPE)) {
+            return;
+        }*/
+        //?}
         boolean canAutoLogin = extendedConfig.clientMod.allowAutoLogin;
         boolean canAutoRegister = extendedConfig.clientMod.allowAutoRegister
                 && !extendedConfig.disableRegistration
                 && !config.enableGlobalPassword;
+        //? if >=1.20.5 {
         HelloPayload hello = new HelloPayload(PROTOCOL_VERSION, canAutoLogin, canAutoRegister, registered, authenticated);
         //? if fabric {
-        ServerPlayNetworking.send(player, hello);
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, hello);
         //?} else {
-        /*PacketDistributor.sendToPlayer(player, hello);*/
+        /*net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, hello);*/
+        //?}
+        //?} else {
+        /*FriendlyByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+        buf.writeVarInt(PROTOCOL_VERSION);
+        buf.writeBoolean(canAutoLogin);
+        buf.writeBoolean(canAutoRegister);
+        buf.writeBoolean(registered);
+        buf.writeBoolean(authenticated);
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, HELLO_ID, buf);*/
         //?}
     }
 
-    // Runs on the server thread (fabric receivers are re-dispatched there; NeoForge via executesOn(MAIN)).
-    private static void receive(ServerPlayer player, AuthPayload payload) {
+    // Runs on the server thread (fabric payload receivers are re-dispatched there; the legacy
+    // handler re-dispatches via server.execute; NeoForge via executesOn(MAIN)).
+    private static void receive(ServerPlayer player, String password, String otp) {
         PlayerAuth playerAuth = (PlayerAuth) player;
         if (playerAuth.easyAuth$isAuthenticated()) {
             return;
@@ -181,18 +219,16 @@ public final class ClientModBridge {
                     LogDebug("Ignoring packet registration from " + username + " (disabled in extended.conf)");
                     return;
                 }
-                RegisterCommand.register(player.createCommandSourceStack(), payload.password(), payload.password());
+                RegisterCommand.register(player.createCommandSourceStack(), password, password);
             } else {
                 if (!extendedConfig.clientMod.allowAutoLogin) {
                     LogDebug("Ignoring packet login from " + username + " (disabled in extended.conf)");
                     return;
                 }
-                LoginCommand.login(player.createCommandSourceStack(), payload.password(),
-                        payload.otp().isEmpty() ? null : payload.otp());
+                LoginCommand.login(player.createCommandSourceStack(), password, otp.isEmpty() ? null : otp);
             }
         } catch (CommandSyntaxException e) {
             // getPlayerOrException cannot fail for a player-created source
         }
     }
 }
-//?}

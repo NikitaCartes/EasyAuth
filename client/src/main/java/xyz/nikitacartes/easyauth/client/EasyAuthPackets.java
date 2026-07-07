@@ -1,43 +1,46 @@
+//~ resource_location
 package xyz.nikitacartes.easyauth.client;
 
-import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
-//? if >=26.1 {
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.Identifier;
+//? if >=1.20.5 {
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
-//? if fabric {
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-//?} else {
-/*import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.HandlerThread;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-*///?}
 //?}
+import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
 
 /**
  * Wire twin of the server's {@code ClientModBridge}: {@code easyauth:hello} (S2C capability +
  * auth-state announce) and {@code easyauth:auth} (C2S credentials; the server routes them to
- * register or login by account state). The payload records are loader-agnostic; only registration
- * and sending differ (Fabric networking API vs NeoForge mod-bus registrar + ClientPacketDistributor).
+ * register or login by account state).
  *
- * <p>The packet path exists only on MC 26.1+ (the server registers no channel below that); older
- * versions keep the stub methods so RuleEngine's command-tree fallback is the only path.
+ * <p>Works on every supported version (loader-specific classes are used fully-qualified to avoid
+ * per-era import juggling). {@code >=1.20.5}: CustomPacketPayload API (Fabric
+ * serverboundPlay/clientboundPlay at 26.1+, playC2S/playS2C below; NeoForge registrar + client send
+ * via ClientPacketDistributor at 1.21.9+, PacketDistributor below). {@code <1.20.5} (Fabric only —
+ * NeoForge starts at 1.21): the legacy ResourceLocation+FriendlyByteBuf channel API. The wire
+ * format MUST stay in sync with ClientModBridge.
  */
 public final class EasyAuthPackets {
 
     private EasyAuthPackets() {
     }
 
-    //? if >=26.1 {
+    private static Identifier id(String path) {
+        //? if >=1.21 {
+        return Identifier.fromNamespaceAndPath("easyauth", path);
+        //?} else {
+        /*return new Identifier("easyauth", path);*/
+        //?}
+    }
+
+    static final Identifier HELLO_ID = id("hello");
+    static final Identifier AUTH_ID = id("auth");
+
+    //? if >=1.20.5 {
     public record HelloPayload(int protocolVersion, boolean canAutoLogin, boolean canAutoRegister,
                                boolean registered, boolean authenticated) implements CustomPacketPayload {
-        public static final CustomPacketPayload.Type<HelloPayload> TYPE =
-                new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("easyauth", "hello"));
+        public static final CustomPacketPayload.Type<HelloPayload> TYPE = new CustomPacketPayload.Type<>(HELLO_ID);
 
         public static final StreamCodec<FriendlyByteBuf, HelloPayload> CODEC = StreamCodec.of(
                 (buf, payload) -> {
@@ -57,8 +60,7 @@ public final class EasyAuthPackets {
     }
 
     public record AuthPayload(String password, String otp) implements CustomPacketPayload {
-        public static final CustomPacketPayload.Type<AuthPayload> TYPE =
-                new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("easyauth", "auth"));
+        public static final CustomPacketPayload.Type<AuthPayload> TYPE = new CustomPacketPayload.Type<>(AUTH_ID);
 
         public static final StreamCodec<FriendlyByteBuf, AuthPayload> CODEC = StreamCodec.of(
                 (buf, payload) -> {
@@ -72,63 +74,85 @@ public final class EasyAuthPackets {
             return TYPE;
         }
     }
+    //?}
 
-    private static void onHello(HelloPayload payload) {
-        RuleEngine.onHello(payload.canAutoLogin(), payload.canAutoRegister(),
-                payload.registered(), payload.authenticated());
+    private static void onHello(boolean canAutoLogin, boolean canAutoRegister, boolean registered, boolean authenticated) {
+        RuleEngine.onHello(canAutoLogin, canAutoRegister, registered, authenticated);
     }
 
     //? if fabric {
     /** Call once from the client entrypoint (payload types must register early). */
     public static void init() {
-        PayloadTypeRegistry.clientboundPlay().register(HelloPayload.TYPE, HelloPayload.CODEC);
-        PayloadTypeRegistry.serverboundPlay().register(AuthPayload.TYPE, AuthPayload.CODEC);
+        //? if >=1.20.5 {
+        //? if >=26.1 {
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(HelloPayload.TYPE, HelloPayload.CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(AuthPayload.TYPE, AuthPayload.CODEC);
+        //?} else {
+        /*net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(HelloPayload.TYPE, HelloPayload.CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playC2S().register(AuthPayload.TYPE, AuthPayload.CODEC);*/
+        //?}
         // Fabric play receivers run on the client main thread, same as the tick/join events.
-        ClientPlayNetworking.registerGlobalReceiver(HelloPayload.TYPE, (payload, context) -> onHello(payload));
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(HelloPayload.TYPE,
+                (payload, context) -> onHello(payload.canAutoLogin(), payload.canAutoRegister(), payload.registered(), payload.authenticated()));
+        //?} else {
+        /*// Legacy channel API: the handler runs off-thread, so re-dispatch to the client thread.
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(HELLO_ID,
+                (client, handler, buf, sender) -> {
+                    buf.readVarInt(); // protocol version (unused)
+                    boolean canAutoLogin = buf.readBoolean();
+                    boolean canAutoRegister = buf.readBoolean();
+                    boolean registered = buf.readBoolean();
+                    boolean authenticated = buf.readBoolean();
+                    client.execute(() -> onHello(canAutoLogin, canAutoRegister, registered, authenticated));
+                });*/
+        //?}
     }
     //?} else {
     /*// NeoForge registers through the mod bus (onRegisterPayloads); init() is unused there.
     public static void init() {
     }
 
-    public static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
+    public static void onRegisterPayloads(net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {
         // Version "1" must match ClientModBridge's registrar (server side) for NeoForge to
         // negotiate the channel. optional() so the companion can still connect to servers
         // without it; executesOn(MAIN) so onHello runs on the client thread like Fabric's receiver.
-        PayloadRegistrar registrar = event.registrar("1").optional().executesOn(HandlerThread.MAIN);
-        registrar.playToClient(HelloPayload.TYPE, HelloPayload.CODEC, (payload, context) -> onHello(payload));
+        net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar("1")
+                .optional().executesOn(net.neoforged.neoforge.network.registration.HandlerThread.MAIN);
+        registrar.playToClient(HelloPayload.TYPE, HelloPayload.CODEC,
+                (payload, context) -> onHello(payload.canAutoLogin(), payload.canAutoRegister(), payload.registered(), payload.authenticated()));
         registrar.playToServer(AuthPayload.TYPE, AuthPayload.CODEC, (payload, context) -> {}); // send-only
-    }
-    *///?}
+    }*/
+    //?}
 
-    /** Whether the server declared the credentials channel (EasyAuth on 26.1+). */
+    /** Whether the server declared the credentials channel (EasyAuth companion support). */
     public static boolean serverSupportsPacketAuth() {
         //? if fabric {
-        return ClientPlayNetworking.canSend(AuthPayload.TYPE);
+        //? if >=1.20.5 {
+        return net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.canSend(AuthPayload.TYPE);
         //?} else {
-        /*ClientPacketListener connection = Minecraft.getInstance().getConnection();
+        /*return net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.canSend(AUTH_ID);*/
+        //?}
+        //?} else {
+        /*net.minecraft.client.multiplayer.ClientPacketListener connection = net.minecraft.client.Minecraft.getInstance().getConnection();
         return connection != null && connection.hasChannel(AuthPayload.TYPE);*/
         //?}
     }
 
     public static void sendCredentials(String password, String otp) {
+        //? if >=1.20.5 {
         AuthPayload payload = new AuthPayload(password, otp == null ? "" : otp);
         //? if fabric {
-        ClientPlayNetworking.send(payload);
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(payload);
+        //?} else if >=1.21.9 {
+        /*net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(payload);
+        *///?} else {
+        /*net.neoforged.neoforge.network.PacketDistributor.sendToServer(payload);
+        *///?}
         //?} else {
-        /*ClientPacketDistributor.sendToServer(payload);*/
+        /*net.minecraft.network.FriendlyByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+        buf.writeUtf(password);
+        buf.writeUtf(otp == null ? "" : otp);
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(AUTH_ID, buf);*/
         //?}
     }
-    //?} else {
-    /*// < 26.1: the server registers no packet channel — command-tree fallback only (see RuleEngine).
-    public static void init() {
-    }
-
-    public static boolean serverSupportsPacketAuth() {
-        return false;
-    }
-
-    public static void sendCredentials(String password, String otp) {
-    }
-    *///?}
 }

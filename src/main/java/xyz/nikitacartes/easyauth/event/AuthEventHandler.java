@@ -398,7 +398,6 @@ public class AuthEventHandler {
     public static void onPlayerJoin(ServerPlayer player) {
         PlayerAuth playerAuth = (PlayerAuth) player;
 
-        //? if >= 26.1 {
         // Companion-mod hello: announce capabilities + this player's auth state (must go out in
         // every branch below, so it sits before them).
         {
@@ -408,7 +407,6 @@ public class AuthEventHandler {
                             || isSkipAllAuthChecksApplicable(player),
                     helloEntry != null && !helloEntry.password.isEmpty());
         }
-        //?}
 
         if (playerAuth.easyAuth$canSkipAuth()) {
             langConfig.session.onlineAccount.send(player);

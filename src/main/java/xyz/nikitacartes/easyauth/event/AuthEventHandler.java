@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.Blocks;
 /*import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 *///?}
+import xyz.nikitacartes.easyauth.integrations.ClientModBridge;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.storage.database.DBReadException;
@@ -400,13 +401,9 @@ public class AuthEventHandler {
 
         // Companion-mod hello: announce capabilities + this player's auth state (must go out in
         // every branch below, so it sits before them).
-        {
-            PlayerEntryV1 helloEntry = playerAuth.easyAuth$getPlayerEntryV1();
-            xyz.nikitacartes.easyauth.integrations.ClientModBridge.sendHello(player,
-                    playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()
-                            || isSkipAllAuthChecksApplicable(player),
-                    helloEntry != null && !helloEntry.password.isEmpty());
-        }
+        ClientModBridge.sendHello(player,
+                playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()
+                        || isSkipAllAuthChecksApplicable(player));
 
         if (playerAuth.easyAuth$canSkipAuth()) {
             langConfig.session.onlineAccount.send(player);
@@ -443,6 +440,7 @@ public class AuthEventHandler {
         UUID playerUuid = player.getUUID();
         administratorCache.remove(playerUuid);
         lastAcceptedPacketByPlayer.remove(playerUuid);
+        ClientModBridge.onPlayerLeave(playerUuid);
 
         PlayerAuth playerAuth = (PlayerAuth) player;
         if (playerAuth.easyAuth$canSkipAuth())

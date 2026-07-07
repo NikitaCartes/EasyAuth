@@ -7,8 +7,16 @@ import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import xyz.nikitacartes.easyauth.utils.Totp;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.time.format.DateTimeFormatter;
+import java.util.HexFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -126,6 +134,31 @@ public class PlayerEntryV1 {
     @SerializedName("otp_enabled")
     public boolean otpEnabled = false;
 
+    /**
+     * SHA-256 hex of the current companion-mod session token, or {@code null} if none.
+     * Single active token: issuing a new one (rotation on every successful login) invalidates the old.
+     */
+    @Expose
+    @SerializedName("session_token_hash")
+    public String sessionTokenHash = null;
+
+    /**
+     * Expiry of the current session token (unix ms). Ignored while {@link #sessionTokenHash} is null.
+     */
+    @Expose
+    @SerializedName("session_token_expires")
+    public ZonedDateTime sessionTokenExpires = getUnixZero();
+
+    /**
+     * Base64 X.509/SPKI-encoded Ed25519 public keys registered by companion clients
+     * (challenge-response passkey login). Newest last, capped at {@link #MAX_PASSKEYS}.
+     */
+    @Expose
+    @SerializedName("passkeys")
+    public List<String> passkeys = new ArrayList<>();
+
+    public static final int MAX_PASSKEYS = 5;
+
     public PlayerEntryV1(String username, String usernameLowerCase, String uuid, String json) {
         PlayerEntryV1 entry = gson.fromJson(json, PlayerEntryV1.class);
         ZonedDateTime startOfTime = getUnixZero();
@@ -147,6 +180,9 @@ public class PlayerEntryV1 {
         this.showLoginDialog = entry.showLoginDialog;
         this.otpSecret = entry.otpSecret;
         this.otpEnabled = entry.otpEnabled;
+        this.sessionTokenHash = entry.sessionTokenHash;
+        this.sessionTokenExpires = entry.sessionTokenExpires == null ? startOfTime : entry.sessionTokenExpires;
+        this.passkeys = entry.passkeys == null ? new ArrayList<>() : entry.passkeys;
     }
 
     /** True if two-factor authentication is active and a code must be supplied at login. */
@@ -157,6 +193,62 @@ public class PlayerEntryV1 {
     /** Verifies a TOTP code against this player's secret (±1 time step for clock drift). */
     public boolean verifyOtp(String code) {
         return hasOtp() && Totp.verify(otpSecret, code, 1);
+    }
+
+    /**
+     * Issues a fresh companion-mod session token (rotation: the previous one stops working).
+     * Only the SHA-256 of the token is stored; the raw value is returned once for the client.
+     */
+    public String issueSessionToken(long ttlSeconds) {
+        byte[] raw = new byte[32];
+        new SecureRandom().nextBytes(raw);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
+        sessionTokenHash = sha256Hex(token);
+        sessionTokenExpires = ZonedDateTime.now().plusSeconds(ttlSeconds);
+        return token;
+    }
+
+    /** True if the token matches the stored hash and has not expired. Registered players only. */
+    public boolean verifySessionToken(String token) {
+        if (sessionTokenHash == null || token == null || token.isEmpty() || password.isEmpty()) {
+            return false;
+        }
+        if (sessionTokenExpires == null || sessionTokenExpires.isBefore(ZonedDateTime.now())) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+                sessionTokenHash.getBytes(StandardCharsets.US_ASCII),
+                sha256Hex(token).getBytes(StandardCharsets.US_ASCII));
+    }
+
+    public void revokeSessionToken() {
+        sessionTokenHash = null;
+        sessionTokenExpires = getUnixZero();
+    }
+
+    /** Adds a passkey (base64 SPKI), deduplicating; the oldest key is evicted past {@link #MAX_PASSKEYS}. */
+    public void addPasskey(String publicKeyBase64) {
+        if (passkeys == null) {
+            passkeys = new ArrayList<>();
+        }
+        passkeys.remove(publicKeyBase64);
+        passkeys.add(publicKeyBase64);
+        while (passkeys.size() > MAX_PASSKEYS) {
+            passkeys.remove(0);
+        }
+    }
+
+    public boolean hasPasskeys() {
+        return passkeys != null && !passkeys.isEmpty();
+    }
+
+    private static String sha256Hex(String value) {
+        try {
+            return HexFormat.of().formatHex(
+                    MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e); // SHA-256 is mandatory in every JRE
+        }
     }
 
     public PlayerEntryV1(String username) {
@@ -188,6 +280,9 @@ public class PlayerEntryV1 {
         target.showLoginDialog = this.showLoginDialog;
         target.otpSecret = this.otpSecret;
         target.otpEnabled = this.otpEnabled;
+        target.sessionTokenHash = this.sessionTokenHash;
+        target.sessionTokenExpires = this.sessionTokenExpires;
+        target.passkeys = this.passkeys == null ? new ArrayList<>() : new ArrayList<>(this.passkeys);
     }
 
     public String toJson() {

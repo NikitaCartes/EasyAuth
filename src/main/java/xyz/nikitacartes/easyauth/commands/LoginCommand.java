@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import xyz.nikitacartes.easyauth.integrations.ClientModBridge;
 import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
@@ -151,6 +152,8 @@ public class LoginCommand {
                 IpLimitManager.invalidateCache(oldIp);
                 IpLimitManager.invalidateCache(playerData.lastIp);
             }
+            // Companion clients get a session token ("remember me") and a login confirmation.
+            ClientModBridge.onAuthSuccess(player);
             // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
             return;
         }

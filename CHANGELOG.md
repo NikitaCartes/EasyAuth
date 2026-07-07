@@ -22,7 +22,9 @@
 #### Add
 - NeoForge support for Minecraft 1.21[.X] and 26.[x]
 - EasyAuth Client — new separate client-side companion mod
-- New `client-mod` section in `extended.conf` (`allow-auto-login`, `allow-auto-register`): on 26.1+ servers (Fabric and NeoForge) the companion mod logs in and registers through direct packets instead of chat commands; these options let admins turn that off
+- New `client-mod` section in `extended.conf` (`allow-auto-login`, `allow-auto-register`): the companion mod logs in and registers through direct packets instead of chat commands; these options let admins turn that off
+- Session tokens for the companion mod ("remember me"): after every successful login the server issues a random token (only its SHA-256 hash is stored) and the client uses it instead of the password on the next join. Rotated on every use, survives IP changes, expires after `client-mod.session-token-ttl` (default 30 days), revoked on password change. Disable with `client-mod.allow-session-token`
+- Passkey login for the companion mod (Ed25519 challenge-response): the client registers a public key after a successful login and later proves key ownership by signing a one-time server challenge, so no secret ever leaves the client. Up to 5 keys per account; `/account passkey` shows them, `/account passkey revoke` removes them. Disable with `client-mod.allow-passkey`
 - Server-side Dialog windows (GUI) for login, registration, the account menu and the admin panel on Minecraft 1.21.6+. Older versions automatically fall back to the chat commands. [#245](https://github.com/NikitaCartes/EasyAuth/issues/245)
   - New config file `dialogs.conf` to control them (`enabled`, `login`, `register`, `account`, `admin`, `can-close-with-escape`, `allow-datapack-override`)
   - Datapacks can override any built-in window by id (e.g. `easyauth:login`)

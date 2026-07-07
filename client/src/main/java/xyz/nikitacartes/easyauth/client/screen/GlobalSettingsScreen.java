@@ -21,6 +21,8 @@ public class GlobalSettingsScreen extends Screen {
 
     private Checkbox autoLoginBox;
     private Checkbox autoRegisterBox;
+    private Checkbox useSessionTokenBox;
+    private Checkbox usePasskeyBox;
     private EditBox defaultPasswordBox;
     private EditBox loginCommandBox;
     private EditBox registerCommandBox;
@@ -52,6 +54,15 @@ public class GlobalSettingsScreen extends Screen {
         flagRow.addChild(autoRegisterBox, 0, 1);
         column.addChild(flagRow, 0, 0);
 
+        GridLayout keyRow = new GridLayout().spacing(8);
+        useSessionTokenBox = checkbox(Component.translatable("easyauthclient.config.useSessionToken"), store.useSessionToken);
+        useSessionTokenBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.useSessionToken.tooltip")));
+        usePasskeyBox = checkbox(Component.translatable("easyauthclient.config.usePasskey"), store.usePasskey);
+        usePasskeyBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.usePasskey.tooltip")));
+        keyRow.addChild(useSessionTokenBox, 0, 0);
+        keyRow.addChild(usePasskeyBox, 0, 1);
+        column.addChild(keyRow, 1, 0);
+
         defaultPasswordBox = editBox(Component.translatable("easyauthclient.config.defaultPassword"));
         defaultPasswordBox.setMaxLength(512);
         defaultPasswordBox.setHint(Component.translatable("easyauthclient.config.defaultPassword"));
@@ -59,21 +70,21 @@ public class GlobalSettingsScreen extends Screen {
         if (store.defaultPassword != null) {
             defaultPasswordBox.setValue(store.defaultPassword);
         }
-        column.addChild(defaultPasswordBox, 1, 0);
+        column.addChild(defaultPasswordBox, 2, 0);
 
         loginCommandBox = editBox(Component.translatable("easyauthclient.config.loginCommand"));
         loginCommandBox.setMaxLength(256);
         loginCommandBox.setHint(Component.translatable("easyauthclient.config.loginCommand"));
         loginCommandBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.loginCommand.tooltip")));
         loginCommandBox.setValue(store.loginCommand == null ? "" : store.loginCommand);
-        column.addChild(loginCommandBox, 2, 0);
+        column.addChild(loginCommandBox, 3, 0);
 
         registerCommandBox = editBox(Component.translatable("easyauthclient.config.registerCommand"));
         registerCommandBox.setMaxLength(256);
         registerCommandBox.setHint(Component.translatable("easyauthclient.config.registerCommand"));
         registerCommandBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.registerCommand.tooltip")));
         registerCommandBox.setValue(store.registerCommand == null ? "" : store.registerCommand);
-        column.addChild(registerCommandBox, 3, 0);
+        column.addChild(registerCommandBox, 4, 0);
 
         layout.addToContents(column);
         layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(200).build());
@@ -101,6 +112,8 @@ public class GlobalSettingsScreen extends Screen {
     private void commit() {
         store.autoLogin = autoLoginBox.selected();
         store.autoRegister = autoRegisterBox.selected();
+        store.useSessionToken = useSessionTokenBox.selected();
+        store.usePasskey = usePasskeyBox.selected();
         store.defaultPassword = defaultPasswordBox.getValue();
         store.loginCommand = loginCommandBox.getValue();
         store.registerCommand = registerCommandBox.getValue();

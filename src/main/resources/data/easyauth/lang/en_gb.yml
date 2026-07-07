@@ -66,6 +66,9 @@ text:
       otpNotEnabled: "§6Two-factor authentication is not enabled on your account."
       otpDisabled: "§aTwo-factor authentication has been disabled."
       otpReset: "§aTwo-factor authentication has been reset for player §e%s§a."
+      passkeyStatus: "§6You have %d passkey(s) registered by the EasyAuth Client mod. Use /account passkey revoke to remove them."
+      passkeyNone: "§6You have no passkeys registered."
+      passkeyRevoked: "§aAll passkeys have been removed from your account."
     # Uuid
     uuid:
       offline: "Offline UUID for player %s (click to copy):\n%s"

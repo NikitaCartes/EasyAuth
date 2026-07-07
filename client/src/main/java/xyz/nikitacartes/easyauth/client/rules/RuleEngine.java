@@ -42,6 +42,11 @@ public final class RuleEngine {
     private static String serverAddress = "";
     private static Credentials.Store store;
     private static Credentials credentials;
+    // Snapshot of the server hello (packet path) for fallback decisions after a token/passkey rejection.
+    private static boolean helloCanAutoLogin;
+    private static boolean helloCanSessionToken;
+    private static boolean helloCanPasskey;
+    private static boolean helloHasPasskey;
 
     private RuleEngine() {
     }
@@ -62,6 +67,7 @@ public final class RuleEngine {
         authPending = false;
         store = null;
         credentials = null;
+        helloCanAutoLogin = helloCanSessionToken = helloCanPasskey = helloHasPasskey = false;
         ServerData server = Minecraft.getInstance().getCurrentServer();
         if (server == null || server.ip == null) {
             return; // singleplayer/realms
@@ -122,15 +128,25 @@ public final class RuleEngine {
      * Hello from the server's EasyAuth (packet path, plan §6): supersedes the command fallback.
      * The server routes the credentials to register or login by account state itself, and the
      * capability flags let the admin veto auto-auth for compliant clients entirely.
+     * Login ladder: passkey (signed one-time challenge) -> session token -> password; a rejected
+     * rung falls through to the next one in {@link #onResult}.
      * Called on the client main thread by the payload receiver in EasyAuthPackets.
      */
-    public static void onHello(boolean canAutoLogin, boolean canAutoRegister, boolean registered, boolean authenticated) {
+    public static void onHello(boolean canAutoLogin, boolean canAutoRegister, boolean registered, boolean authenticated,
+                               boolean canSessionToken, boolean canPasskey, boolean hasPasskey, byte[] challenge) {
         if (!authPending) {
             return;
         }
         authPending = false;
+        helloCanAutoLogin = canAutoLogin;
+        helloCanSessionToken = canSessionToken;
+        helloCanPasskey = canPasskey;
+        helloHasPasskey = hasPasskey;
         if (authenticated) {
-            return; // session still valid (or the server skips auth for this player)
+            // Session still valid (or the server skips auth for this player) — nothing to log in
+            // with, but a good moment to (re)register our passkey for the next join.
+            maybeEnrollPasskey();
+            return;
         }
         if (!registered) {
             if (!canAutoRegister || !store.autoRegister) {
@@ -141,23 +157,131 @@ public final class RuleEngine {
             EasyAuthPackets.sendCredentials(credentials.password, null);
             return;
         }
-        if (!canAutoLogin || !store.autoLogin
+        if (tryPasskeyLogin(challenge) || tryTokenLogin()) {
+            return;
+        }
+        tryPasswordLogin();
+    }
+
+    /**
+     * Auth outcome from the server (packet path). SUCCESS carries the freshly issued/rotated
+     * session token; rejections trigger the next rung of the login ladder.
+     * Called on the client main thread by the payload receiver in EasyAuthPackets.
+     */
+    public static void onResult(int code, String sessionToken) {
+        if (store == null) {
+            return; // not connected / no tracked server
+        }
+        switch (code) {
+            case EasyAuthPackets.RESULT_SUCCESS -> {
+                if (sessionToken != null && !sessionToken.isEmpty() && store.useSessionToken) {
+                    ensureEntry().sessionToken = sessionToken;
+                    Credentials.save(credentialsFile, store);
+                }
+                maybeEnrollPasskey();
+            }
+            case EasyAuthPackets.RESULT_TOKEN_REJECTED -> {
+                // Rotated by another device or expired — drop it and fall back to the password.
+                if (credentials != null && credentials.sessionToken != null) {
+                    credentials.sessionToken = null;
+                    Credentials.save(credentialsFile, store);
+                }
+                tryPasswordLogin();
+            }
+            case EasyAuthPackets.RESULT_PASSKEY_REJECTED -> {
+                helloHasPasskey = false; // our key is not on the server; re-enroll after the next success
+                if (!tryTokenLogin()) {
+                    tryPasswordLogin();
+                }
+            }
+            default -> {
+            }
+        }
+    }
+
+    private static boolean tryPasskeyLogin(byte[] challenge) {
+        if (!helloCanPasskey || !helloHasPasskey || !store.usePasskey || !store.autoLogin
+                || credentials == null || !credentials.autoLogin
+                || credentials.passkeyPrivate == null || credentials.passkeyPublic == null
+                || challenge == null || challenge.length == 0) {
+            return false;
+        }
+        byte[] publicKey = Passkey.decodePublic(credentials.passkeyPublic);
+        byte[] signature = Passkey.sign(credentials.passkeyPrivate, challenge);
+        if (publicKey == null || signature == null) {
+            return false;
+        }
+        LOGGER.info("Logging in on {} with a passkey", serverAddress);
+        EasyAuthPackets.sendPasskey(publicKey, signature);
+        return true;
+    }
+
+    private static boolean tryTokenLogin() {
+        if (!helloCanSessionToken || !store.useSessionToken || !store.autoLogin
+                || credentials == null || !credentials.autoLogin
+                || credentials.sessionToken == null || credentials.sessionToken.isEmpty()) {
+            return false;
+        }
+        LOGGER.info("Logging in on {} with a session token", serverAddress);
+        EasyAuthPackets.sendToken(credentials.sessionToken);
+        return true;
+    }
+
+    private static void tryPasswordLogin() {
+        if (!helloCanAutoLogin || !store.autoLogin
                 || credentials == null || credentials.password == null || !credentials.autoLogin) {
             return;
         }
         EasyAuthPackets.sendCredentials(credentials.password, Totp.currentCode(credentials.totpSecret));
     }
 
+    /**
+     * Registers (or re-registers) our Ed25519 public key while authenticated; the server
+     * deduplicates, so re-sending an already-known key is harmless.
+     */
+    private static void maybeEnrollPasskey() {
+        if (!helloCanPasskey || !store.usePasskey) {
+            return;
+        }
+        if (credentials != null && credentials.passkeyPrivate != null && helloHasPasskey) {
+            return; // we have a key and the server has one — assume it is ours
+        }
+        if (credentials == null || credentials.passkeyPrivate == null || credentials.passkeyPublic == null) {
+            String[] pair = Passkey.generate();
+            if (pair == null) {
+                return; // no Ed25519 in this JRE
+            }
+            Credentials entry = ensureEntry();
+            entry.passkeyPublic = pair[0];
+            entry.passkeyPrivate = pair[1];
+            Credentials.save(credentialsFile, store);
+        }
+        byte[] publicKey = Passkey.decodePublic(credentials.passkeyPublic);
+        if (publicKey == null) {
+            return;
+        }
+        LOGGER.info("Registering a passkey on {}", serverAddress);
+        EasyAuthPackets.sendRegisterPasskey(publicKey);
+        helloHasPasskey = true;
+    }
+
+    /** The credentials entry for the current server, created (and registered in the store) on demand. */
+    private static Credentials ensureEntry() {
+        if (credentials == null) {
+            credentials = new Credentials();
+            store.servers.put(serverAddress, credentials);
+        }
+        return credentials;
+    }
+
     /** Ensures {@link #credentials} has a stored password for this server, generating and saving one if needed. */
     private static void ensureStoredPassword() {
-        Credentials entry = credentials != null ? credentials : new Credentials();
+        Credentials entry = ensureEntry();
         if (entry.password == null) {
             entry.password = store.defaultPassword == null || store.defaultPassword.isEmpty()
                     ? randomPassword()
                     : store.defaultPassword;
         }
-        credentials = entry;
-        store.servers.put(serverAddress, entry);
         Credentials.save(credentialsFile, store);
     }
 
@@ -261,6 +385,7 @@ public final class RuleEngine {
         authPending = false;
         store = null;
         credentials = null;
+        helloCanAutoLogin = helloCanSessionToken = helloCanPasskey = helloHasPasskey = false;
     }
 
     private static void tryFire(ActiveRule r, long now, long delay) {

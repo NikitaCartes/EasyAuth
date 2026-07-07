@@ -292,6 +292,9 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText otpNotEnabled = new TranslatableText("account.otpNotEnabled");
         public TranslatableText otpDisabled = new TranslatableText("account.otpDisabled");
         public TranslatableText otpReset = new TranslatableText("account.otpReset");
+        public TranslatableText passkeyStatus = new TranslatableText("account.passkeyStatus");
+        public TranslatableText passkeyNone = new TranslatableText("account.passkeyNone");
+        public TranslatableText passkeyRevoked = new TranslatableText("account.passkeyRevoked");
     }
 
     @ConfigSerializable

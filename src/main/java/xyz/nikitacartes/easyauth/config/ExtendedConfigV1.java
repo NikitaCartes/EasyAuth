@@ -245,8 +245,7 @@ public class ExtendedConfigV1 extends ConfigTemplate {
 
     @Comment("""
 
-            Settings for the EasyAuth Client companion mod (direct packet-based auto-login).
-            Requires Minecraft 26.1+ with the Fabric loader; has no effect otherwise.""")
+            Settings for the EasyAuth Client companion mod (direct packet-based auto-login).""")
     public ClientModSettings clientMod = new ClientModSettings();
 
     @Comment("""
@@ -320,6 +319,28 @@ public class ExtendedConfigV1 extends ConfigTemplate {
             Allow companion clients to register automatically with a generated password (direct packet, no /register command).
             The capability is announced to the client on join, so compliant clients stop auto-registering when this is off.""")
         public boolean allowAutoRegister = true;
+
+        @Comment("""
+
+            Issue session tokens to companion clients ("remember me").
+            After every successful login the server sends the client a random token and stores only its SHA-256 hash;
+            on the next join the client logs in with the token instead of the password. The token is rotated on every
+            use, expires after session-token-ttl, survives IP changes, and bypasses 2FA (like an IP session does).
+            Tokens are revoked when the player changes their password.""")
+        public boolean allowSessionToken = true;
+
+        @Comment("""
+
+            How long an unused session token stays valid, in seconds. Default 2592000 (30 days).""")
+        public long sessionTokenTtl = 2592000;
+
+        @Comment("""
+
+            Allow companion clients to log in with a passkey (Ed25519 challenge-response).
+            The client registers its public key after a successful login; on later joins it proves key ownership by
+            signing a one-time server challenge, so no secret ever leaves the client. Up to 5 keys per account
+            (one per device); players can remove them with /account passkey revoke. Bypasses 2FA.""")
+        public boolean allowPasskey = true;
     }
 
     @ConfigSerializable

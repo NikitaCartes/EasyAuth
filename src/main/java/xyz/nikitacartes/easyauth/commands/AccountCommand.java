@@ -105,6 +105,13 @@ public class AccountCommand {
                                 ))
                         )
                 )
+                .then(literal("passkey")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.account.passkey", true))
+                        .executes(ctx -> passkeyStatus(ctx.getSource()))
+                        .then(literal("revoke")
+                                .executes(ctx -> passkeyRevoke(ctx.getSource()))
+                        )
+                )
                 .then(literal("otp")
                         .requires(EasyAuthPermissions.require("easyauth.commands.account.otp", true))
                         .executes(ctx -> otpStatus(ctx.getSource()))
@@ -211,6 +218,8 @@ public class AccountCommand {
 
                 PlayerEntryV1 playerEntry = playerAuth.easyAuth$getPlayerEntryV1();
                 playerEntry.password = AuthHelper.hashPassword(newPass.toCharArray());
+                // Standard leak response: a new password kills the old "remember me" token.
+                playerEntry.revokeSessionToken();
                 playerEntry.update();
 
                 langConfig.password.changed.send(source);
@@ -331,6 +340,40 @@ public class AccountCommand {
         playerEntry.showLoginDialog = showDialog;
         playerEntry.update();
         langConfig.account.settingsSaved.send(source);
+        return 1;
+    }
+
+    /** Shows how many companion-mod passkeys are registered on the account. */
+    public static int passkeyStatus(CommandSourceStack source) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        PlayerEntryV1 entry = playerAuth.easyAuth$getPlayerEntryV1();
+        if (!entry.hasPasskeys()) {
+            langConfig.account.passkeyNone.send(source);
+            return 1;
+        }
+        langConfig.account.passkeyStatus.send(source, entry.passkeys.size());
+        return 1;
+    }
+
+    /** Removes every registered passkey (works even when the feature is disabled server-side, for cleanup). */
+    public static int passkeyRevoke(CommandSourceStack source) throws CommandSyntaxException {
+        PlayerAuth playerAuth = (PlayerAuth) source.getPlayerOrException();
+        if (!playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.loginRequired.send(source);
+            return 0;
+        }
+        PlayerEntryV1 entry = playerAuth.easyAuth$getPlayerEntryV1();
+        if (!entry.hasPasskeys()) {
+            langConfig.account.passkeyNone.send(source);
+            return 0;
+        }
+        entry.passkeys.clear();
+        entry.update();
+        langConfig.account.passkeyRevoked.send(source);
         return 1;
     }
 

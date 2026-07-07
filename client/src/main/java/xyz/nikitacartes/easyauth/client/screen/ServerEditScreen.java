@@ -83,6 +83,20 @@ public class ServerEditScreen extends Screen {
         flagRow.addChild(autoRegisterBox, 0, 1);
         column.addChild(flagRow, 3, 0);
 
+        // Forget the server-issued session token and the local passkey pair (e.g. after
+        // /account passkey revoke on the server, or to force a fresh password login).
+        if (entry != null && (entry.sessionToken != null || entry.passkeyPrivate != null)) {
+            Credentials clearTarget = entry;
+            Button clearButton = Button.builder(Component.translatable("easyauthclient.config.clearKeys"), button -> {
+                clearTarget.sessionToken = null;
+                clearTarget.passkeyPublic = null;
+                clearTarget.passkeyPrivate = null;
+                button.active = false;
+            }).width(ROW_WIDTH).build();
+            clearButton.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.clearKeys.tooltip")));
+            column.addChild(clearButton, 4, 0);
+        }
+
         layout.addToContents(column);
         layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(200).build());
         layout.visitWidgets(widget -> this.addRenderableWidget(widget));

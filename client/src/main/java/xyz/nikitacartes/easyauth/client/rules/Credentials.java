@@ -23,11 +23,16 @@ public final class Credentials {
     public String totpSecret;    // Base32; presence = explicit opt-in to auto-{otp}
     public boolean autoLogin = true;     // built-in auto-/login rules
     public boolean autoRegister = false; // opt-in: registering sets the account password
+    public String sessionToken;   // "remember me" token from the server; rotated on every use
+    public String passkeyPublic;  // base64 X.509/SPKI Ed25519 public key registered on the server
+    public String passkeyPrivate; // base64 PKCS#8 Ed25519 private key (never leaves this machine)
 
     /** Whole credentials.json: global auto-auth settings plus the per-server entries. */
     public static final class Store {
         public boolean autoLogin = true;     // master switch for the built-in /login
         public boolean autoRegister = true;  // register on new servers that expose /register
+        public boolean useSessionToken = true; // accept + use "remember me" session tokens
+        public boolean usePasskey = true;    // enroll + use Ed25519 passkeys on supporting servers
         public String defaultPassword = "";  // used by auto-register; empty = random per server
         // Templates for the built-in auto-auth; the first word doubles as the command-tree
         // detection literal (e.g. "/reg {password}" waits for /reg). {otp} is appended to the

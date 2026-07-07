@@ -25,8 +25,10 @@ public class EasyAuthClientNeoForge {
         RuleEngine.init(FMLPaths.CONFIGDIR.get());
         container.registerExtensionPoint(IConfigScreenFactory.class, (mod, parent) -> new ConfigScreen(parent));
 
-        modBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) ->
+        //? if >=26.1 {
+        /^modBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) ->
                 EasyAuthPackets.onRegisterPayloads(event));
+        ^///?}
 
         IEventBus gameBus = NeoForge.EVENT_BUS;
         gameBus.addListener((ClientPlayerNetworkEvent.LoggingIn event) -> RuleEngine.onJoin());

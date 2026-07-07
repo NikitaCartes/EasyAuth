@@ -1,10 +1,11 @@
 package xyz.nikitacartes.easyauth.client;
 
+import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
+//? if >=26.1 {
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
 //? if fabric {
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -16,18 +17,23 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.HandlerThread;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 *///?}
+//?}
 
 /**
  * Wire twin of the server's {@code ClientModBridge}: {@code easyauth:hello} (S2C capability +
  * auth-state announce) and {@code easyauth:auth} (C2S credentials; the server routes them to
  * register or login by account state). The payload records are loader-agnostic; only registration
  * and sending differ (Fabric networking API vs NeoForge mod-bus registrar + ClientPacketDistributor).
+ *
+ * <p>The packet path exists only on MC 26.1+ (the server registers no channel below that); older
+ * versions keep the stub methods so RuleEngine's command-tree fallback is the only path.
  */
 public final class EasyAuthPackets {
 
     private EasyAuthPackets() {
     }
 
+    //? if >=26.1 {
     public record HelloPayload(int protocolVersion, boolean canAutoLogin, boolean canAutoRegister,
                                boolean registered, boolean authenticated) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<HelloPayload> TYPE =
@@ -113,4 +119,16 @@ public final class EasyAuthPackets {
         /*ClientPacketDistributor.sendToServer(payload);*/
         //?}
     }
+    //?} else {
+    /*// < 26.1: the server registers no packet channel — command-tree fallback only (see RuleEngine).
+    public static void init() {
+    }
+
+    public static boolean serverSupportsPacketAuth() {
+        return false;
+    }
+
+    public static void sendCredentials(String password, String otp) {
+    }
+    *///?}
 }

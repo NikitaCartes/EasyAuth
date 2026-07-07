@@ -26,7 +26,11 @@ public class EasyAuthClientFabric implements ClientModInitializer {
             }
         });
         ClientReceiveMessageEvents.CHAT.register((message, signedMessage, sender, boundChatType, timeStamp) ->
+                //? if >=1.21.9 {
                 RuleEngine.onChat(message.getString(), false, sender != null ? sender.id() : null));
+                //?} else {
+                /*RuleEngine.onChat(message.getString(), false, sender != null ? sender.getId() : null));*/
+                //?}
         ClientTickEvents.END_CLIENT_TICK.register(client -> RuleEngine.onTick());
 
         LOGGER.info("EasyAuth Client loaded");

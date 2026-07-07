@@ -3,9 +3,10 @@ package xyz.nikitacartes.easyauth.client.screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -38,48 +39,70 @@ public class ServerEditScreen extends Screen {
     @Override
     protected void init() {
         HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
+        //? if >=1.20.5 {
         layout.addTitleHeader(title, font);
-        LinearLayout column = layout.addToContents(LinearLayout.vertical().spacing(4));
+        //?} else {
+        /*layout.addToHeader(new StringWidget(title, font));*/
+        //?}
+        // GridLayout (identical API 1.19.4→26.x) instead of LinearLayout (no vertical()/horizontal()
+        // before 1.20.2). Single column: each addChild(row, 0) stacks vertically.
+        GridLayout column = new GridLayout().spacing(4);
         Credentials entry = editAddress != null ? store.servers.get(editAddress) : null;
 
-        addressBox = column.addChild(new EditBox(font, ROW_WIDTH, 20,
-                Component.translatable("easyauthclient.config.address")));
+        addressBox = editBox(Component.translatable("easyauthclient.config.address"));
         addressBox.setMaxLength(128);
         addressBox.setHint(Component.translatable("easyauthclient.config.address"));
         if (editAddress != null) {
             addressBox.setValue(editAddress);
             addressBox.active = false;
         }
+        column.addChild(addressBox, 0, 0);
 
-        passwordBox = column.addChild(new EditBox(font, ROW_WIDTH, 20,
-                Component.translatable("easyauthclient.config.password")));
+        passwordBox = editBox(Component.translatable("easyauthclient.config.password"));
         passwordBox.setMaxLength(512);
         passwordBox.setHint(Component.translatable("easyauthclient.config.password"));
         passwordBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.password.tooltip")));
         if (entry != null && entry.password != null) {
             passwordBox.setValue(entry.password);
         }
+        column.addChild(passwordBox, 1, 0);
 
-        totpBox = column.addChild(new EditBox(font, ROW_WIDTH, 20,
-                Component.translatable("easyauthclient.config.totp")));
+        totpBox = editBox(Component.translatable("easyauthclient.config.totp"));
         totpBox.setMaxLength(128);
         totpBox.setHint(Component.translatable("easyauthclient.config.totp"));
         totpBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.totp.tooltip")));
         if (entry != null && entry.totpSecret != null) {
             totpBox.setValue(entry.totpSecret);
         }
+        column.addChild(totpBox, 2, 0);
 
-        LinearLayout flagRow = column.addChild(LinearLayout.horizontal().spacing(8));
-        autoLoginBox = flagRow.addChild(Checkbox.builder(Component.translatable("easyauthclient.config.autoLogin"), font)
-                .selected(entry == null || entry.autoLogin)
-                .build());
-        autoRegisterBox = flagRow.addChild(Checkbox.builder(Component.translatable("easyauthclient.config.autoRegister"), font)
-                .selected(entry != null && entry.autoRegister)
-                .build());
+        GridLayout flagRow = new GridLayout().spacing(8);
+        autoLoginBox = checkbox(Component.translatable("easyauthclient.config.autoLogin"), entry == null || entry.autoLogin);
+        autoRegisterBox = checkbox(Component.translatable("easyauthclient.config.autoRegister"), entry != null && entry.autoRegister);
+        flagRow.addChild(autoLoginBox, 0, 0);
+        flagRow.addChild(autoRegisterBox, 0, 1);
+        column.addChild(flagRow, 3, 0);
 
+        layout.addToContents(column);
         layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(200).build());
         layout.visitWidgets(widget -> this.addRenderableWidget(widget));
         layout.arrangeElements();
+    }
+
+    private EditBox editBox(Component message) {
+        //? if >=1.20.2 {
+        return new EditBox(font, ROW_WIDTH, 20, message);
+        //?} else {
+        /*return new EditBox(font, 0, 0, ROW_WIDTH, 20, message);*/
+        //?}
+    }
+
+    private Checkbox checkbox(Component message, boolean selected) {
+        //? if >=1.20.3 {
+        return Checkbox.builder(message, font).selected(selected).build();
+        //?} else {
+        /*return new Checkbox(0, 0, font.width(message) + 24, 20, message, selected);*/
+        //?}
     }
 
     /** Widget values → {@link #store}; keeps them across re-init (window resize). */
@@ -96,11 +119,19 @@ public class ServerEditScreen extends Screen {
         editAddress = address;
     }
 
+    //? if >=1.21.11 {
     @Override
     public void resize(int width, int height) {
         commit();
         super.resize(width, height);
     }
+    //?} else {
+    /*@Override
+    public void resize(net.minecraft.client.Minecraft minecraft, int width, int height) {
+        commit();
+        super.resize(minecraft, width, height);
+    }
+    *///?}
 
     @Override
     public void onClose() {

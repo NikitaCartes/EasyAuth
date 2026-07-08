@@ -30,6 +30,12 @@ public class MainConfigV1 extends ConfigTemplate {
 
     @Comment("""
             
+            Whether to allow connection for offline players not present in technical.forcedOfflinePlayers list
+            and not present in player cache""")
+    public boolean premiumAutoLoginAllowUnknownOffline = false;
+
+    @Comment("""
+            
             How long to keep session (auto-logging in the player), in seconds.
             Set to -1 to disable.
             For more information, see https://github.com/NikitaCartes/EasyAuth/wiki/Sessions""")

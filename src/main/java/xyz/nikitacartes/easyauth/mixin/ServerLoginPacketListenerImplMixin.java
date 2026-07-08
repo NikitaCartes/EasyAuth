@@ -21,6 +21,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.getUuid;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
@@ -97,20 +98,24 @@ public abstract class ServerLoginPacketListenerImplMixin {
                         playerData.update();
                         // Authentication continues in the original method
                     } else {
-                        if (onlineUuid == null) {
-                            LogDebug("Player " + username + " doesn't have a Mojang account");
-                            playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
-                            playerData.update();
-                        } else {
-                            LogInfo("Player " + username + " has a Mojang account, but UUID mismatch: expected " + onlineUuid + ", got " + packet.profileId());
-                            if (!EasyAuth.extendedConfig.checkOfflinePlayersWithOnlineUsernames) {
+                        final boolean allowOffline = config.premiumAutoLoginAllowUnknownOffline;
+                        LogDebug("Player " + username + " doesn't have a Mojang account. " + (allowOffline? "Allowing" : "NOT allowing") + " to be offline");
+                        if ( allowOffline ) {
+                            if (onlineUuid == null) {
+                                LogDebug("Player " + username + " doesn't have a Mojang account");
                                 playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
                                 playerData.update();
+                            } else {
+                                LogInfo("Player " + username + " has a Mojang account, but UUID mismatch: expected " + onlineUuid + ", got " + packet.profileId());
+                                if (!EasyAuth.extendedConfig.checkOfflinePlayersWithOnlineUsernames) {
+                                    playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
+                                    playerData.update();
+                                }
                             }
+                            state = getReadyState();
+                            this.authenticatedProfile = getGameProfile(packet.name());
+                            ci.cancel();
                         }
-                        state = getReadyState();
-                        this.authenticatedProfile = getGameProfile(packet.name());
-                        ci.cancel();
                     }
                 }
             } catch (IOException e) {

@@ -1,0 +1,47 @@
+# ModMenu
+modmenu:
+  summaryTranslation:
+    easyauth: "Chat automation and auto-login for EasyAuth servers."
+  descriptionTranslation:
+    easyauth: "Client-side companion for EasyAuth: per-server chat/command automation rules and auto-login, with optional TOTP codes."
+easyauthclient:
+  config:
+    title: "EasyAuth Client"
+    # Server entry
+    server: "Server"
+    newServer: "+ Add server"
+    address: "Server address"
+    password: "Password"
+    password.tooltip: "Stored as plain text in credentials.json. Clear this field to forget the server."
+    totp: "TOTP secret (Base32, optional)"
+    totp.tooltip: "Enables automatic {otp} codes. Storing the secret here makes this computer the second factor."
+    autoLogin: "Auto-login"
+    autoRegister: "Auto-register (sets the account password!)"
+    edit: "Edit"
+    remove: "Remove"
+    noPassword: "(no password)"
+    # Global settings
+    globalSettings: "Global settings"
+    globalAutoLogin: "Auto-login (all servers)"
+    globalAutoLogin.tooltip: "Send /login automatically on servers that have the command and a saved password."
+    globalAutoRegister: "Auto-register (new servers)"
+    globalAutoRegister.tooltip: "On servers with a /register command and no saved password, register with the default password (or a random one) and remember it."
+    useSessionToken: "Session tokens"
+    useSessionToken.tooltip: "\"Remember me\": after a successful login the server issues a one-time-rotating token, used instead of the password on the next join. EasyAuth 4.0+ servers only."
+    usePasskey: "Passkeys"
+    usePasskey.tooltip: "Ed25519 challenge-response login: a key pair is generated per server and the secret never leaves this computer. EasyAuth 4.0+ servers only."
+    clearKeys: "Forget session token & passkey"
+    clearKeys.tooltip: "Removes the stored session token and the local passkey pair for this server. The next login uses the password again."
+    defaultPassword: "Default password for new servers"
+    defaultPassword.tooltip: "Used by auto-register. Leave empty to generate a random password per server."
+    # Commands
+    loginCommand: "Login command"
+    loginCommand.tooltip: "Template for the built-in auto-login, e.g. /login {password}. Its first word is also what is looked for in the server's command tree. {otp} is appended automatically when a TOTP secret is set."
+    registerCommand: "Register command"
+    registerCommand.tooltip: "Template for the built-in auto-register, e.g. /register {password} {password}. Its first word is also what is looked for in the server's command tree."
+    # Server tags
+    tag:
+      noAutoLogin: "no auto-login"
+      autoRegister: "auto-register"
+    # Misc
+    rulesHint: "Auto-input rules: config/easyauth-client/rules.json"

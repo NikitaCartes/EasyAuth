@@ -248,6 +248,10 @@ fletchingTable {
         // Nested YAML lang files are flattened to dotted-key JSON at build time
         patterns.add("data/easyauth/lang/**")
     }
+    lang.create("client") {
+        // Client-only nested YAML lang files (src/client source set)
+        patterns.add("assets/easyauth/lang/**")
+    }
 }
 
 private abstract class ServerRunSemaphore : BuildService<BuildServiceParameters.None>

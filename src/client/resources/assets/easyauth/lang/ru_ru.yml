@@ -1,0 +1,47 @@
+# ModMenu
+modmenu:
+  summaryTranslation:
+    easyauth: "Автоматизация чата и автовход для серверов с EasyAuth."
+  descriptionTranslation:
+    easyauth: "Клиентский компаньон для EasyAuth: правила авто-ввода команд по серверам и автовход, опционально с TOTP-кодами."
+easyauthclient:
+  config:
+    title: "EasyAuth Client"
+    # Server entry
+    server: "Сервер"
+    newServer: "+ Добавить сервер"
+    address: "Адрес сервера"
+    password: "Пароль"
+    password.tooltip: "Хранится открытым текстом в credentials.json. Очистите поле, чтобы забыть сервер."
+    totp: "TOTP-секрет (Base32, необязательно)"
+    totp.tooltip: "Включает автоподстановку {otp}. Секрет на этом компьютере делает его вторым фактором."
+    autoLogin: "Автовход"
+    autoRegister: "Авторегистрация (устанавливает пароль аккаунта!)"
+    edit: "Изменить"
+    remove: "Удалить"
+    noPassword: "(без пароля)"
+    # Global settings
+    globalSettings: "Общие настройки"
+    globalAutoLogin: "Автовход (все серверы)"
+    globalAutoLogin.tooltip: "Автоматически отправлять /login на серверах, где есть эта команда и сохранён пароль."
+    globalAutoRegister: "Авторегистрация (новые серверы)"
+    globalAutoRegister.tooltip: "На серверах с командой /register и без сохранённого пароля — зарегистрироваться с паролем по умолчанию (или случайным) и запомнить его."
+    useSessionToken: "Сессионные токены"
+    useSessionToken.tooltip: "«Запомнить меня»: после успешного входа сервер выдаёт одноразово-ротируемый токен, который используется вместо пароля при следующем входе. Только для серверов с EasyAuth 4.0+."
+    usePasskey: "Паскеи (passkey)"
+    usePasskey.tooltip: "Вход по Ed25519 challenge-response: пара ключей создаётся для каждого сервера, секрет не покидает этот компьютер. Только для серверов с EasyAuth 4.0+."
+    clearKeys: "Забыть токен и паскей"
+    clearKeys.tooltip: "Удаляет сохранённый сессионный токен и локальную пару ключей для этого сервера. Следующий вход снова использует пароль."
+    defaultPassword: "Пароль по умолчанию для новых серверов"
+    defaultPassword.tooltip: "Используется авторегистрацией. Оставьте пустым — для каждого сервера будет сгенерирован случайный пароль."
+    # Commands
+    loginCommand: "Команда входа"
+    loginCommand.tooltip: "Шаблон встроенного автовхода, например /login {password}. Первое слово — это ещё и команда, которую мод ищет в дереве команд сервера. {otp} добавляется автоматически, если задан TOTP-секрет."
+    registerCommand: "Команда регистрации"
+    registerCommand.tooltip: "Шаблон встроенной авторегистрации, например /register {password} {password}. Первое слово — это ещё и команда, которую мод ищет в дереве команд сервера."
+    # Server tags
+    tag:
+      noAutoLogin: "без автовхода"
+      autoRegister: "авторегистрация"
+    # Misc
+    rulesHint: "Правила авто-ввода: config/easyauth-client/rules.json"

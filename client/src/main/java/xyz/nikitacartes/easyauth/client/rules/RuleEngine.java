@@ -39,8 +39,19 @@ public final class RuleEngine {
     // Session state; empty when not connected or no rules for the current server.
     private static List<ActiveRule> active = List.of();
     private static final List<Pending> queue = new ArrayList<>();
-    // Built-in auto-auth; fires once /login or /register appears in the server's command tree (see onTick).
+    // Built-in auto-auth; fires once /login or /register appears in the server's command tree
+    // (see onTick), but only until the deadline — a server with neither an auth mod nor the
+    // packet bridge should not be scanned forever, 20 times a second.
     private static boolean authPending;
+    private static long authPendingUntil;
+    private static final long AUTH_PENDING_WINDOW_MS = 60_000;
+    // Detection literals precomputed from the command templates at join (hot path: onTick).
+    private static String loginLiteral = "";
+    private static String registerLiteral = "";
+    // Whether the current rule set contains chat/leave triggers; lets the chat callbacks skip
+    // flattening every message and the pause-screen hook skip touching vanilla buttons.
+    private static boolean hasChatRules;
+    private static boolean hasLeaveRules;
     private static String serverAddress = "";
     private static Credentials.Store store;
     private static Credentials credentials;
@@ -67,6 +78,7 @@ public final class RuleEngine {
         queue.clear();
         active = List.of();
         authPending = false;
+        hasChatRules = hasLeaveRules = false;
         store = null;
         credentials = null;
         helloCanAutoLogin = helloCanSessionToken = helloCanPasskey = helloHasPasskey = false;
@@ -81,7 +93,12 @@ public final class RuleEngine {
             LOGGER.warn("Using credentials for {} from {} — this file is stored as plain text", serverAddress, credentialsFile);
         }
         authPending = store.autoLogin || store.autoRegister;
+        authPendingUntil = System.currentTimeMillis() + AUTH_PENDING_WINDOW_MS;
+        loginLiteral = commandLiteral(store.loginCommand);
+        registerLiteral = commandLiteral(store.registerCommand);
         active = loadRules(serverAddress);
+        hasChatRules = active.stream().anyMatch(r -> r.rule.trigger.equals("chat"));
+        hasLeaveRules = active.stream().anyMatch(r -> r.rule.trigger.equals("leave"));
         long now = System.currentTimeMillis();
         for (ActiveRule r : active) {
             switch (r.rule.trigger) {
@@ -191,7 +208,15 @@ public final class RuleEngine {
                 tryPasswordLogin();
             }
             case ClientModProtocol.RESULT_PASSKEY_REJECTED -> {
-                helloHasPasskey = false; // our key is not on the server (revoked/evicted); no auto-re-enroll
+                helloHasPasskey = false;
+                // The server explicitly does not know this key (evicted, or revoked while other
+                // keys remained) and we never auto-re-enroll an existing key — it is dead weight.
+                // Drop it so the next successful login can enroll a fresh pair.
+                if (credentials != null && credentials.passkeyPrivate != null) {
+                    credentials.passkeyPublic = null;
+                    credentials.passkeyPrivate = null;
+                    Credentials.save(credentialsFile, store);
+                }
                 if (!tryTokenLogin()) {
                     tryPasswordLogin();
                 }
@@ -201,9 +226,13 @@ public final class RuleEngine {
         }
     }
 
+    /** Common gate of every auto-login rung: global switch + per-server entry + its own switch. */
+    private static boolean autoAuthAllowed() {
+        return store.autoLogin && credentials != null && credentials.autoLogin;
+    }
+
     private static boolean tryPasskeyLogin(byte[] challenge) {
-        if (!helloCanPasskey || !helloHasPasskey || !store.usePasskey || !store.autoLogin
-                || credentials == null || !credentials.autoLogin
+        if (!autoAuthAllowed() || !helloCanPasskey || !helloHasPasskey || !store.usePasskey
                 || credentials.passkeyPrivate == null || credentials.passkeyPublic == null
                 || challenge == null || challenge.length == 0) {
             return false;
@@ -219,8 +248,7 @@ public final class RuleEngine {
     }
 
     private static boolean tryTokenLogin() {
-        if (!helloCanSessionToken || !store.useSessionToken || !store.autoLogin
-                || credentials == null || !credentials.autoLogin
+        if (!autoAuthAllowed() || !helloCanSessionToken || !store.useSessionToken
                 || credentials.sessionToken == null || credentials.sessionToken.isEmpty()) {
             return false;
         }
@@ -230,8 +258,7 @@ public final class RuleEngine {
     }
 
     private static void tryPasswordLogin() {
-        if (!helloCanAutoLogin || !store.autoLogin
-                || credentials == null || credentials.password == null || !credentials.autoLogin) {
+        if (!autoAuthAllowed() || !helloCanAutoLogin || credentials.password == null) {
             return;
         }
         EasyAuthPackets.sendCredentials(credentials.password, Totp.currentCode(credentials.totpSecret));
@@ -344,21 +371,27 @@ public final class RuleEngine {
         if (active.isEmpty() && queue.isEmpty() && !authPending) {
             return;
         }
+        long now = System.currentTimeMillis();
         if (authPending) {
-            ClientPacketListener connection = Minecraft.getInstance().getConnection();
-            // When the server declared the packet channel (EasyAuth 26.1+ on Fabric), wait for
-            // its hello instead — see onHello. The command fallback covers everything else.
-            if (connection != null && !EasyAuthPackets.serverSupportsPacketAuth()) {
-                var root = connection.getCommands().getRoot();
-                boolean hasLogin = root.getChild(commandLiteral(store.loginCommand)) != null;
-                boolean hasRegister = root.getChild(commandLiteral(store.registerCommand)) != null;
-                if (hasLogin || hasRegister) {
-                    authPending = false;
-                    sendAuthCommands(hasLogin, hasRegister);
+            if (now > authPendingUntil) {
+                // Neither a hello nor the auth commands showed up — stop scanning the command
+                // tree every tick for the rest of the session (most servers have no auth mod).
+                authPending = false;
+            } else {
+                ClientPacketListener connection = Minecraft.getInstance().getConnection();
+                // When the server declared the packet channel (EasyAuth 26.1+ on Fabric), wait for
+                // its hello instead — see onHello. The command fallback covers everything else.
+                if (connection != null && !EasyAuthPackets.serverSupportsPacketAuth()) {
+                    var root = connection.getCommands().getRoot();
+                    boolean hasLogin = root.getChild(loginLiteral) != null;
+                    boolean hasRegister = root.getChild(registerLiteral) != null;
+                    if (hasLogin || hasRegister) {
+                        authPending = false;
+                        sendAuthCommands(hasLogin, hasRegister);
+                    }
                 }
             }
         }
-        long now = System.currentTimeMillis();
         for (ActiveRule r : active) {
             if (r.rule.trigger.equals("timer") && now >= r.nextTimerAt) {
                 tryFire(r, now, 0);
@@ -375,18 +408,38 @@ public final class RuleEngine {
     }
 
     public static void onDisconnect() {
-        long now = System.currentTimeMillis();
-        for (ActiveRule r : active) {
-            if (r.rule.trigger.equals("leave")) {
-                tryFire(r, now, 0); // a delayed send would outlive the connection
-            }
-        }
         active = List.of();
         queue.clear();
         authPending = false;
+        hasChatRules = hasLeaveRules = false;
         store = null;
         credentials = null;
         helloCanAutoLogin = helloCanSessionToken = helloCanPasskey = helloHasPasskey = false;
+    }
+
+    /** True when the current server has chat-triggered rules; gates the message flattening. */
+    public static boolean hasChatRules() {
+        return hasChatRules;
+    }
+
+    /** True when the current server has leave-triggered rules; gates the pause-screen hook. */
+    public static boolean hasLeaveRules() {
+        return hasLeaveRules;
+    }
+
+    /**
+     * Fires the "leave" rules. Called from the wrapped pause-menu disconnect button (see
+     * QuitHook) while the connection is still open — by onDisconnect the channel is already
+     * closed and anything sent would go nowhere. Sends run immediately: a delayed send would
+     * outlive the connection.
+     */
+    public static void onQuit() {
+        long now = System.currentTimeMillis();
+        for (ActiveRule r : active) {
+            if (r.rule.trigger.equals("leave")) {
+                tryFire(r, now, 0);
+            }
+        }
     }
 
     private static void tryFire(ActiveRule r, long now, long delay) {

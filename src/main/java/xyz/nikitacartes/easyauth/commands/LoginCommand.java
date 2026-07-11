@@ -177,6 +177,18 @@ public class LoginCommand {
         playerData.update();
     }
 
+    /**
+     * Failure tail shared with the packet token/passkey modes in {@link ClientModBridge}: a
+     * rejected credential counts like a wrong password (same maxLoginTries kick), so packet
+     * modes keep the failed-attempt penalty any future weaker mode would otherwise silently lack.
+     */
+    public static void recordFailedAttempt(ServerPlayer player, PlayerEntryV1 playerData) {
+        playerData.loginTries++;
+        if (playerData.loginTries >= config.maxLoginTries && config.maxLoginTries != -1) {
+            handleMaxTries(player, playerData, StoneCutterUtils.getUsername(player), false);
+        }
+    }
+
     private static void handleMaxTries(ServerPlayer player, PlayerEntryV1 playerData, String username, boolean otpFailed) {
         LogLogin("Player " + username + " exceeded max login tries");
         // Send the player a different error message if the max login tries is 1.

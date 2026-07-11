@@ -159,6 +159,8 @@ public class PlayerEntryV1 {
 
     public static final int MAX_PASSKEYS = 5;
 
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     public PlayerEntryV1(String username, String usernameLowerCase, String uuid, String json) {
         PlayerEntryV1 entry = gson.fromJson(json, PlayerEntryV1.class);
         ZonedDateTime startOfTime = getUnixZero();
@@ -201,7 +203,7 @@ public class PlayerEntryV1 {
      */
     public String issueSessionToken(long ttlSeconds) {
         byte[] raw = new byte[32];
-        new SecureRandom().nextBytes(raw);
+        RANDOM.nextBytes(raw);
         String token = Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
         sessionTokenHash = sha256Hex(token);
         sessionTokenExpires = ZonedDateTime.now().plusSeconds(ttlSeconds);

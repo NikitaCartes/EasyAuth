@@ -204,6 +204,18 @@ public final class ClientModBridge {
     }*/
     //?}
 
+    /**
+     * Whether the pre-auth packet firewall should let the credentials channel through: the bridge
+     * is registered and at least one packet mode that unauthenticated players use is enabled
+     * (passkey enrollment happens after login, so it needs no pre-auth allowance).
+     */
+    public static boolean acceptsPreAuthPackets() {
+        return initialized && (extendedConfig.clientMod.allowAutoLogin
+                || extendedConfig.clientMod.allowAutoRegister
+                || extendedConfig.clientMod.allowSessionToken
+                || extendedConfig.clientMod.allowPasskey);
+    }
+
     /** Whether this player's client declared the companion channels (checked via the hello channel). */
     private static boolean hasCompanion(ServerPlayer player) {
         //? if fabric {
@@ -280,22 +292,25 @@ public final class ClientModBridge {
      * Called on the server thread after every successful explicit authentication (/login command,
      * dialog, or any packet mode) and after /register. Issues a fresh session token (rotating the
      * previous one) for companion clients and confirms the login so the client can enroll a passkey.
-     * Only mutates the entry — every caller persists it right after, so each login stays a single
-     * DB write (see LoginCommand.finishLogin and the async write in RegisterCommand).
+     * Only mutates the entry — the caller persists it, so each login stays a single DB write
+     * (see LoginCommand.finishLogin and the post-write confirmation in RegisterCommand).
+     *
+     * @return true when a token was issued, i.e. the entry was mutated and needs persisting
      */
-    public static void onAuthSuccess(ServerPlayer player) {
+    public static boolean onAuthSuccess(ServerPlayer player) {
         if (!initialized || !hasCompanion(player)) {
-            return;
+            return false;
         }
         PlayerEntryV1 entry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
         if (entry == null) {
-            return;
+            return false;
         }
         String token = "";
         if (extendedConfig.clientMod.allowSessionToken) {
             token = entry.issueSessionToken(extendedConfig.clientMod.sessionTokenTtl);
         }
         sendResult(player, ClientModProtocol.RESULT_SUCCESS, token);
+        return !token.isEmpty();
     }
 
     /** Drops the pending login challenge and hello state (if any) when the player disconnects. */
@@ -352,11 +367,19 @@ public final class ClientModBridge {
     private static void receiveToken(ServerPlayer player, PlayerAuth playerAuth, PlayerEntryV1 entry,
                                      String token, String username) {
         String ip = playerAuth.easyAuth$getIpAddress();
-        if (!extendedConfig.clientMod.allowSessionToken || IpLimitManager.isLoginRateLimitExceeded(ip)
-                || !entry.verifySessionToken(token)) {
-            // Stale token is normal (rotated by another device / expired) — tell the client to fall back.
+        if (!extendedConfig.clientMod.allowSessionToken || IpLimitManager.isLoginRateLimitExceeded(ip)) {
+            // Mode unavailable / rate limited — no failed-attempt penalty, same as the command path.
+            LogLogin("Player " + username + " sent a session token while token login is unavailable");
+            sendResult(player, ClientModProtocol.RESULT_TOKEN_REJECTED, "");
+            return;
+        }
+        if (!entry.verifySessionToken(token)) {
+            // Stale token is normal (rotated by another device / expired) — tell the client to fall
+            // back. Result goes out first so the client drops the token even if the failed attempt
+            // (counted like a wrong password) takes the player over maxLoginTries and kicks.
             LogLogin("Player " + username + " presented a rejected session token");
             sendResult(player, ClientModProtocol.RESULT_TOKEN_REJECTED, "");
+            LoginCommand.recordFailedAttempt(player, entry);
             return;
         }
         LogLogin("Player " + username + " logged in with a session token");
@@ -368,16 +391,23 @@ public final class ClientModBridge {
         String ip = playerAuth.easyAuth$getIpAddress();
         // The challenge is one-time: consumed by the first attempt, reissued only on rejoin.
         byte[] challenge = challenges.remove(player.getUUID());
-        boolean valid = extendedConfig.clientMod.allowPasskey
-                && !IpLimitManager.isLoginRateLimitExceeded(ip)
-                && challenge != null
+        if (!extendedConfig.clientMod.allowPasskey || IpLimitManager.isLoginRateLimitExceeded(ip)) {
+            // Mode unavailable / rate limited — no failed-attempt penalty, same as the command path.
+            LogLogin("Player " + username + " sent a passkey while passkey login is unavailable");
+            sendResult(player, ClientModProtocol.RESULT_PASSKEY_REJECTED, "");
+            return;
+        }
+        boolean valid = challenge != null
                 && !entry.password.isEmpty()
                 && entry.passkeys != null
                 && entry.passkeys.contains(Base64.getEncoder().encodeToString(publicKey))
                 && verifyPasskeySignature(publicKey, signature, challenge);
         if (!valid) {
+            // Result goes out first so the client prunes the dead key even if the failed attempt
+            // (counted like a wrong password) takes the player over maxLoginTries and kicks.
             LogLogin("Player " + username + " presented a rejected passkey");
             sendResult(player, ClientModProtocol.RESULT_PASSKEY_REJECTED, "");
+            LoginCommand.recordFailedAttempt(player, entry);
             return;
         }
         LogLogin("Player " + username + " logged in with a passkey");

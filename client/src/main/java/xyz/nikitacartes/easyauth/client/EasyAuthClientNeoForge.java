@@ -32,14 +32,32 @@ public class EasyAuthClientNeoForge {
         IEventBus gameBus = NeoForge.EVENT_BUS;
         gameBus.addListener((ClientPlayerNetworkEvent.LoggingIn event) -> RuleEngine.onJoin());
         gameBus.addListener((ClientPlayerNetworkEvent.LoggingOut event) -> RuleEngine.onDisconnect());
+        // hasChatRules() gate: don't flatten every chat/system message into a String (the
+        // typical session has no chat rules at all).
         gameBus.addListener((ClientChatReceivedEvent.System event) -> {
-            if (!event.isOverlay()) {
+            if (!event.isOverlay() && RuleEngine.hasChatRules()) {
                 RuleEngine.onChat(event.getMessage().getString(), true, null);
             }
         });
-        gameBus.addListener((ClientChatReceivedEvent.Player event) ->
-                RuleEngine.onChat(event.getMessage().getString(), false, event.getSender()));
+        gameBus.addListener((ClientChatReceivedEvent.Player event) -> {
+            if (RuleEngine.hasChatRules()) {
+                RuleEngine.onChat(event.getMessage().getString(), false, event.getSender());
+            }
+        });
         gameBus.addListener((ClientTickEvent.Post event) -> RuleEngine.onTick());
+        // "leave" rules must go out while the connection is still open (LoggingOut above fires
+        // after it closed), so the pause-menu disconnect button gets wrapped — see QuitHook.
+        gameBus.addListener((net.neoforged.neoforge.client.event.ScreenEvent.Init.Post event) -> {
+            if (event.getScreen() instanceof net.minecraft.client.gui.screens.PauseScreen && RuleEngine.hasLeaveRules()) {
+                for (var listener : java.util.List.copyOf(event.getListenersList())) {
+                    if (listener instanceof net.minecraft.client.gui.components.Button button
+                            && QuitHook.isDisconnect(button)) {
+                        event.removeListener(button);
+                        event.addListener(QuitHook.wrap(button));
+                    }
+                }
+            }
+        });
 
         LOGGER.info("EasyAuth Client loaded");
     }

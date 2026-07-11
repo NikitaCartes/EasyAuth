@@ -157,10 +157,6 @@ public class RegisterCommand {
         playerAuth.easyAuth$setAuthenticated(true);
         playerAuth.easyAuth$restoreTrueLocation();
         langConfig.registration.success.send(source);
-        // Companion clients get a session token ("remember me") and a confirmation. In the rare
-        // case the async DB write below fails and registration is revoked, the token is unusable:
-        // token/passkey login requires a non-empty stored password.
-        ClientModBridge.onAuthSuccess(player);
         // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
 
         THREADPOOL.submit(() -> {
@@ -183,6 +179,15 @@ public class RegisterCommand {
 
             // Invalidate IP cache after registration
             IpLimitManager.invalidateCache(playerData.lastIp);
+
+            // Companion confirmation (session token + passkey-enrollment green light) only after
+            // the registration is actually persisted: the token hash rides the update() below and
+            // the client's immediate passkey enrollment needs the non-empty stored password.
+            player.server.execute(() -> {
+                if (ClientModBridge.onAuthSuccess(player)) {
+                    playerData.update();
+                }
+            });
 
             LogRegister("Player " + username + "{" + player.getStringUUID() + "} successfully registered");
         });

@@ -198,8 +198,10 @@ public class AuthEventHandler {
             }
 
             // Companion-mod credentials channel (ClientModBridge): its whole point is to
-            // arrive before authentication, so it must not be blocked here.
-            if (ClientModProtocol.AUTH_CHANNEL.equals(customPacketIdentifier)) {
+            // arrive before authentication, so it must not be blocked here — but only while
+            // the bridge is registered and some packet auth mode is actually enabled.
+            if (ClientModBridge.acceptsPreAuthPackets()
+                    && ClientModProtocol.AUTH_CHANNEL.equals(customPacketIdentifier)) {
                 return true;
             }
 

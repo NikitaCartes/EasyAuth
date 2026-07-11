@@ -45,10 +45,13 @@ java {
     withSourcesJar()
 }
 
-// Wire-format/TOTP sources shared with the client companion mod (single source of truth,
-// see xyz.nikitacartes.easyauth.protocol.ClientModProtocol). Version- and loader-independent,
-// no stonecutter markers.
-sourceSets["main"].java.srcDir(rootProject.projectDir.resolve("shared/src/main/java"))
+// Client-only sources share the src/client layout with Fabric's split source sets. A "client"
+// source set makes Stonecutter preprocess src/client here too (it maps the source set to
+// src/client by name and wires the processed copy in — no manual srcDir needed). The client @Mod
+// is dist-gated (Dist.CLIENT), so these classes never load on a dedicated server.
+val clientSourceSet = sourceSets.create("client")
+clientSourceSet.compileClasspath += sourceSets["main"].compileClasspath + sourceSets["main"].output
+clientSourceSet.runtimeClasspath += sourceSets["main"].runtimeClasspath + sourceSets["main"].output
 
 neoForge {
     version = property("neoforge_version").toString()
@@ -60,11 +63,16 @@ neoForge {
             server()
             gameDirectory.set(file("run"))
         }
+        create("client") {
+            client()
+            gameDirectory.set(file("run"))
+        }
     }
 
     mods {
         create(property("mod_id").toString()) {
             sourceSet(sourceSets.main.get())
+            sourceSet(clientSourceSet)
         }
     }
 }
@@ -75,7 +83,11 @@ fletchingTable {
         applyMixinConfig = false
     }
     mixins.create("main") {
-        mixin("default", "easyauth.mixins.json")
+        // env("SERVER"): all discovered mixins go in the config's "server" block, so they apply
+        // only on a dedicated server (not the integrated server / single-player).
+        mixin("default", "easyauth.mixins.json") {
+            env("SERVER")
+        }
     }
     lang.create("main") {
         // Nested YAML lang files are flattened to dotted-key JSON at build time
@@ -131,6 +143,7 @@ tasks.shadowJar {
 
 tasks.jar {
     from("LICENSE")
+    from(clientSourceSet.output)
     dependsOn(tasks.shadowJar)
     from(zipTree(tasks.shadowJar.get().archiveFile)) {
         exclude("META-INF/MANIFEST.MF", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")

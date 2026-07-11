@@ -1,6 +1,6 @@
 {
-  "modmenu.summaryTranslation.easyauthclient": "Автоматизация чата и автовход для серверов с EasyAuth.",
-  "modmenu.descriptionTranslation.easyauthclient": "Клиентский компаньон для EasyAuth: правила авто-ввода команд по серверам и автовход, опционально с TOTP-кодами.",
+  "modmenu.summaryTranslation.easyauth": "Автоматизация чата и автовход для серверов с EasyAuth.",
+  "modmenu.descriptionTranslation.easyauth": "Клиентский компаньон для EasyAuth: правила авто-ввода команд по серверам и автовход, опционально с TOTP-кодами.",
   "easyauthclient.config.title": "EasyAuth Client",
   "easyauthclient.config.server": "Сервер",
   "easyauthclient.config.newServer": "+ Добавить сервер",

@@ -7,10 +7,6 @@ mod_name = "EasyAuth"
 mod_id = "easyauth"
 mod_version = "4.0.0-SNAPSHOT"
 
-# Client mod (client/ branch); no dashes in the id — NeoForge forbids them
-client_mod_id = "easyauthclient"
-client_mod_name = "EasyAuth Client"
-
 # Shared dependencies
 luckperms_version = "5.4"
 bcrypt_version = "0.10.2"
@@ -183,7 +179,7 @@ vanish_version = "1.6.8+26.1"
 display_name = "[26.1]"
 supported_versions = "26.1,26.1.1,26.1.2"
 supported_minecraft_version = ">=26.1- <26.2"
-# compile-only dependency of the client branch (client/build.fabric.gradle.kts)
+# compile-only dependency of the client source set (EasyAuthClientModMenu)
 modmenu_version = "18.0.0-beta.1"
 
 [fabric."26.2"]
@@ -197,7 +193,7 @@ vanish_version = "1.6.14+26.2"
 display_name = "[26.2]"
 supported_versions = "26.2"
 supported_minecraft_version = ">=26.2-"
-# compile-only dependency of the client branch (client/build.fabric.gradle.kts)
+# compile-only dependency of the client source set (EasyAuthClientModMenu)
 modmenu_version = "20.0.0-alpha.1"
 
 # ---------------------------------------------------------------------------

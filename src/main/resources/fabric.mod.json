@@ -14,10 +14,16 @@
     "issues": "https://github.com/NikitaCartes/EasyAuth/issues"
   },
   "license": "MIT",
-  "environment": "server",
+  "environment": "*",
   "entrypoints": {
-    "main": [
+    "server": [
       "xyz.nikitacartes.easyauth.EasyAuthFabric"
+    ],
+    "client": [
+      "xyz.nikitacartes.easyauth.client.EasyAuthClientFabric"
+    ],
+    "modmenu": [
+      "xyz.nikitacartes.easyauth.client.EasyAuthClientModMenu"
     ]
   },
   "accessWidener": "accesswidener/${accessWidener}",
@@ -35,6 +41,17 @@
     "fabric-permissions-api-v0": "*",
     "melius-vanish": "*",
     "skinrestorer": "*",
-    "nochatreports": "*"
+    "nochatreports": "*",
+    "modmenu": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.modrinth": "https://modrinth.com/mod/easyauth",
+        "modmenu.curseforge": "https://www.curseforge.com/projects/503866",
+        "modmenu.github_releases": "https://github.com/NikitaCartes/EasyAuth/releases"
+      },
+      "update_checker": false
+    }
   }
 }

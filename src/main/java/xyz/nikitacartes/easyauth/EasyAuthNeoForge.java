@@ -5,6 +5,7 @@ package xyz.nikitacartes.easyauth;
 import net.minecraft.world.InteractionResult;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
@@ -40,7 +41,7 @@ import static xyz.nikitacartes.easyauth.EasyAuth.createConfigFolder;
 import static xyz.nikitacartes.easyauth.EasyAuth.reloadConfigs;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 
-@Mod(EasyAuthNeoForge.MOD_ID)
+@Mod(value = EasyAuthNeoForge.MOD_ID, dist = Dist.DEDICATED_SERVER)
 public class EasyAuthNeoForge {
     public static final String MOD_ID = "easyauth";
 

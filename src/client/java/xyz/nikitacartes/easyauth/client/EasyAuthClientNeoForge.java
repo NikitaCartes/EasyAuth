@@ -18,7 +18,7 @@ import xyz.nikitacartes.easyauth.client.screen.ConfigScreen;
 
 @Mod(value = EasyAuthClientNeoForge.MOD_ID, dist = Dist.CLIENT)
 public class EasyAuthClientNeoForge {
-    public static final String MOD_ID = "easyauthclient";
+    public static final String MOD_ID = "easyauth";
     public static final Logger LOGGER = LoggerFactory.getLogger("EasyAuthClient");
 
     public EasyAuthClientNeoForge(IEventBus modBus, ModContainer container) {

@@ -2,7 +2,7 @@
 package xyz.nikitacartes.easyauth;
 
 //? if fabric {
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -16,10 +16,10 @@ import xyz.nikitacartes.easyauth.event.AuthEventHandler;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
 
-public class EasyAuthFabric implements ModInitializer {
+public class EasyAuthFabric implements DedicatedServerModInitializer {
 
     @Override
-    public void onInitialize() {
+    public void onInitializeServer() {
         gameDirectory = FabricLoader.getInstance().getGameDir();
         LogInfo("EasyAuth mod by NikitaCartes");
 

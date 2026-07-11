@@ -1,6 +1,6 @@
 {
-  "modmenu.summaryTranslation.easyauthclient": "Chat automation and auto-login for EasyAuth servers.",
-  "modmenu.descriptionTranslation.easyauthclient": "Client-side companion for EasyAuth: per-server chat/command automation rules and auto-login, with optional TOTP codes.",
+  "modmenu.summaryTranslation.easyauth": "Chat automation and auto-login for EasyAuth servers.",
+  "modmenu.descriptionTranslation.easyauth": "Client-side companion for EasyAuth: per-server chat/command automation rules and auto-login, with optional TOTP codes.",
   "easyauthclient.config.title": "EasyAuth Client",
   "easyauthclient.config.server": "Server",
   "easyauthclient.config.newServer": "+ Add server",

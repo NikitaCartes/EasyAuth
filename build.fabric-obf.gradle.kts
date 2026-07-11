@@ -22,6 +22,7 @@ repositories {
     maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
     maven(url = "https://repo.opencollab.dev/main")
     maven(url = "https://api.modrinth.com/maven")
+    maven(url = "https://maven.terraformersmc.com/releases")
     //mavenLocal()
 }
 
@@ -42,11 +43,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
 }
-
-// Wire-format/TOTP sources shared with the client companion mod (single source of truth,
-// see xyz.nikitacartes.easyauth.protocol.ClientModProtocol). Version- and loader-independent,
-// no stonecutter markers.
-sourceSets["main"].java.srcDir(rootProject.projectDir.resolve("shared/src/main/java"))
 
 loom {
     splitEnvironmentSourceSets()
@@ -110,6 +106,9 @@ dependencies {
     modCompileOnly("org.geysermc.floodgate:api:${property("floodgate_api_version")}")
     modCompileOnly("maven.modrinth:vanish:${property("vanish_version")}")
 
+    // ModMenu config-screen entrypoint (client source set only; compile-only, loaded only when ModMenu is present)
+    "modClientCompileOnly"("com.terraformersmc:modmenu:${property("modmenu_version")}") { isTransitive = false }
+
     // Password hashing
     implementAndInclude("at.favre.lib:bcrypt:${property("bcrypt_version")}")
     implementAndInclude("at.favre.lib:bytes:${property("bytes_version")}")
@@ -138,6 +137,7 @@ tasks.shadowJar {
 
     configurations = listOf(project.configurations.shadow.get())
     from(sourceSets.main.get().output)
+    from(sourceSets["client"].output)
 }
 
 tasks.remapJar {
@@ -243,8 +243,11 @@ publishMods {
 
 fletchingTable {
     mixins.create("main") { // Name should match an existing source set
-        // Default matches the default value in the annotation
-        mixin("default", "easyauth.mixins.json")
+        // env("SERVER"): all discovered mixins go in the config's "server" block, so they apply
+        // only on a dedicated server (not the integrated server / single-player).
+        mixin("default", "easyauth.mixins.json") {
+            env("SERVER")
+        }
     }
     lang.create("main") {
         // Nested YAML lang files are flattened to dotted-key JSON at build time

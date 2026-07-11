@@ -12,8 +12,8 @@ authors = "NikitaCartes, samo_lego"
 description = '''
 A mod that tries to keep authentication for players easy via commands.
 Server-side authentication: /login, /register, /auth, etc.
+Bundles the client companion (auto-login, config screen); the server half runs only on dedicated servers.
 '''
-side = "SERVER"
 
 [[mixins]]
 config = "easyauth.mixins.json"
@@ -26,14 +26,14 @@ modId = "neoforge"
 type = "required"
 versionRange = "[${neoforge_version},)"
 ordering = "NONE"
-side = "SERVER"
+side = "BOTH"
 
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 type = "required"
 versionRange = "${supported_minecraft_version}"
 ordering = "NONE"
-side = "SERVER"
+side = "BOTH"
 
 [[dependencies.${mod_id}]]
 modId = "luckperms"

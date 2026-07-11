@@ -124,7 +124,8 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        store.servers.values().removeIf(entry -> entry.password == null && entry.totpSecret == null);
+        store.servers.values().removeIf(entry -> entry.password == null && entry.totpSecret == null
+                && entry.sessionToken == null && entry.passkeyPrivate == null);
         Credentials.save(RuleEngine.getCredentialsFile(), store);
         open(parent);
     }

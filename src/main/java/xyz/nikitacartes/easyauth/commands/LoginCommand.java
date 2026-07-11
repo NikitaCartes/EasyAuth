@@ -132,47 +132,61 @@ public class LoginCommand {
 
         if (passwordResult == AuthHelper.PasswordOptions.CORRECT && !otpFailed) {
             LogLogin("Player " + username + " provide correct password");
-            if (playerData.lastKickedDate.plusSeconds(config.resetLoginAttemptsTimeout).isAfter(ZonedDateTime.now())) {
-                LogLogin("Player " + username + " will be kicked due to kick timeout");
-                player.connection.disconnect(langConfig.session.tooManyAttempts.get());
-                return;
-            }
-            langConfig.session.loginSuccess.send(source);
-            playerAuth.easyAuth$restoreTrueLocation();
-            playerAuth.easyAuth$setAuthenticated(true);
-            playerData.lastAuthenticatedDate = ZonedDateTime.now();
-            playerData.loginTries = 0;
-            String oldIp = playerData.lastIp;
-            playerData.lastIp = playerAuth.easyAuth$getIpAddress();
-            playerData.update();
-
-            // Invalidate IP cache if IP changed
-            IpLimitManager.clearLoginAttempts(ip);
-            if (!oldIp.equals(playerData.lastIp)) {
-                IpLimitManager.invalidateCache(oldIp);
-                IpLimitManager.invalidateCache(playerData.lastIp);
-            }
-            // Companion clients get a session token ("remember me") and a login confirmation.
-            ClientModBridge.onAuthSuccess(player);
-            // player.getServer().getPlayerManager().sendToAll(new PlayerListS2CPacket(PlayerListS2CPacket.Action.ADD_PLAYER, player));
+            finishLogin(player, playerAuth, playerData, ip);
             return;
         }
         playerData.loginTries++;
         if (playerData.loginTries >= config.maxLoginTries && config.maxLoginTries != -1) { // Player exceeded maxLoginTries
-            LogLogin("Player " + username + " exceeded max login tries");
-            // Send the player a different error message if the max login tries is 1.
-            playerData.lastKickedDate = ZonedDateTime.now();
-            playerData.loginTries = 0;
-            playerData.update();
-            if (config.maxLoginTries == 1) {
-                player.connection.disconnect((otpFailed ? langConfig.session.otpIncorrect : langConfig.password.incorrect).get());
-            } else {
-                player.connection.disconnect(langConfig.session.tooManyAttempts.get());
-            }
+            handleMaxTries(player, playerData, username, otpFailed);
             return;
         }
         LogLogin("Player " + username + " provided wrong " + (otpFailed ? "2FA code" : "password"));
         // Sending wrong pass / wrong code message
         (otpFailed ? langConfig.session.otpIncorrect : langConfig.password.incorrect).send(source);
+    }
+
+    /**
+     * Success tail shared by every explicit login path: the password command/dialog above and the
+     * packet token/passkey modes in {@link ClientModBridge}. Re-checks the post-kick window, flips
+     * auth state, does the IP bookkeeping, lets the companion issue/rotate its session token, and
+     * persists the entry once (the token mutation rides the same DB write). Server thread only.
+     */
+    public static void finishLogin(ServerPlayer player, PlayerAuth playerAuth, PlayerEntryV1 playerData, String ip) {
+        if (playerData.lastKickedDate.plusSeconds(config.resetLoginAttemptsTimeout).isAfter(ZonedDateTime.now())) {
+            LogLogin("Player " + StoneCutterUtils.getUsername(player) + " will be kicked due to kick timeout");
+            player.connection.disconnect(langConfig.session.tooManyAttempts.get());
+            return;
+        }
+        langConfig.session.loginSuccess.send(player);
+        playerAuth.easyAuth$restoreTrueLocation();
+        playerAuth.easyAuth$setAuthenticated(true);
+        playerData.lastAuthenticatedDate = ZonedDateTime.now();
+        playerData.loginTries = 0;
+        String oldIp = playerData.lastIp;
+        playerData.lastIp = ip;
+
+        // Invalidate IP cache if IP changed
+        IpLimitManager.clearLoginAttempts(ip);
+        if (!oldIp.equals(playerData.lastIp)) {
+            IpLimitManager.invalidateCache(oldIp);
+            IpLimitManager.invalidateCache(playerData.lastIp);
+        }
+        // Companion clients get a session token ("remember me") and a login confirmation.
+        // onAuthSuccess only mutates the entry, so the update() below is the single DB write.
+        ClientModBridge.onAuthSuccess(player);
+        playerData.update();
+    }
+
+    private static void handleMaxTries(ServerPlayer player, PlayerEntryV1 playerData, String username, boolean otpFailed) {
+        LogLogin("Player " + username + " exceeded max login tries");
+        // Send the player a different error message if the max login tries is 1.
+        playerData.lastKickedDate = ZonedDateTime.now();
+        playerData.loginTries = 0;
+        playerData.update();
+        if (config.maxLoginTries == 1) {
+            player.connection.disconnect((otpFailed ? langConfig.session.otpIncorrect : langConfig.password.incorrect).get());
+        } else {
+            player.connection.disconnect(langConfig.session.tooManyAttempts.get());
+        }
     }
 }

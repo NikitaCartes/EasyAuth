@@ -38,6 +38,11 @@ java {
     targetCompatibility = JavaVersion.VERSION_25
 }
 
+// Wire-format/TOTP sources shared with the client companion mod (single source of truth,
+// see xyz.nikitacartes.easyauth.protocol.ClientModProtocol). Version- and loader-independent,
+// no stonecutter markers.
+sourceSets["main"].java.srcDir(rootProject.projectDir.resolve("shared/src/main/java"))
+
 loom {
     splitEnvironmentSourceSets()
     accessWidenerPath = rootProject.file("src/main/resources/accesswidener/$awFile")

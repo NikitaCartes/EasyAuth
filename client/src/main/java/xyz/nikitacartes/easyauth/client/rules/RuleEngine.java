@@ -8,6 +8,8 @@ import net.minecraft.client.multiplayer.ServerData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.client.EasyAuthPackets;
+import xyz.nikitacartes.easyauth.protocol.ClientModProtocol;
+import xyz.nikitacartes.easyauth.utils.Totp;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -144,7 +146,7 @@ public final class RuleEngine {
         helloHasPasskey = hasPasskey;
         if (authenticated) {
             // Session still valid (or the server skips auth for this player) — nothing to log in
-            // with, but a good moment to (re)register our passkey for the next join.
+            // with, but a good moment to enroll a passkey for the next join (first key only).
             maybeEnrollPasskey();
             return;
         }
@@ -173,14 +175,14 @@ public final class RuleEngine {
             return; // not connected / no tracked server
         }
         switch (code) {
-            case EasyAuthPackets.RESULT_SUCCESS -> {
+            case ClientModProtocol.RESULT_SUCCESS -> {
                 if (sessionToken != null && !sessionToken.isEmpty() && store.useSessionToken) {
                     ensureEntry().sessionToken = sessionToken;
                     Credentials.save(credentialsFile, store);
                 }
                 maybeEnrollPasskey();
             }
-            case EasyAuthPackets.RESULT_TOKEN_REJECTED -> {
+            case ClientModProtocol.RESULT_TOKEN_REJECTED -> {
                 // Rotated by another device or expired — drop it and fall back to the password.
                 if (credentials != null && credentials.sessionToken != null) {
                     credentials.sessionToken = null;
@@ -188,8 +190,8 @@ public final class RuleEngine {
                 }
                 tryPasswordLogin();
             }
-            case EasyAuthPackets.RESULT_PASSKEY_REJECTED -> {
-                helloHasPasskey = false; // our key is not on the server; re-enroll after the next success
+            case ClientModProtocol.RESULT_PASSKEY_REJECTED -> {
+                helloHasPasskey = false; // our key is not on the server (revoked/evicted); no auto-re-enroll
                 if (!tryTokenLogin()) {
                     tryPasswordLogin();
                 }
@@ -236,33 +238,32 @@ public final class RuleEngine {
     }
 
     /**
-     * Registers (or re-registers) our Ed25519 public key while authenticated; the server
-     * deduplicates, so re-sending an already-known key is harmless.
+     * Enrolls a freshly generated Ed25519 key while authenticated — only when we have no key
+     * for this server yet. An existing local key the server does not know means it was revoked
+     * server-side (/account passkey revoke) or evicted; auto-re-enrolling it would silently undo
+     * that, so re-arming requires clearing the key in the config screen first.
      */
     private static void maybeEnrollPasskey() {
         if (!helloCanPasskey || !store.usePasskey) {
             return;
         }
-        if (credentials != null && credentials.passkeyPrivate != null && helloHasPasskey) {
-            return; // we have a key and the server has one — assume it is ours
+        if (credentials != null && credentials.passkeyPrivate != null && credentials.passkeyPublic != null) {
+            return;
         }
-        if (credentials == null || credentials.passkeyPrivate == null || credentials.passkeyPublic == null) {
-            String[] pair = Passkey.generate();
-            if (pair == null) {
-                return; // no Ed25519 in this JRE
-            }
-            Credentials entry = ensureEntry();
-            entry.passkeyPublic = pair[0];
-            entry.passkeyPrivate = pair[1];
-            Credentials.save(credentialsFile, store);
+        String[] pair = Passkey.generate();
+        if (pair == null) {
+            return; // no Ed25519 in this JRE
         }
-        byte[] publicKey = Passkey.decodePublic(credentials.passkeyPublic);
+        Credentials entry = ensureEntry();
+        entry.passkeyPublic = pair[0];
+        entry.passkeyPrivate = pair[1];
+        Credentials.save(credentialsFile, store);
+        byte[] publicKey = Passkey.decodePublic(entry.passkeyPublic);
         if (publicKey == null) {
             return;
         }
         LOGGER.info("Registering a passkey on {}", serverAddress);
         EasyAuthPackets.sendRegisterPasskey(publicKey);
-        helloHasPasskey = true;
     }
 
     /** The credentials entry for the current server, created (and registered in the store) on demand. */
@@ -469,6 +470,12 @@ public final class RuleEngine {
         List<ActiveRule> result = new ArrayList<>();
         for (AutoInputRule rule : entry.rules) {
             if (rule == null || rule.send == null || rule.trigger == null) {
+                continue;
+            }
+            // Gson happily deserializes ["cmd", null] — drop unusable lines instead of NPEing in tryFire.
+            rule.send = rule.send.stream().filter(line -> line != null && !line.isEmpty()).toList();
+            if (rule.send.isEmpty()) {
+                LOGGER.warn("Ignoring rule for {} with no usable 'send' lines", address);
                 continue;
             }
             rule.trigger = rule.trigger.toLowerCase(Locale.ROOT);

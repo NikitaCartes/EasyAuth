@@ -218,8 +218,10 @@ public class AccountCommand {
 
                 PlayerEntryV1 playerEntry = playerAuth.easyAuth$getPlayerEntryV1();
                 playerEntry.password = AuthHelper.hashPassword(newPass.toCharArray());
-                // Standard leak response: a new password kills the old "remember me" token.
+                // Standard leak response: a new password kills the old "remember me" token and
+                // any enrolled passkeys — an intruder must not survive the owner's password change.
                 playerEntry.revokeSessionToken();
+                playerEntry.passkeys.clear();
                 playerEntry.update();
 
                 langConfig.password.changed.send(source);

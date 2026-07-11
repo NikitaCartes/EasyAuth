@@ -5,11 +5,17 @@ import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.Locale;
 
 /**
  * Self-contained TOTP (RFC 6238) implementation: HMAC-SHA1, 6 digits, 30s step.
  * No external dependency — authenticator apps (Google Authenticator, Aegis, etc.)
  * use exactly these defaults, so they interoperate without configuration.
+ *
+ * <p>Shared source: compiled into both the server mod (enrollment + verify) and the client
+ * companion (code generation for auto-login), so the two sides cannot drift. Locale.ROOT
+ * everywhere — the client runs on arbitrary player machines (Turkish dotless-i, localized digits).
+ * Keep this file free of Minecraft classes.
  */
 public final class Totp {
 
@@ -55,6 +61,20 @@ public final class Totp {
         return false;
     }
 
+    /** The current 6-digit code, or null when the secret is missing/invalid (client auto-login). */
+    public static String currentCode(String base32Secret) {
+        if (base32Secret == null || base32Secret.isEmpty()) {
+            return null;
+        }
+        byte[] key;
+        try {
+            key = base32Decode(base32Secret);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+        return generate(key, System.currentTimeMillis() / 1000L / PERIOD);
+    }
+
     /** The {@code otpauth://} URI an authenticator app scans to provision the account. */
     public static String uri(String issuer, String account, String base32Secret) {
         String label = urlEncode(issuer) + ":" + urlEncode(account);
@@ -85,7 +105,7 @@ public final class Totp {
                 | ((hash[offset + 2] & 0xff) << 8)
                 | (hash[offset + 3] & 0xff);
         int otp = binary % (int) Math.pow(10, DIGITS);
-        return String.format("%0" + DIGITS + "d", otp);
+        return String.format(Locale.ROOT, "%0" + DIGITS + "d", otp);
     }
 
     private static boolean constantTimeEquals(String a, String b) {
@@ -117,7 +137,7 @@ public final class Totp {
     }
 
     static byte[] base32Decode(String s) {
-        String clean = s.trim().replace(" ", "").replace("=", "").toUpperCase();
+        String clean = s.trim().replace(" ", "").replace("=", "").toUpperCase(Locale.ROOT);
         int buffer = 0, bits = 0, index = 0;
         byte[] out = new byte[clean.length() * 5 / 8];
         for (int i = 0; i < clean.length(); i++) {

@@ -34,6 +34,7 @@ import net.minecraft.world.item.ItemStack;
 *///?}
 import xyz.nikitacartes.easyauth.integrations.ClientModBridge;
 import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
+import xyz.nikitacartes.easyauth.protocol.ClientModProtocol;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.storage.database.DBReadException;
 import xyz.nikitacartes.easyauth.integrations.FloodgateApiHelper;
@@ -198,7 +199,7 @@ public class AuthEventHandler {
 
             // Companion-mod credentials channel (ClientModBridge): its whole point is to
             // arrive before authentication, so it must not be blocked here.
-            if ("easyauth:auth".equals(customPacketIdentifier)) {
+            if (ClientModProtocol.AUTH_CHANNEL.equals(customPacketIdentifier)) {
                 return true;
             }
 
@@ -401,9 +402,7 @@ public class AuthEventHandler {
 
         // Companion-mod hello: announce capabilities + this player's auth state (must go out in
         // every branch below, so it sits before them).
-        ClientModBridge.sendHello(player,
-                playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()
-                        || isSkipAllAuthChecksApplicable(player));
+        ClientModBridge.sendHello(player, isEffectivelyAuthenticated(player));
 
         if (playerAuth.easyAuth$canSkipAuth()) {
             langConfig.session.onlineAccount.send(player);
@@ -455,6 +454,16 @@ public class AuthEventHandler {
         if (config.hidePlayerCoords) {
             ((PlayerAuth) player).easyAuth$restoreTrueLocation();
         }
+    }
+
+    /**
+     * The "authenticated" flag of the companion-mod hello: every state in which no further login
+     * step is expected. Used at join and by ClientModBridge's late-hello retry for legacy clients.
+     */
+    public static boolean isEffectivelyAuthenticated(ServerPlayer player) {
+        PlayerAuth playerAuth = (PlayerAuth) player;
+        return playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()
+                || isSkipAllAuthChecksApplicable(player);
     }
 
     public static boolean isSkipAllAuthChecksApplicable(ServerPlayer player) {

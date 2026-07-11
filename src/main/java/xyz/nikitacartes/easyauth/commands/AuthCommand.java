@@ -465,14 +465,20 @@ public class AuthCommand {
                 return;
             }
             playerData.password = newPasswordHash;
+            // Admin reset = leak response: the "remember me" credentials die with the password
+            // (same as /account changePassword), or the intruder's companion client walks back in.
+            playerData.revokeSessionToken();
+            playerData.passkeys.clear();
             playerData.update();
-            
+
             // Also update the cached PlayerEntryV1 if the player is online
             ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(username);
             if (player != null) {
                 PlayerEntryV1 cachedEntry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
                 if (cachedEntry != null) {
                     cachedEntry.password = newPasswordHash;
+                    cachedEntry.revokeSessionToken();
+                    cachedEntry.passkeys.clear();
                 }
             }
             

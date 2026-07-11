@@ -2,8 +2,8 @@ package xyz.nikitacartes.easyauth.client.rules;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.nikitacartes.easyauth.protocol.ClientModProtocol;
 
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -21,8 +21,6 @@ import java.util.Base64;
  */
 public final class Passkey {
     private static final Logger LOGGER = LoggerFactory.getLogger("EasyAuthClient");
-    /** Must match ClientModBridge.PASSKEY_DOMAIN on the server. */
-    private static final byte[] DOMAIN = "easyauth-passkey-v1".getBytes(StandardCharsets.US_ASCII);
 
     private Passkey() {
     }
@@ -47,7 +45,7 @@ public final class Passkey {
                     .generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyBase64)));
             Signature signer = Signature.getInstance("Ed25519");
             signer.initSign(key);
-            signer.update(DOMAIN);
+            signer.update(ClientModProtocol.PASSKEY_DOMAIN);
             signer.update(challenge);
             return signer.sign();
         } catch (GeneralSecurityException | IllegalArgumentException e) {

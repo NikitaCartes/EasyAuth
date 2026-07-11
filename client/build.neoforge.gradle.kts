@@ -24,6 +24,11 @@ java {
     }
 }
 
+// Wire-format/TOTP sources shared with the server mod (single source of truth,
+// see xyz.nikitacartes.easyauth.protocol.ClientModProtocol). Version- and loader-independent,
+// no stonecutter markers.
+sourceSets["main"].java.srcDir(rootProject.projectDir.resolve("shared/src/main/java"))
+
 neoForge {
     version = property("neoforge_version").toString()
 

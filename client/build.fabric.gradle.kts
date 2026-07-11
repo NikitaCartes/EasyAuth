@@ -30,6 +30,11 @@ java {
     targetCompatibility = JavaVersion.VERSION_25
 }
 
+// Wire-format/TOTP sources shared with the server mod (single source of truth,
+// see xyz.nikitacartes.easyauth.protocol.ClientModProtocol). Version- and loader-independent,
+// no stonecutter markers.
+sourceSets["main"].java.srcDir(rootProject.projectDir.resolve("shared/src/main/java"))
+
 loom {
     mods {
         create(property("client_mod_id").toString()) {

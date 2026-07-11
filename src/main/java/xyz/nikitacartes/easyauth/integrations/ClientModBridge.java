@@ -12,26 +12,25 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import xyz.nikitacartes.easyauth.commands.LoginCommand;
 import xyz.nikitacartes.easyauth.commands.RegisterCommand;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
+import xyz.nikitacartes.easyauth.protocol.ClientModProtocol;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
 import xyz.nikitacartes.easyauth.utils.IpLimitManager;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
-import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
-import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogLogin;
@@ -49,29 +48,11 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogLogin;
  * API (Fabric {@code PayloadTypeRegistry.serverboundPlay/clientboundPlay} at 26.1+, the older
  * {@code playC2S/playS2C} names below; NeoForge {@code RegisterPayloadHandlersEvent}); {@code <1.20.5}
  * (Fabric only — NeoForge starts at 1.21) uses the legacy {@code ResourceLocation}+{@code FriendlyByteBuf}
- * channel API. The wire format (field order in the codecs and the legacy read/write) is identical
- * across eras and MUST stay in sync with the client's EasyAuthPackets.
+ * channel API. The wire format itself (field order, constants) lives in the shared
+ * {@link ClientModProtocol}, compiled into both mods, so the two sides cannot drift.
  */
 public final class ClientModBridge {
 
-    private static final int PROTOCOL_VERSION = 2;
-    /** Kept in sync with the whitelist in AuthEventHandler.isAllowedPacket. */
-    public static final String AUTH_CHANNEL = "easyauth:auth";
-
-    // C2S easyauth:auth modes.
-    public static final int MODE_PASSWORD = 0;
-    public static final int MODE_TOKEN = 1;
-    public static final int MODE_PASSKEY = 2;
-    public static final int MODE_REGISTER_PASSKEY = 3;
-
-    // S2C easyauth:result codes. Rejections tell the client to fall back to the next
-    // credential (passkey -> token -> password); password failures keep using chat messages.
-    public static final int RESULT_SUCCESS = 0;
-    public static final int RESULT_TOKEN_REJECTED = 1;
-    public static final int RESULT_PASSKEY_REJECTED = 2;
-
-    /** Signed alongside the challenge for domain separation (no cross-protocol signature reuse). */
-    private static final byte[] PASSKEY_DOMAIN = "easyauth-passkey-v1".getBytes(StandardCharsets.US_ASCII);
     private static final byte[] EMPTY_BYTES = new byte[0];
     private static final SecureRandom RANDOM = new SecureRandom();
     /** Ed25519 is in every stock JRE 15+, but a stripped runtime may lack SunEC — degrade to no passkeys. */
@@ -80,6 +61,11 @@ public final class ClientModBridge {
     // One-time login challenges by player UUID, issued in sendHello and consumed by the first
     // passkey attempt. Entries are dropped on player leave; bounded by the online player count.
     private static final Map<UUID, byte[]> challenges = new ConcurrentHashMap<>();
+
+    // Players whose join-time hello could not go out because their companion channels were not
+    // declared yet: pre-configuration-phase clients (<1.20.2) send minecraft:register only after
+    // entering play. The channel-register hook in init() retries from here; cleaned up on leave.
+    private static final Set<UUID> helloPending = ConcurrentHashMap.newKeySet();
 
     private static volatile boolean initialized = false;
 
@@ -99,28 +85,13 @@ public final class ClientModBridge {
     static final Identifier RESULT_ID = id("result");
 
     //? if >=1.20.5 {
-    /** S2C capability + auth-state announce, sent right after join. Challenge is empty unless a passkey login is possible. */
-    public record HelloPayload(int protocolVersion, boolean canAutoLogin, boolean canAutoRegister,
-                               boolean registered, boolean authenticated,
-                               boolean canSessionToken, boolean canPasskey, boolean hasPasskey,
-                               byte[] challenge) implements CustomPacketPayload {
+    // Thin payload wrappers for the CustomPacketPayload API; the wire format is ClientModProtocol's.
+    public record HelloPayload(ClientModProtocol.Hello hello) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<HelloPayload> TYPE = new CustomPacketPayload.Type<>(HELLO_ID);
 
         public static final StreamCodec<FriendlyByteBuf, HelloPayload> CODEC = StreamCodec.of(
-                (buf, payload) -> {
-                    buf.writeVarInt(payload.protocolVersion());
-                    buf.writeBoolean(payload.canAutoLogin());
-                    buf.writeBoolean(payload.canAutoRegister());
-                    buf.writeBoolean(payload.registered());
-                    buf.writeBoolean(payload.authenticated());
-                    buf.writeBoolean(payload.canSessionToken());
-                    buf.writeBoolean(payload.canPasskey());
-                    buf.writeBoolean(payload.hasPasskey());
-                    buf.writeByteArray(payload.challenge());
-                },
-                buf -> new HelloPayload(buf.readVarInt(), buf.readBoolean(), buf.readBoolean(),
-                        buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(),
-                        buf.readBoolean(), buf.readByteArray()));
+                (buf, payload) -> payload.hello().write(buf),
+                buf -> new HelloPayload(ClientModProtocol.Hello.read(buf)));
 
         @Override
         public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
@@ -128,26 +99,12 @@ public final class ClientModBridge {
         }
     }
 
-    /**
-     * C2S credentials; the mode selects which fields matter (the rest stay empty):
-     * PASSWORD -> password/otp, TOKEN -> token, PASSKEY -> publicKey/signature,
-     * REGISTER_PASSKEY (authenticated players only) -> publicKey.
-     */
-    public record AuthPayload(int mode, String password, String otp, String token,
-                              byte[] publicKey, byte[] signature) implements CustomPacketPayload {
+    public record AuthPayload(ClientModProtocol.Auth auth) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<AuthPayload> TYPE = new CustomPacketPayload.Type<>(AUTH_ID);
 
         public static final StreamCodec<FriendlyByteBuf, AuthPayload> CODEC = StreamCodec.of(
-                (buf, payload) -> {
-                    buf.writeVarInt(payload.mode());
-                    buf.writeUtf(payload.password());
-                    buf.writeUtf(payload.otp());
-                    buf.writeUtf(payload.token());
-                    buf.writeByteArray(payload.publicKey());
-                    buf.writeByteArray(payload.signature());
-                },
-                buf -> new AuthPayload(buf.readVarInt(), buf.readUtf(), buf.readUtf(), buf.readUtf(),
-                        buf.readByteArray(), buf.readByteArray()));
+                (buf, payload) -> payload.auth().write(buf),
+                buf -> new AuthPayload(ClientModProtocol.Auth.read(buf)));
 
         @Override
         public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
@@ -155,16 +112,12 @@ public final class ClientModBridge {
         }
     }
 
-    /** S2C auth outcome; sessionToken is non-empty only on SUCCESS with tokens enabled (issue/rotation). */
-    public record ResultPayload(int code, String sessionToken) implements CustomPacketPayload {
+    public record ResultPayload(ClientModProtocol.Result result) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<ResultPayload> TYPE = new CustomPacketPayload.Type<>(RESULT_ID);
 
         public static final StreamCodec<FriendlyByteBuf, ResultPayload> CODEC = StreamCodec.of(
-                (buf, payload) -> {
-                    buf.writeVarInt(payload.code());
-                    buf.writeUtf(payload.sessionToken());
-                },
-                buf -> new ResultPayload(buf.readVarInt(), buf.readUtf()));
+                (buf, payload) -> payload.result().write(buf),
+                buf -> new ResultPayload(ClientModProtocol.Result.read(buf)));
 
         @Override
         public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
@@ -194,23 +147,34 @@ public final class ClientModBridge {
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(ResultPayload.TYPE, ResultPayload.CODEC);*/
         //?}
         net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(AuthPayload.TYPE,
-                (payload, context) -> receive(context.player(), payload.mode(), payload.password(), payload.otp(),
-                        payload.token(), payload.publicKey(), payload.signature()));
+                (payload, context) -> receive(context.player(), payload.auth()));
         //?} else {
         /*// Legacy channel API: the handler runs off-thread, so read everything, then re-dispatch to the server thread.
         net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(AUTH_ID,
                 (server, player, handler, buf, sender) -> {
-                    int mode = buf.readVarInt();
-                    String password = buf.readUtf();
-                    String otp = buf.readUtf();
-                    String token = buf.readUtf();
-                    byte[] publicKey = buf.readByteArray();
-                    byte[] signature = buf.readByteArray();
-                    server.execute(() -> receive(player, mode, password, otp, token, publicKey, signature));
+                    ClientModProtocol.Auth auth = ClientModProtocol.Auth.read(buf);
+                    server.execute(() -> receive(player, auth));
                 });*/
         //?}
+        //? if <1.20.2 {
+        /*// Without the configuration phase the client declares its channels only after
+        // placeNewPlayer — after onPlayerJoin already ran — so the join-time hello found no
+        // companion. Resend it when the late minecraft:register arrives, or auto-login never
+        // starts on these versions (the client suppresses its command fallback while waiting).
+        // S2CPlayChannelEvents = server-side event for the client's receivable-channel announce.
+        net.fabricmc.fabric.api.networking.v1.S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) -> {
+            if (channels.contains(HELLO_ID)) {
+                server.execute(() -> {
+                    ServerPlayer player = handler.player;
+                    if (helloPending.remove(player.getUUID())) {
+                        sendHello(player, xyz.nikitacartes.easyauth.event.AuthEventHandler.isEffectivelyAuthenticated(player));
+                    }
+                });
+            }
+        });*/
+        //?}
         initialized = true;
-        LogInfo("EasyAuth Client packet channels registered (easyauth:hello / " + AUTH_CHANNEL + ")");
+        LogInfo("EasyAuth Client packet channels registered (" + ClientModProtocol.HELLO_CHANNEL + " / " + ClientModProtocol.AUTH_CHANNEL + ")");
     }
     //?} else {
     /*// NeoForge registers through the mod bus (onRegisterPayloads); nothing to do at mod init.
@@ -228,16 +192,15 @@ public final class ClientModBridge {
         }
         //?}
         // optional() so vanilla / non-companion clients are not rejected for lacking the channel.
-        net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(String.valueOf(PROTOCOL_VERSION))
+        net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(String.valueOf(ClientModProtocol.PROTOCOL_VERSION))
                 .optional().executesOn(net.neoforged.neoforge.network.registration.HandlerThread.MAIN);
         // 3-arg (no-op handler) works on every NeoForge target; the 2-arg send-only overload is 1.21.9+.
         registrar.playToClient(HelloPayload.TYPE, HelloPayload.CODEC, (payload, context) -> {});
         registrar.playToClient(ResultPayload.TYPE, ResultPayload.CODEC, (payload, context) -> {});
         registrar.playToServer(AuthPayload.TYPE, AuthPayload.CODEC,
-                (payload, context) -> receive((ServerPlayer) context.player(), payload.mode(), payload.password(),
-                        payload.otp(), payload.token(), payload.publicKey(), payload.signature()));
+                (payload, context) -> receive((ServerPlayer) context.player(), payload.auth()));
         initialized = true;
-        LogInfo("EasyAuth Client packet channels registered (easyauth:hello / " + AUTH_CHANNEL + ")");
+        LogInfo("EasyAuth Client packet channels registered (" + ClientModProtocol.HELLO_CHANNEL + " / " + ClientModProtocol.AUTH_CHANNEL + ")");
     }*/
     //?}
 
@@ -256,9 +219,14 @@ public final class ClientModBridge {
 
     /** No-op for clients without the companion mod (they never declared the channel). */
     public static void sendHello(ServerPlayer player, boolean authenticated) {
-        if (!initialized || !hasCompanion(player)) {
+        if (!initialized) {
             return;
         }
+        if (!hasCompanion(player)) {
+            helloPending.add(player.getUUID());
+            return;
+        }
+        helloPending.remove(player.getUUID());
         PlayerEntryV1 entry = ((PlayerAuth) player).easyAuth$getPlayerEntryV1();
         boolean registered = entry != null && !entry.password.isEmpty();
         boolean canAutoLogin = extendedConfig.clientMod.allowAutoLogin;
@@ -274,25 +242,18 @@ public final class ClientModBridge {
             RANDOM.nextBytes(challenge);
             challenges.put(player.getUUID(), challenge);
         }
+        ClientModProtocol.Hello hello = new ClientModProtocol.Hello(ClientModProtocol.PROTOCOL_VERSION,
+                canAutoLogin, canAutoRegister, registered, authenticated, canSessionToken, canPasskey,
+                hasPasskey, challenge);
         //? if >=1.20.5 {
-        HelloPayload hello = new HelloPayload(PROTOCOL_VERSION, canAutoLogin, canAutoRegister, registered,
-                authenticated, canSessionToken, canPasskey, hasPasskey, challenge);
         //? if fabric {
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, hello);
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new HelloPayload(hello));
         //?} else {
-        /*net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, hello);*/
+        /*net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new HelloPayload(hello));*/
         //?}
         //?} else {
         /*FriendlyByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
-        buf.writeVarInt(PROTOCOL_VERSION);
-        buf.writeBoolean(canAutoLogin);
-        buf.writeBoolean(canAutoRegister);
-        buf.writeBoolean(registered);
-        buf.writeBoolean(authenticated);
-        buf.writeBoolean(canSessionToken);
-        buf.writeBoolean(canPasskey);
-        buf.writeBoolean(hasPasskey);
-        buf.writeByteArray(challenge);
+        hello.write(buf);
         net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, HELLO_ID, buf);*/
         //?}
     }
@@ -301,17 +262,16 @@ public final class ClientModBridge {
         if (!initialized || !hasCompanion(player)) {
             return;
         }
+        ClientModProtocol.Result result = new ClientModProtocol.Result(code, sessionToken);
         //? if >=1.20.5 {
-        ResultPayload result = new ResultPayload(code, sessionToken);
         //? if fabric {
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, result);
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new ResultPayload(result));
         //?} else {
-        /*net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, result);*/
+        /*net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new ResultPayload(result));*/
         //?}
         //?} else {
         /*FriendlyByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
-        buf.writeVarInt(code);
-        buf.writeUtf(sessionToken);
+        result.write(buf);
         net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, RESULT_ID, buf);*/
         //?}
     }
@@ -320,6 +280,8 @@ public final class ClientModBridge {
      * Called on the server thread after every successful explicit authentication (/login command,
      * dialog, or any packet mode) and after /register. Issues a fresh session token (rotating the
      * previous one) for companion clients and confirms the login so the client can enroll a passkey.
+     * Only mutates the entry — every caller persists it right after, so each login stays a single
+     * DB write (see LoginCommand.finishLogin and the async write in RegisterCommand).
      */
     public static void onAuthSuccess(ServerPlayer player) {
         if (!initialized || !hasCompanion(player)) {
@@ -332,20 +294,19 @@ public final class ClientModBridge {
         String token = "";
         if (extendedConfig.clientMod.allowSessionToken) {
             token = entry.issueSessionToken(extendedConfig.clientMod.sessionTokenTtl);
-            entry.update();
         }
-        sendResult(player, RESULT_SUCCESS, token);
+        sendResult(player, ClientModProtocol.RESULT_SUCCESS, token);
     }
 
-    /** Drops the pending login challenge (if any) when the player disconnects. */
+    /** Drops the pending login challenge and hello state (if any) when the player disconnects. */
     public static void onPlayerLeave(UUID playerUuid) {
         challenges.remove(playerUuid);
+        helloPending.remove(playerUuid);
     }
 
     // Runs on the server thread (fabric payload receivers are re-dispatched there; the legacy
     // handler re-dispatches via server.execute; NeoForge via executesOn(MAIN)).
-    private static void receive(ServerPlayer player, int mode, String password, String otp,
-                                String token, byte[] publicKey, byte[] signature) {
+    private static void receive(ServerPlayer player, ClientModProtocol.Auth auth) {
         PlayerAuth playerAuth = (PlayerAuth) player;
         PlayerEntryV1 entry = playerAuth.easyAuth$getPlayerEntryV1();
         if (entry == null) {
@@ -354,16 +315,16 @@ public final class ClientModBridge {
         String username = StoneCutterUtils.getUsername(player);
         if (playerAuth.easyAuth$isAuthenticated()) {
             // The only packet accepted after login is the passkey enrollment.
-            if (mode == MODE_REGISTER_PASSKEY) {
-                registerPasskey(entry, publicKey, username);
+            if (auth.mode() == ClientModProtocol.MODE_REGISTER_PASSKEY) {
+                registerPasskey(entry, auth.publicKey(), username);
             }
             return;
         }
-        switch (mode) {
-            case MODE_PASSWORD -> receivePassword(player, entry, password, otp, username);
-            case MODE_TOKEN -> receiveToken(player, playerAuth, entry, token, username);
-            case MODE_PASSKEY -> receivePasskey(player, playerAuth, entry, publicKey, signature, username);
-            default -> LogDebug("Ignoring companion packet mode " + mode + " from unauthenticated " + username);
+        switch (auth.mode()) {
+            case ClientModProtocol.MODE_PASSWORD -> receivePassword(player, entry, auth.password(), auth.otp(), username);
+            case ClientModProtocol.MODE_TOKEN -> receiveToken(player, playerAuth, entry, auth.token(), username);
+            case ClientModProtocol.MODE_PASSKEY -> receivePasskey(player, playerAuth, entry, auth.publicKey(), auth.signature(), username);
+            default -> LogDebug("Ignoring companion packet mode " + auth.mode() + " from unauthenticated " + username);
         }
     }
 
@@ -395,11 +356,11 @@ public final class ClientModBridge {
                 || !entry.verifySessionToken(token)) {
             // Stale token is normal (rotated by another device / expired) — tell the client to fall back.
             LogLogin("Player " + username + " presented a rejected session token");
-            sendResult(player, RESULT_TOKEN_REJECTED, "");
+            sendResult(player, ClientModProtocol.RESULT_TOKEN_REJECTED, "");
             return;
         }
         LogLogin("Player " + username + " logged in with a session token");
-        completeAuth(player, playerAuth, entry, ip);
+        LoginCommand.finishLogin(player, playerAuth, entry, ip);
     }
 
     private static void receivePasskey(ServerPlayer player, PlayerAuth playerAuth, PlayerEntryV1 entry,
@@ -416,11 +377,11 @@ public final class ClientModBridge {
                 && verifyPasskeySignature(publicKey, signature, challenge);
         if (!valid) {
             LogLogin("Player " + username + " presented a rejected passkey");
-            sendResult(player, RESULT_PASSKEY_REJECTED, "");
+            sendResult(player, ClientModProtocol.RESULT_PASSKEY_REJECTED, "");
             return;
         }
         LogLogin("Player " + username + " logged in with a passkey");
-        completeAuth(player, playerAuth, entry, ip);
+        LoginCommand.finishLogin(player, playerAuth, entry, ip);
     }
 
     private static void registerPasskey(PlayerEntryV1 entry, byte[] publicKey, String username) {
@@ -436,31 +397,12 @@ public final class ClientModBridge {
         LogInfo("Player " + username + " registered a passkey");
     }
 
-    // Mirror of LoginCommand.applyLoginResult's success branch for the credential-less packet
-    // modes (token/passkey). The join-time kick-window check already gates these players.
-    private static void completeAuth(ServerPlayer player, PlayerAuth playerAuth, PlayerEntryV1 entry, String ip) {
-        langConfig.session.loginSuccess.send(player);
-        playerAuth.easyAuth$restoreTrueLocation();
-        playerAuth.easyAuth$setAuthenticated(true);
-        entry.lastAuthenticatedDate = ZonedDateTime.now();
-        entry.loginTries = 0;
-        String oldIp = entry.lastIp;
-        entry.lastIp = ip;
-        entry.update();
-        IpLimitManager.clearLoginAttempts(ip);
-        if (!oldIp.equals(entry.lastIp)) {
-            IpLimitManager.invalidateCache(oldIp);
-            IpLimitManager.invalidateCache(entry.lastIp);
-        }
-        onAuthSuccess(player);
-    }
-
     private static boolean verifyPasskeySignature(byte[] publicKey, byte[] signature, byte[] challenge) {
         try {
             PublicKey key = KeyFactory.getInstance("Ed25519").generatePublic(new X509EncodedKeySpec(publicKey));
             Signature verifier = Signature.getInstance("Ed25519");
             verifier.initVerify(key);
-            verifier.update(PASSKEY_DOMAIN);
+            verifier.update(ClientModProtocol.PASSKEY_DOMAIN);
             verifier.update(challenge);
             return verifier.verify(signature);
         } catch (GeneralSecurityException | RuntimeException e) {

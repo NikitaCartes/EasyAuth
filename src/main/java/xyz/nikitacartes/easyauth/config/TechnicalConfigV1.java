@@ -4,8 +4,6 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
-import java.util.ArrayList;
-
 import static xyz.nikitacartes.easyauth.utils.StoneCutterUtils.isModLoaded;
 
 @ConfigSerializable
@@ -14,18 +12,6 @@ public class TechnicalConfigV1 extends ConfigTemplate {
     @Comment("""
             Hashed global password.""")
     public @Nullable String globalPassword = null;
-
-    @Comment("""
-            
-            List of players forced to offline mode.""")
-    @Deprecated
-    public transient ArrayList<String> forcedOfflinePlayers = new ArrayList<>();
-
-    @Comment("""
-            
-            List of players confirmed as online.""")
-    @Deprecated
-    public transient ArrayList<String> confirmedOnlinePlayers = new ArrayList<>();
 
     @Comment("""
             

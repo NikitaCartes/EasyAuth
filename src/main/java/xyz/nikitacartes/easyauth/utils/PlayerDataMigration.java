@@ -18,10 +18,6 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
  * One home for EasyAuth's offline&rarr;online player-data migration: the <em>decision</em> (when a
  * player's offline-UUID world data should follow them to the UUID they actually connected with) and
  * the <em>file move</em> itself.
- *
- * <p>This used to be copy-pasted across {@code PlayerDataStorage*Mixin}, {@code PlayerListMixin},
- * {@code PlayerAdvancementsMixin} and {@code AuthCommand}, each with a slightly different gate. They
- * all call {@link #shouldMigrate} now.
  */
 public final class PlayerDataMigration {
 

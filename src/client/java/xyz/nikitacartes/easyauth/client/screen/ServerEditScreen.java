@@ -1,5 +1,8 @@
 package xyz.nikitacartes.easyauth.client.screen;
 
+//? if <1.21.11 {
+/*import net.minecraft.client.Minecraft;
+*///?}
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
@@ -12,6 +15,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import xyz.nikitacartes.easyauth.client.rules.Credentials;
 import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
+import xyz.nikitacartes.easyauth.client.rules.Vault;
 
 /** Per-server credentials editor; commits into the shared {@link Credentials.Store} on close. */
 public class ServerEditScreen extends Screen {
@@ -26,6 +30,10 @@ public class ServerEditScreen extends Screen {
     private EditBox totpBox;
     private Checkbox autoLoginBox;
     private Checkbox autoRegisterBox;
+    // Still-encrypted (locked) originals: shown as an empty box with a "(locked)" hint and
+    // written back on commit unless the player types a replacement.
+    private String lockedPassword;
+    private String lockedTotp;
 
     public ServerEditScreen(ConfigScreen parent, Credentials.Store store, String editAddress) {
         super(editAddress != null
@@ -44,8 +52,7 @@ public class ServerEditScreen extends Screen {
         //?} else {
         /*layout.addToHeader(new StringWidget(title, font));*/
         //?}
-        // GridLayout (identical API 1.19.4→26.x) instead of LinearLayout (no vertical()/horizontal()
-        // before 1.20.2). Single column: each addChild(row, 0) stacks vertically.
+        // GridLayout, not LinearLayout: same API on every target (LinearLayout lacks vertical() before 1.20.2).
         GridLayout column = new GridLayout().spacing(4);
         Credentials entry = editAddress != null ? store.servers.get(editAddress) : null;
 
@@ -58,20 +65,27 @@ public class ServerEditScreen extends Screen {
         }
         column.addChild(addressBox, 0, 0);
 
+        lockedPassword = entry != null && Vault.isEncrypted(entry.password) ? entry.password : null;
+        lockedTotp = entry != null && Vault.isEncrypted(entry.totpSecret) ? entry.totpSecret : null;
+
         passwordBox = editBox(Component.translatable("easyauthclient.config.password"));
         passwordBox.setMaxLength(512);
-        passwordBox.setHint(Component.translatable("easyauthclient.config.password"));
+        passwordBox.setHint(Component.translatable(lockedPassword != null
+                ? "easyauthclient.config.locked"
+                : "easyauthclient.config.password"));
         passwordBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.password.tooltip")));
-        if (entry != null && entry.password != null) {
+        if (entry != null && entry.password != null && lockedPassword == null) {
             passwordBox.setValue(entry.password);
         }
         column.addChild(passwordBox, 1, 0);
 
         totpBox = editBox(Component.translatable("easyauthclient.config.totp"));
         totpBox.setMaxLength(128);
-        totpBox.setHint(Component.translatable("easyauthclient.config.totp"));
+        totpBox.setHint(Component.translatable(lockedTotp != null
+                ? "easyauthclient.config.locked"
+                : "easyauthclient.config.totp"));
         totpBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.totp.tooltip")));
-        if (entry != null && entry.totpSecret != null) {
+        if (entry != null && entry.totpSecret != null && lockedTotp == null) {
             totpBox.setValue(entry.totpSecret);
         }
         column.addChild(totpBox, 2, 0);
@@ -126,8 +140,10 @@ public class ServerEditScreen extends Screen {
             return;
         }
         Credentials entry = store.servers.computeIfAbsent(address, a -> new Credentials());
-        entry.password = passwordBox.getValue().isEmpty() ? null : passwordBox.getValue();
-        entry.totpSecret = totpBox.getValue().isEmpty() ? null : totpBox.getValue();
+        // An empty box means "keep" for a locked value (there is nothing to redisplay) and
+        // "forget" otherwise; a typed value always replaces.
+        entry.password = passwordBox.getValue().isEmpty() ? lockedPassword : passwordBox.getValue();
+        entry.totpSecret = totpBox.getValue().isEmpty() ? lockedTotp : totpBox.getValue();
         entry.autoLogin = autoLoginBox.selected();
         entry.autoRegister = autoRegisterBox.selected();
         editAddress = address;
@@ -141,7 +157,7 @@ public class ServerEditScreen extends Screen {
     }
     //?} else {
     /*@Override
-    public void resize(net.minecraft.client.Minecraft minecraft, int width, int height) {
+    public void resize(Minecraft minecraft, int width, int height) {
         commit();
         super.resize(minecraft, width, height);
     }

@@ -12,6 +12,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.integrations.ClientModBridge;
+import xyz.nikitacartes.easyauth.proxy.ProxyBridge;
 
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -28,8 +30,8 @@ public class EasyAuthFabric implements DedicatedServerModInitializer {
         loadConfigs();
         loadDatabase();
 
-        xyz.nikitacartes.easyauth.proxy.ProxyBridge.init();
-        xyz.nikitacartes.easyauth.integrations.ClientModBridge.init();
+        ProxyBridge.init();
+        ClientModBridge.init();
 
         registerCommands();
         registerEvents();

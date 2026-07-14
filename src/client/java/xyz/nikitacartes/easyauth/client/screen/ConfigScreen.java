@@ -24,6 +24,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 //?}
 import xyz.nikitacartes.easyauth.client.rules.Credentials;
 import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
+import xyz.nikitacartes.easyauth.client.rules.Vault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.TreeSet;
 public class ConfigScreen extends Screen {
     private static final int FOOTER_HEIGHT = 64;
 
-    private final Screen parent;
+    final Screen parent; // package-private: StorageScreen rebuilds the chain after a relocation
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 33, FOOTER_HEIGHT);
     private final Credentials.Store store;
     private ServerList list;
@@ -50,8 +51,8 @@ public class ConfigScreen extends Screen {
         this.store = Credentials.load(RuleEngine.getCredentialsFile());
     }
 
-    /** The 26.1/26.2 setScreen split in one place; also used by the sub-screens. */
-    static void open(Screen screen) {
+    /** The 26.1/26.2 setScreen split in one place; also used by the sub-screens and the loader hooks. */
+    public static void open(Screen screen) {
         //? if >=26.2 {
         Minecraft.getInstance().gui.setScreen(screen);
         //?} else {
@@ -75,10 +76,15 @@ public class ConfigScreen extends Screen {
         addRenderableWidget(serverList);*/
         //?}
 
-        // GridLayout (identical API 1.19.4→26.x) instead of LinearLayout, which lacks the
-        // vertical()/horizontal() factories before 1.20.2.
+        // GridLayout, not LinearLayout: same API on every target (LinearLayout lacks vertical() before 1.20.2).
         GridLayout footer = new GridLayout().spacing(8);
-        footer.addChild(new StringWidget(Component.translatable("easyauthclient.config.rulesHint"), font), 0, 0, 1, 3);
+        if (Vault.passwordProtected() && Vault.locked()) {
+            footer.addChild(new StringWidget(Component.translatable("easyauthclient.config.rulesHint"), font), 0, 0, 1, 2);
+            footer.addChild(Button.builder(Component.translatable("easyauthclient.unlock.unlock"),
+                    button -> open(new UnlockScreen(this))).width(100).build(), 0, 2);
+        } else {
+            footer.addChild(new StringWidget(Component.translatable("easyauthclient.config.rulesHint"), font), 0, 0, 1, 3);
+        }
         footer.addChild(Button.builder(Component.translatable("easyauthclient.config.newServer"),
                 button -> open(new ServerEditScreen(this, store, null))).width(100).build(), 1, 0);
         footer.addChild(Button.builder(Component.translatable("easyauthclient.config.edit"),
@@ -162,9 +168,11 @@ public class ConfigScreen extends Screen {
             Entry(String address, Credentials credentials) {
                 this.address = address;
                 List<String> parts = new ArrayList<>();
-                parts.add(credentials.password != null
-                        ? credentials.password
-                        : I18n.get("easyauthclient.config.noPassword"));
+                parts.add(credentials.password == null
+                        ? I18n.get("easyauthclient.config.noPassword")
+                        : Vault.isEncrypted(credentials.password)
+                        ? I18n.get("easyauthclient.config.locked")
+                        : credentials.password);
                 if (credentials.totpSecret != null) {
                     parts.add("TOTP");
                 }

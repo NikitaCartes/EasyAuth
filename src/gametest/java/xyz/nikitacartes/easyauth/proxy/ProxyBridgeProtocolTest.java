@@ -15,13 +15,12 @@ import java.util.UUID;
  *
  * <p>Lives in the Fabric gametest source set so it compiles against {@link ProxyBridgeProtocol}
  * but is not run by any Gradle task (no {@code @GameTest}, not a JUnit test). Run standalone, e.g.
- * {@code javac -d out ProxyBridgeProtocol.java ProxyBridgeProtocolTest.java && java -ea -cp out
+ * {@code javac -d out ProxyBridgeProtocol.java ProxyBridgeProtocolTest.java && java -cp out
  * xyz.nikitacartes.easyauth.proxy.ProxyBridgeProtocolTest}.
  */
 public final class ProxyBridgeProtocolTest {
 
     public static void main(String[] args) {
-        // Run with assertions on even if -ea was forgotten.
         boolean ok = true;
         ok &= run("premium perform.login round-trips and verifies", ProxyBridgeProtocolTest::testPremiumRoundTrip);
         ok &= run("offline (no-uuid, old format) perform.login verifies", ProxyBridgeProtocolTest::testOldFormatRoundTrip);
@@ -94,7 +93,7 @@ public final class ProxyBridgeProtocolTest {
         byte[] cut = new byte[5];
         System.arraycopy(msg, 0, cut, 0, 5);
         check(ProxyBridgeProtocol.parseAndVerifyPerformLogin(cut, SECRET, ts) == null, "truncated rejected");
-        check(ProxyBridgeProtocol.readType(cut) == null || ProxyBridgeProtocol.readType(cut) != null, "readType no throw");
+        ProxyBridgeProtocol.readType(cut); // must not throw
     }
 
     private static void testHmacCrossCheck() {

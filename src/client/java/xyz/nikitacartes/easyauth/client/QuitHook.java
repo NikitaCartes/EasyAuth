@@ -2,6 +2,9 @@ package xyz.nikitacartes.easyauth.client;
 
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+//? if >=1.21.9 {
+import net.minecraft.client.input.KeyEvent;
+//?}
 import net.minecraft.network.chat.contents.TranslatableContents;
 import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
 
@@ -29,7 +32,7 @@ public final class QuitHook {
                     RuleEngine.onQuit();
                     //? if >=1.21.9 {
                     // Synthetic Enter press (257 = GLFW_KEY_ENTER); the disconnect action ignores it.
-                    original.onPress(new net.minecraft.client.input.KeyEvent(257, 0, 0));
+                    original.onPress(new KeyEvent(257, 0, 0));
                     //?} else {
                     /*original.onPress();*/
                     //?}

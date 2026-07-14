@@ -101,7 +101,7 @@ public class MongoDB implements DbApi {
             return playerEntry;
         } catch (Exception e) {
             LogError("Error retrieving user data for " + username, e);
-             throw new DBReadException("getUserData failed for " + username, e);
+            throw new DBReadException("getUserData failed for " + username, e);
         }
     }
 

@@ -13,11 +13,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Per-server credentials from {@code config/easyauth-client/credentials.json}.
- * Stored as plain text for now — encryption is the last plan phase (§7);
- * the load path warns about it instead.
+ * Secret fields (password, TOTP secret, session token, passkey private key, default
+ * password) are encrypted at rest via {@link Vault}: decrypted in place on load, encrypted
+ * on a deep copy on save (the live store stays plaintext for consumers). While the vault is
+ * locked they stay {@code enc:v1:…} strings in memory — consumers go through
+ * {@link Vault#usable} and treat them as unavailable.
  */
 public final class Credentials {
     private static final Logger LOGGER = LoggerFactory.getLogger("EasyAuthClient");
@@ -84,6 +88,9 @@ public final class Credentials {
                         entry.password = null;
                     }
                 }
+                if (decryptStore(store) && !Vault.locked()) {
+                    save(file, store); // one-time migration: plaintext secrets → encrypted
+                }
             }
         } catch (IOException | JsonParseException e) {
             LOGGER.warn("Could not read {}: {}", file, e.toString());
@@ -94,6 +101,53 @@ public final class Credentials {
         return store;
     }
 
+    /** Called after the vault is unlocked: decrypts the cached store in place and re-saves (migrates leftovers). */
+    public static void onUnlocked() {
+        if (cached != null) {
+            decryptStore(cached);
+            save(cachedFile, cached);
+        }
+    }
+
+    /** True for a secret that sits on disk unencrypted (needs migration). */
+    private static boolean plaintextSecret(String value) {
+        return value != null && !value.isEmpty() && !Vault.isEncrypted(value);
+    }
+
+    /** Decrypts secret fields in place; returns true when any plaintext secret was found. */
+    private static boolean decryptStore(Store store) {
+        boolean plaintext = plaintextSecret(store.defaultPassword);
+        store.defaultPassword = Vault.decrypt(store.defaultPassword);
+        for (Credentials entry : store.servers.values()) {
+            if (entry == null) {
+                continue;
+            }
+            plaintext |= plaintextSecret(entry.password) || plaintextSecret(entry.totpSecret)
+                    || plaintextSecret(entry.sessionToken) || plaintextSecret(entry.passkeyPrivate);
+            entry.password = Vault.decrypt(entry.password);
+            entry.totpSecret = Vault.decrypt(entry.totpSecret);
+            entry.sessionToken = Vault.decrypt(entry.sessionToken);
+            entry.passkeyPrivate = Vault.decrypt(entry.passkeyPrivate);
+        }
+        return plaintext;
+    }
+
+    /** Deep copy with secret fields encrypted; the live store stays plaintext for consumers. */
+    private static Store encryptedCopy(Store store) {
+        Store copy = GSON.fromJson(GSON.toJsonTree(store), Store.class);
+        copy.defaultPassword = Vault.encrypt(copy.defaultPassword);
+        for (Credentials entry : copy.servers.values()) {
+            if (entry == null) {
+                continue;
+            }
+            entry.password = Vault.encrypt(entry.password);
+            entry.totpSecret = Vault.encrypt(entry.totpSecret);
+            entry.sessionToken = Vault.encrypt(entry.sessionToken);
+            entry.passkeyPrivate = Vault.encrypt(entry.passkeyPrivate);
+        }
+        return copy;
+    }
+
     /**
      * Serializes on the caller thread (consistent snapshot — the store is main-thread-only)
      * and writes the bytes on the background IO thread, so saving never freezes a frame.
@@ -101,14 +155,33 @@ public final class Credentials {
     public static void save(Path file, Store store) {
         cached = store;
         cachedFile = file;
-        String json = GSON.toJson(store);
-        IO.execute(() -> {
-            try {
-                Files.createDirectories(file.getParent());
-                Files.writeString(file, json);
-            } catch (IOException e) {
-                LOGGER.warn("Could not write {}: {}", file, e.toString());
-            }
-        });
+        String json = GSON.toJson(encryptedCopy(store));
+        IO.execute(() -> writeString(file, json));
+    }
+
+    /**
+     * Drains the IO queue and writes synchronously. Used before a storage-location switch,
+     * which copies the file right after — an in-flight async write would race the copy.
+     */
+    public static void saveNow(Path file, Store store) {
+        cached = store;
+        cachedFile = file;
+        String json = GSON.toJson(encryptedCopy(store));
+        try {
+            IO.submit(() -> {
+            }).get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOGGER.warn("Credentials IO queue did not drain: {}", e.toString());
+        }
+        writeString(file, json);
+    }
+
+    private static void writeString(Path file, String json) {
+        try {
+            Files.createDirectories(file.getParent());
+            Files.writeString(file, json);
+        } catch (IOException e) {
+            LOGGER.warn("Could not write {}: {}", file, e.toString());
+        }
     }
 }

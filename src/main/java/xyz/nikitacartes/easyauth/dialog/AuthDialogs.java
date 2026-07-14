@@ -340,16 +340,12 @@ public class AuthDialogs {
         }
         Identifier submitId = id("admin/" + key);
         Identifier dialogId = id("admin_form/" + key);
-        ConfirmationDialog dialog;
-        if (action.confirm()) {
-            dialog = new ConfirmationDialog(
-                    common(action.label().get(), List.of(new PlainMessage(langConfig.dialog.admin.confirm.get(), WIDTH)), inputs, true, DialogAction.CLOSE),
-                    submit(action.label().get(), submitId), cancelButton());
-        } else {
-            dialog = new ConfirmationDialog(
-                    common(action.label().get(), List.of(), inputs, true, DialogAction.CLOSE),
-                    submit(action.label().get(), submitId), cancelButton());
-        }
+        List<DialogBody> body = action.confirm()
+                ? List.of(new PlainMessage(langConfig.dialog.admin.confirm.get(), WIDTH))
+                : List.of();
+        ConfirmationDialog dialog = new ConfirmationDialog(
+                common(action.label().get(), body, inputs, true, DialogAction.CLOSE),
+                submit(action.label().get(), submitId), cancelButton());
         open(player, dialogId, dialog);
     }
 

@@ -36,12 +36,12 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
  * EasyAuth side of the (unofficial) AuthMeReloaded proxy-bridge on channel {@code authme:main}.
  *
  * <p>Lets a premium player auto-login without a password when an AuthMe Velocity plugin has
- * cryptographically verified them on the proxy (see {@code PROXY_INTEGRATION_PLAN.md}). The backend
+ * cryptographically verified them on the proxy. The backend
  * runs {@code online-mode=false}; trust comes entirely from the HMAC-signed {@code perform.login}.
  *
  * <p>Receive is via Fabric {@link ServerPlayNetworking}, so messages only arrive in play phase with a
  * live {@link ServerPlayer} (after {@code placeNewPlayer} → after EasyAuth's join handling). That
- * removes the join/perform.login race the plan worried about, so no queue is needed: the carrier of a
+ * leaves no join/perform.login race, so no queue is needed: the carrier of a
  * {@code perform.login} is exactly the player to log in. Send is a raw clientbound payload on the
  * player's connection (Velocity intercepts {@code authme:main} and never forwards it to the client).
  *

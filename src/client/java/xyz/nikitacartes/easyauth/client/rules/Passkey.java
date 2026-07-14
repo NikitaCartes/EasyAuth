@@ -14,10 +14,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
 /**
- * Client half of the passkey login (plan §4 B2): an Ed25519 keypair per server. The public key
+ * Client half of the passkey login: an Ed25519 keypair per server. The public key
  * (X.509/SPKI) is registered on the server after a successful login; later logins sign the
  * server's one-time challenge, so the secret never leaves this machine. Keys are stored base64
- * in credentials.json (plaintext until the encryption phase, like the password).
+ * in credentials.json (the private key encrypted at rest via {@link Vault}, like the password).
  */
 public final class Passkey {
     private static final Logger LOGGER = LoggerFactory.getLogger("EasyAuthClient");

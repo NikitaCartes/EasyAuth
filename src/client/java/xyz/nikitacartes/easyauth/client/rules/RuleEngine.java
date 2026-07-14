@@ -33,9 +33,6 @@ public final class RuleEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger("EasyAuthClient");
     private static final Gson GSON = new Gson();
 
-    private static Path configFile;
-    private static Path credentialsFile;
-
     // Session state; empty when not connected or no rules for the current server.
     private static List<ActiveRule> active = List.of();
     private static final List<Pending> queue = new ArrayList<>();
@@ -65,13 +62,11 @@ public final class RuleEngine {
     }
 
     public static void init(Path configDir) {
-        Path dir = configDir.resolve("easyauth-client");
-        configFile = dir.resolve("rules.json");
-        credentialsFile = dir.resolve("credentials.json");
+        Vault.init(configDir.resolve("easyauth-client"));
     }
 
     public static Path getCredentialsFile() {
-        return credentialsFile;
+        return Vault.credentialsFile();
     }
 
     public static void onJoin() {
@@ -87,10 +82,10 @@ public final class RuleEngine {
             return; // singleplayer/realms
         }
         serverAddress = normalizeAddress(server.ip);
-        store = Credentials.load(credentialsFile);
+        store = Credentials.load(Vault.credentialsFile());
         credentials = store.servers.get(serverAddress);
-        if (credentials != null && credentials.password != null) {
-            LOGGER.warn("Using credentials for {} from {} — this file is stored as plain text", serverAddress, credentialsFile);
+        if (credentials != null && Vault.locked()) {
+            LOGGER.warn("Credential storage is locked; auto-login on {} stays off until it is unlocked in the config screen", serverAddress);
         }
         authPending = store.autoLogin || store.autoRegister;
         authPendingUntil = System.currentTimeMillis() + AUTH_PENDING_WINDOW_MS;
@@ -111,7 +106,7 @@ public final class RuleEngine {
     }
 
     /**
-     * Auto-auth (plan §4, variant A): fires once the login/register command shows up in the
+     * Auto-auth command fallback: fires once the login/register command shows up in the
      * command tree the server pushes after join (see onTick) — detection of an installed auth
      * mod, with no dependency on its messages, locales, or chat. The commands themselves are
      * the configurable templates in {@link Credentials.Store}. A server without a stored
@@ -119,12 +114,16 @@ public final class RuleEngine {
      * back to credentials.json. Global-password servers are not supported.
      */
     private static void sendAuthCommands(boolean hasLogin, boolean hasRegister) {
+        if (Vault.locked()) {
+            LOGGER.info("Skipping auto-auth on {}: credential storage is locked", serverAddress);
+            return;
+        }
         if (credentials == null || credentials.password == null) {
             if (!store.autoRegister || !hasRegister) {
                 return;
             }
             ensureStoredPassword();
-            LOGGER.info("Auto-registering on {}; the password is saved in {}", serverAddress, credentialsFile);
+            LOGGER.info("Auto-registering on {}; the password is saved in {}", serverAddress, Vault.credentialsFile());
             sendResolved(store.registerCommand);
             return;
         }
@@ -137,14 +136,15 @@ public final class RuleEngine {
             sendResolved(store.registerCommand);
         }
         String login = store.loginCommand;
-        if (credentials.totpSecret != null && !credentials.totpSecret.isEmpty() && !login.contains("{otp}")) {
+        String totpSecret = Vault.usable(credentials.totpSecret);
+        if (totpSecret != null && !totpSecret.isEmpty() && !login.contains("{otp}")) {
             login += " {otp}";
         }
         sendResolved(login);
     }
 
     /**
-     * Hello from the server's EasyAuth (packet path, plan §6): supersedes the command fallback.
+     * Hello from the server's EasyAuth (packet path): supersedes the command fallback.
      * The server routes the credentials to register or login by account state itself, and the
      * capability flags let the admin veto auto-auth for compliant clients entirely.
      * Login ladder: passkey (signed one-time challenge) -> session token -> password; a rejected
@@ -161,6 +161,10 @@ public final class RuleEngine {
         helloCanSessionToken = canSessionToken;
         helloCanPasskey = canPasskey;
         helloHasPasskey = hasPasskey;
+        if (Vault.locked()) {
+            LOGGER.info("Skipping auto-auth on {}: credential storage is locked", serverAddress);
+            return;
+        }
         if (authenticated) {
             // Session still valid (or the server skips auth for this player) — nothing to log in
             // with, but a good moment to enroll a passkey for the next join (first key only).
@@ -172,7 +176,7 @@ public final class RuleEngine {
                 return;
             }
             ensureStoredPassword();
-            LOGGER.info("Auto-registering on {} via packet; the password is saved in {}", serverAddress, credentialsFile);
+            LOGGER.info("Auto-registering on {} via packet; the password is saved in {}", serverAddress, Vault.credentialsFile());
             EasyAuthPackets.sendCredentials(credentials.password, null);
             return;
         }
@@ -193,9 +197,12 @@ public final class RuleEngine {
         }
         switch (code) {
             case ClientModProtocol.RESULT_SUCCESS -> {
-                if (sessionToken != null && !sessionToken.isEmpty() && store.useSessionToken) {
+                // No token writes while locked: it could not be encrypted, and the stored
+                // (still-locked) token is dead anyway after this rotation — the password rung
+                // recovers on the next unlocked join.
+                if (sessionToken != null && !sessionToken.isEmpty() && store.useSessionToken && !Vault.locked()) {
                     ensureEntry().sessionToken = sessionToken;
-                    Credentials.save(credentialsFile, store);
+                    Credentials.save(Vault.credentialsFile(), store);
                 }
                 maybeEnrollPasskey();
             }
@@ -203,7 +210,7 @@ public final class RuleEngine {
                 // Rotated by another device or expired — drop it and fall back to the password.
                 if (credentials != null && credentials.sessionToken != null) {
                     credentials.sessionToken = null;
-                    Credentials.save(credentialsFile, store);
+                    Credentials.save(Vault.credentialsFile(), store);
                 }
                 tryPasswordLogin();
             }
@@ -215,7 +222,7 @@ public final class RuleEngine {
                 if (credentials != null && credentials.passkeyPrivate != null) {
                     credentials.passkeyPublic = null;
                     credentials.passkeyPrivate = null;
-                    Credentials.save(credentialsFile, store);
+                    Credentials.save(Vault.credentialsFile(), store);
                 }
                 if (!tryTokenLogin()) {
                     tryPasswordLogin();
@@ -233,12 +240,15 @@ public final class RuleEngine {
 
     private static boolean tryPasskeyLogin(byte[] challenge) {
         if (!autoAuthAllowed() || !helloCanPasskey || !helloHasPasskey || !store.usePasskey
-                || credentials.passkeyPrivate == null || credentials.passkeyPublic == null
                 || challenge == null || challenge.length == 0) {
             return false;
         }
+        String privateKey = Vault.usable(credentials.passkeyPrivate);
+        if (privateKey == null || credentials.passkeyPublic == null) {
+            return false;
+        }
         byte[] publicKey = Passkey.decodePublic(credentials.passkeyPublic);
-        byte[] signature = Passkey.sign(credentials.passkeyPrivate, challenge);
+        byte[] signature = Passkey.sign(privateKey, challenge);
         if (publicKey == null || signature == null) {
             return false;
         }
@@ -248,20 +258,27 @@ public final class RuleEngine {
     }
 
     private static boolean tryTokenLogin() {
-        if (!autoAuthAllowed() || !helloCanSessionToken || !store.useSessionToken
-                || credentials.sessionToken == null || credentials.sessionToken.isEmpty()) {
+        if (!autoAuthAllowed() || !helloCanSessionToken || !store.useSessionToken) {
+            return false;
+        }
+        String token = Vault.usable(credentials.sessionToken);
+        if (token == null || token.isEmpty()) {
             return false;
         }
         LOGGER.info("Logging in on {} with a session token", serverAddress);
-        EasyAuthPackets.sendToken(credentials.sessionToken);
+        EasyAuthPackets.sendToken(token);
         return true;
     }
 
     private static void tryPasswordLogin() {
-        if (!autoAuthAllowed() || !helloCanAutoLogin || credentials.password == null) {
+        if (!autoAuthAllowed() || !helloCanAutoLogin) {
             return;
         }
-        EasyAuthPackets.sendCredentials(credentials.password, Totp.currentCode(credentials.totpSecret));
+        String password = Vault.usable(credentials.password);
+        if (password == null) {
+            return;
+        }
+        EasyAuthPackets.sendCredentials(password, Totp.currentCode(Vault.usable(credentials.totpSecret)));
     }
 
     /**
@@ -271,8 +288,8 @@ public final class RuleEngine {
      * that, so re-arming requires clearing the key in the config screen first.
      */
     private static void maybeEnrollPasskey() {
-        if (!helloCanPasskey || !store.usePasskey) {
-            return;
+        if (!helloCanPasskey || !store.usePasskey || Vault.locked()) {
+            return; // locked: a fresh private key could not be encrypted at rest
         }
         if (credentials != null && credentials.passkeyPrivate != null && credentials.passkeyPublic != null) {
             return;
@@ -284,7 +301,7 @@ public final class RuleEngine {
         Credentials entry = ensureEntry();
         entry.passkeyPublic = pair[0];
         entry.passkeyPrivate = pair[1];
-        Credentials.save(credentialsFile, store);
+        Credentials.save(Vault.credentialsFile(), store);
         byte[] publicKey = Passkey.decodePublic(entry.passkeyPublic);
         if (publicKey == null) {
             return;
@@ -310,7 +327,7 @@ public final class RuleEngine {
                     ? randomPassword()
                     : store.defaultPassword;
         }
-        Credentials.save(credentialsFile, store);
+        Credentials.save(Vault.credentialsFile(), store);
     }
 
     /** First word of a command template, without the leading slash — the detection literal. */
@@ -468,18 +485,20 @@ public final class RuleEngine {
         String out = line
                 .replace("{username}", Minecraft.getInstance().getUser().getName())
                 .replace("{server}", serverAddress);
-        // Never let an unresolved placeholder leak into chat as literal text.
+        // Never let an unresolved placeholder leak into chat as literal text — including a
+        // still-encrypted (locked) value, which Vault.usable() reports as absent.
         if (out.contains("{password}")) {
-            if (credentials == null || credentials.password == null) {
-                LOGGER.warn("Skipping rule line: no password stored for {} in credentials.json", serverAddress);
+            String password = credentials == null ? null : Vault.usable(credentials.password);
+            if (password == null) {
+                LOGGER.warn("Skipping rule line: no usable password for {} (none stored, or storage is locked)", serverAddress);
                 return null;
             }
-            out = out.replace("{password}", credentials.password);
+            out = out.replace("{password}", password);
         }
         if (out.contains("{otp}")) {
-            String code = credentials == null ? null : Totp.currentCode(credentials.totpSecret);
+            String code = credentials == null ? null : Totp.currentCode(Vault.usable(credentials.totpSecret));
             if (code == null) {
-                LOGGER.warn("Skipping rule line: no valid totpSecret stored for {} in credentials.json", serverAddress);
+                LOGGER.warn("Skipping rule line: no usable totpSecret for {} (none stored, invalid, or storage is locked)", serverAddress);
                 return null;
             }
             out = out.replace("{otp}", code);
@@ -500,17 +519,18 @@ public final class RuleEngine {
     }
 
     private static List<ActiveRule> loadRules(String address) {
+        Path rulesFile = Vault.rulesFile();
         RulesFile file;
         try {
-            if (!Files.exists(configFile)) {
-                Files.createDirectories(configFile.getParent());
-                Files.writeString(configFile, "{\n  \"servers\": {}\n}\n");
-                LOGGER.info("Created empty rules config at {}", configFile);
+            if (!Files.exists(rulesFile)) {
+                Files.createDirectories(rulesFile.getParent());
+                Files.writeString(rulesFile, "{\n  \"servers\": {}\n}\n");
+                LOGGER.info("Created empty rules config at {}", rulesFile);
                 return List.of();
             }
-            file = GSON.fromJson(Files.readString(configFile), RulesFile.class);
+            file = GSON.fromJson(Files.readString(rulesFile), RulesFile.class);
         } catch (IOException | JsonParseException e) {
-            LOGGER.warn("Could not read {}: {}", configFile, e.toString());
+            LOGGER.warn("Could not read {}: {}", rulesFile, e.toString());
             return List.of();
         }
         if (file == null || file.servers == null) {

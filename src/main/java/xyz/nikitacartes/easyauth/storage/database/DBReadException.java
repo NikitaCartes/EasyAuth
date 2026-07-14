@@ -1,6 +1,6 @@
 package xyz.nikitacartes.easyauth.storage.database;
 
-/** Брошено, когда чтение БД упало (в отличие от "юзера нет" = null). Заставляет вызывающего fail-close. */
+/** Thrown when a DB read fails (as opposed to "no such user" = null), forcing the caller to fail closed. */
 public class DBReadException extends RuntimeException {
     public DBReadException(String message, Throwable cause) {
         super(message, cause);

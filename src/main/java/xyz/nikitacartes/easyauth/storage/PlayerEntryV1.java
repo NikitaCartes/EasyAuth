@@ -112,8 +112,7 @@ public class PlayerEntryV1 {
 
     /**
      * Whether the login Dialog window is shown to this player on join.
-     * When false, the player gets the chat prompt instead. Boxed so a missing
-     * value in old data deserializes to {@code true}.
+     * When false, the player gets the chat prompt instead.
      */
     @Expose
     @SerializedName("show_login_dialog")
@@ -143,7 +142,7 @@ public class PlayerEntryV1 {
     public String sessionTokenHash = null;
 
     /**
-     * Expiry of the current session token (unix ms). Ignored while {@link #sessionTokenHash} is null.
+     * Expiry of the current session token. Ignored while {@link #sessionTokenHash} is null.
      */
     @Expose
     @SerializedName("session_token_expires")

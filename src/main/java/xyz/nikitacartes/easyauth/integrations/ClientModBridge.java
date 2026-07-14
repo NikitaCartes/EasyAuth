@@ -9,6 +9,27 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 //?}
+//? if fabric {
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
+//? if >=1.20.5 {
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+//?} else {
+/*import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+*///?}
+//? if <1.20.2 {
+/*import net.fabricmc.fabric.api.networking.v1.S2CPlayChannelEvents;
+import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+*///?}
+//?} else {
+/*import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.HandlerThread;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+*///?}
 import xyz.nikitacartes.easyauth.commands.LoginCommand;
 import xyz.nikitacartes.easyauth.commands.RegisterCommand;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -36,19 +57,17 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogLogin;
 
 /**
- * Packet bridge for the EasyAuth Client companion mod (see {@code CLIENT_MOD_PLAN.md} §6).
+ * Packet bridge for the EasyAuth Client companion mod.
  *
  * <p>After join the server sends {@code easyauth:hello} with its capabilities and the player's
  * auth state; the companion replies on {@code easyauth:auth} with the stored credentials and the
  * server routes them to the same handlers as /login and /register (by account state, so the
  * client never has to guess between the two).
  *
- * <p>Works on every supported version. Three networking eras (loader-specific classes are used
- * fully-qualified to avoid per-era import juggling): {@code >=1.20.5} uses the CustomPacketPayload
- * API (Fabric {@code PayloadTypeRegistry.serverboundPlay/clientboundPlay} at 26.1+, the older
- * {@code playC2S/playS2C} names below; NeoForge {@code RegisterPayloadHandlersEvent}); {@code <1.20.5}
- * (Fabric only — NeoForge starts at 1.21) uses the legacy {@code ResourceLocation}+{@code FriendlyByteBuf}
- * channel API. The wire format itself (field order, constants) lives in the shared
+ * <p>Loader-specific classes are used fully-qualified to avoid per-era import juggling:
+ * {@code >=1.20.5} uses the CustomPacketPayload API, {@code <1.20.5} (Fabric only — NeoForge
+ * starts at 1.21) the legacy {@code ResourceLocation}+{@code FriendlyByteBuf} channel API.
+ * The wire format itself (field order, constants) lives in the shared
  * {@link ClientModProtocol}, compiled into both mods, so the two sides cannot drift.
  */
 public final class ClientModBridge {
@@ -133,24 +152,24 @@ public final class ClientModBridge {
      * ponytail: LAN hosts therefore have no packet auth — the command fallback covers them.
      */
     public static void init() {
-        if (initialized || net.fabricmc.loader.api.FabricLoader.getInstance().getEnvironmentType() != net.fabricmc.api.EnvType.SERVER) {
+        if (initialized || FabricLoader.getInstance().getEnvironmentType() != EnvType.SERVER) {
             return;
         }
         //? if >=1.20.5 {
         //? if >=26.1 {
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(AuthPayload.TYPE, AuthPayload.CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(HelloPayload.TYPE, HelloPayload.CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(ResultPayload.TYPE, ResultPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(AuthPayload.TYPE, AuthPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(HelloPayload.TYPE, HelloPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ResultPayload.TYPE, ResultPayload.CODEC);
         //?} else {
-        /*net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playC2S().register(AuthPayload.TYPE, AuthPayload.CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(HelloPayload.TYPE, HelloPayload.CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(ResultPayload.TYPE, ResultPayload.CODEC);*/
+        /*PayloadTypeRegistry.playC2S().register(AuthPayload.TYPE, AuthPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(HelloPayload.TYPE, HelloPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ResultPayload.TYPE, ResultPayload.CODEC);*/
         //?}
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(AuthPayload.TYPE,
+        ServerPlayNetworking.registerGlobalReceiver(AuthPayload.TYPE,
                 (payload, context) -> receive(context.player(), payload.auth()));
         //?} else {
         /*// Legacy channel API: the handler runs off-thread, so read everything, then re-dispatch to the server thread.
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(AUTH_ID,
+        ServerPlayNetworking.registerGlobalReceiver(AUTH_ID,
                 (server, player, handler, buf, sender) -> {
                     ClientModProtocol.Auth auth = ClientModProtocol.Auth.read(buf);
                     server.execute(() -> receive(player, auth));
@@ -162,12 +181,12 @@ public final class ClientModBridge {
         // companion. Resend it when the late minecraft:register arrives, or auto-login never
         // starts on these versions (the client suppresses its command fallback while waiting).
         // S2CPlayChannelEvents = server-side event for the client's receivable-channel announce.
-        net.fabricmc.fabric.api.networking.v1.S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) -> {
+        S2CPlayChannelEvents.REGISTER.register((handler, sender, server, channels) -> {
             if (channels.contains(HELLO_ID)) {
                 server.execute(() -> {
                     ServerPlayer player = handler.player;
                     if (helloPending.remove(player.getUUID())) {
-                        sendHello(player, xyz.nikitacartes.easyauth.event.AuthEventHandler.isEffectivelyAuthenticated(player));
+                        sendHello(player, AuthEventHandler.isEffectivelyAuthenticated(player));
                     }
                 });
             }
@@ -177,23 +196,19 @@ public final class ClientModBridge {
         LogInfo("EasyAuth Client packet channels registered (" + ClientModProtocol.HELLO_CHANNEL + " / " + ClientModProtocol.AUTH_CHANNEL + ")");
     }
     //?} else {
-    /*// NeoForge registers through the mod bus (onRegisterPayloads); nothing to do at mod init.
-    public static void init() {
-    }
-
-    public static void onRegisterPayloads(net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {
+    /*public static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         //? if >=1.21.9 {
-        /^if (initialized || net.neoforged.fml.loading.FMLEnvironment.getDist() != net.neoforged.api.distmarker.Dist.DEDICATED_SERVER) {
+        /^if (initialized || FMLEnvironment.getDist() != Dist.DEDICATED_SERVER) {
             return;
         }
         ^///?} else {
-        if (initialized || net.neoforged.fml.loading.FMLEnvironment.dist != net.neoforged.api.distmarker.Dist.DEDICATED_SERVER) {
+        if (initialized || FMLEnvironment.dist != Dist.DEDICATED_SERVER) {
             return;
         }
         //?}
         // optional() so vanilla / non-companion clients are not rejected for lacking the channel.
-        net.neoforged.neoforge.network.registration.PayloadRegistrar registrar = event.registrar(String.valueOf(ClientModProtocol.PROTOCOL_VERSION))
-                .optional().executesOn(net.neoforged.neoforge.network.registration.HandlerThread.MAIN);
+        PayloadRegistrar registrar = event.registrar(String.valueOf(ClientModProtocol.PROTOCOL_VERSION))
+                .optional().executesOn(HandlerThread.MAIN);
         // 3-arg (no-op handler) works on every NeoForge target; the 2-arg send-only overload is 1.21.9+.
         registrar.playToClient(HelloPayload.TYPE, HelloPayload.CODEC, (payload, context) -> {});
         registrar.playToClient(ResultPayload.TYPE, ResultPayload.CODEC, (payload, context) -> {});
@@ -220,9 +235,9 @@ public final class ClientModBridge {
     private static boolean hasCompanion(ServerPlayer player) {
         //? if fabric {
         //? if >=1.20.5 {
-        return net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, HelloPayload.TYPE);
+        return ServerPlayNetworking.canSend(player, HelloPayload.TYPE);
         //?} else {
-        /*return net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, HELLO_ID);*/
+        /*return ServerPlayNetworking.canSend(player, HELLO_ID);*/
         //?}
         //?} else {
         /*return player.connection.hasChannel(HelloPayload.TYPE);*/
@@ -259,14 +274,14 @@ public final class ClientModBridge {
                 hasPasskey, challenge);
         //? if >=1.20.5 {
         //? if fabric {
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new HelloPayload(hello));
+        ServerPlayNetworking.send(player, new HelloPayload(hello));
         //?} else {
-        /*net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new HelloPayload(hello));*/
+        /*PacketDistributor.sendToPlayer(player, new HelloPayload(hello));*/
         //?}
         //?} else {
-        /*FriendlyByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+        /*FriendlyByteBuf buf = PacketByteBufs.create();
         hello.write(buf);
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, HELLO_ID, buf);*/
+        ServerPlayNetworking.send(player, HELLO_ID, buf);*/
         //?}
     }
 
@@ -277,14 +292,14 @@ public final class ClientModBridge {
         ClientModProtocol.Result result = new ClientModProtocol.Result(code, sessionToken);
         //? if >=1.20.5 {
         //? if fabric {
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new ResultPayload(result));
+        ServerPlayNetworking.send(player, new ResultPayload(result));
         //?} else {
-        /*net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, new ResultPayload(result));*/
+        /*PacketDistributor.sendToPlayer(player, new ResultPayload(result));*/
         //?}
         //?} else {
-        /*FriendlyByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+        /*FriendlyByteBuf buf = PacketByteBufs.create();
         result.write(buf);
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, RESULT_ID, buf);*/
+        ServerPlayNetworking.send(player, RESULT_ID, buf);*/
         //?}
     }
 

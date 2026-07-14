@@ -63,10 +63,9 @@ public class IpLimitManager {
 
         // Short-circuit for already registered players — they should always be allowed to log in regardless of IP limit
         if (playerData == null) {
-             try {
+            try {
                 playerData = DB.getUserData(currentUsername);
             } catch (RuntimeException e) {
-                // if the DB read fails, just treat as unregistered and continue.
                 LogDebug("IP limit: DB read failed for " + currentUsername + ", treating as unregistered");
             }
         }

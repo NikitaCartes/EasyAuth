@@ -116,11 +116,10 @@ public class DialogHandler {
         }
     }
 
-    private static boolean open(ServerPlayer player, Consumer<ServerPlayer> opener) {
+    private static void open(ServerPlayer player, Consumer<ServerPlayer> opener) {
         if (((PlayerAuth) player).easyAuth$isAuthenticated()) {
             opener.accept(player);
         }
-        return true;
     }
 
     private static void login(ServerPlayer player, CompoundTag data) {

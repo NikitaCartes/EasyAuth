@@ -1,5 +1,8 @@
 package xyz.nikitacartes.easyauth.client.screen;
 
+//? if <1.21.11 {
+/*import net.minecraft.client.Minecraft;
+*///?}
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
@@ -11,6 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import xyz.nikitacartes.easyauth.client.rules.Credentials;
+import xyz.nikitacartes.easyauth.client.rules.Vault;
 
 /** Global auto-auth settings editor; commits into the shared {@link Credentials.Store} on close. */
 public class GlobalSettingsScreen extends Screen {
@@ -26,6 +30,9 @@ public class GlobalSettingsScreen extends Screen {
     private EditBox defaultPasswordBox;
     private EditBox loginCommandBox;
     private EditBox registerCommandBox;
+    // Still-encrypted (locked) original: shown as an empty box with a "(locked)" hint and
+    // written back on commit unless the player types a replacement.
+    private String lockedDefaultPassword;
 
     public GlobalSettingsScreen(ConfigScreen parent, Credentials.Store store) {
         super(Component.translatable("easyauthclient.config.globalSettings"));
@@ -41,8 +48,7 @@ public class GlobalSettingsScreen extends Screen {
         //?} else {
         /*layout.addToHeader(new StringWidget(title, font));*/
         //?}
-        // GridLayout (identical API 1.19.4→26.x) instead of LinearLayout (no vertical()/horizontal()
-        // before 1.20.2). Single column: each addChild(row, 0) stacks vertically.
+        // GridLayout, not LinearLayout: same API on every target (LinearLayout lacks vertical() before 1.20.2).
         GridLayout column = new GridLayout().spacing(4);
 
         GridLayout flagRow = new GridLayout().spacing(8);
@@ -63,11 +69,14 @@ public class GlobalSettingsScreen extends Screen {
         keyRow.addChild(usePasskeyBox, 0, 1);
         column.addChild(keyRow, 1, 0);
 
+        lockedDefaultPassword = Vault.isEncrypted(store.defaultPassword) ? store.defaultPassword : null;
         defaultPasswordBox = editBox(Component.translatable("easyauthclient.config.defaultPassword"));
         defaultPasswordBox.setMaxLength(512);
-        defaultPasswordBox.setHint(Component.translatable("easyauthclient.config.defaultPassword"));
+        defaultPasswordBox.setHint(Component.translatable(lockedDefaultPassword != null
+                ? "easyauthclient.config.locked"
+                : "easyauthclient.config.defaultPassword"));
         defaultPasswordBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.defaultPassword.tooltip")));
-        if (store.defaultPassword != null) {
+        if (store.defaultPassword != null && lockedDefaultPassword == null) {
             defaultPasswordBox.setValue(store.defaultPassword);
         }
         column.addChild(defaultPasswordBox, 2, 0);
@@ -85,6 +94,11 @@ public class GlobalSettingsScreen extends Screen {
         registerCommandBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.registerCommand.tooltip")));
         registerCommandBox.setValue(store.registerCommand == null ? "" : store.registerCommand);
         column.addChild(registerCommandBox, 4, 0);
+
+        column.addChild(Button.builder(Component.translatable("easyauthclient.storage.title"), button -> {
+            commit();
+            ConfigScreen.open(new StorageScreen(this, parent, store));
+        }).width(ROW_WIDTH).build(), 5, 0);
 
         layout.addToContents(column);
         layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(200).build());
@@ -114,7 +128,10 @@ public class GlobalSettingsScreen extends Screen {
         store.autoRegister = autoRegisterBox.selected();
         store.useSessionToken = useSessionTokenBox.selected();
         store.usePasskey = usePasskeyBox.selected();
-        store.defaultPassword = defaultPasswordBox.getValue();
+        // An empty box means "keep" for a locked value (there is nothing to redisplay).
+        store.defaultPassword = defaultPasswordBox.getValue().isEmpty() && lockedDefaultPassword != null
+                ? lockedDefaultPassword
+                : defaultPasswordBox.getValue();
         store.loginCommand = loginCommandBox.getValue();
         store.registerCommand = registerCommandBox.getValue();
     }
@@ -127,7 +144,7 @@ public class GlobalSettingsScreen extends Screen {
     }
     //?} else {
     /*@Override
-    public void resize(net.minecraft.client.Minecraft minecraft, int width, int height) {
+    public void resize(Minecraft minecraft, int width, int height) {
         commit();
         super.resize(minecraft, width, height);
     }

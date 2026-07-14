@@ -20,6 +20,7 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 //?}
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 //? if >=26.1 {
 /^import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -33,6 +34,7 @@ import xyz.nikitacartes.easyauth.commands.LoginCommand;
 import xyz.nikitacartes.easyauth.commands.LogoutCommand;
 import xyz.nikitacartes.easyauth.commands.RegisterCommand;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.integrations.ClientModBridge;
 
 import static xyz.nikitacartes.easyauth.EasyAuth.langConfig;
 import static xyz.nikitacartes.easyauth.EasyAuth.loadConfigs;
@@ -56,8 +58,7 @@ public class EasyAuthNeoForge {
         // Mod-bus events (setup, registry)
         modBus.addListener(this::onCommonSetup);
         // Companion-mod packet channels (all NeoForge targets are >=1.21, which has the payload API).
-        modBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) ->
-                xyz.nikitacartes.easyauth.integrations.ClientModBridge.onRegisterPayloads(event));
+        modBus.addListener(ClientModBridge::onRegisterPayloads);
 
         // Game-bus events (commands, world, players)
         IEventBus gameBus = NeoForge.EVENT_BUS;

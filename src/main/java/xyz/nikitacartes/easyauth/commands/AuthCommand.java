@@ -748,6 +748,8 @@ public class AuthCommand {
         return 1;
     }
 
+    private static final DateTimeFormatter INFO_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     /**
      * Retrieves information about a player from the database.
      *
@@ -755,8 +757,6 @@ public class AuthCommand {
      * @param username username of the player to get information for
      * @return 0
      */
-    private static final DateTimeFormatter INFO_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
     public static int getPlayerInfo(CommandSourceStack source, String username) {
         runDbTask(source, () -> {
             PlayerEntryV1 playerData = DB.getUserData(username);

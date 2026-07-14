@@ -126,6 +126,8 @@ public class AuthDialogs {
         List<Input> inputs = new ArrayList<>();
         if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
             inputs.add(new Input("global_password", passwordField(langConfig.dialog.register.globalPassword.get())));
+        } else if (config.requireRegistrationCode) {
+            inputs.add(new Input("reg_code", new TextInput(WIDTH, langConfig.dialog.register.code.get(), true, "", 32, Optional.empty())));
         }
         inputs.add(new Input("password", passwordField(langConfig.dialog.register.password.get())));
         inputs.add(new Input("password_confirm", passwordField(langConfig.dialog.register.passwordConfirm.get())));

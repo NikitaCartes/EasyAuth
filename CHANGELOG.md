@@ -54,6 +54,10 @@ The jar is now universal: installed on a client, the same file works as **EasyAu
 - `/auth accounts <username>` to list every registered account that shares a player's last-login IP.
 - `/auth backup` to write a timestamped SQLite database snapshot on demand (SQLite backend only; snapshots go to a `backups` folder next to the database file and are never auto-deleted)
   - New `backup-on-start` and `backup-on-stop` options in `storage.conf` (default `false`) to also snapshot the SQLite database automatically when the server starts or stops
+- Registration codes: gate registration behind admin-issued codes (`/register <code> <password> <password>`) when the new `require-registration-code` option in `main.conf` is enabled. [#234](https://github.com/NikitaCartes/EasyAuth/issues/234)
+  - `/auth regcode new [<max-uses>] [<duration>] [<alias>]` mints a code with an optional use limit (`0` = unlimited), optional expiry (`30m`/`12h`/`7d`, a bare number is days, `0` = never) and optional alias
+  - `/auth regcode list` shows each code's usage, expiry and creator; `/auth regcode del <code|alias>` removes one; `/auth regcode players <code|alias>` lists everyone who registered with it
+  - Each account records which code it registered with (shown in `/auth getPlayerInfo`); codes are stored in `config/EasyAuth/regcodes.json`
 - Unofficial [AuthMeReloaded](https://github.com/AuthMe/AuthMeReloaded) proxy-bridge support: behind a Velocity proxy with an AuthMe plugin, premium players auto-login passwordless while offline players keep using passwords. [Fabric]
   - New config file `proxy.conf` (`enabled`, `proxy-shared-secret`); the `/premium` command is only registered when enabled
   - `/premium enable|disable <password>` for a premium player to opt into (or out of) passwordless auto-login

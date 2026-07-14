@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.dialog.AuthDialogs;
 import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
+import xyz.nikitacartes.easyauth.storage.RegCode;
 import xyz.nikitacartes.easyauth.storage.database.DBApiException;
 import xyz.nikitacartes.easyauth.utils.AuthHelper;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
@@ -31,12 +32,15 @@ import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
@@ -279,6 +283,34 @@ public class AuthCommand {
                 .then(literal("backup")
                         .requires(EasyAuthPermissions.require("easyauth.commands.auth.backup", 4))
                         .executes(ctx -> backupDatabase(ctx.getSource()))
+                )
+                .then(literal("regcode")
+                        .requires(EasyAuthPermissions.require("easyauth.commands.auth.regcode", 3))
+                        .then(literal("new")
+                                .executes(ctx -> createRegCode(ctx.getSource(), 0, null, null))
+                                .then(argument("maxUses", integer(0))
+                                        .executes(ctx -> createRegCode(ctx.getSource(), getInteger(ctx, "maxUses"), null, null))
+                                        .then(argument("duration", word())
+                                                .executes(ctx -> createRegCode(ctx.getSource(), getInteger(ctx, "maxUses"), getString(ctx, "duration"), null))
+                                                .then(argument("alias", word())
+                                                        .executes(ctx -> createRegCode(ctx.getSource(), getInteger(ctx, "maxUses"), getString(ctx, "duration"), getString(ctx, "alias")))
+                                                )
+                                        )
+                                )
+                        )
+                        .then(literal("del")
+                                .then(argument("code", word())
+                                        .executes(ctx -> deleteRegCode(ctx.getSource(), getString(ctx, "code")))
+                                )
+                        )
+                        .then(literal("list")
+                                .executes(ctx -> listRegCodes(ctx.getSource()))
+                        )
+                        .then(literal("players")
+                                .then(argument("code", word())
+                                        .executes(ctx -> regCodePlayers(ctx.getSource(), getString(ctx, "code")))
+                                )
+                        )
                 )
         );
     }
@@ -777,6 +809,9 @@ public class AuthCommand {
             if (playerData.forcedUuid != null) {
                 message.append(infoLine("Forced UUID", playerData.forcedUuid));
             }
+            if (playerData.registeredWithCode != null) {
+                message.append(infoLine("Registration code", playerData.registeredWithCode));
+            }
             source.sendSystemMessage(message);
         });
         return 1;
@@ -1030,5 +1065,126 @@ public class AuthCommand {
             }
         });
         return 1;
+    }
+
+    /**
+     * Creates a new registration code. {@code maxUses} of 0 means unlimited; {@code duration} is a
+     * span like {@code 30m}/{@code 12h}/{@code 7d} (a bare number is days, {@code 0}/{@code never}/
+     * null means no expiry); {@code alias} may be null.
+     */
+    public static int createRegCode(CommandSourceStack source, int maxUses, String duration, String alias) {
+        long seconds = parseDurationSeconds(duration);
+        if (seconds < 0) {
+            langConfig.admin.regcodeInvalidDuration.send(source, duration);
+            return 0;
+        }
+        ZonedDateTime expiresAt = seconds > 0 ? ZonedDateTime.now().plusSeconds(seconds) : null;
+        RegCode code = regCodes.create(alias, maxUses, expiresAt, source.getTextName());
+        langConfig.admin.regcodeCreated.send(source, code.code);
+        source.sendSystemMessage(regCodeLine(code));
+        LogInfo("Registration code " + code.code + " created by " + source.getTextName());
+        return 1;
+    }
+
+    /**
+     * Parses a duration like {@code 30m}/{@code 12h}/{@code 7d}/{@code 3600s} into seconds.
+     * A bare number is interpreted as days; {@code 0}, {@code never}, blank and null mean no expiry
+     * (returns 0). Returns -1 for anything unparseable.
+     */
+    private static long parseDurationSeconds(String input) {
+        if (input == null || input.isBlank() || input.equals("0") || input.equalsIgnoreCase("never")) {
+            return 0;
+        }
+        char unit = input.charAt(input.length() - 1);
+        String number = Character.isDigit(unit) ? input : input.substring(0, input.length() - 1);
+        long n;
+        try {
+            n = Long.parseLong(number);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+        if (n < 0) {
+            return -1;
+        }
+        return switch (Character.toLowerCase(unit)) {
+            case 's' -> n;
+            case 'm' -> n * 60;
+            case 'h' -> n * 3600;
+            case 'd' -> n * 86400;
+            default -> Character.isDigit(unit) ? n * 86400 : -1; // bare number = days
+        };
+    }
+
+    /** Deletes a registration code by code or alias. */
+    public static int deleteRegCode(CommandSourceStack source, String codeOrAlias) {
+        RegCode removed = regCodes.delete(codeOrAlias);
+        if (removed == null) {
+            langConfig.admin.regcodeNotFound.send(source, codeOrAlias);
+            return 0;
+        }
+        langConfig.admin.regcodeDeleted.send(source, removed.code);
+        return 1;
+    }
+
+    /** Lists every registration code with its usage, expiry and creator. */
+    public static int listRegCodes(CommandSourceStack source) {
+        List<RegCode> all = regCodes.list();
+        if (all.isEmpty()) {
+            langConfig.admin.regcodeListEmpty.send(source);
+            return 1;
+        }
+        MutableComponent message = langConfig.admin.regcodeListHeader.get(all.size());
+        for (RegCode code : all) {
+            message.append(Component.literal("\n")).append(regCodeLine(code));
+        }
+        source.sendSystemMessage(message);
+        return 1;
+    }
+
+    /** Lists every player who registered with the given code (or alias) — a scan over all entries. */
+    public static int regCodePlayers(CommandSourceStack source, String codeOrAlias) {
+        runDbTask(source, () -> {
+            String code = regCodes.resolveToCode(codeOrAlias);
+            List<String> players = new ArrayList<>();
+            for (PlayerEntryV1 entry : DB.getAllData().values()) {
+                if (code.equalsIgnoreCase(entry.registeredWithCode)) {
+                    players.add(entry.username);
+                }
+            }
+            if (players.isEmpty()) {
+                langConfig.admin.regcodePlayersEmpty.send(source, code);
+                return;
+            }
+            MutableComponent message = langConfig.admin.regcodePlayersHeader.get(code, players.size());
+            for (int i = 0; i < players.size(); i++) {
+                message.append(withCopy(Component.literal(players.get(i)).withStyle(ChatFormatting.YELLOW), players.get(i)));
+                if (i < players.size() - 1) {
+                    message.append(Component.literal(", ").withStyle(ChatFormatting.GRAY));
+                }
+            }
+            source.sendSystemMessage(message);
+        });
+        return 1;
+    }
+
+    // One detail line for a registration code: clickable code, then alias/uses/expiry/creator.
+    private static MutableComponent regCodeLine(RegCode code) {
+        String uses = code.maxUses == 0 ? code.uses + "/∞" : code.uses + "/" + code.maxUses;
+        String expiry = code.expiresAt == null ? "never" : code.expiresAt.format(INFO_DATE_FORMAT);
+        MutableComponent line = withCopy(Component.literal(code.code).withStyle(ChatFormatting.YELLOW), code.code);
+        if (code.alias != null) {
+            line.append(Component.literal(" (" + code.alias + ")").withStyle(ChatFormatting.GRAY));
+        }
+        line.append(Component.literal(" §8— §7uses §f" + uses + " §8· §7expires §f" + expiry + " §8· §7by §f" + code.createdBy));
+        return line;
+    }
+
+    // Applies a copy-to-clipboard click event, bridging the ClickEvent API change at 1.21.5.
+    private static MutableComponent withCopy(MutableComponent component, String value) {
+        //? if >= 1.21.5 {
+        return component.setStyle(Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(value)));
+        //?} else {
+        /*return component.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, value)));
+        *///?}
     }
 }

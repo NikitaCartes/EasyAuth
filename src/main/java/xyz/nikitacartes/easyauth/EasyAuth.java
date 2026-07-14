@@ -7,6 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.commands.*;
 import xyz.nikitacartes.easyauth.config.*;
+import xyz.nikitacartes.easyauth.storage.RegCodeStore;
 import xyz.nikitacartes.easyauth.storage.database.*;
 import xyz.nikitacartes.easyauth.integrations.LuckPermsIntegration;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
@@ -47,6 +48,10 @@ public class EasyAuth {
     public static StorageConfigV1 storageConfig;
     public static DialogConfigV1 dialogConfig;
     public static ProxyConfigV1 proxyConfig;
+
+    // Registration codes (config/EasyAuth/regcodes.json). Not a versioned config file — plain
+    // runtime data mutated by /auth regcode, so it lives outside the ConfigTemplate machinery.
+    public static RegCodeStore regCodes;
 
 
     public static void loadDatabase() {
@@ -136,6 +141,8 @@ public class EasyAuth {
     }
 
     public static void loadConfigs() {
+        regCodes = RegCodeStore.load();
+
         int configVersion = VersionConfig.load().configVersion;
 
         if (configVersion == -1) {

@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import xyz.nikitacartes.easyauth.integrations.ClientModBridge;
 import xyz.nikitacartes.easyauth.integrations.EasyAuthPermissions;
 import xyz.nikitacartes.easyauth.storage.PlayerEntryV1;
+import xyz.nikitacartes.easyauth.storage.RegCodeStore;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import xyz.nikitacartes.easyauth.utils.StoneCutterUtils;
 import xyz.nikitacartes.easyauth.utils.IpLimitManager;
@@ -58,6 +59,23 @@ public class RegisterCommand {
                         langConfig.password.enter.send(ctx.getSource());
                         return 0;
                     }));
+        } else if (config.requireRegistrationCode) {
+            return dispatcher.register(literal("register")
+                    .requires(EasyAuthPermissions.require("easyauth.commands.register", true))
+                    .then(argument("code", string())
+                            .then(argument("password", string())
+                                    .then(argument("passwordAgain", string())
+                                            .executes(ctx -> registerWithCode(ctx.getSource(),
+                                                    getString(ctx, "code"),
+                                                    getString(ctx, "password"),
+                                                    getString(ctx, "passwordAgain")))
+                                    )
+                            )
+                    )
+                    .executes(ctx -> {
+                        langConfig.registration.codeRequired.send(ctx.getSource());
+                        return 0;
+                    }));
         } else {
             return dispatcher.register(literal("register")
                     .requires(EasyAuthPermissions.require("easyauth.commands.register", true))
@@ -73,6 +91,40 @@ public class RegisterCommand {
                         return 0;
                     }));
         }
+    }
+
+    /**
+     * Registration guarded by a registration code (see {@link MainConfigV1#requireRegistrationCode}).
+     * The code is validated up front so a bad code is rejected before the player is registered;
+     * the actual use is consumed atomically only once registration succeeds (in {@link #register}).
+     */
+    public static int registerWithCode(CommandSourceStack source, String code, String pass1, String pass2) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        PlayerAuth playerAuth = (PlayerAuth) player;
+
+        if (playerAuth.easyAuth$isAuthenticated()) {
+            langConfig.session.alreadyAuthenticated.send(source);
+            return 0;
+        }
+
+        switch (regCodes.check(code)) {
+            case NOT_FOUND -> {
+                langConfig.registration.codeInvalid.send(source);
+                return 0;
+            }
+            case EXPIRED -> {
+                langConfig.registration.codeExpired.send(source);
+                return 0;
+            }
+            case EXHAUSTED -> {
+                langConfig.registration.codeExhausted.send(source);
+                return 0;
+            }
+            case OK -> {
+                // fall through to registration
+            }
+        }
+        return doRegister(source, pass1, pass2, code);
     }
 
     public static int register(CommandSourceStack source, String globalPassword, String pass1, String pass2) throws CommandSyntaxException {
@@ -107,8 +159,13 @@ public class RegisterCommand {
         return 0;
     }
 
-    // Method called for hashing the password & writing to DB
     public static int register(CommandSourceStack source, String pass1, String pass2) throws CommandSyntaxException {
+        return doRegister(source, pass1, pass2, null);
+    }
+
+    // Method called for hashing the password & writing to DB. regCode is the registration code the
+    // player redeemed, or null for a normal (non-code) registration.
+    private static int doRegister(CommandSourceStack source, String pass1, String pass2, String regCode) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         PlayerAuth playerAuth = (PlayerAuth) player;
 
@@ -169,12 +226,20 @@ public class RegisterCommand {
             playerData.registrationDate = ZonedDateTime.now();
             playerData.lastIp = playerAuth.easyAuth$getIpAddress();
             playerData.lastAuthenticatedDate = ZonedDateTime.now();
+            playerData.registeredWithCode = regCode;
             playerAuth.easyAuth$setPlayerEntryV1(playerData);
 
             // Synchronous write with result (we're already in THREADPOOL): if it fails, revoke access.
             if (!DB.updateUserData(playerData)) {
                 revokeRegistration(player, playerAuth, source);
                 return;
+            }
+
+            // Consume the code only now that the account is persisted. The up-front check() already
+            // rejected bad codes; a benign off-by-one is possible if two players redeem the last use
+            // at the exact same time — acceptable for an admin-issued alt limiter.
+            if (regCode != null && regCodes.redeem(regCode) != RegCodeStore.Status.OK) {
+                LogRegister("Registration code " + regCode + " was exhausted concurrently while " + username + " registered");
             }
 
             // Invalidate IP cache after registration

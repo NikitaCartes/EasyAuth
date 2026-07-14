@@ -158,6 +158,15 @@ public class PlayerEntryV1 {
 
     public static final int MAX_PASSKEYS = 5;
 
+    /**
+     * The registration code this player used to register, or {@code null} if none.
+     * Set once at registration; enables {@code /auth regcode players <code>} to list everyone
+     * who signed up with a given code (a scan over all entries).
+     */
+    @Expose
+    @SerializedName("registered_with_code")
+    public String registeredWithCode = null;
+
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public PlayerEntryV1(String username, String usernameLowerCase, String uuid, String json) {
@@ -184,6 +193,7 @@ public class PlayerEntryV1 {
         this.sessionTokenHash = entry.sessionTokenHash;
         this.sessionTokenExpires = entry.sessionTokenExpires == null ? startOfTime : entry.sessionTokenExpires;
         this.passkeys = entry.passkeys == null ? new ArrayList<>() : entry.passkeys;
+        this.registeredWithCode = entry.registeredWithCode;
     }
 
     /** True if two-factor authentication is active and a code must be supplied at login. */
@@ -284,6 +294,7 @@ public class PlayerEntryV1 {
         target.sessionTokenHash = this.sessionTokenHash;
         target.sessionTokenExpires = this.sessionTokenExpires;
         target.passkeys = this.passkeys == null ? new ArrayList<>() : new ArrayList<>(this.passkeys);
+        target.registeredWithCode = this.registeredWithCode;
     }
 
     public String toJson() {

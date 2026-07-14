@@ -70,6 +70,15 @@ public class MainConfigV1 extends ConfigTemplate {
     public boolean singleUseGlobalPassword = false;
 
     @Comment("""
+
+            Require a registration code to register: /register <code> <password> <password>.
+            Codes are managed with /auth regcode new/del/list/players, carry a use limit and an
+            optional expiry, and each registration records which code it used.
+            Ignored while single-use-global-password is on (that gate takes precedence).
+            For more information, see https://github.com/NikitaCartes/EasyAuth/wiki/Registration-codes""")
+    public boolean requireRegistrationCode = false;
+
+    @Comment("""
             Whether to teleport player to chosen location when joining (to hide original player coordinates).""")
     public boolean hidePlayerCoords = false;
 

@@ -259,6 +259,10 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText alreadyRegistered = new TranslatableText("registration.alreadyRegistered");
         public TranslatableText success = new TranslatableText("registration.success");
         public TranslatableText notRegistered = new TranslatableText("registration.notRegistered");
+        public TranslatableText codeRequired = new TranslatableText("registration.codeRequired");
+        public TranslatableText codeInvalid = new TranslatableText("registration.codeInvalid");
+        public TranslatableText codeExpired = new TranslatableText("registration.codeExpired");
+        public TranslatableText codeExhausted = new TranslatableText("registration.codeExhausted");
     }
 
     @ConfigSerializable
@@ -336,6 +340,14 @@ public class LangConfigV1 extends ConfigTemplate {
         public TranslatableText accountsNoIp = new TranslatableText("admin.accountsNoIp");
         public TranslatableText backupSuccess = new TranslatableText("admin.backupSuccess");
         public TranslatableText backupUnsupported = new TranslatableText("admin.backupUnsupported");
+        public TranslatableText regcodeCreated = new TranslatableText("admin.regcodeCreated");
+        public TranslatableText regcodeInvalidDuration = new TranslatableText("admin.regcodeInvalidDuration");
+        public TranslatableText regcodeDeleted = new TranslatableText("admin.regcodeDeleted");
+        public TranslatableText regcodeNotFound = new TranslatableText("admin.regcodeNotFound");
+        public TranslatableText regcodeListHeader = new TranslatableText("admin.regcodeListHeader");
+        public TranslatableText regcodeListEmpty = new TranslatableText("admin.regcodeListEmpty");
+        public TranslatableText regcodePlayersHeader = new TranslatableText("admin.regcodePlayersHeader");
+        public TranslatableText regcodePlayersEmpty = new TranslatableText("admin.regcodePlayersEmpty");
     }
 
     @ConfigSerializable
@@ -391,6 +403,7 @@ public class LangConfigV1 extends ConfigTemplate {
             public TranslatableText password = new TranslatableText("dialog.register.password");
             public TranslatableText passwordConfirm = new TranslatableText("dialog.register.passwordConfirm");
             public TranslatableText globalPassword = new TranslatableText("dialog.register.globalPassword");
+            public TranslatableText code = new TranslatableText("dialog.register.code");
             public TranslatableText submit = new TranslatableText("dialog.register.submit");
         }
 

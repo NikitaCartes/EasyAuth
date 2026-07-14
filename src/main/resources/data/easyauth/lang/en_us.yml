@@ -35,6 +35,10 @@ text:
       alreadyRegistered: "§6This account name is already registered!"
       success: "§aYou are now authenticated."
       notRegistered: "§cThis player is not registered!"
+      codeRequired: "§6Use /register <code> <password> <password> to claim this account."
+      codeInvalid: "§4Invalid or unknown registration code."
+      codeExpired: "§4This registration code has expired."
+      codeExhausted: "§4This registration code has reached its use limit."
     # Account
     account:
       cannotUnregister: "§cYou cannot unregister this account!"
@@ -98,6 +102,14 @@ text:
       accountsNoIp: "§7No recorded IP for player §e%s§7."
       backupSuccess: "§aDatabase backed up to §e%s§a."
       backupUnsupported: "§eBackup is built in only for the SQLite backend. Back up MySQL, PostgreSQL or MongoDB with their own tooling (mysqldump, pg_dump, mongodump)."
+      regcodeCreated: "§aRegistration code created: §e%s"
+      regcodeInvalidDuration: "§cInvalid duration §e%s§c. Use e.g. 30m, 12h, 7d, or 0 for no expiry."
+      regcodeDeleted: "§aRegistration code §e%s §ahas been deleted."
+      regcodeNotFound: "§cNo registration code matching §e%s§c."
+      regcodeListHeader: "§6Registration codes (§e%d§6):"
+      regcodeListEmpty: "§7No registration codes exist. Create one with /auth regcode new."
+      regcodePlayersHeader: "§6Players registered with §e%s §6(§e%d§6):\n"
+      regcodePlayersEmpty: "§7No players have registered with §e%s§7."
     # Error
     error:
       unknown: "§4An unknown error has occurred."
@@ -131,6 +143,7 @@ text:
         password: "Password"
         passwordConfirm: "Repeat password"
         globalPassword: "Server password"
+        code: "Registration code"
         submit: "Register"
       changePassword:
         title: "Change password"

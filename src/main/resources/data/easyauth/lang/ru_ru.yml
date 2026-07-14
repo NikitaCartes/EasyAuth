@@ -35,6 +35,10 @@ text:
       alreadyRegistered: "§6Этот аккаунт уже зарегистрирован!"
       success: "§aВы успешно авторизованы."
       notRegistered: "§cЭтот игрок не зарегистрирован!"
+      codeRequired: "§6Введите /register <код> <пароль> <пароль> для регистрации."
+      codeInvalid: "§4Неверный или неизвестный код регистрации."
+      codeExpired: "§4Срок действия этого кода регистрации истёк."
+      codeExhausted: "§4Этот код регистрации исчерпал лимит использований."
     # Account
     account:
       cannotUnregister: "§cВы не можете удалить этот аккаунт!"
@@ -98,6 +102,14 @@ text:
       accountsNoIp: "§7Для игрока §e%s §7нет записанного IP."
       backupSuccess: "§aБаза данных сохранена в §e%s§a."
       backupUnsupported: "§eРезервное копирование встроено только для SQLite. Базы MySQL, PostgreSQL или MongoDB сохраняйте их собственными средствами (mysqldump, pg_dump, mongodump)."
+      regcodeCreated: "§aКод регистрации создан: §e%s"
+      regcodeInvalidDuration: "§cНеверная длительность §e%s§c. Пример: 30m, 12h, 7d или 0 для бессрочного."
+      regcodeDeleted: "§aКод регистрации §e%s §aудалён."
+      regcodeNotFound: "§cКод регистрации §e%s §cне найден."
+      regcodeListHeader: "§6Коды регистрации (§e%d§6):"
+      regcodeListEmpty: "§7Кодов регистрации нет. Создайте командой /auth regcode new."
+      regcodePlayersHeader: "§6Игроки, зарегистрированные по коду §e%s §6(§e%d§6):\n"
+      regcodePlayersEmpty: "§7По коду §e%s §7никто не зарегистрировался."
     # Error
     error:
       unknown: "§4Произошла неизвестная ошибка."
@@ -131,6 +143,7 @@ text:
         password: "Пароль"
         passwordConfirm: "Повторите пароль"
         globalPassword: "Пароль сервера"
+        code: "Код регистрации"
         submit: "Зарегистрироваться"
       changePassword:
         title: "Смена пароля"

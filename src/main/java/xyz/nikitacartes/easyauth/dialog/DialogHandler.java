@@ -204,6 +204,8 @@ public class DialogHandler {
         try {
             if (config.enableGlobalPassword && config.singleUseGlobalPassword) {
                 RegisterCommand.register(source, data.getStringOr("global_password", ""), password, confirm);
+            } else if (config.requireRegistrationCode) {
+                RegisterCommand.registerWithCode(source, data.getStringOr("reg_code", ""), password, confirm);
             } else {
                 RegisterCommand.register(source, password, confirm);
             }

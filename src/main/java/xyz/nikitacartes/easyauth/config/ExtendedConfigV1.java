@@ -207,9 +207,9 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     public long authenticationPromptInterval = 10;
 
     @Comment("""
-            
-            Connection settings for the Mojang API.""")
-    public MojangApiSettings mojangApiSettings = new MojangApiSettings();
+
+            Settings for looking up player profiles (name -> UUID) and detecting premium accounts.""")
+    public ProfileLookupSettings profileLookup = new ProfileLookupSettings();
 
     @Comment("""
             
@@ -344,19 +344,30 @@ public class ExtendedConfigV1 extends ConfigTemplate {
     }
 
     @ConfigSerializable
-    public static final class MojangApiSettings {
+    public static final class ProfileLookupSettings {
         @Comment("""
-            
-            URL of the Mojang API.""")
+
+            URL of the Mojang profile-lookup API (name -> UUID), used to detect premium accounts.""")
         public String url = "https://api.minecraftservices.com/minecraft/profile/lookup/name/";
 
         @Comment("""
-            
+
+            Profile-lookup URLs of third-party auth providers such as ely.by.
+            When a premium username is not recognized by Mojang but a listed provider knows it (and the
+            UUID matches the one the client presented), the player is treated as online and the vanilla
+            login handshake is allowed to continue, so a companion mod like Alternative Authentication can
+            verify the session instead of the player being forced offline.
+            Empty by default. Add ely.by only when you also run a mod that verifies its sessions, e.g.:
+            alternative-urls=["https://authserver.ely.by/api/users/profiles/minecraft/"]""")
+        public List<String> alternativeUrls = new ArrayList<>();
+
+        @Comment("""
+
             Connection timeout in milliseconds.""")
         public int connectionTimeout = 5000;
 
         @Comment("""
-            
+
             Read timeout in milliseconds.""")
         public int readTimeout = 5000;
     }

@@ -35,10 +35,10 @@ public class MojangApi {
         }
 
         LogDebug("Checking player " + username + " for premium status");
-        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) URI.create(extendedConfig.mojangApiSettings.url + username).toURL().openConnection();
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) URI.create(extendedConfig.profileLookup.url + username).toURL().openConnection();
         httpsURLConnection.setRequestMethod("GET");
-        httpsURLConnection.setConnectTimeout(extendedConfig.mojangApiSettings.connectionTimeout);
-        httpsURLConnection.setReadTimeout(extendedConfig.mojangApiSettings.readTimeout);
+        httpsURLConnection.setConnectTimeout(extendedConfig.profileLookup.connectionTimeout);
+        httpsURLConnection.setReadTimeout(extendedConfig.profileLookup.readTimeout);
 
         int response = httpsURLConnection.getResponseCode();
         if (response == HttpURLConnection.HTTP_OK) {
@@ -62,17 +62,41 @@ public class MojangApi {
     }
 
     public static UUID getUuid(String username) throws IOException {
-        String key = username.toLowerCase(Locale.ENGLISH);
+        return getUuidFrom(extendedConfig.profileLookup.url, username);
+    }
+
+    /**
+     * Resolves a username against the configured alternative-auth profile-lookup URLs (e.g. ely.by).
+     * Returns the first UUID a provider knows for this name, or {@code null} if none recognize it.
+     * Used only to decide whether to let the vanilla online handshake proceed (so a companion mod like
+     * Alternative Authentication can validate the session) instead of forcing the player offline.
+     */
+    public static UUID resolveAlternativeUuid(String username) {
+        for (String url : extendedConfig.profileLookup.alternativeUrls) {
+            try {
+                UUID uuid = getUuidFrom(url, username);
+                if (uuid != null) {
+                    return uuid;
+                }
+            } catch (IOException e) {
+                LogDebug("Alternative auth provider " + url + " failed for " + username + ": " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    private static UUID getUuidFrom(String baseUrl, String username) throws IOException {
+        String key = baseUrl + "|" + username.toLowerCase(Locale.ENGLISH);
         UUID cached = UUID_CACHE.get(key);
         if (cached != null) {
             LogDebug("Player " + username + " has UUID (cached): " + cached);
             return cached;
         }
 
-        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) URI.create(extendedConfig.mojangApiSettings.url + username).toURL().openConnection();
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) URI.create(baseUrl + username).toURL().openConnection();
         httpsURLConnection.setRequestMethod("GET");
-        httpsURLConnection.setConnectTimeout(extendedConfig.mojangApiSettings.connectionTimeout);
-        httpsURLConnection.setReadTimeout(extendedConfig.mojangApiSettings.readTimeout);
+        httpsURLConnection.setConnectTimeout(extendedConfig.profileLookup.connectionTimeout);
+        httpsURLConnection.setReadTimeout(extendedConfig.profileLookup.readTimeout);
 
         int response = httpsURLConnection.getResponseCode();
         if (response == HttpURLConnection.HTTP_OK) {

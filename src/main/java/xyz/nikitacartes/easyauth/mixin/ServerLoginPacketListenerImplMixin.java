@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static xyz.nikitacartes.easyauth.integrations.MojangApi.getUuid;
+import static xyz.nikitacartes.easyauth.integrations.MojangApi.resolveAlternativeUuid;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
@@ -125,6 +126,16 @@ public abstract class ServerLoginPacketListenerImplMixin {
                         playerData.update();
                         // Authentication continues in the original method
                     } else {
+                        UUID altUuid = resolveAlternativeUuid(username);
+                        if (checkUuid(packet.profileId(), altUuid)) {
+                            // A third-party provider (e.g. ely.by) owns this name and the client presented
+                            // its UUID. Let the vanilla handshake continue so a companion mod (Alternative
+                            // Authentication) can verify the session, instead of forcing the player offline.
+                            LogDebug("Player " + username + " recognized by an alternative auth provider, deferring to online handshake");
+                            playerData.onlineAccount = PlayerEntryV1.OnlineAccount.TRUE;
+                            playerData.update();
+                            return;
+                        }
                         if (onlineUuid == null) {
                             LogDebug("Player " + username + " doesn't have a Mojang account");
                             playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;

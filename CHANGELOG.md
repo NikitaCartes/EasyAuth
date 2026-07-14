@@ -63,12 +63,14 @@ The jar is now universal: installed on a client, the same file works as **EasyAu
   - `/premium enable|disable <password>` for a premium player to opt into (or out of) passwordless auto-login
   - Works with AuthMe's `keepOfflineUuidCompatibility` set to either `true` (backend keeps the offline UUID) or `false` (backend gets the real Mojang UUID); with `false`, a premium player's existing offline-UUID world data now migrates to their online UUID automatically on join
   - See the [Proxies wiki page](https://github.com/NikitaCartes/EasyAuth/wiki/Proxies) for setup
+- New `profile-lookup.alternative-urls` option in `extended.conf` (empty by default): profile-lookup URLs of third-party auth providers such as ely.by. When a premium username is not recognized by Mojang but a listed provider knows it (and the UUID matches), the player is treated as online and the vanilla handshake is allowed to continue, so a companion mod like Alternative Authentication can verify the session instead of the player being forced offline. [#273](https://github.com/NikitaCartes/EasyAuth/issues/273)
 
 #### Fix
 - The player position not saving properly after `/logout` [#270](https://github.com/NikitaCartes/EasyAuth/issues/270)
 - Respawn at the death point [#269](https://github.com/NikitaCartes/EasyAuth/issues/269)
 
 #### Changes
+- The `mojang-api-settings` section in `extended.conf` is renamed to `profile-lookup` and now also holds the third-party `alternative-urls`. Values are not migrated automatically (a backup of the old config is created in `config/EasyAuth/backup`); if you had customized the Mojang API url or timeouts, re-enter them under `profile-lookup`.
 - `username-regexp` now applies to offline players only; premium (online-account) players bypass the check [#214](https://github.com/NikitaCartes/EasyAuth/issues/214)
 - Updated Hungarian translation [#272](https://github.com/NikitaCartes/EasyAuth/issues/272), thanks to @Zan1456
 - Require Java 25 or newer to run EasyAuth 4.0.0

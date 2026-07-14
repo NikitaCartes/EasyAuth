@@ -3,6 +3,8 @@
 
 EasyAuth disallows players who aren't authenticated to do actions like placing blocks, moving, typing commands or use the inventory.
 
+The jar is universal: on a server it is the authentication mod, installed on a client the same file becomes **EasyAuth Client** — an auto-login companion (see below).
+
 ### Feature:
 - Auto login players that have purchased Minecraft
 - Passwordless premium auto-login behind a Velocity proxy via the AuthMeReloaded proxy-bridge (unofficial), with `/premium` opt-in [Fabric]
@@ -21,8 +23,22 @@ EasyAuth disallows players who aren't authenticated to do actions like placing b
 - Support Luckperms API and Luckperms Context
 - Support Floodgate [Fabric] and Carpet players
 - Support Vanish mod to hide unauthenticated players [Fabric]
+- Client companion in the same jar: auto-login, passkeys, "remember me" tokens, encrypted credential storage
 
 See [wiki](https://github.com/NikitaCartes/EasyAuth/wiki) for more information.
+
+### EasyAuth Client
+
+Install the very same jar on the client and it turns into a companion mod:
+
+- Stores per-server passwords (encrypted at rest, with an optional master password) and logs in automatically on join
+- Works on **any** server with an auth mod through configurable chat commands; on EasyAuth 4.0.0+ servers it switches to direct packets, passkey (Ed25519) login and rotating "remember me" session tokens instead
+- Fills two-factor (TOTP) codes automatically if you store the secret
+- Chat/command automation rules: on join, on a chat message, on a timer, on leave
+- Config screen via ModMenu (Fabric) or the mods list (NeoForge)
+
+Server admins can limit what companion clients may do with the `client-mod` section of `extended.conf`.
+See the [EasyAuth Client wiki page](https://github.com/NikitaCartes/EasyAuth/wiki/EasyAuth-Client) for details.
 
 [CurseForge](https://www.curseforge.com/minecraft/mc-mods/easyauth), [Modrinth](https://modrinth.com/mod/easyauth)
 

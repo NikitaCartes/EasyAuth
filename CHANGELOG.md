@@ -10,6 +10,19 @@
 ---
 ### 4.0.0
 ##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.[x]
+### EasyAuth Client
+The jar is now universal: installed on a client, the same file works as **EasyAuth Client** — an auto-login companion. A dedicated server loads only the server part, a client only the client part. See the [EasyAuth Client wiki page](https://github.com/NikitaCartes/EasyAuth/wiki/EasyAuth-Client).
+- Auto-login and auto-register on join, on **any** server with an auth mod: configurable command templates (default `/login {password}`, `/register {password} {password}`) detected through the server's command tree, with no dependency on chat messages or their language
+- Deeper integration with EasyAuth 4.0.0+ servers over direct packets: the server announces its capabilities and the account state on join, and the client authenticates without any chat commands, trying passkey → session token → password in order
+    - New `client-mod` section in `extended.conf` (`allow-auto-login`, `allow-auto-register`, `allow-session-token`, `session-token-ttl`, `allow-passkey`) lets admins turn each capability off; compliant clients honor it
+- Session tokens ("remember me"): after every successful login the server issues a random token (only its SHA-256 hash is stored) and the client uses it instead of the password on the next join. Rotated on every use, survives IP changes, expires after `client-mod.session-token-ttl` (default 30 days), revoked on password change
+- Passkey login (Ed25519 challenge-response): the client registers a public key after a successful login and later proves key ownership by signing a one-time server challenge, so no secret ever leaves the client. Up to 5 keys per account; `/account passkey` shows them, `/account passkey revoke` removes them
+- Automatic two-factor codes: store an account's TOTP secret in the server entry and the client computes and fills the current 6-digit code on auto-login (packet path and the `{otp}` placeholder)
+- Config screen via ModMenu (Fabric) or the mods-list Config button (NeoForge): per-server passwords and toggles, global settings, command templates, and a "Forget session token & passkey" button per server
+- Stored secrets (passwords, TOTP secrets, session tokens, passkey private keys) are encrypted at rest with AES-256-GCM. The key file lives outside the instance (user home by default) so exported modpacks and synced config folders contain only ciphertext; on Windows it is additionally protected with DPAPI. An optional master password (asked once per launch) can protect it on any platform. The data folder and key file locations are configurable ("Storage & security" screen) to share one credential store between instances; existing plaintext files are migrated automatically
+- Auto-input rules in `config/easyauth-client/rules.json`: send chat messages or commands on join, on a chat-message regex, on a timer, or on leave (the pause-menu Disconnect button), with `{username}`, `{server}`, `{password}`, `{otp}` placeholders, delays, cooldowns and per-session run limits
+
+### EasyAuth Server
 #### Remove
 - Migration from older versions of EasyAuth (older than 3.1.0):
   - LevelDB support
@@ -21,11 +34,6 @@
 
 #### Add
 - NeoForge support for Minecraft 1.21[.X] and 26.[x]
-- EasyAuth Client — client-side companion (auto-login, config screen), bundled in the same jar as the server instead of a separate mod
-- New `client-mod` section in `extended.conf` (`allow-auto-login`, `allow-auto-register`): the companion mod logs in and registers through direct packets instead of chat commands; these options let admins turn that off
-- Session tokens for the companion mod ("remember me"): after every successful login the server issues a random token (only its SHA-256 hash is stored) and the client uses it instead of the password on the next join. Rotated on every use, survives IP changes, expires after `client-mod.session-token-ttl` (default 30 days), revoked on password change. Disable with `client-mod.allow-session-token`
-- Passkey login for the companion mod (Ed25519 challenge-response): the client registers a public key after a successful login and later proves key ownership by signing a one-time server challenge, so no secret ever leaves the client. Up to 5 keys per account; `/account passkey` shows them, `/account passkey revoke` removes them. Disable with `client-mod.allow-passkey`
-- The companion mod's stored secrets (passwords, TOTP secrets, session tokens, passkey private keys) are encrypted at rest with AES-256-GCM. The key file lives outside the instance (user home by default) so exported modpacks and synced config folders contain only ciphertext; on Windows it is additionally protected with DPAPI. An optional master password (asked once per launch) can protect it on any platform. The data folder and key file locations are configurable ("Storage & security" screen) to share one credential store between instances; existing plaintext files are migrated automatically
 - Server-side Dialog windows (GUI) for login, registration, the account menu and the admin panel on Minecraft 1.21.6+. Older versions automatically fall back to the chat commands. [#245](https://github.com/NikitaCartes/EasyAuth/issues/245)
   - New config file `dialogs.conf` to control them (`enabled`, `login`, `register`, `account`, `admin`, `can-close-with-escape`, `allow-datapack-override`)
   - Datapacks can override any built-in window by id (e.g. `easyauth:login`)

@@ -42,6 +42,8 @@ public final class RuleEngine {
     private static boolean authPending;
     private static long authPendingUntil;
     private static final long AUTH_PENDING_WINDOW_MS = 60_000;
+    // Gap between the login command and a separate 2FA command (see sendAuthCommands).
+    private static final long TOTP_COMMAND_DELAY_MS = 1_000;
     // Detection literals precomputed from the command templates at join (hot path: onTick).
     private static String loginLiteral = "";
     private static String registerLiteral = "";
@@ -137,10 +139,19 @@ public final class RuleEngine {
         }
         String login = store.loginCommand;
         String totpSecret = Vault.usable(credentials.totpSecret);
-        if (totpSecret != null && !totpSecret.isEmpty() && !login.contains("{otp}")) {
+        boolean hasTotp = totpSecret != null && !totpSecret.isEmpty();
+        // A separate 2FA command (AuthMe-style) takes precedence over EasyAuth's inline {otp}.
+        boolean separateTotp = hasTotp && store.totpCommand != null && !store.totpCommand.isEmpty();
+        if (hasTotp && !separateTotp && !login.contains("{otp}")) {
             login += " {otp}";
         }
         sendResolved(login);
+        if (separateTotp) {
+            // The code is only accepted once the server has verified the password, which it does
+            // off the main thread (AuthMe hashes with BCrypt) — so this cannot go out in the same
+            // tick. ponytail: fixed delay, make it configurable if a slow datasource needs longer.
+            queueResolved(store.totpCommand, TOTP_COMMAND_DELAY_MS);
+        }
     }
 
     /**
@@ -344,6 +355,14 @@ public final class RuleEngine {
         String resolved = resolvePlaceholders(template);
         if (resolved != null && !resolved.isEmpty()) {
             send(resolved);
+        }
+    }
+
+    /** Like {@link #sendResolved}, but sent by {@link #onTick} once the delay has elapsed. */
+    private static void queueResolved(String template, long delay) {
+        String resolved = resolvePlaceholders(template);
+        if (resolved != null && !resolved.isEmpty()) {
+            queue.add(new Pending(System.currentTimeMillis() + delay, resolved));
         }
     }
 

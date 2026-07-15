@@ -58,10 +58,13 @@ public final class Credentials {
         public boolean usePasskey = true;    // enroll + use Ed25519 passkeys on supporting servers
         public String defaultPassword = "";  // used by auto-register; empty = random per server
         // Templates for the built-in auto-auth; the first word doubles as the command-tree
-        // detection literal (e.g. "/reg {password}" waits for /reg). {otp} is appended to the
-        // login command automatically when the server entry has a TOTP secret.
+        // detection literal (e.g. "/reg {password}" waits for /reg).
         public String loginCommand = "/login {password}";
         public String registerCommand = "/register {password} {password}";
+        // Separate 2FA command, for servers whose login command takes no code (AuthMe wants
+        // "/totp code {otp}" after a bare /login). Empty = EasyAuth's own syntax: {otp} is
+        // appended to the login command instead when the server entry has a TOTP secret.
+        public String totpCommand = "";
         public Map<String, Credentials> servers = new LinkedHashMap<>();
     }
 

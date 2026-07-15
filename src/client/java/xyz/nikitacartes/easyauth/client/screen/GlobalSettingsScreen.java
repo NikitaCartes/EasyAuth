@@ -34,6 +34,7 @@ public class GlobalSettingsScreen extends Screen {
     private EditBox defaultPasswordBox;
     private EditBox loginCommandBox;
     private EditBox registerCommandBox;
+    private EditBox totpCommandBox;
     // Still-encrypted (locked) original: shown as an empty box with a "(locked)" hint and
     // written back on commit unless the player types a replacement.
     private String lockedDefaultPassword;
@@ -111,10 +112,17 @@ public class GlobalSettingsScreen extends Screen {
         registerCommandBox.setValue(store.registerCommand == null ? "" : store.registerCommand);
         column.addChild(registerCommandBox, 4, 0);
 
+        totpCommandBox = editBox(Component.translatable("easyauthclient.config.totpCommand"), ROW_WIDTH);
+        totpCommandBox.setMaxLength(256);
+        totpCommandBox.setHint(Component.translatable("easyauthclient.config.totpCommand"));
+        totpCommandBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.totpCommand.tooltip")));
+        totpCommandBox.setValue(store.totpCommand == null ? "" : store.totpCommand);
+        column.addChild(totpCommandBox, 5, 0);
+
         column.addChild(Button.builder(Component.translatable("easyauthclient.storage.title"), button -> {
             commit();
             ConfigScreen.open(new StorageScreen(this, parent, store));
-        }).width(ROW_WIDTH).build(), 5, 0);
+        }).width(ROW_WIDTH).build(), 6, 0);
 
         layout.addToContents(column);
         layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(200).build());
@@ -159,6 +167,7 @@ public class GlobalSettingsScreen extends Screen {
                 : defaultPasswordBox.getValue();
         store.loginCommand = loginCommandBox.getValue();
         store.registerCommand = registerCommandBox.getValue();
+        store.totpCommand = totpCommandBox.getValue();
     }
 
     //? if >=1.21.11 {

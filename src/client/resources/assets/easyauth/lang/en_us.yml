@@ -39,9 +39,11 @@ easyauthclient:
     defaultPassword.tooltip: "Used by auto-register. Leave empty to generate a random password per server."
     # Commands
     loginCommand: "Login command"
-    loginCommand.tooltip: "Template for the built-in auto-login, e.g. /login {password}. Its first word is also what is looked for in the server's command tree. {otp} is appended automatically when a TOTP secret is set."
+    loginCommand.tooltip: "Template for the built-in auto-login, e.g. /login {password}. Its first word is also what is looked for in the server's command tree. {otp} is appended automatically when a TOTP secret is set and no separate 2FA command is configured."
     registerCommand: "Register command"
     registerCommand.tooltip: "Template for the built-in auto-register, e.g. /register {password} {password}. Its first word is also what is looked for in the server's command tree."
+    totpCommand: "2FA command"
+    totpCommand.tooltip: "For servers whose login command takes no code, e.g. /totp code {otp} on AuthMe. Sent shortly after the login command when a TOTP secret is set. Leave empty to append {otp} to the login command instead (EasyAuth's own syntax)."
     # Server tags
     tag:
       noAutoLogin: "no auto-login"

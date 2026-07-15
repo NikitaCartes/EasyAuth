@@ -33,12 +33,11 @@ import java.util.TreeSet;
 /**
  * Saved-credentials overview shared by ModMenu (Fabric) and the NeoForge mods-list Config
  * button: one row per server with its password and per-server flags. Editing happens in
- * {@link ServerEditScreen}, global auto-auth settings in {@link GlobalSettingsScreen}.
- * Auto-input rules are edited in rules.json directly.
- * ponytail: no in-game rule editor until someone asks for one.
+ * {@link ServerEditScreen}, global auto-auth settings in {@link GlobalSettingsScreen} and
+ * auto-input rules in {@link RuleListScreen}.
  */
 public class ConfigScreen extends Screen {
-    private static final int FOOTER_HEIGHT = 72; // hint row + two button rows
+    private static final int FOOTER_HEIGHT = 84; // rules row + two button rows
 
     final Screen parent; // package-private: StorageScreen rebuilds the chain after a relocation
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 33, FOOTER_HEIGHT);
@@ -97,10 +96,8 @@ public class ConfigScreen extends Screen {
         buttons.addChild(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(100).build(), 1, 2);
 
         GridLayout footer = new GridLayout().spacing(8);
-        String rulesPath = Vault.dataDirOverride().isEmpty()
-                ? "config/easyauth-client/rules.json"
-                : Vault.rulesFile().toString();
-        footer.addChild(new StringWidget(Component.translatable("easyauthclient.config.rulesHint", rulesPath), font),
+        footer.addChild(Button.builder(Component.translatable("easyauthclient.rules.title"),
+                        button -> open(new RuleListScreen(this))).width(208).build(),
                 0, 0, footer.newCellSettings().alignHorizontallyCenter());
         footer.addChild(buttons, 1, 0);
         layout.addToFooter(footer);

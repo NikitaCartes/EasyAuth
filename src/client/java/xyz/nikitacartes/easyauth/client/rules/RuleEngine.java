@@ -1,7 +1,5 @@
 package xyz.nikitacartes.easyauth.client.rules;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ServerData;
@@ -11,15 +9,12 @@ import xyz.nikitacartes.easyauth.client.EasyAuthPackets;
 import xyz.nikitacartes.easyauth.protocol.ClientModProtocol;
 import xyz.nikitacartes.easyauth.utils.Totp;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -31,7 +26,6 @@ import java.util.regex.PatternSyntaxException;
  */
 public final class RuleEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger("EasyAuthClient");
-    private static final Gson GSON = new Gson();
 
     // Session state; empty when not connected or no rules for the current server.
     private static List<ActiveRule> active = List.of();
@@ -538,25 +532,8 @@ public final class RuleEngine {
     }
 
     private static List<ActiveRule> loadRules(String address) {
-        Path rulesFile = Vault.rulesFile();
-        RulesFile file;
-        try {
-            if (!Files.exists(rulesFile)) {
-                Files.createDirectories(rulesFile.getParent());
-                Files.writeString(rulesFile, "{\n  \"servers\": {}\n}\n");
-                LOGGER.info("Created empty rules config at {}", rulesFile);
-                return List.of();
-            }
-            file = GSON.fromJson(Files.readString(rulesFile), RulesFile.class);
-        } catch (IOException | JsonParseException e) {
-            LOGGER.warn("Could not read {}: {}", rulesFile, e.toString());
-            return List.of();
-        }
-        if (file == null || file.servers == null) {
-            return List.of();
-        }
-        ServerRules entry = file.servers.get(address);
-        if (entry == null || entry.rules == null) {
+        Rules.ServerRules entry = Rules.load(Vault.rulesFile()).servers.get(address);
+        if (entry == null) {
             return List.of();
         }
         List<ActiveRule> result = new ArrayList<>();
@@ -613,14 +590,6 @@ public final class RuleEngine {
             a = a.substring(0, a.length() - ":25565".length());
         }
         return a;
-    }
-
-    private static final class RulesFile {
-        Map<String, ServerRules> servers;
-    }
-
-    private static final class ServerRules {
-        List<AutoInputRule> rules;
     }
 
     private static final class ActiveRule {

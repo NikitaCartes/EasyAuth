@@ -38,7 +38,7 @@ import java.util.TreeSet;
  * ponytail: no in-game rule editor until someone asks for one.
  */
 public class ConfigScreen extends Screen {
-    private static final int FOOTER_HEIGHT = 64;
+    private static final int FOOTER_HEIGHT = 72; // hint row + two button rows
 
     final Screen parent; // package-private: StorageScreen rebuilds the chain after a relocation
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 33, FOOTER_HEIGHT);
@@ -77,23 +77,32 @@ public class ConfigScreen extends Screen {
         //?}
 
         // GridLayout, not LinearLayout: same API on every target (LinearLayout lacks vertical() before 1.20.2).
-        GridLayout footer = new GridLayout().spacing(8);
+        // The hint sits in its own centered row so its width never skews the button columns.
+        GridLayout buttons = new GridLayout().spacing(8);
+        buttons.addChild(Button.builder(Component.translatable("easyauthclient.config.newServer"),
+                button -> open(new ServerEditScreen(this, store, null))).width(100).build(), 0, 0);
+        buttons.addChild(Button.builder(Component.translatable("easyauthclient.config.edit"),
+                button -> editSelected()).width(100).build(), 0, 1);
+        buttons.addChild(Button.builder(Component.translatable("easyauthclient.config.remove"),
+                button -> removeSelected()).width(100).build(), 0, 2);
         if (Vault.passwordProtected() && Vault.locked()) {
-            footer.addChild(new StringWidget(Component.translatable("easyauthclient.config.rulesHint"), font), 0, 0, 1, 2);
-            footer.addChild(Button.builder(Component.translatable("easyauthclient.unlock.unlock"),
-                    button -> open(new UnlockScreen(this))).width(100).build(), 0, 2);
+            buttons.addChild(Button.builder(Component.translatable("easyauthclient.unlock.unlock"),
+                    button -> open(new UnlockScreen(this))).width(100).build(), 1, 0);
+            buttons.addChild(Button.builder(Component.translatable("easyauthclient.config.globalSettings"),
+                    button -> open(new GlobalSettingsScreen(this, store))).width(100).build(), 1, 1);
         } else {
-            footer.addChild(new StringWidget(Component.translatable("easyauthclient.config.rulesHint"), font), 0, 0, 1, 3);
+            buttons.addChild(Button.builder(Component.translatable("easyauthclient.config.globalSettings"),
+                    button -> open(new GlobalSettingsScreen(this, store))).width(208).build(), 1, 0, 1, 2);
         }
-        footer.addChild(Button.builder(Component.translatable("easyauthclient.config.newServer"),
-                button -> open(new ServerEditScreen(this, store, null))).width(100).build(), 1, 0);
-        footer.addChild(Button.builder(Component.translatable("easyauthclient.config.edit"),
-                button -> editSelected()).width(100).build(), 1, 1);
-        footer.addChild(Button.builder(Component.translatable("easyauthclient.config.remove"),
-                button -> removeSelected()).width(100).build(), 1, 2);
-        footer.addChild(Button.builder(Component.translatable("easyauthclient.config.globalSettings"),
-                button -> open(new GlobalSettingsScreen(this, store))).width(208).build(), 2, 0, 1, 2);
-        footer.addChild(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(100).build(), 2, 2);
+        buttons.addChild(Button.builder(CommonComponents.GUI_DONE, button -> onClose()).width(100).build(), 1, 2);
+
+        GridLayout footer = new GridLayout().spacing(8);
+        String rulesPath = Vault.dataDirOverride().isEmpty()
+                ? "config/easyauth-client/rules.json"
+                : Vault.rulesFile().toString();
+        footer.addChild(new StringWidget(Component.translatable("easyauthclient.config.rulesHint", rulesPath), font),
+                0, 0, footer.newCellSettings().alignHorizontallyCenter());
+        footer.addChild(buttons, 1, 0);
         layout.addToFooter(footer);
 
         layout.visitWidgets(widget -> this.addRenderableWidget(widget));
@@ -130,8 +139,7 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        store.servers.values().removeIf(entry -> entry.password == null && entry.totpSecret == null
-                && entry.sessionToken == null && entry.passkeyPrivate == null);
+        Credentials.pruneEmpty(store);
         Credentials.save(RuleEngine.getCredentialsFile(), store);
         open(parent);
     }
@@ -168,11 +176,12 @@ public class ConfigScreen extends Screen {
             Entry(String address, Credentials credentials) {
                 this.address = address;
                 List<String> parts = new ArrayList<>();
+                // Never the password itself — the list can be on screen while streaming.
                 parts.add(credentials.password == null
                         ? I18n.get("easyauthclient.config.noPassword")
                         : Vault.isEncrypted(credentials.password)
                         ? I18n.get("easyauthclient.config.locked")
-                        : credentials.password);
+                        : "********");
                 if (credentials.totpSecret != null) {
                     parts.add("TOTP");
                 }

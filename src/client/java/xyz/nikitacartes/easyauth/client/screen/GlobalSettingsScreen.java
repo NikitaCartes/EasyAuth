@@ -13,15 +13,19 @@ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import xyz.nikitacartes.easyauth.client.rules.Credentials;
 import xyz.nikitacartes.easyauth.client.rules.Vault;
 
 /** Global auto-auth settings editor; commits into the shared {@link Credentials.Store} on close. */
 public class GlobalSettingsScreen extends Screen {
     private static final int ROW_WIDTH = 310;
+    private static final int REVEAL_BUTTON_WIDTH = 60;
 
     private final ConfigScreen parent;
     private final Credentials.Store store;
+    private boolean showPassword;
 
     private Checkbox autoLoginBox;
     private Checkbox autoRegisterBox;
@@ -70,7 +74,8 @@ public class GlobalSettingsScreen extends Screen {
         column.addChild(keyRow, 1, 0);
 
         lockedDefaultPassword = Vault.isEncrypted(store.defaultPassword) ? store.defaultPassword : null;
-        defaultPasswordBox = editBox(Component.translatable("easyauthclient.config.defaultPassword"));
+        defaultPasswordBox = editBox(Component.translatable("easyauthclient.config.defaultPassword"),
+                ROW_WIDTH - REVEAL_BUTTON_WIDTH - 4);
         defaultPasswordBox.setMaxLength(512);
         defaultPasswordBox.setHint(Component.translatable(lockedDefaultPassword != null
                 ? "easyauthclient.config.locked"
@@ -79,16 +84,27 @@ public class GlobalSettingsScreen extends Screen {
         if (store.defaultPassword != null && lockedDefaultPassword == null) {
             defaultPasswordBox.setValue(store.defaultPassword);
         }
-        column.addChild(defaultPasswordBox, 2, 0);
+        //? if >=1.21.9 {
+        defaultPasswordBox.addFormatter(this::maskPassword);
+        //?} else {
+        /*defaultPasswordBox.setFormatter(this::maskPassword);*/
+        //?}
+        GridLayout passwordRow = new GridLayout().spacing(4);
+        passwordRow.addChild(defaultPasswordBox, 0, 0);
+        passwordRow.addChild(Button.builder(revealLabel(), button -> {
+            showPassword = !showPassword;
+            button.setMessage(revealLabel());
+        }).width(REVEAL_BUTTON_WIDTH).build(), 0, 1);
+        column.addChild(passwordRow, 2, 0);
 
-        loginCommandBox = editBox(Component.translatable("easyauthclient.config.loginCommand"));
+        loginCommandBox = editBox(Component.translatable("easyauthclient.config.loginCommand"), ROW_WIDTH);
         loginCommandBox.setMaxLength(256);
         loginCommandBox.setHint(Component.translatable("easyauthclient.config.loginCommand"));
         loginCommandBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.loginCommand.tooltip")));
         loginCommandBox.setValue(store.loginCommand == null ? "" : store.loginCommand);
         column.addChild(loginCommandBox, 3, 0);
 
-        registerCommandBox = editBox(Component.translatable("easyauthclient.config.registerCommand"));
+        registerCommandBox = editBox(Component.translatable("easyauthclient.config.registerCommand"), ROW_WIDTH);
         registerCommandBox.setMaxLength(256);
         registerCommandBox.setHint(Component.translatable("easyauthclient.config.registerCommand"));
         registerCommandBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.config.registerCommand.tooltip")));
@@ -106,12 +122,21 @@ public class GlobalSettingsScreen extends Screen {
         layout.arrangeElements();
     }
 
-    private EditBox editBox(Component message) {
+    private EditBox editBox(Component message, int width) {
         //? if >=1.20.2 {
-        return new EditBox(font, ROW_WIDTH, 20, message);
+        return new EditBox(font, width, 20, message);
         //?} else {
-        /*return new EditBox(font, 0, 0, ROW_WIDTH, 20, message);*/
+        /*return new EditBox(font, 0, 0, width, 20, message);*/
         //?}
+    }
+
+    private Component revealLabel() {
+        return Component.translatable(showPassword ? "easyauthclient.config.hide" : "easyauthclient.config.show");
+    }
+
+    /** Display formatter for the default-password box: asterisks unless Show is toggled on. */
+    private FormattedCharSequence maskPassword(String text, int offset) {
+        return FormattedCharSequence.forward(showPassword ? text : "*".repeat(text.length()), Style.EMPTY);
     }
 
     private Checkbox checkbox(Component message, boolean selected) {

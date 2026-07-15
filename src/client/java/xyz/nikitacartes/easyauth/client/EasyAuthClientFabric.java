@@ -10,12 +10,18 @@ import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
+//? if >=1.21.9 {
+import net.minecraft.client.gui.screens.ManageServerScreen;
+//?} else {
+/*import net.minecraft.client.gui.screens.EditServerScreen;
+*///?}
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
 import xyz.nikitacartes.easyauth.client.rules.Vault;
 import xyz.nikitacartes.easyauth.client.screen.ConfigScreen;
+import xyz.nikitacartes.easyauth.client.screen.ServerEditScreen;
 import xyz.nikitacartes.easyauth.client.screen.UnlockScreen;
 
 public class EasyAuthClientFabric implements ClientModInitializer {
@@ -49,6 +55,22 @@ public class EasyAuthClientFabric implements ClientModInitializer {
             if (screen instanceof JoinMultiplayerScreen && Vault.shouldPromptUnlock()) {
                 Vault.markPrompted();
                 ConfigScreen.open(new UnlockScreen(screen));
+            }
+            // "…" shortcut next to the address box of the vanilla edit-server screen.
+            //? if >=1.21.9 {
+            if (screen instanceof ManageServerScreen) {
+            //?} else {
+            /*if (screen instanceof EditServerScreen) {
+            *///?}
+                //? if >=26.1 {
+                var widgets = Screens.getWidgets(screen);
+                //?} else {
+                /*var widgets = Screens.getButtons(screen);*/
+                //?}
+                Button shortcut = ServerEditScreen.vanillaShortcut(screen, widgets);
+                if (shortcut != null) {
+                    widgets.add(shortcut);
+                }
             }
             // Wrap the disconnect button so "leave" rules fire while the connection is open (see QuitHook).
             if (screen instanceof PauseScreen && RuleEngine.hasLeaveRules()) {

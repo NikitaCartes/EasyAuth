@@ -27,6 +27,8 @@ import java.nio.file.Path;
  */
 public class StorageScreen extends Screen {
     private static final int ROW_WIDTH = 310;
+    private static final int HOME_BUTTON_WIDTH = 70;
+    private static final int PATH_BOX_WIDTH = ROW_WIDTH - HOME_BUTTON_WIDTH - 4;
 
     private final GlobalSettingsScreen parent;
     private final ConfigScreen config;
@@ -62,28 +64,34 @@ public class StorageScreen extends Screen {
         GridLayout column = new GridLayout().spacing(4);
         int row = 0;
 
-        dataDirBox = editBox(Component.translatable("easyauthclient.storage.dataDir"));
+        dataDirBox = editBox(Component.translatable("easyauthclient.storage.dataDir"), PATH_BOX_WIDTH);
         dataDirBox.setHint(Component.literal(Vault.defaultDataDir().toString()));
         dataDirBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.storage.dataDir.tooltip")));
         dataDirBox.setValue(pendingDataDir);
-        column.addChild(dataDirBox, row++, 0);
+        column.addChild(pathRow(dataDirBox, Vault.homeDataDir().toString()), row++, 0);
 
-        keyFileBox = editBox(Component.translatable("easyauthclient.storage.keyFile"));
+        keyFileBox = editBox(Component.translatable("easyauthclient.storage.keyFile"), PATH_BOX_WIDTH);
         keyFileBox.setHint(Component.literal(Vault.defaultKeyFile().toString()));
         keyFileBox.setTooltip(Tooltip.create(Component.translatable("easyauthclient.storage.keyFile.tooltip")));
         keyFileBox.setValue(pendingKeyFile);
-        column.addChild(keyFileBox, row++, 0);
+        column.addChild(pathRow(keyFileBox, Vault.homeKeyFile().toString()), row++, 0);
 
-        if (Vault.passwordProtected() && Vault.locked()) {
+        if (!Vault.encryptionEnabled()) {
+            column.addChild(new StringWidget(ROW_WIDTH, 9,
+                    Component.translatable("easyauthclient.storage.plaintextWarning").withStyle(ChatFormatting.RED),
+                    font), row++, 0);
+            column.addChild(Button.builder(Component.translatable("easyauthclient.storage.enableEncryption"),
+                    button -> setEncryption(true)).width(ROW_WIDTH).build(), row++, 0);
+        } else if (Vault.passwordProtected() && Vault.locked()) {
             column.addChild(Button.builder(Component.translatable("easyauthclient.unlock.unlock"), button -> {
                 commit(); // path edits survive the round trip through the prompt
                 ConfigScreen.open(new UnlockScreen(this));
             }).width(ROW_WIDTH).build(), row++, 0);
         } else if (!Vault.locked()) {
-            newPasswordBox = editBox(Component.translatable("easyauthclient.storage.newPassword"));
+            newPasswordBox = editBox(Component.translatable("easyauthclient.storage.newPassword"), ROW_WIDTH);
             newPasswordBox.setHint(Component.translatable("easyauthclient.storage.newPassword"));
             column.addChild(newPasswordBox, row++, 0);
-            repeatPasswordBox = editBox(Component.translatable("easyauthclient.storage.repeatPassword"));
+            repeatPasswordBox = editBox(Component.translatable("easyauthclient.storage.repeatPassword"), ROW_WIDTH);
             repeatPasswordBox.setHint(Component.translatable("easyauthclient.storage.repeatPassword"));
             column.addChild(repeatPasswordBox, row++, 0);
             column.addChild(Button.builder(Component.translatable(Vault.passwordProtected()
@@ -94,6 +102,10 @@ public class StorageScreen extends Screen {
                 column.addChild(Button.builder(Component.translatable("easyauthclient.storage.removePassword"),
                         button -> removePassword()).width(ROW_WIDTH).build(), row++, 0);
             }
+            Button disableButton = Button.builder(Component.translatable("easyauthclient.storage.disableEncryption"),
+                    button -> setEncryption(false)).width(ROW_WIDTH).build();
+            disableButton.setTooltip(Tooltip.create(Component.translatable("easyauthclient.storage.disableEncryption.tooltip")));
+            column.addChild(disableButton, row++, 0);
         } else {
             // Locked without a master password: a DPAPI blob from another user/computer or a
             // corrupt key file. Nothing to type — only replacing the key file helps.
@@ -112,14 +124,38 @@ public class StorageScreen extends Screen {
         layout.arrangeElements();
     }
 
-    private EditBox editBox(Component message) {
+    private EditBox editBox(Component message, int width) {
         //? if >=1.20.2 {
-        EditBox box = new EditBox(font, ROW_WIDTH, 20, message);
+        EditBox box = new EditBox(font, width, 20, message);
         //?} else {
-        /*EditBox box = new EditBox(font, 0, 0, ROW_WIDTH, 20, message);*/
+        /*EditBox box = new EditBox(font, 0, 0, width, 20, message);*/
         //?}
         box.setMaxLength(1024);
         return box;
+    }
+
+    /** A path EditBox with a button that fills in the shared home-folder location. */
+    private GridLayout pathRow(EditBox box, String homePath) {
+        GridLayout pathRow = new GridLayout().spacing(4);
+        pathRow.addChild(box, 0, 0);
+        pathRow.addChild(Button.builder(Component.translatable("easyauthclient.storage.useHome"),
+                button -> box.setValue(homePath)).width(HOME_BUTTON_WIDTH).build(), 0, 1);
+        return pathRow;
+    }
+
+    /**
+     * Toggles encryption at rest and immediately re-saves the credentials in the new form.
+     * Only reachable while the vault is unlocked (or already in plaintext mode), so the live
+     * store holds usable plaintext to convert.
+     */
+    private void setEncryption(boolean enabled) {
+        commit();
+        Vault.setEncryptionEnabled(enabled);
+        Credentials.save(Vault.credentialsFile(), store);
+        pendingStatus = Component.translatable(enabled
+                ? "easyauthclient.storage.encryptionEnabled"
+                : "easyauthclient.storage.encryptionDisabled").withStyle(enabled ? ChatFormatting.GREEN : ChatFormatting.RED);
+        rebuildWidgets();
     }
 
     private void applyPassword() {

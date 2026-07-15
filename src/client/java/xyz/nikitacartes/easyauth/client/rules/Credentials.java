@@ -88,7 +88,7 @@ public final class Credentials {
                         entry.password = null;
                     }
                 }
-                if (decryptStore(store) && !Vault.locked()) {
+                if (decryptStore(store) && Vault.encryptionEnabled() && !Vault.locked()) {
                     save(file, store); // one-time migration: plaintext secrets → encrypted
                 }
             }
@@ -99,6 +99,12 @@ public final class Credentials {
         cached = store;
         cachedFile = file;
         return store;
+    }
+
+    /** Drops server entries with no stored secrets; run before saving from the config screens. */
+    public static void pruneEmpty(Store store) {
+        store.servers.values().removeIf(entry -> entry.password == null && entry.totpSecret == null
+                && entry.sessionToken == null && entry.passkeyPrivate == null);
     }
 
     /** Called after the vault is unlocked: decrypts the cached store in place and re-saves (migrates leftovers). */

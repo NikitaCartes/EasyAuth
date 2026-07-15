@@ -27,10 +27,11 @@ import java.util.Properties;
 
 /**
  * Encryption at rest for the secret fields of credentials.json, plus the storage
- * locations. Secrets are encrypted with AES-256-GCM under one random data key. The key lives
- * in a file OUTSIDE the instance (default: the user's home directory), so an exported modpack,
- * a synced instance or a zipped config folder contains only ciphertext. The key file itself is
- * protected by the best available rung:
+ * locations. Secrets are encrypted with AES-256-GCM under one random data key. By default
+ * everything (data and key file) lives in the instance's config/easyauth-client folder; the
+ * storage screen offers one-click home-folder paths for players who export or sync their
+ * instance and want the key outside of it. Encryption can also be turned off entirely
+ * (plaintext at rest). The key file itself is protected by the best available rung:
  * <ul>
  *   <li>Windows: DPAPI, tying it to the OS account (jna-platform ships with Minecraft);</li>
  *   <li>elsewhere: a plain key file with 0600 permissions;</li>
@@ -60,6 +61,7 @@ public final class Vault {
     private static Path keyFile;
     private static String dataDirOverride = "";
     private static String keyFileOverride = "";
+    private static boolean encryptionDisabled; // opt-in "plaintext" mode: secrets stored as-is
 
     private static boolean keyLoaded;
     private static SecretKey key;             // null while locked
@@ -91,6 +93,7 @@ public final class Vault {
         }
         dataDirOverride = props.getProperty("data-dir", "").trim();
         keyFileOverride = props.getProperty("key-file", "").trim();
+        encryptionDisabled = Boolean.parseBoolean(props.getProperty("plaintext", "false").trim());
         applyLocations();
     }
 
@@ -111,7 +114,16 @@ public final class Vault {
     }
 
     public static Path defaultKeyFile() {
-        return Path.of(System.getProperty("user.home"), ".easyauth-client.key");
+        return instanceDir.resolve("easyauth.key");
+    }
+
+    /** ~/.easyauth-client — the one-click shared location offered by the storage screen. */
+    public static Path homeDataDir() {
+        return Path.of(System.getProperty("user.home"), ".easyauth-client");
+    }
+
+    public static Path homeKeyFile() {
+        return homeDataDir().resolve("easyauth.key");
     }
 
     public static Path credentialsFile() {
@@ -158,12 +170,22 @@ public final class Vault {
         }
         dataDirOverride = dataOverride;
         keyFileOverride = keyOverride;
+        writePointerFile();
+        applyLocations();
+        LOGGER.info("EasyAuth Client storage: data at {}, key file at {}", dataDir, keyFile);
+        return true;
+    }
+
+    private static void writePointerFile() {
         Properties props = new Properties();
-        if (!dataOverride.isEmpty()) {
-            props.setProperty("data-dir", dataOverride);
+        if (!dataDirOverride.isEmpty()) {
+            props.setProperty("data-dir", dataDirOverride);
         }
-        if (!keyOverride.isEmpty()) {
-            props.setProperty("key-file", keyOverride);
+        if (!keyFileOverride.isEmpty()) {
+            props.setProperty("key-file", keyFileOverride);
+        }
+        if (encryptionDisabled) {
+            props.setProperty("plaintext", "true");
         }
         try {
             Files.createDirectories(instanceDir);
@@ -173,9 +195,29 @@ public final class Vault {
         } catch (IOException e) {
             LOGGER.warn("Could not write {}: {}", pointerFile(), e.toString());
         }
-        applyLocations();
-        LOGGER.info("EasyAuth Client storage: data at {}, key file at {}", dataDir, keyFile);
-        return true;
+    }
+
+    /** False in opt-in plaintext mode: secrets are stored as-is and no key file is used. */
+    public static boolean encryptionEnabled() {
+        return !encryptionDisabled;
+    }
+
+    /**
+     * Turns encryption at rest on or off and persists the choice. The caller re-saves the
+     * credentials afterwards so what is on disk matches the new mode. Turning it off is only
+     * offered while the vault is unlocked (otherwise still-encrypted values could not be
+     * converted); turning it on reuses or creates a key file lazily on the next encrypt.
+     */
+    public static void setEncryptionEnabled(boolean enabled) {
+        if (encryptionDisabled == !enabled) {
+            return;
+        }
+        encryptionDisabled = !enabled;
+        writePointerFile();
+        keyLoaded = false;
+        key = null;
+        loadedKeyData = null;
+        LOGGER.info("EasyAuth Client encryption at rest {}", enabled ? "enabled" : "disabled");
     }
 
     private static void copyIfTargetMissing(Path from, Path to) throws IOException {
@@ -193,6 +235,9 @@ public final class Vault {
         keyLoaded = true;
         key = null;
         loadedKeyData = null;
+        if (encryptionDisabled) {
+            return; // plaintext mode: no key is loaded or created
+        }
         try {
             if (!Files.exists(keyFile)) {
                 createNewKey();
@@ -289,6 +334,9 @@ public final class Vault {
 
     /** True while the data key is unavailable: master password not entered yet, or the key file is unreadable/foreign. */
     public static boolean locked() {
+        if (encryptionDisabled) {
+            return false; // plaintext mode: nothing to unlock
+        }
         ensureKeyLoaded();
         return key == null;
     }

@@ -3,6 +3,11 @@ package xyz.nikitacartes.easyauth.client;
 //? if neoforge {
 /*import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
+//? if >=1.21.9 {
+import net.minecraft.client.gui.screens.ManageServerScreen;
+//?} else {
+/^import net.minecraft.client.gui.screens.EditServerScreen;
+^///?}
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -20,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import xyz.nikitacartes.easyauth.client.rules.RuleEngine;
 import xyz.nikitacartes.easyauth.client.rules.Vault;
 import xyz.nikitacartes.easyauth.client.screen.ConfigScreen;
+import xyz.nikitacartes.easyauth.client.screen.ServerEditScreen;
 import xyz.nikitacartes.easyauth.client.screen.UnlockScreen;
 
 import java.util.List;
@@ -56,6 +62,17 @@ public class EasyAuthClientNeoForge {
             if (event.getScreen() instanceof JoinMultiplayerScreen && Vault.shouldPromptUnlock()) {
                 Vault.markPrompted();
                 ConfigScreen.open(new UnlockScreen(event.getScreen()));
+            }
+            // "…" shortcut next to the address box of the vanilla edit-server screen.
+            //? if >=1.21.9 {
+            if (event.getScreen() instanceof ManageServerScreen) {
+            //?} else {
+            /^if (event.getScreen() instanceof EditServerScreen) {
+            ^///?}
+                Button shortcut = ServerEditScreen.vanillaShortcut(event.getScreen(), event.getListenersList());
+                if (shortcut != null) {
+                    event.addListener(shortcut);
+                }
             }
             // Wrap the disconnect button so "leave" rules fire while the connection is open (see QuitHook).
             if (event.getScreen() instanceof PauseScreen && RuleEngine.hasLeaveRules()) {

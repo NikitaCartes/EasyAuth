@@ -13,7 +13,9 @@ import net.minecraft.server.level.ServerPlayer;
 //? if >= 1.21.6 {
 import net.minecraft.world.level.storage.ValueInput;
 //?}
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Final;
@@ -336,8 +338,11 @@ public abstract class ServerPlayerMixin extends EntityMixin implements PlayerAut
     }
 
     @Override
-    public boolean easyAuth$isInvulnerable(boolean original) {
-        return original || (!isAuthenticated && extendedConfig.playerInvulnerable);
+    public boolean easyAuth$isInvulnerable(boolean original, DamageSource source) {
+        // Keep vanilla bypasses (void, /kill, genericKill) working, so that death
+        // restoration via killPlayer still applies to an unauthenticated player.
+        return original || (!isAuthenticated && extendedConfig.playerInvulnerable
+                && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY));
     }
 
     public long easyAuth$getKickTimer() {

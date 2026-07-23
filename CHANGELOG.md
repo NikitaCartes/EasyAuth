@@ -81,6 +81,13 @@ The jar is now universal: installed on a client, the same file works as **EasyAu
 - Session auto-login is now blocked when the connecting IP is a loopback address (`127.x.x.x` / `::1`), preventing account takeover behind reverse proxies (e.g. FRP) that do not forward the real player IP [#240](https://github.com/NikitaCartes/EasyAuth/issues/240)
 
 ---
+### 3.4.4
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.[X]
+#### Fix
+- `playerInvulnerable` not blocking damage before authentication (players took hits from other players, explosions and potions)
+- NullPointerException in restoreTrueLocation when client disconnects mid-join [#276](https://github.com/NikitaCartes/EasyAuth/issues/276)
+
+---
 ### 3.4.3
 ##### Minecraft 1.19.4, 1.20[.X], 1.21[.X]
 #### Add

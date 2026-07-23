@@ -1,6 +1,7 @@
 package xyz.nikitacartes.easyauth.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,8 +13,12 @@ public class EntityMixin {
         return original;
     }
 
-    @ModifyReturnValue(method = "isInvulnerable()Z", at = @At("RETURN"))
-    public boolean easyAuth$isInvulnerable(boolean original) {
+    //? if >= 1.21.2 {
+    @ModifyReturnValue(method = "isInvulnerableToBase(Lnet/minecraft/world/damagesource/DamageSource;)Z", at = @At("RETURN"))
+    //?} else {
+    /*@ModifyReturnValue(method = "isInvulnerableTo(Lnet/minecraft/world/damagesource/DamageSource;)Z", at = @At("RETURN"))
+    *///?}
+    public boolean easyAuth$isInvulnerable(boolean original, DamageSource source) {
         return original;
     }
 }

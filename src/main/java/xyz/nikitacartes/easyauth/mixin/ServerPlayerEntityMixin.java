@@ -2,9 +2,11 @@ package xyz.nikitacartes.easyauth.mixin;
 
 import com.google.common.net.InetAddresses;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -314,8 +316,11 @@ public abstract class ServerPlayerEntityMixin extends EntityMixin implements Pla
     }
 
     @Override
-    public boolean easyAuth$isInvulnerable(boolean original) {
-        return original || (!isAuthenticated && extendedConfig.playerInvulnerable);
+    public boolean easyAuth$isInvulnerable(boolean original, DamageSource source) {
+        // Keep vanilla bypasses (void, /kill, genericKill) working, so that death
+        // restoration via killPlayer still applies to an unauthenticated player.
+        return original || (!isAuthenticated && extendedConfig.playerInvulnerable
+                && !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY));
     }
 
     public long easyAuth$getKickTimer() {

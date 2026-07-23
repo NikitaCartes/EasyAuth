@@ -9,6 +9,13 @@
 - Check how offline players work if they try to connect with a taken online account
 
 ---
+### 3.4.4
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.[X]
+#### Fix
+- `playerInvulnerable` not blocking damage before authentication (players took hits from other players, explosions and potions)
+- NullPointerException in restoreTrueLocation when client disconnects mid-join [#276](https://github.com/NikitaCartes/EasyAuth/issues/276)
+
+---
 ### 3.4.3
 ##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.1
 #### Add

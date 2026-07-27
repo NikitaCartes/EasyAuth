@@ -5,7 +5,7 @@ plugins {
     id("net.fabricmc.fabric-loom") version "1.15-SNAPSHOT"
     id("com.google.devtools.ksp") version "2.3.6"
     id("com.gradleup.shadow") version "9.3.0"
-    id("me.modmuss50.mod-publish-plugin") version "0.8.4"
+    id("me.modmuss50.mod-publish-plugin") version "2.1.1"
 }
 
 val baseVersion = property("mod_version").toString()
@@ -213,13 +213,13 @@ publishMods {
     type = STABLE
     modLoaders.add("fabric")
 
-    val targets = property("supported_versions").toString().split(",")
+    val targets = property("supported_versions").toString()
 
     modrinth {
         projectId = "aZj58GfX"
         accessToken = modrinthToken
 
-        targets.forEach(minecraftVersions::add)
+        minecraftVersionList(targets)
         requires("fabric-api")
         optional("luckperms")
         optional("vanish")
@@ -229,11 +229,14 @@ publishMods {
         projectId = "503866"
         accessToken = curseforgeToken
 
-        targets.forEach(minecraftVersions::add)
+        minecraftVersionList(targets)
         requires("fabric-api")
         embeds("server-translation-api")
         optional("luckperms")
         optional("meliusvanish")
+
+        server.set(true)
+        client.set(false)
     }
 }
 

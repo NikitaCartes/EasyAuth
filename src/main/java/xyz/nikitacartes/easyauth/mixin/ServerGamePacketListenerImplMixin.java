@@ -2,11 +2,17 @@ package xyz.nikitacartes.easyauth.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+//? if >= 1.21 {
+import net.minecraft.network.DisconnectionDetails;
+//?} else {
+/*import net.minecraft.network.chat.Component;
+*///?}
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionResult;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 
 import static net.minecraft.network.protocol.game.ServerboundPlayerActionPacket.Action.SWAP_ITEM_WITH_OFFHAND;
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 @Mixin(ServerGamePacketListenerImpl.class)
@@ -108,4 +115,20 @@ public abstract class ServerGamePacketListenerImplMixin {
         }
     }
     //?}
+
+    //? if >= 1.21 {
+    @Inject(method = "onDisconnect(Lnet/minecraft/network/DisconnectionDetails;)V", at = @At("TAIL"))
+    private void onPlayerDisconnectUnVanish(DisconnectionDetails details, CallbackInfo ci) {
+    //?} else {
+    /*@Inject(method = "onDisconnect(Lnet/minecraft/network/chat/Component;)V", at = @At("TAIL"))
+    private void onPlayerDisconnectUnVanish(Component reason, CallbackInfo ci) {
+    *///?}
+        PlayerAuth playerAuth = (PlayerAuth) this.player;
+        if (playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()) {
+            return;
+        }
+        if (config.vanishUntilAuth) {
+            VanishIntegration.setVanished(this.player, playerAuth.easyAuth$wasVanished());
+        }
+    }
 }

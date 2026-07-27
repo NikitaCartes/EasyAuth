@@ -30,7 +30,6 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
-import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -97,17 +96,6 @@ public abstract class PlayerListMixin {
     @Inject(method = "remove(Lnet/minecraft/server/level/ServerPlayer;)V", at = @At("HEAD"))
     private void onPlayerLeave(ServerPlayer serverPlayerEntity, CallbackInfo ci) {
         AuthEventHandler.onPlayerLeave(serverPlayerEntity);
-    }
-
-    @Inject(method = "remove(Lnet/minecraft/server/level/ServerPlayer;)V", at = @At("RETURN"))
-    private void onPlayerLeaveUnVanish(ServerPlayer player, CallbackInfo ci) {
-        PlayerAuth playerAuth = (PlayerAuth) player;
-        if (playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()) {
-            return;
-        }
-        if (config.vanishUntilAuth) {
-            VanishIntegration.setVanished(player, playerAuth.easyAuth$wasVanished());
-        }
     }
 
     @Inject(method = "canPlayerLogin(Ljava/net/SocketAddress;Lnet/minecraft/server/players/NameAndId;)Lnet/minecraft/network/chat/Component;", at = @At("HEAD"), cancellable = true)

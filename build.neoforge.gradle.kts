@@ -6,7 +6,7 @@ plugins {
     id("net.neoforged.moddev") version "2.0.141"
     id("dev.kikugie.fletching-table.neoforge") version "0.1.0-alpha.22"
     id("com.gradleup.shadow") version "9.4.2"
-    id("me.modmuss50.mod-publish-plugin") version "0.8.4"
+    id("me.modmuss50.mod-publish-plugin") version "2.1.1"
 }
 
 stonecutter {
@@ -220,20 +220,23 @@ publishMods {
     type = STABLE
     modLoaders.add("neoforge")
 
-    val targets = property("supported_versions").toString().split(",")
+    val targets = property("supported_versions").toString()
 
     modrinth {
         projectId = "aZj58GfX"
         accessToken = modrinthToken
-        targets.forEach(minecraftVersions::add)
+        minecraftVersionList(targets)
         optional("luckperms")
     }
 
     curseforge {
         projectId = "503866"
         accessToken = curseforgeToken
-        targets.forEach(minecraftVersions::add)
+        minecraftVersionList(targets)
         optional("luckperms")
+
+        server.set(true)
+        client.set(true)
     }
 
     // Uploads this node's jar into the single release created by the root publishGithub task.

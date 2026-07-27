@@ -6,7 +6,7 @@ plugins {
     id("com.google.devtools.ksp") version "2.3.9"
     id("dev.kikugie.fletching-table.fabric") version "0.1.0-alpha.22"
     id("com.gradleup.shadow") version "9.4.2"
-    id("me.modmuss50.mod-publish-plugin") version "0.8.4"
+    id("me.modmuss50.mod-publish-plugin") version "2.1.1"
 }
 
 // Tag this node's loader and version so the per-node values in stonecutter.properties.toml
@@ -209,12 +209,12 @@ publishMods {
     type = STABLE
     modLoaders.add("fabric")
 
-    val targets = property("supported_versions").toString().split(",")
+    val targets = property("supported_versions").toString()
 
     modrinth {
         projectId = "aZj58GfX"
         accessToken = modrinthToken
-        targets.forEach(minecraftVersions::add)
+        minecraftVersionList(targets)
         requires("fabric-api")
         optional("luckperms")
         optional("vanish")
@@ -223,11 +223,14 @@ publishMods {
     curseforge {
         projectId = "503866"
         accessToken = curseforgeToken
-        targets.forEach(minecraftVersions::add)
+        minecraftVersionList(targets)
         requires("fabric-api")
         embeds("server-translation-api")
         optional("luckperms")
         optional("meliusvanish")
+
+        server.set(true)
+        client.set(true)
     }
     // Uploads this node's jar into the single release created by the root publishGithub task.
     github {

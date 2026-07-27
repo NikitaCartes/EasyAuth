@@ -2,11 +2,17 @@ package xyz.nikitacartes.easyauth.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+//? if >= 1.21 {
+import net.minecraft.network.DisconnectionInfo;
+//?} else {
+/*import net.minecraft.text.Text;
+*///?}
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.integrations.VanishIntegration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.nikitacartes.easyauth.interfaces.PlayerAuth;
 
 import static net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND;
+import static xyz.nikitacartes.easyauth.EasyAuth.config;
 import static xyz.nikitacartes.easyauth.EasyAuth.extendedConfig;
 
 @Mixin(ServerPlayNetworkHandler.class)
@@ -108,4 +115,20 @@ public abstract class ServerPlayNetworkHandlerMixin {
         }
     }
     //?}
+
+    //? if >= 1.21 {
+    @Inject(method = "onDisconnected(Lnet/minecraft/network/DisconnectionInfo;)V", at = @At("TAIL"))
+    private void onPlayerDisconnectUnVanish(DisconnectionInfo info, CallbackInfo ci) {
+    //?} else {
+    /*@Inject(method = "onDisconnected(Lnet/minecraft/text/Text;)V", at = @At("TAIL"))
+    private void onPlayerDisconnectUnVanish(Text reason, CallbackInfo ci) {
+    *///?}
+        PlayerAuth playerAuth = (PlayerAuth) this.player;
+        if (playerAuth.easyAuth$canSkipAuth() || playerAuth.easyAuth$isAuthenticated()) {
+            return;
+        }
+        if (config.vanishUntilAuth) {
+            VanishIntegration.setVanished(this.player, playerAuth.easyAuth$wasVanished());
+        }
+    }
 }

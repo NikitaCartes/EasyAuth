@@ -21,7 +21,7 @@ stonecutter {
             versions("$mc-fabric" to mc).buildscript("build.fabric-obf.gradle.kts")
         }
         // Deobfuscated Fabric
-        listOf("26.1", "26.2").forEach { mc ->
+        listOf("26.1", "26.2", "26.3").forEach { mc ->
             versions("$mc-fabric" to mc).buildscript("build.fabric-deobf.gradle.kts")
         }
         // NeoForge

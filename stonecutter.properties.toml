@@ -192,9 +192,24 @@ floodgate_api_version = "2.2.4-SNAPSHOT"
 vanish_version = "1.6.14+26.2"
 display_name = "[26.2]"
 supported_versions = "26.2"
-supported_minecraft_version = ">=26.2-"
+supported_minecraft_version = ">=26.2- <26.3"
 # compile-only dependency of the client source set (EasyAuthClientModMenu)
 modmenu_version = "20.0.0-alpha.1"
+
+[fabric."26.3"]
+minecraft_version = "26.3"
+loader_version = "0.19.3"
+fabric_version = "0.161.0+26.3"
+server_translations_version = "3.2.0+26.3"
+fabric_permissions_version = "0.7.0"
+floodgate_api_version = "2.2.4-SNAPSHOT"
+# Vanish has no 26.3 build yet; it is a compile-only API dependency, so the 26.2 jar still resolves.
+vanish_version = "1.6.15+26.2"
+display_name = "[26.3]"
+supported_versions = "26.3"
+supported_minecraft_version = ">=26.3-"
+# compile-only dependency of the client source set (EasyAuthClientModMenu)
+modmenu_version = "21.0.0-beta.1"
 
 # ---------------------------------------------------------------------------
 # NeoForge (build.neoforge.gradle.kts: ModDevGradle).

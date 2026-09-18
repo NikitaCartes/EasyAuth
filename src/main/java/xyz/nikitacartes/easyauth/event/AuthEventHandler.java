@@ -145,7 +145,12 @@ public class AuthEventHandler {
             return true;
         }
 
-        if (packetClass == ServerboundSwingPacket.class) {
+        // 26.3 replaced the hand-carrying ServerboundSwingPacket with the singleton ServerboundPunchPacket.
+        //? if >=26.3 {
+        if (packetClass == ServerboundPunchPacket.class) {
+        //?} else {
+        /*if (packetClass == ServerboundSwingPacket.class) {
+        *///?}
             return extendedConfig.allowBlockInteraction || extendedConfig.allowEntityInteraction || extendedConfig.allowEntityAttacking;
         }
         

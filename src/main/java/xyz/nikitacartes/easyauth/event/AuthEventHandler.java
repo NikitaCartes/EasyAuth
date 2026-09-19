@@ -29,7 +29,7 @@ import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.world.level.block.Blocks;
@@ -126,7 +126,7 @@ public class AuthEventHandler {
             return true;
         }
 
-        if (packet instanceof ServerboundSwingPacket) {
+        if (packet instanceof ServerboundPunchPacket) {
             return extendedConfig.allowBlockInteraction || extendedConfig.allowEntityInteraction || extendedConfig.allowEntityAttacking;
         }
         
@@ -336,7 +336,7 @@ public class AuthEventHandler {
         // Tries to rescue player from nether portal
         if (extendedConfig.tryPortalRescue) {
             BlockPos pos = player.blockPosition();
-            player.randomTeleport(pos.getX() + 0.5, player.getY(), pos.getZ() + 0.5, false);
+            player.randomTeleport(pos.getX() + 0.5, player.getY(), pos.getZ() + 0.5, false, _ -> false);
             if (player.getInBlockState().getBlock().equals(Blocks.NETHER_PORTAL) || StoneCutterUtils.getServerWorld(player).getBlockState(player.blockPosition().above()).getBlock().equals(Blocks.NETHER_PORTAL)) {
                 // Faking portal blocks to be air
                 ClientboundBlockUpdatePacket feetPacket = new ClientboundBlockUpdatePacket(pos, Blocks.AIR.defaultBlockState());

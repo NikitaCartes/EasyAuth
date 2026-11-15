@@ -110,6 +110,7 @@ public class LangConfigV1 extends ConfigTemplate {
             config = new LangConfigV1();
             config.save();
         }
+        loadTranslations(config.defaultLanguage);
         return config;
     }
 
@@ -121,12 +122,23 @@ public class LangConfigV1 extends ConfigTemplate {
             config.save();
         }
 
+        loadTranslations(config.defaultLanguage);
+
+        return config;
+    }
+
+    public static void loadTranslations(String language) {
         ClassLoader classLoader = LangConfigV1.class.getClassLoader();
-        InputStream defaultLanguage = classLoader.getResourceAsStream("data/easyauth/lang/" + config.defaultLanguage + ".json");
+        InputStream defaultLanguage = classLoader.getResourceAsStream("data/easyauth/lang/" + language + ".json");
 
         if (defaultLanguage == null) {
-            LogError("Failed to load default language " + config.defaultLanguage + ".json. Using en_us.json instead.");
+            LogError("Failed to load default language " + language + ".json. Using en_us.json instead.");
             defaultLanguage = classLoader.getResourceAsStream("data/easyauth/lang/en_us.json");
+        }
+
+        if (defaultLanguage == null) {
+            LogError("Failed to load fallback language en_us.json. Messages will show translation keys.");
+            return;
         }
 
         try (InputStreamReader reader = new InputStreamReader(defaultLanguage)) {
@@ -137,8 +149,6 @@ public class LangConfigV1 extends ConfigTemplate {
         } catch (Exception e) {
             throw new RuntimeException("Failed to load default language", e);
         }
-
-        return config;
     }
 
     @Override
@@ -229,7 +239,11 @@ public class LangConfigV1 extends ConfigTemplate {
                 if (!fallback.isEmpty()) {
                     return translatableWithFallback(key, fallback, args);
                 } else {
-                    return translatableWithFallback(key, translations.get(key), args);
+                    String text = translations.get(key);
+                    if (text == null || text.isEmpty()) {
+                        text = key;
+                    }
+                    return translatableWithFallback(key, text, args);
                 }
             } else {
                 return Component.literal("");
@@ -246,14 +260,22 @@ public class LangConfigV1 extends ConfigTemplate {
             if (!fallback.isEmpty()) {
                 return translatableWithFallback(key, fallback, args);
             }
-            return translatableWithFallback(key, translations.get(key), args);
+            String text = translations.get(key);
+            if (text == null || text.isEmpty()) {
+                text = key;
+            }
+            return translatableWithFallback(key, text, args);
             *///?} else {
             if (langConfig.enableServerSideTranslation && serverSide) {
                 return translatable(key, args);
             } if (!fallback.isEmpty()) {
                 return translatableWithFallback(key, fallback, args);
             } else {
-                return translatableWithFallback(key, translations.get(key), args);
+                String text = translations.get(key);
+                if (text == null || text.isEmpty()) {
+                    text = key;
+                }
+                return translatableWithFallback(key, text, args);
             }
             //?}
         }

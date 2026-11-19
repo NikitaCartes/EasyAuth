@@ -81,12 +81,13 @@ public abstract class ServerLoginPacketListenerImplMixin {
                 if (playerData.onlineAccount == PlayerEntryV1.OnlineAccount.FALSE) {
                     LogDebug("Player " + username + " is forced to be offline");
 
-                    state = getReadyState();
                     //? if >= 1.20.2 {
                     this.authenticatedProfile = getGameProfile(packet.name());
                     //?} else {
                     /*this.gameProfile = getGameProfile(packet.name());
                     *///?}
+                    // Set the state after the profile: tick() on the server thread reads the profile when it sees the state
+                    state = getReadyState();
                     ci.cancel();
                     return;
                 }
@@ -98,7 +99,6 @@ public abstract class ServerLoginPacketListenerImplMixin {
                     // Player definitely doesn't have a mojang account
                     LogDebug("Player " + username + " doesn't have a valid username for Mojang account");
 
-                    state = getReadyState();
                     playerData.onlineAccount = PlayerEntryV1.OnlineAccount.FALSE;
                     playerData.update();
 
@@ -107,6 +107,7 @@ public abstract class ServerLoginPacketListenerImplMixin {
                     //?} else {
                     /*this.gameProfile = getGameProfile(packet.name());
                     *///?}
+                    state = getReadyState();
                     ci.cancel();
                 } else {
                     UUID onlineUuid = getUuid(username);
@@ -128,12 +129,12 @@ public abstract class ServerLoginPacketListenerImplMixin {
                                 playerData.update();
                             }
                         }
-                        state = getReadyState();
                         //? if >= 1.20.2 {
                         this.authenticatedProfile = getGameProfile(packet.name());
                         //?} else {
                         /*this.gameProfile = getGameProfile(packet.name());
                         *///?}
+                        state = getReadyState();
                         ci.cancel();
                     }
                 }

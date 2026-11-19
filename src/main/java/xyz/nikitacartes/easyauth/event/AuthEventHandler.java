@@ -345,6 +345,11 @@ public class AuthEventHandler {
             return;
         }
 
+        // The cancelled doTick does not send the health. Without the health, the client of a dead player shows no death screen.
+        if (player.isDeadOrDying()) {
+            player.connection.send(new ClientboundSetHealthPacket(player.getHealth(), player.getFoodData().getFoodLevel(), player.getFoodData().getSaturationLevel()));
+        }
+
         // Tries to rescue player from nether portal
         if (extendedConfig.tryPortalRescue) {
             BlockPos pos = player.blockPosition();

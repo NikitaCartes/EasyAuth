@@ -9,7 +9,18 @@
 - Check how offline players work if they try to connect with a taken online account
 
 ---
+### 3.5.2
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.[X] on Fabric and NeoForge (1.21+)
+#### Fix
+- No death screen for a player who left the server dead and joined again before login [#292](https://github.com/NikitaCartes/EasyAuth/issues/292)
 
+---
+### 3.5.1
+##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.[X] on Fabric and NeoForge (1.21+)
+#### Fix
+- Messages without text on the first server start, when EasyAuth creates the language config
+
+---
 ### 3.5.0
 ##### Minecraft 1.19.4, 1.20[.X], 1.21[.X], 26.[X] on Fabric and NeoForge (1.21+)
 #### Add
